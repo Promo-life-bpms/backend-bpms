@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Ventas\VentasController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+//rutas de inicio de sesion
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
@@ -23,3 +25,21 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 });
 
 Route::get('users', [AuthController::class, 'allUsers']);
+
+// rutas de ventas
+
+// pagina principal
+Route::get('dashboard', [VentasController::class, 'dashboard']);
+
+// incidencias
+Route::get('incidencias', [VentasController::class, 'incidencias']);
+Route::get('incidencias/{pedido}', [VentasController::class, 'showIncidencia']);
+
+Route::post('aprobarInc', [VentasController::class, 'aprobarInc']);
+Route::post('rechazarInc', [VentasController::class, 'rechazarInc']);
+
+// seguimiento de pedido
+Route::get('pedidos', [VentasController::class, 'pedidos']);
+
+// pedido
+Route::get('pedidos/{pedido}', [VentasController::class, 'pedido']);
