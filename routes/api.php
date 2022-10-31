@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Ventas\VentasController;
+use App\Http\Controllers\Control\ControlController;
+use App\Http\Controllers\LM\LMController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,7 +29,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 Route::get('users', [AuthController::class, 'allUsers']);
 
-// rutas de ventas
+// RUTAS DE VENTAS
 
 // pagina principal
 Route::get('dashboard', [VentasController::class, 'dashboard']);
@@ -43,3 +46,26 @@ Route::get('pedidos', [VentasController::class, 'pedidos']);
 
 // pedido
 Route::get('pedidos/{pedido}', [VentasController::class, 'pedido']);
+
+// RUTAS DE CALIDAD_CONTROL
+Route::get('dashboardCon', [ControlController::class, 'dashboardCon']);
+
+//segpedidos
+Route::get('segpedidos', [ControlController::class, 'segpedidos']);
+//almacen
+Route::get('almacen', [ControlController::class, 'almacen']);
+Route::get('almacen/{pedido}', [ControlController::class, 'almacenShow']);
+// pedido
+Route::get('pedidosAL/{pedido}', [ControlController::class, 'pedidoAl']);
+
+// RUTAS DE lOGISTICA Y MESA DE CONTROL (LM)
+Route::get('dashboardLM', [LMController::class, 'dashboardLM']);
+//rutas
+Route::get('rutasen', [LMController::class, 'rutasen']);
+Route::get('rutasen/{pedido}', [LMController::class, 'pedidoentrega']);
+Route::get('rutasmat', [LMController::class, 'rutasmat']);
+Route::get('rutasmat/{pedido}', [LMController::class, 'pedidomaterial']);
+//pedidos
+Route::get('pedidos', [LMController::class, 'pedidos']);
+Route::get('pedidosLM/{pedido}', [LMController::class, 'pedidoLM']);
+

@@ -24,11 +24,12 @@ class VentasController extends Controller
             "Pendientes" => 5
         ];
         $calendarioEntregas = [
-            "22/11/2021" => [
+            [
+                "22/11/2021",
                 "PED122416",
                 "PED134567",
-            ],
-            "25/11/2021" => [
+            ], [
+                "23/11/2021",
                 "PED122890",
                 "PED134562",
             ]
@@ -63,12 +64,14 @@ class VentasController extends Controller
             "Direccion_de_entrega" => "DIRECCION",
             "Hora" => "9-13",
 
-            "20/09/22" => [
+             [
+                "20/09/22",
                 "Juan",
                 "Presupuesto, Pedido de venta",
                 "13:46"
             ],
-            "21/09/22" => [
+             [
+                "21/09/22",
                 "Lele",
                 "Pedido de venta",
                 "11:00"
@@ -84,20 +87,22 @@ class VentasController extends Controller
     {
         $incidencia = [
             "Pedido_256467" => [
-                "GRUPONACIONAL PROVICIONAL SAB",
-                "BOLSEC",
-                "12",
-                "PIEZAS ROTAS ",
-                "PENDIENTE",
-                56
+                "Pedido"=>"256467",
+                "Cliente"=>"GRUPONACIONAL PROVICIONAL SAB",
+                "Proveedor"=>"BOLSEC",
+                "Piezas_rechazadas"=>"12",
+                "Observaciones"=>"PIEZAS ROTAS ",
+                "Status"=>"PENDIENTE",
+                "id"=>56
             ],
-            "Pedido_252383" => [
-                "MERZ PHARMA S.A DE C.V",
-                "DOBLE VELA",
-                "6",
-                "EL COLOR NO ES EL CORRECTO ",
-                "PENDIENTE",
-                50
+             [
+                "Pedido"=>"252383",
+                "Cliente"=>"GRUPONACIONAL PROVICIONAL SAB",
+                "Proveedor"=>"BOLSEC",
+                "Piezas_rechazadas"=>"12",
+                "Observaciones"=>"EL COLOR NO ES EL CORRECTO",
+                "Status"=>"PENDIENTE",
+                "id"=>56
             ],
         ];
 
@@ -152,19 +157,21 @@ class VentasController extends Controller
     public function pedidos()
     {
         $pedidos = [
-            "pedido_241232" => [
-                "Cotizacion, Compromiso, Previstas",
-                "Cliente, Comercial, Total",
-                2,
-                56,
-            ],
-            "pedido_243542" => [
-                "Cotizacion, Compromiso, Previstas",
-                "Cliente, Comercial, Total",
-                3,
-                50,
-            ]
-        ];
+            [
+               "Num_pedido"=>"241232",
+               "Fecha"=>"Cotizacion, Compromiso, Previstas",
+               "General"=>"Cliente, Comercial, Total",
+               "Status"=>2,
+               "id"=>56,
+           ],
+            [
+               "Num_pedido"=>"243542",
+               "Fecha"=>"Cotizacion, Compromiso, Previstas",
+               "General"=>"Cliente, Comercial, Total",
+               "Status"=>3,
+               "Id"=>50,
+           ]
+       ];
 
         return response()->json([
             "pedidos" => $pedidos
