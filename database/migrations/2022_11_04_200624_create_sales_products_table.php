@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAdditionalOrderInformationTable extends Migration
+class CreateSalesProductsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,14 @@ class CreateAdditionalOrderInformationTable extends Migration
      */
     public function up()
     {
-        Schema::create('additional_order_information', function (Blueprint $table) {
+        Schema::create('sales_products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sale_order_id')->references('id')->on('sales_orders');
+            $table->string("product");
+            $table->text("description");
+            $table->string("provider");
+            $table->string("logo");
+            $table->integer("quantity_ordered");
+            $table->integer("quantity_delivered");
             $table->timestamps();
         });
     }
@@ -27,6 +32,6 @@ class CreateAdditionalOrderInformationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('additional_order_information');
+        Schema::dropIfExists('sales_products');
     }
 }

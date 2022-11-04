@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
+use App\Models\AdditionalSaleInformation;
 use Illuminate\Http\Request;
 
-class OrderController extends Controller
+class AdditionalSaleInformationController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -41,10 +41,10 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Order  $order
+     * @param  \App\Models\AdditionalSaleInformation  $additionalSaleInformation
      * @return \Illuminate\Http\Response
      */
-    public function show(Order $order)
+    public function show(AdditionalSaleInformation $additionalSaleInformation)
     {
         //
     }
@@ -52,10 +52,10 @@ class OrderController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Order  $order
+     * @param  \App\Models\AdditionalSaleInformation  $additionalSaleInformation
      * @return \Illuminate\Http\Response
      */
-    public function edit(Order $order)
+    public function edit(AdditionalSaleInformation $additionalSaleInformation)
     {
         //
     }
@@ -64,10 +64,10 @@ class OrderController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Order  $order
+     * @param  \App\Models\AdditionalSaleInformation  $additionalSaleInformation
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Order $order)
+    public function update(Request $request, AdditionalSaleInformation $additionalSaleInformation)
     {
         //
     }
@@ -75,10 +75,10 @@ class OrderController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Order  $order
+     * @param  \App\Models\AdditionalSaleInformation  $additionalSaleInformation
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Order $order)
+    public function destroy(AdditionalSaleInformation $additionalSaleInformation)
     {
         //
     }

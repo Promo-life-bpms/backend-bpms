@@ -38,4 +38,3 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
 Route::get('dashboard', [HomeController::class, 'dashboard']);
 Route::get('users', [AuthController::class, 'allUsers']);
-Route::post('setOrderSale', [ApiOdooController::class, 'setOrderSale']);

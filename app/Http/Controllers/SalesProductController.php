@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SalesOrderProducts;
+use App\Models\SalesProduct;
 use Illuminate\Http\Request;
 
-class SalesOrderProductsController extends Controller
+class SalesProductController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -41,10 +41,10 @@ class SalesOrderProductsController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\SalesOrderProducts  $salesOrderProducts
+     * @param  \App\Models\SalesProduct  $salesProduct
      * @return \Illuminate\Http\Response
      */
-    public function show(SalesOrderProducts $salesOrderProducts)
+    public function show(SalesProduct $salesProduct)
     {
         //
     }
@@ -52,10 +52,10 @@ class SalesOrderProductsController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\SalesOrderProducts  $salesOrderProducts
+     * @param  \App\Models\SalesProduct  $salesProduct
      * @return \Illuminate\Http\Response
      */
-    public function edit(SalesOrderProducts $salesOrderProducts)
+    public function edit(SalesProduct $salesProduct)
     {
         //
     }
@@ -64,10 +64,10 @@ class SalesOrderProductsController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\SalesOrderProducts  $salesOrderProducts
+     * @param  \App\Models\SalesProduct  $salesProduct
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, SalesOrderProducts $salesOrderProducts)
+    public function update(Request $request, SalesProduct $salesProduct)
     {
         //
     }
@@ -75,10 +75,10 @@ class SalesOrderProductsController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\SalesOrderProducts  $salesOrderProducts
+     * @param  \App\Models\SalesProduct  $salesProduct
      * @return \Illuminate\Http\Response
      */
-    public function destroy(SalesOrderProducts $salesOrderProducts)
+    public function destroy(SalesProduct $salesProduct)
     {
         //
     }
