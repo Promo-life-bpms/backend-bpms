@@ -12,15 +12,20 @@ class Sale extends Model
     protected $fillable = [
         'code_sale',
         'name_sale',
-        'directed_to',
         'invoice_address',
         'delivery_address',
         'delivery_instructions',
         'delivery_time',
         'confirmation_date',
+        'order_date',
         'additional_information',
         'commercial_name',
         'commercial_email',
         'commercial_odoo_id'
     ];
+
+    public function aditionalInformation()
+    {
+        return $this->hasOne(AdditionalSaleInformation::class);
+    }
 }

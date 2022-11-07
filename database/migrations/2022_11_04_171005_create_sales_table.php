@@ -23,6 +23,7 @@ class CreateSalesTable extends Migration
             $table->text('delivery_instructions');
             $table->dateTime('delivery_time');
             $table->dateTime('confirmation_date');
+            $table->dateTime('order_date');
             $table->text('additional_information');
             $table->string('commercial_name');
             $table->string('commercial_email');

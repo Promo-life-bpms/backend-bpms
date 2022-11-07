@@ -8,4 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class AdditionalSaleInformation extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'sale_id',
+        'client_name',
+        'client_address',
+        'client_contact',
+        'warehouse_company',
+        'warehouse_address',
+        'planned_date',
+        'commitment_date'
+    ];
 }

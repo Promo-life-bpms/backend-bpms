@@ -9,8 +9,8 @@ use App\Http\Controllers\Control\ControlController;
 use App\Http\Controllers\LM\LMController;
 use App\Http\Controllers\Chofer\ChoferController;
 use App\Http\Controllers\Maquilador\MaquiladorController;
+use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SalesOrderController;
 use App\Http\Controllers\SalesOrderProductsController;
 
 
@@ -34,10 +34,6 @@ Route::post('login', [AuthController::class, 'login']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('user-profile', [AuthController::class, 'userProfile']);
     Route::post('logout', [AuthController::class, 'logout']);
-    // Rutas de los pedidos
-    Route::get('pedidos', [SalesOrderController::class, 'index']);
-    Route::get('pedidos/{lead}', [SalesOrderController::class, 'show']);
-    Route::get('pedidos/{lead}/productos', [SalesOrderProductsController::class, 'index']);
 });
 
 Route::get('dashboard', [HomeController::class, 'dashboard']);
@@ -115,3 +111,8 @@ Route::get('SeguimientoPedidos', [ChoferController::class, 'Seguimientopedidos']
 Route::get('dashboardMaq', [MaquiladorController::class, 'dashboardMaq']);
 Route::get('Remisiones', [MaquiladorController::class, 'Remisiones']);
 Route::get('Remisiones/{pedido}', [MaquiladorController::class, 'DetallesR']);
+
+
+// Rutas Generales
+Route::get('pedidos', [SaleController::class, 'index']);
+Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
