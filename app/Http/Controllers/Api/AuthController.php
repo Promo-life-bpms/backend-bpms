@@ -21,6 +21,7 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|confirmed'
         ]);
+
         //alta del usuario
         $user = new User();
         $user->name = $request->name;
@@ -55,7 +56,7 @@ class AuthController extends Controller
                 return response()->json([
                     "status" => 1,
                     "msg" => "La password es incorrecta",
-                ]);
+                ],);
             }
         } else {
             return response()->json([
