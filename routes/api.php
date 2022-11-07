@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\IncidenciaController;
+use App\Models\Incidencia;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Ventas\VentasController;
 use App\Http\Controllers\Control\ControlController;
 use App\Http\Controllers\LM\LMController;
@@ -29,6 +32,19 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 });
 
 Route::get('users', [AuthController::class, 'allUsers']);
+
+
+Route::get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Route::get('/Incidencia', [IncidenciaController::class, 'index']);
+
+Route::post('/Incidencia', [IncidenciaController::class, 'store']);
+
+Route::put('/Incidencia', [IncidenciaController::class, 'update']);
+
+Route::delete('/Incidencia', [IncidenciaController::class, 'destroy']);
 
 // RUTAS DE VENTAS
 // pagina principal
