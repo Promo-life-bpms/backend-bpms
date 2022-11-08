@@ -19,4 +19,9 @@ class AdditionalSaleInformation extends Model
         'planned_date',
         'commitment_date'
     ];
+
+    public function sale()
+    {
+        return $this->belongsTo(Sale::class);
+    }
 }

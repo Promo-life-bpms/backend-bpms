@@ -15,9 +15,9 @@ class CreateSalesTable extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->string('code_sale', 20);
+            $table->string('code_sale', 20)->unique();
             $table->string('name_sale', 255);
-            $table->string('directed_to', 255)->nullable();
+            $table->string('sequence', 40);
             $table->text('invoice_address');
             $table->text('delivery_address');
             $table->text('delivery_instructions');
@@ -25,6 +25,8 @@ class CreateSalesTable extends Migration
             $table->dateTime('confirmation_date');
             $table->dateTime('order_date');
             $table->text('additional_information');
+            $table->boolean('sample_required')->default(false);
+            $table->string('tariff', 50);
             $table->string('commercial_name');
             $table->string('commercial_email');
             $table->string('commercial_odoo_id');

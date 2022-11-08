@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sale;
+use App\Models\Status;
 use Illuminate\Http\Request;
 
-class SaleController extends Controller
+class StatusController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,8 +14,7 @@ class SaleController extends Controller
      */
     public function index()
     {
-        $sales = Sale::paginate(10);
-        return response()->json(['pedidos' => $sales], 200);
+        //
     }
 
     /**
@@ -42,26 +41,21 @@ class SaleController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Sale  $sale
+     * @param  \App\Models\Status  $status
      * @return \Illuminate\Http\Response
      */
-    public function show($sale_id)
+    public function show(Status $status)
     {
-        $sale = Sale::where('code_sale', $sale_id)->first();
-        if ($sale) {
-            $sale->moreInformation;
-            return response()->json(['pedido' => $sale], 200);
-        }
-        return response()->json(['pedido' => "No hay informacion acerca de este pedido"], 200);
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Sale  $sale
+     * @param  \App\Models\Status  $status
      * @return \Illuminate\Http\Response
      */
-    public function edit(Sale $sale)
+    public function edit(Status $status)
     {
         //
     }
@@ -70,10 +64,10 @@ class SaleController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Sale  $sale
+     * @param  \App\Models\Status  $status
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Sale $sale)
+    public function update(Request $request, Status $status)
     {
         //
     }
@@ -81,10 +75,10 @@ class SaleController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Sale  $sale
+     * @param  \App\Models\Status  $status
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Sale $sale)
+    public function destroy(Status $status)
     {
         //
     }
