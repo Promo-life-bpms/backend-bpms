@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Sale;
 use Illuminate\Database\Seeder;
 use Laratrust\Laratrust;
 
@@ -17,5 +18,6 @@ class DatabaseSeeder extends Seeder
         $this->call(LaratrustSeeder::class);
 
         // \App\Models\User::factory(10)->create();
+        Sale::factory()->count(50)->create();
     }
 }
