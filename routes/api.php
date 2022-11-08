@@ -92,11 +92,11 @@ Route::get('dashboardChofer', [ChoferController::class, 'dashboardChofer']);
 Route::get('RutasdeEntrega', [ChoferController::class, 'RutasdeEntrega']);
 Route::get('RutasdeEntrega/{pedido}', [ChoferController::class, 'PedidoEntrega']);
 //botones
-Route::get('Confirmar', [ChoferController::class, 'Confirmar']);
-Route::get('Rechazar', [ChoferController::class, 'Rechazar']);
+Route::post('Confirmar', [ChoferController::class, 'Confirmar']);
+Route::post('Rechazar', [ChoferController::class, 'Rechazar']);
 //Rutas de material limpio
 Route::get('RutasdeMaterial', [ChoferController::class, 'RutasdeMaterial']);
-Route::get('RutasdeEntrega', [ChoferController::class, 'RutasdeEntrega']);
+
 Route::get('RutasdeMaterial/{pedido}', [ChoferController::class, 'PedidoMaterial']);
 //Rutas de pedidos
 Route::get('SeguimientoPedidos', [ChoferController::class, 'Seguimientopedidos']);
