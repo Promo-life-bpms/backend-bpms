@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Sale;
 use Illuminate\Database\Seeder;
 use Laratrust\Laratrust;
 
@@ -15,7 +16,9 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call(LaratrustSeeder::class);
+        $this->call(SaleSeeder::class);
+        $this->call(UserSeeder::class);
 
-        // \App\Models\User::factory(10)->create();
+
     }
 }

@@ -1,15 +1,17 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IncidenciaController;
-use App\Models\Incidencia;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Ventas\VentasController;
 use App\Http\Controllers\Control\ControlController;
 use App\Http\Controllers\LM\LMController;
 use App\Http\Controllers\Chofer\ChoferController;
 use App\Http\Controllers\Maquilador\MaquiladorController;
+use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SalesOrderProductsController;
 
 
 /*
@@ -23,14 +25,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+include('Routes/ApiOdooRoutes.php');
+
 //rutas de inicio de sesion
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('user-profile', [AuthController::class, 'userProfile']);
     Route::post('logout', [AuthController::class, 'logout']);
 });
 
+Route::get('dashboard', [HomeController::class, 'dashboard']);
 Route::get('users', [AuthController::class, 'allUsers']);
 
 
@@ -105,3 +111,8 @@ Route::get('SeguimientoPedidos', [ChoferController::class, 'Seguimientopedidos']
 Route::get('dashboardMaq', [MaquiladorController::class, 'dashboardMaq']);
 Route::get('Remisiones', [MaquiladorController::class, 'Remisiones']);
 Route::get('Remisiones/{pedido}', [MaquiladorController::class, 'DetallesR']);
+
+
+// Rutas Generales
+Route::get('pedidos', [SaleController::class, 'index']);
+Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
