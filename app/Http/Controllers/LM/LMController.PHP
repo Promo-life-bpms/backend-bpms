@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 class LMController extends Controller
 {
 
-    public function dashboard()
+    public static function dashboard()
     {
         $rutas = [
             "RUTA_DE_ENTREGAS" => 8,

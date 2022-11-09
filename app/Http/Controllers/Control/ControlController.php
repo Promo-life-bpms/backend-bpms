@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ControlController extends Controller
 {
-    public function dashboard()
+    public static function dashboard()
     {
         //pedidos e incidencias
         $pedinc = [
