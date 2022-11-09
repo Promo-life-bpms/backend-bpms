@@ -14,7 +14,7 @@ class SaleController extends Controller
      */
     public function index()
     {
-        $sales = Sale::paginate(10);
+        $sales = Sale::with('currentStatus')->paginate(10);
         return response()->json(['pedidos' => $sales], 200);
     }
 

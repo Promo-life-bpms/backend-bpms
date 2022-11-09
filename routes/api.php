@@ -35,7 +35,6 @@ Route::post('login', [AuthController::class, 'login']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('user-profile', [AuthController::class, 'userProfile']);
     Route::post('logout', [AuthController::class, 'logout']);
-    Route::get('users', [AuthController::class, 'allUsers']);
 
     Route::get('dashboard', [HomeController::class, 'dashboard']);
 
@@ -112,6 +111,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('pedidos', [SaleController::class, 'index']);
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
 
-
-    Route::get('compras-por-agendar', [ProductRouteController::class, 'productsToSchedule']);
+    Route::get('pedidos-por-agendar', [ProductRouteController::class, 'productsToSchedule']);
 });
+
+Route::get('users', [AuthController::class, 'allUsers']);

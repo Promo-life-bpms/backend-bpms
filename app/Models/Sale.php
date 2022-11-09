@@ -32,4 +32,8 @@ class Sale extends Model
     {
         return $this->hasOne(AdditionalSaleInformation::class);
     }
+    public function currentStatus()
+    {
+        return $this->belongsTo(Status::class, 'status_id', 'id');
+    }
 }

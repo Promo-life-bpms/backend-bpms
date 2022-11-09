@@ -22,7 +22,6 @@ class CreateSalesTable extends Migration
             $table->text('delivery_address');
             $table->text('delivery_instructions');
             $table->dateTime('delivery_time');
-            $table->dateTime('confirmation_date');
             $table->dateTime('order_date');
             $table->text('additional_information');
             $table->boolean('sample_required')->default(false);
@@ -30,6 +29,7 @@ class CreateSalesTable extends Migration
             $table->string('commercial_name');
             $table->string('commercial_email');
             $table->string('commercial_odoo_id');
+            $table->foreignId('status_id')->constrained();
             $table->timestamps();
         });
     }

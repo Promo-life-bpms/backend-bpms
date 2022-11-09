@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
-        $users =  User::factory(10)->create();
+        $users =  User::factory(50)->create();
         $roles =  Role::all();
         foreach ($users as $user) {
             $user->attachRole($roles[rand(0, count($roles) - 1)]);
