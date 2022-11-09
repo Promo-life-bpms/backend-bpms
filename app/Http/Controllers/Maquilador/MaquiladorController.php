@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 class MaquiladorController extends Controller
 {
     //home maquilador
-    function dashboardMaq()
+    function dashboard()
     {
         $rutas = [
             [

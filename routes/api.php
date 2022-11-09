@@ -35,9 +35,7 @@ Route::post('login', [AuthController::class, 'login']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('user-profile', [AuthController::class, 'userProfile']);
     Route::post('logout', [AuthController::class, 'logout']);
-
     Route::get('dashboard', [HomeController::class, 'dashboard']);
-
     Route::get('/Incidencia', [IncidenciaController::class, 'index']);
 
     Route::post('/Incidencia', [IncidenciaController::class, 'store']);
@@ -48,7 +46,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // RUTAS DE VENTAS
     // pagina principal
-    Route::get('dashboard', [VentasController::class, 'dashboard']);
+    //Route::get('dashboard', [VentasController::class, 'dashboard']);
     // incidencias
     Route::get('incidencias', [VentasController::class, 'incidencias']);
     Route::get('incidencias/{pedido}', [VentasController::class, 'showIncidencia']);
@@ -60,7 +58,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('pedidos/{pedido}', [VentasController::class, 'pedido']);
 
     // RUTAS DE CALIDAD_CONTROL
-    Route::get('dashboardCon', [ControlController::class, 'dashboardCon']);
+    //Route::get('dashboardCon', [ControlController::class, 'dashboardCon']);
     //segpedidos
     Route::get('segpedidos', [ControlController::class, 'segpedidos']);
     //almacen
@@ -75,7 +73,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('GuardarIns', [ControlController::class, 'GuardarIns']);
 
     // RUTAS DE lOGISTICA Y MESA DE CONTROL (LM)
-    Route::get('dashboardLM', [LMController::class, 'dashboardLM']);
+    //Route::get('dashboardLM', [LMController::class, 'dashboardLM']);
     //rutas
     Route::get('rutasen', [LMController::class, 'rutasen']);
     Route::get('rutasen/{pedido}', [LMController::class, 'pedidoentrega']);
@@ -87,7 +85,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // RUTAS DE CHOFER
     //Home chofer
-    Route::get('dashboardChofer', [ChoferController::class, 'dashboardChofer']);
+    //Route::get('dashboardChofer', [ChoferController::class, 'dashboardChofer']);
     //rutas de entrega pagina
     Route::get('RutasdeEntrega', [ChoferController::class, 'RutasdeEntrega']);
     Route::get('RutasdeEntrega/{pedido}', [ChoferController::class, 'PedidoEntrega']);
@@ -102,10 +100,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('SeguimientoPedidos', [ChoferController::class, 'Seguimientopedidos']);
     //RUTAS DEL MAQUILADOR
     //Home de maquilador
-    Route::get('dashboardMaq', [MaquiladorController::class, 'dashboardMaq']);
+
+    //Route::get('dashboardMaq', [MaquiladorController::class, 'dashboardMaq']);
     Route::get('Remisiones', [MaquiladorController::class, 'Remisiones']);
     Route::get('Remisiones/{pedido}', [MaquiladorController::class, 'DetallesR']);
-
 
     // Rutas Generales
     Route::get('pedidos', [SaleController::class, 'index']);
