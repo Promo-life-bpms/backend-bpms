@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ChoferController extends Controller
 {
-    function dashboardChofer()
+    function dashboard()
     {
         $rutas = [
             "RUTA_DE_ENTREGAS" => 8,
