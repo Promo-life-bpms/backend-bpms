@@ -5,14 +5,14 @@ namespace App\Http\Controllers\Ventas;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Request;
-use Symfony\Component\HttpFoundation\Response;       
+use Symfony\Component\HttpFoundation\Response;
 use App\Models\Role;
 use App\Models\User;
 
 class VentasController extends Controller
 {
-    public function dashboard()
-    {  
+    public static function dashboard()
+    {
         $incidencias = [
             "INCIDENCIAS" => 18,
             "SIN_INCIDENCIAS" => 11
