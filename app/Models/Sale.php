@@ -24,11 +24,16 @@ class Sale extends Model
         'tariff',
         'commercial_name',
         'commercial_email',
-        'commercial_odoo_id'
+        'commercial_odoo_id',
+        'status_id',
     ];
 
     public function moreInformation()
     {
         return $this->hasOne(AdditionalSaleInformation::class);
+    }
+    public function currentStatus()
+    {
+        return $this->belongsTo(Status::class, 'status_id', 'id');
     }
 }

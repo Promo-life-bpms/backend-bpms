@@ -9,6 +9,7 @@ use App\Http\Controllers\Control\ControlController;
 use App\Http\Controllers\LM\LMController;
 use App\Http\Controllers\Chofer\ChoferController;
 use App\Http\Controllers\Maquilador\MaquiladorController;
+use App\Http\Controllers\ProductRouteController;
 use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SalesOrderProductsController;
@@ -99,6 +100,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('SeguimientoPedidos', [ChoferController::class, 'Seguimientopedidos']);
     //RUTAS DEL MAQUILADOR
     //Home de maquilador
+
     //Route::get('dashboardMaq', [MaquiladorController::class, 'dashboardMaq']);
     Route::get('Remisiones', [MaquiladorController::class, 'Remisiones']);
     Route::get('Remisiones/{pedido}', [MaquiladorController::class, 'DetallesR']);
@@ -106,6 +108,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Rutas Generales
     Route::get('pedidos', [SaleController::class, 'index']);
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
+
+    Route::get('pedidos-por-agendar', [ProductRouteController::class, 'productsToSchedule']);
 });
 
 Route::get('users', [AuthController::class, 'allUsers']);
