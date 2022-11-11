@@ -33,7 +33,6 @@ class SaleSeeder extends Seeder
                 ->for($sale)
                 ->create();
             foreach ($orders as $order) {
-                # code...
                 OrderPurchaseProduct::factory()
                     ->count(rand(1, 3))
                     ->for($order)

@@ -113,3 +113,83 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 });
 
 Route::get('users', [AuthController::class, 'allUsers']);
+
+
+
+// Vista de tabla de Pedidos
+// localhost/pedidos
+Route::get('pedidos', [SaleController::class, 'index']);
+
+
+// Vista de Detalle de los pedidos
+/*
+# Generales
+# OT, OC relacionadas
+# Incidencias Relacionadas, Datos generales
+# Inspecciones Relacionadas, Datos generales
+# Historial de Cambios, Datos generales
+# Entregas Relacionadas, Datos generales
+*/
+// localhost/pedidos/PED456
+Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
+
+
+// Modal de un detalle de OC, OT
+// localhost/pedidos/PED456/orders/OC-568
+// localhost/pedidos/PED456/orders/OT-423
+Route::get('pedidos/{pedido}/orders/{order}', [SaleController::class, 'show']);
+
+
+// Seccion para actualizar el estatus de maquila
+
+
+
+// Seccion de Incidencias
+
+// Detalle de la incidencia con las compras relacionadas
+// localhost/pedidos/PED456/incidencias/INC-423
+Route::get('incidencias/{incidencia}', [SaleController::class, 'show']);
+
+// Crear una incidencia
+Route::get('incidencias/create', [SaleController::class, 'show']);
+Route::post('incidencias/store', [SaleController::class, 'show']);
+
+
+// Seccion de Inspeccion de Calidad
+
+// Detalle de la Incidencia
+// localhost/pedidos/PED456/inspeccion/INS-7688
+Route::get('inspections/{inspection}', [SaleController::class, 'show']);
+
+// Crear una inspeccion de calidad
+Route::get('inspections/create', [SaleController::class, 'show']);
+Route::post('inspections/store', [SaleController::class, 'show']);
+
+// Actualizar una inspeccion de calidad
+Route::get('inspections/{inspection}/edit', [SaleController::class, 'show']);
+Route::put('inspections/{inspection}/update', [SaleController::class, 'show']);
+
+// SECCION RUTAS DE ENTREGA
+
+// Tabla de rutas de entrega
+Route::get('rutas-de-entrega', [ProductRouteController::class, 'productsToSchedule']);
+
+// Crear una ruta de entrega
+    // Leer pedidos por agendar
+Route::get('rutas-de-entrega/create', [ProductRouteController::class, 'productsToSchedule']);
+    // Guardar la ruta de entrega
+Route::post('rutas-de-entrega/store', [ProductRouteController::class, 'productsToSchedule']);
+
+// Editar una ruta de entrega
+    // Leer informacion de la ruta de entrega
+Route::get('rutas-de-entrega/{ruta}/edit', [ProductRouteController::class, 'productsToSchedule']);
+    // Actualizar la ruta de entrega
+Route::put('rutas-de-entrega/{ruta}/update', [ProductRouteController::class, 'productsToSchedule']);
+
+// Eliminar ruta de entrega
+    // Actualizar la ruta de entrega
+Route::delete('rutas-de-entrega/{ruta}', [ProductRouteController::class, 'productsToSchedule']);
+
+// Detalle de una ruta de entrega
+Route::get('rutas-de-entrega/{ruta}', [ProductRouteController::class, 'productsToSchedule']);
+Route::get('rutas-de-entrega/{ruta}/', [ProductRouteController::class, 'productsToSchedule']);

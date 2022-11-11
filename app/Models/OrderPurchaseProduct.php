@@ -17,7 +17,6 @@ class OrderPurchaseProduct extends Model
         "quantity_delivered",
     ];
 
-
     public function orderPurchase()
     {
         return $this->belongsTo(OrderPurchase::class);
