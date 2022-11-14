@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
 {
+    // Pedido de Venta
     use HasFactory;
 
     protected $fillable = [
@@ -32,6 +33,17 @@ class Sale extends Model
     {
         return $this->hasOne(AdditionalSaleInformation::class);
     }
+
+    public function saleProducts()
+    {
+        return $this->hasMany(SalesProduct::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(OrderPurchase::class, "code_sale", "code_sale");
+    }
+
     public function currentStatus()
     {
         return $this->belongsTo(Status::class, 'status_id', 'id');

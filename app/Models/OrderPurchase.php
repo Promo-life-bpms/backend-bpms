@@ -16,5 +16,11 @@ class OrderPurchase extends Model
         'order_date',
         'planned_date',
         'deliver_in',
+        'company'
     ];
+
+    public function sale()
+    {
+        return $this->belongsTo(Sale::class, "code_sale", "code_sale");
+    }
 }
