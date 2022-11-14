@@ -9,6 +9,7 @@ use App\Http\Controllers\Control\ControlController;
 use App\Http\Controllers\LM\LMController;
 use App\Http\Controllers\Chofer\ChoferController;
 use App\Http\Controllers\Maquilador\MaquiladorController;
+use App\Http\Controllers\RutasDEController;
 use App\Http\Controllers\ProductRouteController;
 use App\Http\Controllers\SaleController;
 use Illuminate\Support\Facades\Route;
@@ -108,8 +109,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Rutas Generales
     Route::get('pedidos', [SaleController::class, 'index']);
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
-
     Route::get('pedidos-por-agendar', [ProductRouteController::class, 'productsToSchedule']);
+    Route::get('RutasDE', [RutasDEController::class, 'index']);
+    Route::post('RutasDE', [RutasDEController::class, 'update']);
+    Route::delete('RutasDE', [RutasDEController::class, 'destroy']);
 });
 
 Route::get('users', [AuthController::class, 'allUsers']);
