@@ -23,6 +23,7 @@ class CreateAdditionalSaleInformationTable extends Migration
             $table->text('warehouse_address');
             $table->dateTime('planned_date');
             $table->dateTime('commitment_date');
+            $table->dateTime('effective_date');
             $table->timestamps();
         });
     }

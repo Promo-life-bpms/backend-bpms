@@ -21,7 +21,8 @@ class AdditionalSaleInformationFactory extends Factory
             'warehouse_company' => $companyWareHouse[round(0, 1)],
             'warehouse_address' => $this->faker->address(),
             'planned_date' => $this->faker->dateTimeBetween('+1 week', '+2 week'),
-            'commitment_date' => $this->faker->dateTimeBetween('+1 week', '+2 week')
+            'commitment_date' => $this->faker->dateTimeBetween('+1 week', '+2 week'),
+            'effective_date' => $this->faker->dateTimeBetween('+1 week', '+2 week')
         ];
     }
 }

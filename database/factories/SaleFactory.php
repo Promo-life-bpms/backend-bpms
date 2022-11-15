@@ -27,6 +27,7 @@ class SaleFactory extends Factory
             'additional_information' => $this->faker->sentence(),
             'sample_required' => rand(0, 1),
             'tariff' => "MXN",
+            'incidence' => true,
             'commercial_name' => $this->faker->name(),
             'commercial_email' => $this->faker->unique()->safeEmail(),
             'commercial_odoo_id' => $this->faker->numberBetween(0, 100),
