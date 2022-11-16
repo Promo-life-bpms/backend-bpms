@@ -30,6 +30,10 @@ class ApiOdooController extends Controller
                     'sale.sample_required' => 'required',
                     'sale.tariff' => 'required',
                     'sale.incidence' => 'required',
+                    // Maquila Empaque o Etiquetado
+                    // Politica de entrega
+                    // Se cambio horario
+                    // Motivo de cambio
                     'sale.commercial.odoo_id' => 'required',
                     'sale.commercial.name' => 'required',
                     'sale.commercial.email' => 'required',
@@ -49,6 +53,7 @@ class ApiOdooController extends Controller
                     'sale.products.*.logo' => 'required',
                     'sale.products.*.quantity' => 'required|numeric',
                     'sale.products.*.quantity_delivered' => 'required|numeric',
+                    // Faltan Campos
                 ]);
 
                 if ($validator->fails()) {
@@ -93,6 +98,7 @@ class ApiOdooController extends Controller
                     'planned_date' => $planned_date,
                     'commitment_date' => $commitment_date,
                     'effective_date' => $effective_date
+
                 ];
 
                 $dataProducts = $requestData->products;
@@ -153,6 +159,7 @@ class ApiOdooController extends Controller
                     'purchase.code_order' => 'required',
                     'purchase.code_sale' => 'required',
                     'purchase.provider.name' => 'required',
+                    'purchase.provider.representante' => 'required',
                     'purchase.sequence' => 'required',
                     'purchase.order_date' => 'required|date',
                     'purchase.planned_date' => 'required|date',
@@ -162,6 +169,8 @@ class ApiOdooController extends Controller
                     'purchase.products.*.description' => 'required',
                     'purchase.products.*.planned_date' => 'required|date',
                     'purchase.products.*.quantity' => 'required|numeric',
+                    // Total
+
                 ]);
 
                 if ($validator->fails()) {
