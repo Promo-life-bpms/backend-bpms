@@ -23,6 +23,7 @@ class CreateOrderPurchasesTable extends Migration
             $table->dateTime('planned_date');
             $table->text('deliver_in');
             $table->string('company');
+            $table->string("status");
             $table->timestamps();
         });
     }
