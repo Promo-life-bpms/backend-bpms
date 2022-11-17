@@ -43,25 +43,7 @@ class RutasDEController extends Controller
     public function create(Request $request)
     {
         //
-        $rutas = new RutasDEController();
-        $rutas->id = $request->id;
-        $rutas->numOrden = $request->numOrden;
-        $rutas->empresa = $request-> empresa;
-        $rutas->proveedor = $request-> proveedor;
-        $rutas->producto = $request->producto;
-        $rutas->cantidad = $request->cantidad;
-        $rutas->cliente = $request->cliente;
-        $rutas->logo = $request->logo;
-        //modal
-        $rutas->tipoOrigen = $request->tipoOrigen;
-        $rutas->tipoDestino = $request-> tipoDestino;
-        $rutas->direccionOrigen = $request-> direccionOrigen;
-        $rutas->direccionDestino = $request-> direccionDestino;
-        $rutas->hora = $request-> hora;
-        $rutas->atencion_a = $request->atencion_a;
-        $rutas->accion = $request->accion;
-        $rutas->num_guia = $request->num_guia;
-        $rutas->observaciones = $request->observaciones;
+
 
     }
 

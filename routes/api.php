@@ -3,15 +3,14 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\IncidenciaController;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Ventas\VentasController;
 use App\Http\Controllers\Control\ControlController;
 use App\Http\Controllers\LM\LMController;
 use App\Http\Controllers\Chofer\ChoferController;
 use App\Http\Controllers\Maquilador\MaquiladorController;
-use App\Http\Controllers\RutasDEController;
 use App\Http\Controllers\ProductRouteController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\DeliveryRouteController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SalesOrderProductsController;
 
@@ -110,9 +109,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('pedidos', [SaleController::class, 'index']);
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
     Route::get('pedidos-por-agendar', [ProductRouteController::class, 'productsToSchedule']);
-    Route::get('RutasDE', [RutasDEController::class, 'index']);
-    Route::post('RutasDE', [RutasDEController::class, 'update']);
-    Route::delete('RutasDE', [RutasDEController::class, 'destroy']);
 });
 
 Route::get('users', [AuthController::class, 'allUsers']);
@@ -175,22 +171,22 @@ Route::put('inspections/{inspection}/update', [SaleController::class, 'show']);
 // SECCION RUTAS DE ENTREGA
 
 // Tabla de rutas de entrega
-Route::get('rutas-de-entrega', [ProductRouteController::class, 'productsToSchedule']);
+Route::get('rutas-de-entrega', [DeliveryRouteController::class, 'index']);
 
 // Crear una ruta de entrega
-    // Leer pedidos por agendar
-Route::get('rutas-de-entrega/create', [ProductRouteController::class, 'productsToSchedule']);
-    // Guardar la ruta de entrega
-Route::post('rutas-de-entrega/store', [ProductRouteController::class, 'productsToSchedule']);
+// Leer pedidos por agendar
+Route::get('rutas-de-entrega/create', [DeliveryRouteController::class, 'create']);
+// Guardar la ruta de entrega
+Route::post('rutas-de-entrega/store', [DeliveryRouteController::class, 'store']);
 
 // Editar una ruta de entrega
-    // Leer informacion de la ruta de entrega
-Route::get('rutas-de-entrega/{ruta}/edit', [ProductRouteController::class, 'productsToSchedule']);
-    // Actualizar la ruta de entrega
-Route::put('rutas-de-entrega/{ruta}/update', [ProductRouteController::class, 'productsToSchedule']);
+// Leer informacion de la ruta de entrega
+Route::get('rutas-de-entrega/{ruta}/edit', [DeliveryRouteController::class, 'productsToSchedule']);
+// Actualizar la ruta de entrega
+Route::put('rutas-de-entrega/{ruta}/update', [DeliveryRouteController::class, 'productsToSchedule']);
 
 // Eliminar ruta de entrega
-    // Actualizar la ruta de entrega
+// Actualizar la ruta de entrega
 Route::delete('rutas-de-entrega/{ruta}', [ProductRouteController::class, 'productsToSchedule']);
 
 // Detalle de una ruta de entrega

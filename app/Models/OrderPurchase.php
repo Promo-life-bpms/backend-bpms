@@ -16,7 +16,8 @@ class OrderPurchase extends Model
         'order_date',
         'planned_date',
         'deliver_in',
-        'company'
+        'company',
+        'status'
     ];
 
     public function sale()

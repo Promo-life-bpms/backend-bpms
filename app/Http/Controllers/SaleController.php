@@ -12,9 +12,16 @@ class SaleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        $sales = Sale::with('currentStatus')->paginate(10);
+    public function index(Request $request)
+    { // crear una var que se llame per_page = 10
+        $per_page = 10;
+
+        if ($request->per_page) {
+            //Asignarle el valor al var per_page
+            $per_page = $request->per_page;
+        }
+
+        $sales = Sale::with('currentStatus')->paginate($per_page);
         return response()->json(['pedidos' => $sales], 200);
     }
 
