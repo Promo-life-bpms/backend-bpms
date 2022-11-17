@@ -26,6 +26,7 @@ class CreateSalesTable extends Migration
             $table->text('additional_information');
             $table->boolean('sample_required')->default(false);
             $table->string('tariff', 50);
+            $table->boolean('incidence');
             $table->string('commercial_name');
             $table->string('commercial_email');
             $table->string('commercial_odoo_id');

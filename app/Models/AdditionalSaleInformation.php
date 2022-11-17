@@ -17,7 +17,8 @@ class AdditionalSaleInformation extends Model
         'warehouse_company',
         'warehouse_address',
         'planned_date',
-        'commitment_date'
+        'commitment_date',
+        'effective_date'
     ];
 
     public function sale()
