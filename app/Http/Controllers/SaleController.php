@@ -54,7 +54,7 @@ class SaleController extends Controller
      */
     public function show($sale_id)
     {
-        $sale = Sale::with(['currentStatus', 'saleProducts', 'moreInformation'])->where('code_sale', $sale_id)->first();
+        $sale = Sale::with(['currentStatus', 'saleProducts', 'moreInformation', 'orders'])->where('code_sale', $sale_id)->first();
         if ($sale) {
             return response()->json(['pedido' => $sale], 200);
         }
