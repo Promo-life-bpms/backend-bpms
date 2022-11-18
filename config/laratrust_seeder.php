@@ -2,9 +2,9 @@
 
 return [
 
-    'create_users' => false,
+    'create_users' => true,
 
-    'truncate_tables' => true,
+    'truncate_tables' => false,
 
 
     'roles_structure' => [
@@ -14,7 +14,7 @@ return [
         ],
         'maquilador' => [
             'profile' => 'c,r',
-        ],
+     ],
         'almacen' => [
             'profile' => 'r,u',
         ],

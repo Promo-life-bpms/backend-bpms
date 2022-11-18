@@ -105,3 +105,27 @@ Route::get('SeguimientoPedidos', [ChoferController::class, 'Seguimientopedidos']
 Route::get('dashboardMaq', [MaquiladorController::class, 'dashboardMaq']);
 Route::get('Remisiones', [MaquiladorController::class, 'Remisiones']);
 Route::get('Remisiones/{pedido}', [MaquiladorController::class, 'DetallesR']);
+
+
+//Rutas de asignacion para Roles
+
+
+// Seccion de Incidencias
+
+// Detalle de la incidencia con las compras relacionadas
+// localhost/pedidos/PED456/incidencias/INC-423
+Route::get('incidencias/{incidencia}', [SaleController::class, 'show']);
+// Crear una incidencia
+Route::get('incidencias/create', [SaleController::class, 'show']);
+Route::post('incidencias/store', [SaleController::class, 'show']);
+
+//------------------------------------------------------------
+
+// Seccion de Rutas de entrega
+
+// Detalle de la ruta_entrega con las compras relacionadas
+// localhost/pedidos/PED456/ruta_entrega/INC-423
+Route::get('ruta_entrega/{ruta_entrega}', [SaleController::class, 'show']);
+// Crear una incidencia
+Route::get('ruta_entrega/create', [SaleController::class, 'show']);
+Route::post('ruta_entrega/store', [SaleController::class, 'show']);
