@@ -4,15 +4,14 @@ namespace App\Http\Controllers\Ventas;
 
 
 use App\Http\Controllers\Controller;
-use Dotenv\Util\Regex;
 use Illuminate\Support\Facades\Request;
-use Psy\CodeCleaner\FunctionReturnInWriteContextPass;
 use Symfony\Component\HttpFoundation\Response;
-
+use App\Models\Role;
+use App\Models\User;
 
 class VentasController extends Controller
 {
-    public function dashboard()
+    public static function dashboard()
     {
         $incidencias = [
             "INCIDENCIAS" => 18,

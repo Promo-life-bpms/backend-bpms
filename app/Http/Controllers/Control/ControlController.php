@@ -13,45 +13,64 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ControlController extends Controller
 {
-    public function dashboardCon()
+    public static function dashboard()
     {
         //pedidos e incidencias
         $pedinc = [
-            "Pedidos" => 1,
-            "Incidencias" => 2,
-            "dias" => "lunes",
-            "cantidad" => "20"
+            [
+                "date" => "23/11/2022",
+                "information" => [
+                    "pedido" => 12,
+                    "incidencia" => 20
+                ]
+            ],
+            [
+                "date" => "24/11/2022",
+                "information" => [
+                    "pedido" => 14,
+                    "incidencia" => 2
+                ]
+            ],
+            [
+                "date" => "25/11/2022",
+                "information" => [
+                    "pedido" => 9,
+                    "incidencia" => 10
+                ]
+            ],
         ];
         $maquilador = [
-            "Completadas" => 7,
-            "Pendientes" => 5
+            "complete" => 7,
+            "pending" => 5
         ];
         //ordenes de entrega
         $orden = [
             [
-                "Nombre_chofer" => "juan",
-                "entregas" => 13,
-                "Pendientes" => 1,
+                "drivers_name" => "Juan",
+                "deliveries" => 13,
+                "pending" => 1,
             ],
 
             [
-                "Nombre_chofer" => "jesus",
-                "entregas" => 10,
-                "Pendientes" => 2,
+                "drivers_name" => "jesus",
+                "deliveries" => 10,
+                "pending" => 2,
             ]
 
         ];
         //seguimiento del pedido
         $tablapedido = [
-            "Num_pedido" => "PED122416",
-            "Status" => 3,
-            "id" => 35,
+            [
+                "code_sale" => "PED122416",
+                "product" => 3,
+                "customer" => 35,
+            ]
 
         ];
         return response()->json([
-            "PEDIDOS_E_INCIDENCIAS" => $pedinc,
-            "Maquilador" => $maquilador,
-            "Ordenes_de_entrega" => $orden,
+            "informationSales" => $pedinc,
+            "maquilador" => $maquilador,
+            "delivery_orders" => $orden,
             "Seguimiento_del_pedido" => $tablapedido
         ], Response::HTTP_OK);
     }

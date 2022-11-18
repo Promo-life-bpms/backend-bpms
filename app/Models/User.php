@@ -20,9 +20,11 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'name',
         'email',
         'password',
+
     ];
 
     /**
@@ -33,4 +35,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
     ];
+
+    public function whatRoles()
+    {
+        return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
+    }
 }
