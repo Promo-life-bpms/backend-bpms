@@ -178,7 +178,8 @@ Route::get('rutas-de-entrega', [DeliveryRouteController::class, 'index']);
 Route::get('rutas-de-entrega/create', [DeliveryRouteController::class, 'create']);
 // Guardar la ruta de entrega
 Route::post('rutas-de-entrega/store', [DeliveryRouteController::class, 'store']);
-
+//ver una ruta de entrega
+Route::get('rutas-de-entrega/show', [DeliveryRouteController::class, 'show']);
 // Editar una ruta de entrega
 // Leer informacion de la ruta de entrega
 Route::get('rutas-de-entrega/{ruta}/edit', [DeliveryRouteController::class, 'productsToSchedule']);
