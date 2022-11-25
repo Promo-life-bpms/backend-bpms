@@ -30,10 +30,10 @@ class ApiOdooController extends Controller
                     'sale.sample_required' => 'required',
                     'sale.tariff' => 'required',
                     'sale.incidence' => 'required',
-                    // Maquila Empaque o Etiquetado
-                    // Politica de entrega
-                    // Se cambio horario
-                    // Motivo de cambio
+                    'sale.labeling' => 'required',
+                    'sale.delivery_policy' => 'required',
+                    'sale.schedule_change' => 'required',
+                    'sale.reason_for_change' => 'required',
                     'sale.commercial.odoo_id' => 'required',
                     'sale.commercial.name' => 'required',
                     'sale.commercial.email' => 'required',
@@ -51,13 +51,19 @@ class ApiOdooController extends Controller
                     'sale.products.*.description' => 'required',
                     'sale.products.*.provider' => 'required',
                     'sale.products.*.logo' => 'required',
+                    'sale.products.*.clave' => 'required|numeric',
                     'sale.products.*.quantity' => 'required|numeric',
                     'sale.products.*.quantity_delivered' => 'required|numeric',
-                    // Faltan Campos
+                    'sale.products.*.quantity_invoiced' => 'required|numeric',
+                    'sale.products.*.unit_price' => 'required|numeric',
+                    'sale.products.*.subtotal' => 'required|numeric',
+                    'sale.products.*.type_sale' => 'required|numeric',
+                    'sale.products.*.cost_labeling' => 'required|numeric',
+                    'sale.products.*.clean_product_cost' => 'required|numeric',
                 ]);
 
                 if ($validator->fails()) {
-                    return response()->json(($validator->getMessageBag()), 201);
+                    return response()->json(($validator->getMessageBag()));
                 }
 
                 // Obtener el pedido
@@ -98,7 +104,6 @@ class ApiOdooController extends Controller
                     'planned_date' => $planned_date,
                     'commitment_date' => $commitment_date,
                     'effective_date' => $effective_date
-
                 ];
 
                 $dataProducts = $requestData->products;
@@ -168,9 +173,7 @@ class ApiOdooController extends Controller
                     'purchase.products.*.product' => 'required',
                     'purchase.products.*.description' => 'required',
                     'purchase.products.*.planned_date' => 'required|date',
-                    'purchase.products.*.quantity' => 'required|numeric',
-                    // Total
-
+                    'purchase.products.*.quantity' => 'required|numeric'
                 ]);
 
                 if ($validator->fails()) {
@@ -201,9 +204,9 @@ class ApiOdooController extends Controller
                         }
                     } else {
                         $orderPurchase = OrderPurchase::create($dataOrder);
-                        /*  foreach ($dataProducts as $product) {
-                            $product = Produc
-                        } */
+                        foreach ($dataProducts as $product) {
+                            // $product = Produc-
+                        }
                     }
                 } catch (Exception $th) {
                     return  response()->json(["Server Error Insert: " => $th->getMessage()], 400);
