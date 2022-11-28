@@ -18,9 +18,9 @@ class DeliveryRoute extends Model
         'status'
         //
     ];
-    public function productsDeliveryRoute()
+    public function codeDeliveryRoute()
     {
-        return $this->hasMany(ProductDeliveryRoute::class, "delivery_route_id");
+        return $this->hasMany(CodeOrderDeliveryRoute::class, "delivery_route_id");
 
         //relacion hasmany() hacia product delivery route
     }

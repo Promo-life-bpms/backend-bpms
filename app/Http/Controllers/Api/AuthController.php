@@ -56,13 +56,13 @@ class AuthController extends Controller
                 return response()->json([
                     "status" => 1,
                     "msg" => "La password es incorrecta",
-                ],);
+                ], Response::HTTP_UNAUTHORIZED);
             }
         } else {
             return response()->json([
                 "status" => 2,
                 "msg" => "Correo incorrecto o no registrado"
-            ]);
+            ], Response::HTTP_UNAUTHORIZED);
         }
     }
 
