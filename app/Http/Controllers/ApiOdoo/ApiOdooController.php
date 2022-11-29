@@ -23,41 +23,48 @@ class ApiOdooController extends Controller
                     'sale.sequence' => 'required',
                     'sale.invoice_address' => 'required',
                     'sale.delivery_address' => 'required',
+                    'sale.delivery_time' => 'required|date:Y-m-d h:i:s',
                     'sale.delivery_instructions' => 'required',
-                    'sale.delivery_time' => 'required|date',
-                    'sale.order_date' => 'required|date',
-                    'sale.additional_information' => 'required',
-                    'sale.sample_required' => 'required',
-                    'sale.tariff' => 'required',
+                    'sale.order_date' => 'required|date:d-m-Y h:i:s',
                     'sale.incidence' => 'required',
-                    // Maquila Empaque o Etiquetado
-                    // Politica de entrega
-                    // Se cambio horario
-                    // Motivo de cambio
+                    'sale.sample_required' => 'required',
+                    'sale.labeling' => 'required',
+                    'sale.additional_information' => 'required',
+                    'sale.tariff' => 'required',
                     'sale.commercial.odoo_id' => 'required',
                     'sale.commercial.name' => 'required',
                     'sale.commercial.email' => 'required',
                     'sale.client.name' => 'required',
                     'sale.client.address' => 'required',
                     'sale.client.contact' => 'required',
-                    'sale.other_information.warehouse.company' => 'required',
-                    'sale.other_information.warehouse.address' => 'required',
-                    'sale.other_information.planned_date' => 'required',
-                    'sale.other_information.commitment_date' => 'required',
-                    'sale.other_information.effective_date' => 'required',
+                    'sale.other_information.delivery_policy' => 'required',
+                    'sale.other_information.schedule_change' => 'required',
+                    'sale.other_information.reason_for_change' => 'required',
+                    'sale.other_information.warehouse_company' => 'required',
+                    'sale.other_information.warehouse_address' => 'required',
+                    'sale.other_information.planned_date' => 'required|date:d-m-Y h:i:s',
+                    'sale.other_information.commitment_date' => 'required|date:d-m-Y h:i:s',
+                    'sale.other_information.effective_date' => 'required|date:d-m-Y h:i:s',
                     'sale.products' => 'bail|required|array',
                     'sale.products.*.odoo_product_id' => 'required',
                     'sale.products.*.product' => 'required',
                     'sale.products.*.description' => 'required',
                     'sale.products.*.provider' => 'required',
                     'sale.products.*.logo' => 'required',
+                    'sale.products.*.key_product' => 'required',
+                    'sale.products.*.type_sale' => 'required',
+                    'sale.products.*.cost_labeling' => 'required|numeric',
+                    'sale.products.*.clean_product_cost' => 'required|numeric',
                     'sale.products.*.quantity' => 'required|numeric',
                     'sale.products.*.quantity_delivered' => 'required|numeric',
-                    // Faltan Campos
+                    'sale.products.*.quantity_invoiced' => 'required|numeric',
+                    'sale.products.*.unit_price' => 'required|numeric',
+                    'sale.products.*.subtotal' => 'required|numeric',
+                    'sale.total' => 'required|numeric',
                 ]);
 
                 if ($validator->fails()) {
-                    return response()->json(($validator->getMessageBag()), 201);
+                    return response()->json(($validator->getMessageBag()));
                 }
 
                 // Obtener el pedido
@@ -93,12 +100,11 @@ class ApiOdooController extends Controller
                     'client_name' => $requestData->client['name'],
                     'client_address' => $requestData->client['address'],
                     'client_contact' => $requestData->client['contact'],
-                    'warehouse_company' => $requestData->other_information['warehouse']['company'],
-                    'warehouse_address' => $requestData->other_information['warehouse']['address'],
+                    'warehouse_company' => $requestData->other_information['warehouse_company'],
+                    'warehouse_address' => $requestData->other_information['warehouse_address'],
                     'planned_date' => $planned_date,
                     'commitment_date' => $commitment_date,
                     'effective_date' => $effective_date
-
                 ];
 
                 $dataProducts = $requestData->products;
@@ -168,9 +174,7 @@ class ApiOdooController extends Controller
                     'purchase.products.*.product' => 'required',
                     'purchase.products.*.description' => 'required',
                     'purchase.products.*.planned_date' => 'required|date',
-                    'purchase.products.*.quantity' => 'required|numeric',
-                    // Total
-
+                    'purchase.products.*.quantity' => 'required|numeric'
                 ]);
 
                 if ($validator->fails()) {
@@ -201,9 +205,9 @@ class ApiOdooController extends Controller
                         }
                     } else {
                         $orderPurchase = OrderPurchase::create($dataOrder);
-                        /*  foreach ($dataProducts as $product) {
-                            $product = Produc
-                        } */
+                        foreach ($dataProducts as $product) {
+                            // $product = Produc-
+                        }
                     }
                 } catch (Exception $th) {
                     return  response()->json(["Server Error Insert: " => $th->getMessage()], 400);
