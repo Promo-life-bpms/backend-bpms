@@ -18,8 +18,20 @@ class AuthController extends Controller
         //validación de los datos
         $request->validate([
             'name' => 'required',
+            'lastname' => 'required',
             'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed'
+            'id' => 'required',
+            'photo' => 'required',
+        ]);
+
+        $user =  User::create([
+            'name' => $request->name . " " . $request->lastname,
+            'email' => $request->email,
+            'email_verified_at' => now(),
+            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+            "photo" => $request->image,
+            "intranet_id" => $request->id,
+            'remember_token' => Str::random(10),
         ]);
 
         //alta del usuario
