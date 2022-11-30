@@ -31,6 +31,7 @@ include('Routes/ApiOdooRoutes.php');
 //rutas de inicio de sesion
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::get('syncUsers', [AuthController::class, 'syncUsers']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('user-profile', [AuthController::class, 'userProfile']);
@@ -126,8 +127,6 @@ Route::get('pedidos/{pedido}/orders/{order}', [SaleController::class, 'show']);
 
 
 // Seccion para actualizar el estatus de maquila
-
-
 
 // Seccion de Incidencias
 
