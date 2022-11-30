@@ -16,6 +16,9 @@ class AdditionalSaleInformation extends Model
         'client_contact',
         'warehouse_company',
         'warehouse_address',
+        'delivery_policy',
+        'schedule_change',
+        'reason_for_change',
         'planned_date',
         'commitment_date',
         'effective_date'

@@ -39,10 +39,10 @@ class SaleController extends Controller
         /*
         # Generales
         # OT, OC relacionadas
-        # Incidencias Relacionadas, Datos generales
-        # Inspecciones Relacionadas, Datos generales
-        # Historial de Cambios, Datos generales
-        # Entregas Relacionadas, Datos generales
+        # //TODO: Incidencias Relacionadas, Datos generales
+        # //TODO: Inspecciones Relacionadas, Datos generales
+        # //TODO: Historial de Cambios BPMS y Odoo
+        # //TODO: Entregas Relacionadas, Datos generales
         */
         $sale = Sale::with(['currentStatus', 'saleProducts', 'moreInformation', 'orders'])->where('code_sale', $sale_id)->first();
         if ($sale) {

@@ -31,7 +31,7 @@ include('Routes/ApiOdooRoutes.php');
 //rutas de inicio de sesion
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
-Route::get('syncUsers', [AuthController::class, 'syncUsers']);
+Route::post('syncUsers', [AuthController::class, 'login']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('user-profile', [AuthController::class, 'userProfile']);
