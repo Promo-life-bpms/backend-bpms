@@ -13,8 +13,10 @@ class SaleController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    { // crear una var que se llame per_page = 10
-        $per_page = 10;
+    {
+        // Vista de tabla de Pedidos
+        // crear una var que se llame per_page = 10
+        $per_page = 15;
 
         if ($request->per_page) {
             //Asignarle el valor al var per_page
@@ -26,27 +28,6 @@ class SaleController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
      * Display the specified resource.
      *
      * @param  \App\Models\Sale  $sale
@@ -54,44 +35,19 @@ class SaleController extends Controller
      */
     public function show($sale_id)
     {
+        // Vista de Detalle de los pedidos
+        /*
+        # Generales
+        # OT, OC relacionadas
+        # //TODO: Incidencias Relacionadas, Datos generales
+        # //TODO: Inspecciones Relacionadas, Datos generales
+        # //TODO: Historial de Cambios BPMS y Odoo
+        # //TODO: Entregas Relacionadas, Datos generales
+        */
         $sale = Sale::with(['currentStatus', 'saleProducts', 'moreInformation', 'orders'])->where('code_sale', $sale_id)->first();
         if ($sale) {
             return response()->json(['pedido' => $sale], 200);
         }
         return response()->json(['pedido' => "No hay informacion acerca de este pedido"], 200);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Sale  $sale
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Sale $sale)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Sale  $sale
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Sale $sale)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Sale  $sale
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Sale $sale)
-    {
-        //
     }
 }
