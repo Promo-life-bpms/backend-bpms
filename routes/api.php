@@ -60,12 +60,8 @@ Route::post('incidencias/store', [SaleController::class, 'show']);
 
 // Seccion de Inspeccion de Calidad
 
-// Detalle de la inspeccion
-// localhost/pedidos/PED456/inspeccion/INS-7688
+Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
 Route::get('inspections/{inspection}', [InspectionController::class, 'show']);
-
-// Crear una inspeccion de calidad
-Route::post('inspections', [InspectionController::class, 'store']);
 
 // Actualizar una inspeccion de calidad
 Route::get('inspections/{inspection}/edit', [SaleController::class, 'show']);
