@@ -22,21 +22,20 @@ use App\Http\Controllers\InspectionController;
 Route::post('setSale/v1', [ApiOdooController::class, 'setSale']);
 Route::post('setPurchase/v1', [ApiOdooController::class, 'setPurchase']);
 
-
-//rutas de inicio de sesion
-Route::post('register', [AuthController::class, 'register']);
+Route::get('users', [AuthController::class, 'allUsers']);
 Route::post('login', [AuthController::class, 'login']);
+Route::post('register', [AuthController::class, 'register']);
 Route::post('syncUsers', [AuthController::class, 'syncUsers']);
 
-Route::group(['middleware' => ['auth:sanctum']], function () {
-    Route::get('user-profile', [AuthController::class, 'userProfile']);
+Route::group(['middleware' => 'auth'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('user-profile', [AuthController::class, 'userProfile']);
 
     Route::get('pedidos', [SaleController::class, 'index']);
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
 });
 
-Route::get('users', [AuthController::class, 'allUsers']);
+
 
 
 

@@ -36,7 +36,7 @@ class InspectionController extends Controller
 
         $dataInspection = [
             'sale_id' => $request->date_inspeccion,
-            'user_created_id' => 1,
+            'user_created_id' => auth()->user(),
             'date_inspection' => $request->date_inspeccion,
             'type_product' => $request->type_product,
             'observations' => $request->observations,
