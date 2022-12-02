@@ -21,8 +21,15 @@ class CreateSalesProductsTable extends Migration
             $table->text("description");
             $table->string("provider");
             $table->string("logo");
+            $table->string("key_product");
+            $table->string("type_sale");
+            $table->decimal("cost_labeling", 8, 2);
+            $table->decimal("clean_product_cost", 8, 2);
             $table->integer("quantity_ordered");
             $table->integer("quantity_delivered");
+            $table->integer("quantity_invoiced");
+            $table->decimal("unit_price", 8, 2);
+            $table->decimal("subtotal", 8, 2);
             $table->timestamps();
         });
     }

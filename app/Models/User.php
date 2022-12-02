@@ -24,7 +24,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-
+        'active',
+        'photo',
+        'intranet_id'
     ];
 
     /**
