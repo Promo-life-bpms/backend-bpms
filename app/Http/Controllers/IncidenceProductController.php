@@ -5,8 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Incidencia;
 
-class IncidenciaController extends Controller
+use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Response;
+
+class IncidenceProductController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      *
@@ -19,9 +23,7 @@ class IncidenciaController extends Controller
         return response()->json([
             "Incidencia" => $Incidencia,
             "mensaje" => "OK",
-            "display_message" => "La peticion se ejecuto correctamente",
-            "user" => "Antonio",
-            "token" => "MDJEIOHDNCS",
+            "user" => "Marlene",
         ], 200);
     }
 
@@ -33,6 +35,7 @@ class IncidenciaController extends Controller
     public function create()
     {
         //
+
     }
 
     /**
@@ -43,25 +46,29 @@ class IncidenciaController extends Controller
      */
     public function store(Request $request)
     {
-        request()->validate([
-            "empresa"=>"required",
-            "cliente"=>"required",
+        //validar que la informacion este correcta si no no se puede registrar
+        // utilizar validator
+        $validation = Validator::make($request->all(), [
+            'id_order_purchase_products'=>'required',
+            'cantidad_seleccionada'=>'required',
+        ]);
+        if ($validation->fails()) {
+            return response()->json(["errors" => $validation->getMessageBag()], 422);
+        };
+
+
+
+        $ProductIncidence = IncidenceProductController::create([
+            'id_order_purchase_products'=>$request->id_order_purchase_products,
+            'cantidad_seleccionada'=>$request->cantidad_seleccionada,
         ]);
 
-        $Incidencia = new Incidencia();
-        $Incidencia->empresa = $request->empresa;
-        $Incidencia->cliente = $request->cliente;
+        return response()->json('Incidencia de productos creada exitosamente', Response::HTTP_CREATED);
+        //return ('Se inserta la incidencia');
 
-        $Incidencia->save();
-        return response()->json([
-            "Incidencia" => $Incidencia,
-            "mensaje" => "OK",
-            "display_message" => "La peticion se ejecuto",
-            "user" => "Antonio",
-            "token" => "MDJEIOHDNCS",
-        ], 201);
-        //
     }
+
+
 
     /**
      * Display the specified resource.
@@ -94,25 +101,8 @@ class IncidenciaController extends Controller
      */
     public function update(Request $request)
     {
-        // request()->validate([
-        //     "empresa"=>"required",
-        //     "cliente"=>"required",
-        // ]);
-
-
         //
-        $Incidencia = Incidencia::findOrFail($request->id);
-        $Incidencia->empresa = $request->empresa;
-        $Incidencia->cliente = $request->cliente;
-        $Incidencia->save();
-        return response()->json([
-            "Incidencia" => $Incidencia,
-            "mensaje" => "Borrando registro",
-            "display_message" => "El registro se ha eliminado corectamente",
-            "user" => "Antonio",
-        ], 201);
-        }
-
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -123,12 +113,14 @@ class IncidenciaController extends Controller
     public function destroy(Request $request)
     {
         //
-        $Incidencia = Incidencia::destroy($request->id);
+        $ProductIncidence = Incidencia::destroy($request->id);
         return response()->json([
-            "Incidencia" => $Incidencia,
+            "ProductIncidence" => $ProductIncidence,
             "mensaje" => "Borrando registro",
-            "display_message" => "El registro se ha eliminado corectamente",
-            "user" => "Antonio",
+            "display_message" => "La incidencia se ha eliminado corectamente",
+            "user" => "Marlene",
         ], 201);
     }
 }
+
+
