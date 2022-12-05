@@ -2,9 +2,9 @@
 
 return [
 
-    'create_users' => true,
+    'create_users' => false,
 
-    'truncate_tables' => false,
+    'truncate_tables' => true,
 
 
     'roles_structure' => [

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Incidence;
 use Illuminate\Http\Request;
 use App\Models\Incidencia;
 
@@ -18,7 +19,7 @@ class IncidenceProductController extends Controller
      */
     public function index()
     {
-        $Incidencia = Incidencia::all();
+        $Incidencia = Incidence::all();
 
         return response()->json([
             "Incidencia" => $Incidencia,
@@ -51,6 +52,7 @@ class IncidenceProductController extends Controller
         $validation = Validator::make($request->all(), [
             'id_order_purchase_products'=>'required',
             'cantidad_seleccionada'=>'required',
+            'id_incidence'=>'required'
         ]);
         if ($validation->fails()) {
             return response()->json(["errors" => $validation->getMessageBag()], 422);
@@ -61,6 +63,7 @@ class IncidenceProductController extends Controller
         $ProductIncidence = IncidenceProductController::create([
             'id_order_purchase_products'=>$request->id_order_purchase_products,
             'cantidad_seleccionada'=>$request->cantidad_seleccionada,
+            'id_incidence'=>$request->id_incidence
         ]);
 
         return response()->json('Incidencia de productos creada exitosamente', Response::HTTP_CREATED);
@@ -113,7 +116,7 @@ class IncidenceProductController extends Controller
     public function destroy(Request $request)
     {
         //
-        $ProductIncidence = Incidencia::destroy($request->id);
+        $ProductIncidence = Incidence::destroy($request->id);
         return response()->json([
             "ProductIncidence" => $ProductIncidence,
             "mensaje" => "Borrando registro",

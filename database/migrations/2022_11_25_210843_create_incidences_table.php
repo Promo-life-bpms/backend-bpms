@@ -28,10 +28,9 @@ class CreateIncidencesTable extends Migration
             $table->date('fecha_compromiso');
             $table->string('solucion');
             $table->date('fecha_solucion');
-            $table->string('id_users');
+            $table->string('id_user');
             $table->string('elaboro');
             $table->text('firma_elaboro');
-            $table->string('id_user');
             $table->string('reviso');
             $table->text('firma_reviso');
             $table->text('comentarios_generales');

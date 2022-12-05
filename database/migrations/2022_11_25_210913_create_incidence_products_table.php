@@ -21,6 +21,11 @@ class CreateIncidenceProductsTable extends Migration
             ->constrained('order_purchase_products')
             ->cascadeOnUpdate()
             ->nullOnDelete();
+            $table->foreignId('id_incidence')
+            ->nullable()
+            ->constrained('incidences')
+            ->cascadeOnUpdate()
+            ->nullOnDelete();
             $table->timestamps();
         });
     }
