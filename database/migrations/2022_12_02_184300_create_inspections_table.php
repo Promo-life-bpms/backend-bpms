@@ -15,6 +15,7 @@ class CreateInspectionsTable extends Migration
     {
         Schema::create('inspections', function (Blueprint $table) {
             $table->id();
+            $table->string('code_inspection');
             $table->foreignId('sale_id')->constrained();
             $table->foreignId('user_created_id')->references('id')->on('users');
             $table->dateTime('date_inspection');

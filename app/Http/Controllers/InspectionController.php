@@ -44,8 +44,17 @@ class InspectionController extends Controller
         if (!$sale) {
             return response()->json(["errors" => "No se ha encontrado el pedido"], 404);
         }
+        $maxSKU = Inspection::max('code_inspection');
+        $idSku = null;
+        if (!$maxSKU) {
+            $idSku = 1;
+        } else {
+            $idSku = (int) explode('-', $maxSKU)[1];
+            $idSku++;
+        }
         $dataInspection = [
             'sale_id' => $sale->id,
+            'code_inspection' => "INSP-" . str_pad($idSku, 4, "0", STR_PAD_LEFT),
             'user_created_id' => auth()->user()->id,
             'date_inspection' => $request->date_inspeccion,
             'type_product' => $request->type_product,
@@ -68,7 +77,7 @@ class InspectionController extends Controller
                 ];
                 $inspection->productsSelected()->create($dataProductSelected);
             }
-            return response()->json(["msg" => "Inspeccion Creada Correctamente"], 400);
+            return response()->json(["msg" => "Inspeccion Creada Correctamente"], 200);
         } catch (Exception $e) {
             return response()->json(["errors" => $e->getMessage()], 400);
         }
@@ -80,8 +89,13 @@ class InspectionController extends Controller
      * @param  \App\Models\Inspection  $inspection
      * @return \Illuminate\Http\Response
      */
-    public function show($inspection)
+    public function show($inspection_id)
     {
+        $inspection = Inspection::with('productsSelected')->where('code_inspection', $inspection_id)->first();
+        if($inspection){
+            return response()->json(["inspection" =>$inspection], 200);
+        }
+        return response()->json(["errors" =>"No Encontrado"], 404);
         // Detalle de la inspeccion
     }
 }

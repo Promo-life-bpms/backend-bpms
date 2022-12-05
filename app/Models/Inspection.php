@@ -11,6 +11,7 @@ class Inspection extends Model
 
     protected $fillable = [
         'sale_id',
+        "code_inspection",
         'user_created_id',
         'date_inspection',
         'type_product',
