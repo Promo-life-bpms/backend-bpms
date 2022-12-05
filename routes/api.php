@@ -31,11 +31,12 @@ include('Routes/ApiOdooRoutes.php');
 //rutas de inicio de sesion
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::post('syncUsers', [AuthController::class, 'syncUsers']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('user-profile', [AuthController::class, 'userProfile']);
     Route::post('logout', [AuthController::class, 'logout']);
-    Route::get('dashboard', [HomeController::class, 'dashboard']);
+    /*     Route::get('dashboard', [HomeController::class, 'dashboard']);
     Route::get('/Incidencia', [IncidenciaController::class, 'index']);
 
     Route::post('/Incidencia', [IncidenciaController::class, 'store']);
@@ -108,29 +109,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // Rutas Generales
     Route::get('pedidos', [SaleController::class, 'index']);
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
-    Route::get('pedidos-por-agendar', [ProductRouteController::class, 'productsToSchedule']);
+    Route::get('pedidos-por-agendar', [ProductRouteController::class, 'productsToSchedule']); */
+
+
+    Route::get('pedidos', [SaleController::class, 'index']);
+    Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
 });
 
 Route::get('users', [AuthController::class, 'allUsers']);
 
-
-
-// Vista de tabla de Pedidos
-// localhost/pedidos
-Route::get('pedidos', [SaleController::class, 'index']);
-
-
-// Vista de Detalle de los pedidos
-/*
-# Generales
-# OT, OC relacionadas
-# Incidencias Relacionadas, Datos generales
-# Inspecciones Relacionadas, Datos generales
-# Historial de Cambios, Datos generales
-# Entregas Relacionadas, Datos generales
-*/
-// localhost/pedidos/PED456
-Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
 
 
 // Modal de un detalle de OC, OT
@@ -140,8 +127,6 @@ Route::get('pedidos/{pedido}/orders/{order}', [SaleController::class, 'show']);
 
 
 // Seccion para actualizar el estatus de maquila
-
-
 
 // Seccion de Incidencias
 

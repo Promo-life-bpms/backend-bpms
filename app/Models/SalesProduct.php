@@ -17,8 +17,15 @@ class SalesProduct extends Model
         "description",
         "provider",
         "logo",
+        "key_product",
+        "type_sale",
+        "cost_labeling",
+        "clean_product_cost",
         "quantity_ordered",
         "quantity_delivered",
+        "quantity_invoiced",
+        "unit_price",
+        "subtotal"
     ];
 
     public function sale()
