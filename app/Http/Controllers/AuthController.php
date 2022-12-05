@@ -1,18 +1,22 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['login', 'allUsers', 'syncUsers']]);
+    }
+
     public function register(Request $request)
     {
         //validación de los datos
@@ -50,29 +54,29 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required'
         ]);
+        $credentials = request(['email', 'password']);
         $user = User::where("email", "=", $request->email)->first();
-
-
         if (isset($user->id)) {
-            if (Hash::check($request->password, $user->password)) {
-                //se crea token
-                $token = $user->createToken('auth_token')->plainTextToken;
-                $cookie = cookie('cookie_token', $token, 60 * 24);
-                return response()->json(["token" => $token],)->withoutCookie($cookie);
-                return response()->json([
-                    "msg" => "Acceso correcto",
-                    "access_token" => $token
-                ]);                    //si todo sale bien
-
-            } else {
-                return response()->json([
-                    "status" => 1,
-                    "msg" => "La password es incorrecta",
-                ], Response::HTTP_UNAUTHORIZED);
+            $role = [];
+            if (count($user->whatRoles) > 0) {
+                $role = [
+                    "id" => $user->whatRoles[0]->id,
+                    "name" => $user->whatRoles[0]->name
+                ];
             }
+            if (!$token = auth()->claims([
+                'role' => $role,
+                'user' => [
+                    "name" => $user->name,
+                    "email" => $user->email,
+                    "photo" => $user->photo
+                ],
+            ])->attempt($credentials)) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+            return $this->respondWithToken($token);
         } else {
             return response()->json([
-                "status" => 2,
                 "msg" => "Correo incorrecto o no registrado"
             ], Response::HTTP_UNAUTHORIZED);
         }
@@ -80,23 +84,33 @@ class AuthController extends Controller
 
     public function userProfile(Request $request)
     {
+        $user = User::find(auth()->user()->id);
         return response()->json([
             "message" => "Perfil de usuario",
-            "userData" => Auth()->user()
+            "userData" => $user
         ], Response::HTTP_OK);
     }
 
     public function logout()
     {
-        $cookie = Cookie::forget('cookie_token');
-        return response(["message" => "Se cerro sesion correctamente"], Response::HTTP_OK)->withCookie($cookie);
+        auth()->logout();
+        return response(["message" => "Se cerro sesion correctamente"], Response::HTTP_OK);
+    }
+
+    protected function respondWithToken($token)
+    {
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60
+        ]);
     }
 
     public function allUsers()
     {
         $users = User::with('whatRoles')->where('active', true)->get();
         foreach ($users as $user) {
-            $user->photo = env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . $user->photo;
+            $user->photo = $user->photo ? env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . $user->photo : null;
         }
         return response()->json([
             "users" => $users

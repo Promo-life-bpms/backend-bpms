@@ -21,9 +21,9 @@ class CreateAdditionalSaleInformationTable extends Migration
             $table->text('client_contact');
             $table->string('warehouse_company');
             $table->text('warehouse_address');
-            $table->string('delivery_policy');
+            $table->text('delivery_policy');
             $table->boolean('schedule_change');
-            $table->string('reason_for_change');
+            $table->text('reason_for_change');
             $table->dateTime('planned_date');
             $table->dateTime('commitment_date');
             $table->dateTime('effective_date');

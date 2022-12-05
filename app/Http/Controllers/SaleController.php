@@ -44,7 +44,14 @@ class SaleController extends Controller
         # //TODO: Historial de Cambios BPMS y Odoo
         # //TODO: Entregas Relacionadas, Datos generales
         */
-        $sale = Sale::with(['currentStatus', 'saleProducts', 'moreInformation', 'orders'])->where('code_sale', $sale_id)->first();
+        $sale = Sale::with([
+            'currentStatus',
+            'saleProducts',
+            'moreInformation',
+            'orders',
+            // 'inspecciones',
+            // TODO: 'incidencias'
+        ])->where('code_sale', $sale_id)->first();
         if ($sale) {
             return response()->json(['pedido' => $sale], 200);
         }

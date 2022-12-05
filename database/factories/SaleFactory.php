@@ -26,11 +26,13 @@ class SaleFactory extends Factory
             'order_date' => $this->faker->dateTimeBetween('now', '+1 week'),
             'additional_information' => $this->faker->sentence(),
             'sample_required' => rand(0, 1),
+            "labeling"=>$this->faker->word(),
             'tariff' => "MXN",
             'incidence' => true,
             'commercial_name' => $this->faker->name(),
             'commercial_email' => $this->faker->unique()->safeEmail(),
             'commercial_odoo_id' => $this->faker->numberBetween(0, 100),
+            'total' => $this->faker->numberBetween(0, 1000),
             'status_id' => $statuses[rand(0, count($statuses) - 1)]
         ];
     }
