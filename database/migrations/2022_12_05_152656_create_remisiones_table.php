@@ -15,13 +15,15 @@ class CreateRemisionesTable extends Migration
     {
         Schema::create('remisiones', function (Blueprint $table) {
             $table->id();
-            $table->string('order');
-            $table->string('product');
-            $table->string('planned_quantity');
-            $table->string('delivered_quantity');
-            $table->time('hour');
-            $table->string('num_guide');
             $table->string('comments');
+            $table->string('satisfaction');
+            $table->string('delivered');
+            $table->text('delivery_signature');
+            $table->string('received');
+            $table->text('signature_received');
+            $table->foreignId('delivery_route_id')->reference('id')->on('delivery_routes');
+            $table->foreignId('user_chofer_id')->reference('id')->on('users');
+            $table->string('status');
             $table->timestamps();
         });
     }

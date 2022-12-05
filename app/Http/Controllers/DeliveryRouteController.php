@@ -6,8 +6,9 @@ use App\Models\CodeOrderDeliveryRoute;
 use App\Models\DeliveryRoute;
 use App\Models\OrderPurchase;
 use App\Models\ProductDeliveryRoute;
+use App\Models\Remission;
 use App\Models\Role;
-
+use App\Models\Status;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -240,8 +241,60 @@ class DeliveryRouteController extends Controller
         
     }
 
-    public function verRemisiones(){
+    public function setRemisiones(Request $request){
 
 
+
+        $validation = Validator::make($request->all(), [
+            'comments' => 'required',
+            'satisfaction' => 'required',
+            'delivered' => 'required',
+            'delivery_signature' => 'required',
+            'received' => 'required',
+            'signature_received' => 'required',
+            'delivery_route_id' => 'required',
+            'user_chofer_id' => 'required',
+            'status' => 'required',
+
+            'product_remission' => 'required|array',
+            'product_remission.*.remission_id' => 'required',
+            'product_remission.*.delivered_quantity' => 'required',
+
+
+
+        ]);
+        if ($validation->fails()) {
+            return response()->json(["errors" => $validation->getMessageBag()], 422);
+        }
+        // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
+        // ::create
+
+        $remision = Remission::create([
+            'comments' => $request->comments,
+            'satisfaction' => $request->satisfaction,
+            'delivered' => $request->delivered,
+            'delivery_signature' => $request->delivery_signature,
+            'received' => $request->received,
+            'signature_received' => $request->signature_received,
+            'delivery_route_id' => $request->delivery_route_id,
+            'user_chofer_id' => $request->user_chofer_id,
+            'status' => 1,2,
+          
+          
+        ]);
+        //crear los productos de esa remision de entrega
+        //  $remision->productsDeliveryRoute()->create
+        //retornar un mensaje
+        foreach ($request->product_remission as $product) {
+            $product = (object)$product;
+
+             $remision->productRemission()->create([
+                'remission_id' => $product->remission_id,
+                'delivered_quantity' => $product->delivered_quantity,
+                
+            ]);
     }
+
+    return response()->json('Remision creada exitosamente', Response::HTTP_CREATED);
+}
 }

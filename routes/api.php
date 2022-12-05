@@ -92,3 +92,7 @@ Route::delete('rutas-de-entrega/{deliveryRoute}', [DeliveryRouteController::clas
 // Detalle de una ruta de entrega
 Route::get('rutas-de-entrega/{ruta}', [ProductRouteController::class, 'productsToSchedule']);
 Route::get('rutas-de-entrega/{ruta}/', [ProductRouteController::class, 'productsToSchedule']);
+
+// Crear una remision 
+Route::post('remision/setRemisiones', [DeliveryRouteController::class, 'setRemisiones']);
+
