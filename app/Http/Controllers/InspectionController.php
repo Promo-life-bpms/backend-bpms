@@ -30,7 +30,11 @@ class InspectionController extends Controller
             'user_signature_reviewed' => 'required',
             'quantity_revised' => 'required|numeric',
             'quantity_denied' => 'required|numeric',
-            'features_quantity' => 'required|array'
+            'features_quantity' => 'required|array',
+            'products_selected' => 'required|array',
+            'products_selected.*.product_id' => 'required',
+            'products_selected.*.order_purchase_id' => 'required',
+            'products_selected.*.quantity_selected' => 'required',
         ]);
 
         if ($validation->fails()) {
@@ -55,7 +59,16 @@ class InspectionController extends Controller
             'features_quantity' => json_encode($request->features_quantity)
         ];
         try {
-            Inspection::create($dataInspection);
+            $inspection = Inspection::create($dataInspection);
+            foreach ($request->products_selected as $productSelected) {
+                $dataProductSelected = [
+                    "product_id" => $productSelected['product_id'],
+                    "order_purchase_id" => $productSelected['order_purchase_id'],
+                    "quantity_selected" => $productSelected['quantity_selected'],
+                ];
+                $inspection->productsSelected()->create($dataProductSelected);
+            }
+            return response()->json(["msg" => "Inspeccion Creada Correctamente"], 400);
         } catch (Exception $e) {
             return response()->json(["errors" => $e->getMessage()], 400);
         }

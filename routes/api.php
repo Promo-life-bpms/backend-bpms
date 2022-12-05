@@ -33,6 +33,9 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('pedidos', [SaleController::class, 'index']);
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
+
+    Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
+    Route::get('inspections/{inspection}', [InspectionController::class, 'show']);
 });
 
 
@@ -60,12 +63,9 @@ Route::post('incidencias/store', [SaleController::class, 'show']);
 
 // Seccion de Inspeccion de Calidad
 
-Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
-Route::get('inspections/{inspection}', [InspectionController::class, 'show']);
-
 // Actualizar una inspeccion de calidad
-Route::get('inspections/{inspection}/edit', [SaleController::class, 'show']);
-Route::put('inspections/{inspection}/update', [SaleController::class, 'show']);
+// Route::get('inspections/{inspection}/edit', [SaleController::class, 'show']);
+// Route::put('inspections/{inspection}/update', [SaleController::class, 'show']);
 
 // SECCION RUTAS DE ENTREGA
 

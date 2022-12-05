@@ -20,8 +20,15 @@ class SalesProductFactory extends Factory
             "description" => $this->faker->sentence(),
             "provider" => $this->faker->company(),
             "logo" => $this->faker->company(),
+            "key_product" => $this->faker->company(),
+            "type_sale" => $this->faker->company(),
+            "cost_labeling" => rand(0, $quantity),
+            "clean_product_cost" => rand(0, $quantity),
             "quantity_ordered" => $quantity,
             "quantity_delivered" => rand(0, $quantity),
+            "quantity_invoiced" => rand(0, $quantity),
+            "unit_price" => rand(0, $quantity),
+            "subtotal" => rand(0, $quantity),
         ];
     }
 }

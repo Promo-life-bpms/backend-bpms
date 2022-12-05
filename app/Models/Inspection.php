@@ -24,4 +24,8 @@ class Inspection extends Model
         'features_quantity'
     ];
 
+    public function productsSelected()
+    {
+        return $this->hasMany(InspectionProduct::class, 'inspection_id');
+    }
 }
