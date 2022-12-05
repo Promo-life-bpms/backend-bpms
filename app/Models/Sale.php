@@ -50,4 +50,9 @@ class Sale extends Model
     {
         return $this->belongsTo(Status::class, 'status_id', 'id');
     }
+
+    public function incidencias()
+    {
+        return $this->hasMany(Incidencia::class, 'sale_id');
+    }
 }
