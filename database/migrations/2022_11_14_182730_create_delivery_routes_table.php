@@ -16,6 +16,7 @@ class CreateDeliveryRoutesTable extends Migration
     {
         Schema::create('delivery_routes', function (Blueprint $table) {
             $table->id();
+            $table->boolean('is_active')->default(1)->nullable();
             $table->date('date_of_delivery');
             $table->foreignId('user_chofer_id')->reference('id')->on('users');
             $table->string('type_of_product');
