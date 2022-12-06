@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductRouteController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\DeliveryRouteController;
+use App\Http\Controllers\IncidenceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\InspectionController;
@@ -54,11 +55,9 @@ Route::get('pedidos/{pedido}/orders/{order}', [SaleController::class, 'show']);
 
 // Detalle de la incidencia con las compras relacionadas
 // localhost/pedidos/PED456/incidencias/INC-423
-Route::get('incidencias/{incidencia}', [SaleController::class, 'show']);
-
+Route::get('incidencias/{incidencia}', [IncidenceController::class, 'show']);
 // Crear una incidencia
-Route::get('incidencias/create', [SaleController::class, 'show']);
-Route::post('incidencias/store', [SaleController::class, 'show']);
+Route::post('pedido/{pedido}/incidencias/', [IncidenceController::class, 'store']);
 
 
 // Seccion de Inspeccion de Calidad

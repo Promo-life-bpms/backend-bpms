@@ -17,7 +17,6 @@ class CreateAdditionalSaleInformationTable extends Migration
             $table->id();
             $table->foreignId('sale_id')->constrained();
             $table->text('client_name');
-            $table->text('client_address');
             $table->text('client_contact');
             $table->string('warehouse_company');
             $table->text('warehouse_address');
