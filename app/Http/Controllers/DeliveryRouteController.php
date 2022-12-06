@@ -6,6 +6,7 @@ use App\Models\CodeOrderDeliveryRoute;
 use App\Models\DeliveryRoute;
 use App\Models\OrderPurchase;
 use App\Models\ProductDeliveryRoute;
+use App\Models\ProductRemission;
 use App\Models\Remission;
 use App\Models\Role;
 use App\Models\Status;
@@ -99,7 +100,7 @@ class DeliveryRouteController extends Controller
         // ::create
 
         $ruta = DeliveryRoute::create([
-           
+
             'date_of_delivery' => $request->date_of_delivery,
             'user_chofer_id' => $request->user_chofer_id,
             'type_of_product' => $request->type_of_product,
@@ -238,10 +239,10 @@ class DeliveryRouteController extends Controller
         $deliveryRoute->is_active = false;
         $deliveryRoute->save();
         return response()->json('Ruta eliminada correctamente!');
-        
     }
 
-    public function setRemisiones(Request $request){
+    public function setRemisiones(Request $request)
+    {
 
 
 
@@ -278,9 +279,10 @@ class DeliveryRouteController extends Controller
             'signature_received' => $request->signature_received,
             'delivery_route_id' => $request->delivery_route_id,
             'user_chofer_id' => $request->user_chofer_id,
-            'status' => 1,2,
-          
-          
+            'status'=> 1,2
+
+
+
         ]);
         //crear los productos de esa remision de entrega
         //  $remision->productsDeliveryRoute()->create
@@ -288,23 +290,37 @@ class DeliveryRouteController extends Controller
         foreach ($request->product_remission as $product) {
             $product = (object)$product;
 
-             $remision->productRemission()->create([
+            $remision->productRemission()->create([
                 'remission_id' => $product->remission_id,
                 'delivered_quantity' => $product->delivered_quantity,
-                
+
             ]);
+        }
+
+        return response()->json('Remision creada exitosamente', Response::HTTP_CREATED);
     }
 
-    return response()->json('Remision creada exitosamente', Response::HTTP_CREATED);
-}
-public function viewRemision(){
-$remision = Remission::all();
-return response()->json([
-    "rutas_de_entrega" => $remision,
-    "mensaje" => "OK",
-    "display_message" => "Acceso de remisiones correcto",
+    public function viewRemision()
+    {
+        $remision = Remission::all();
+        return response()->json([
+            "remisiones" => $remision,
+            "mensaje" => "OK",
+            "display_message" => "Acceso de remisiones correcto",
 
-], 200);
-}
+        ], 200);
+    }
+    public function showRemision($id)
+    {
+        $remision = Remission::find($id);
+        $remision->productRemission;
+        return json_encode($remision);
+    }
 
+    public function cancelRemision($id){
+        $id->status = 1;
+        $id->save();
+        return response()->json('Remision eliminada correctamente!');
 }
+    }
+
