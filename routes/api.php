@@ -95,4 +95,8 @@ Route::get('rutas-de-entrega/{ruta}/', [ProductRouteController::class, 'products
 
 // Crear una remision 
 Route::post('remision/setRemisiones', [DeliveryRouteController::class, 'setRemisiones']);
+// Ver remision 
+Route::get('remision/viewRemision', [DeliveryRouteController::class, 'viewRemision']);
+//show remision con productos
+Route::get('remision/showRemision', [DeliveryRouteController::class, 'showRemision']);
 

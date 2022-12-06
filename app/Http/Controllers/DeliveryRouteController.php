@@ -297,4 +297,14 @@ class DeliveryRouteController extends Controller
 
     return response()->json('Remision creada exitosamente', Response::HTTP_CREATED);
 }
+public function viewRemision(){
+$remision = Remission::all();
+return response()->json([
+    "rutas_de_entrega" => $remision,
+    "mensaje" => "OK",
+    "display_message" => "Acceso de remisiones correcto",
+
+], 200);
+}
+
 }
