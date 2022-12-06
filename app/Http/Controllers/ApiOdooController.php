@@ -35,7 +35,6 @@ class ApiOdooController extends Controller
                     'sale.commercial.name' => 'required',
                     'sale.commercial.email' => 'required',
                     'sale.client.name' => 'required',
-                    'sale.client.address' => 'required',
                     'sale.client.contact' => 'required',
                     'sale.other_information.delivery_policy' => 'required',
                     'sale.other_information.schedule_change' => 'required',
@@ -100,7 +99,6 @@ class ApiOdooController extends Controller
                 $effective_date = Carbon::parse($requestData->other_information['effective_date']);
                 $dataAdditionalInfo =  [
                     'client_name' => $requestData->client['name'],
-                    'client_address' => $requestData->client['address'],
                     'client_contact' => $requestData->client['contact'],
                     'warehouse_company' => $requestData->other_information['warehouse_company'],
                     'warehouse_address' => $requestData->other_information['warehouse_address'],

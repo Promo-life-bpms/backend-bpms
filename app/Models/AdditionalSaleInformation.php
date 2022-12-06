@@ -12,7 +12,6 @@ class AdditionalSaleInformation extends Model
     protected $fillable = [
         'sale_id',
         'client_name',
-        'client_address',
         'client_contact',
         'warehouse_company',
         'warehouse_address',

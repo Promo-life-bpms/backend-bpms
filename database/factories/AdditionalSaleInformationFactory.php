@@ -16,7 +16,6 @@ class AdditionalSaleInformationFactory extends Factory
         $companyWareHouse = ['PROMO LIFE', "BH TRADEMARKET"];
         return [
             'client_name' => $this->faker->company(),
-            'client_address' => $this->faker->address(),
             'client_contact' => $this->faker->name(),
             'warehouse_company' => $companyWareHouse[round(0, 1)],
             'warehouse_address' => $this->faker->address(),
