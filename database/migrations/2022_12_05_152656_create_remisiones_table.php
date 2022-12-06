@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-
-class CreateDeliveryRoutesTable extends Migration
+class CreateRemisionesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,12 +13,16 @@ class CreateDeliveryRoutesTable extends Migration
      */
     public function up()
     {
-        Schema::create('delivery_routes', function (Blueprint $table) {
+        Schema::create('remisiones', function (Blueprint $table) {
             $table->id();
-            $table->boolean('is_active')->default(1)->nullable();
-            $table->date('date_of_delivery');
+            $table->string('comments');
+            $table->string('satisfaction');
+            $table->string('delivered');
+            $table->text('delivery_signature');
+            $table->string('received');
+            $table->text('signature_received');
+            $table->foreignId('delivery_route_id')->reference('id')->on('delivery_routes');
             $table->foreignId('user_chofer_id')->reference('id')->on('users');
-            $table->string('type_of_product');
             $table->string('status');
             $table->timestamps();
         });
@@ -32,6 +35,6 @@ class CreateDeliveryRoutesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('delivery_routes');
+        Schema::dropIfExists('remisiones');
     }
 }
