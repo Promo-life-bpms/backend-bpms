@@ -49,6 +49,7 @@ class SaleController extends Controller
             'saleProducts',
             'moreInformation',
             'orders',
+            'routeDeliveries'
             // 'inspecciones',
             // TODO: 'incidencias'
         ])->where('code_sale', $sale_id)->first();

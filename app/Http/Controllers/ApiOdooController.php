@@ -60,74 +60,11 @@ class ApiOdooController extends Controller
                     'sale.products.*.unit_price' => 'required|numeric',
                     'sale.products.*.subtotal' => 'required|numeric',
                     'sale.total' => 'required|numeric',
-                    'sale.purchases' => 'required|array|bail',
-                    'sale.purchases.*.code_sale' => 'required',
-                    'sale.purchases.*.type_purchase' => 'required',
-                    'sale.purchases.*.sequence' => 'required',
-                    'sale.purchases.*.company' => 'required',
-                    'sale.purchases.*.code_purchase' => 'required',
-                    'sale.purchases.*.order_date' => 'required|date:d-m-Y h:i:s',
-                    'sale.purchases.*.provider_address' => 'required',
-                    'sale.purchases.*.provider_name' => 'required',
-                    'sale.purchases.*.supplier_representative' => 'required',
-                    'sale.purchases.*.total' => 'required|numeric',
-                    'sale.purchases.*.status' => 'required',
-                    'sale.purchases.*.products' => 'required|array|bail',
-                    'sale.purchases.*.products.*.odoo_product_id' => 'required',
-                    'sale.purchases.*.products.*.product' => 'required',
-                    'sale.purchases.*.products.*.description' => 'required',
-                    'sale.purchases.*.products.*.planned_date' => 'required|date:d-m-Y h:i:s',
-                    'sale.purchases.*.products.*.company' => 'required',
-                    'sale.purchases.*.products.*.quantity' => 'required|numeric',
-                    'sale.purchases.*.products.*.quantity_delivered' => 'required|numeric',
-                    'sale.purchases.*.products.*.quantity_invoiced' => 'required|numeric',
-                    'sale.purchases.*.products.*.unit_price' => 'required|numeric',
-                    'sale.purchases.*.products.*.subtotal' => 'required|numeric',
-                    'sale.purchases.*.receptions' => 'required|array|bail',
-                    'sale.purchases.*.receptions.*.code_reception' => 'required',
-                    'sale.purchases.*.receptions.*.company' => 'required',
-                    'sale.purchases.*.receptions.*.type_operation' => 'required',
-                    'sale.purchases.*.receptions.*.planned_date' => 'required|date:d-m-Y h:i:s',
-                    'sale.purchases.*.receptions.*.effective_date' => 'required|date:d-m-Y h:i:s',
-                    'sale.purchases.*.receptions.*.operations' => 'required|array|bail',
-                    'sale.purchases.*.receptions.*.operations.*.code_reception' => 'required',
-                    'sale.purchases.*.receptions.*.operations.*.odoo_product_id' => 'required',
-                    'sale.purchases.*.receptions.*.operations.*.product' => 'required',
-                    'sale.purchases.*.receptions.*.operations.*.initial_demand' => 'required|numeric',
-                    'sale.purchases.*.receptions.*.operations.*.done' => 'required|numeric',
-                    'sale.incidences' => 'required|array|bail',
-                    'sale.incidences.*.code_incidence' => 'required',
-                    'sale.incidences.*.code_sale' => 'required',
-                    'sale.incidences.*.client' => 'required',
-                    'sale.incidences.*.requested_by' => 'required',
-                    'sale.incidences.*.description' => 'required',
-                    'sale.incidences.*.date_request' => 'required',
-                    'sale.incidences.*.company' => 'required',
-                    'sale.incidences.*.products' => 'required|array',
-                    'sale.incidences.*.products.*.code_incidence' => 'required',
-                    'sale.incidences.*.products.*.request' => 'required',
-                    'sale.incidences.*.products.*.notes' => 'required',
-                    'sale.incidences.*.products.*.product' => 'required',
-                    'sale.incidences.*.products.*.quantity' => 'required|numeric',
-                    'sale.incidences.*.products.*.cost' => 'required|numeric',
-                    'sale.deliveries' => 'required|array|bail',
-                    'sale.deliveries.*.code_delivery' => 'required',
-                    'sale.deliveries.*.company' => 'required',
-                    'sale.deliveries.*.type_operation' => 'required',
-                    'sale.deliveries.*.planned_date' => 'required|date:d-m-Y h:i:s',
-                    'sale.deliveries.*.effective_date' => 'required|date:d-m-Y h:i:s',
-                    'sale.deliveries.*.operations' => 'required|array|bail',
-                    'sale.deliveries.*.operations.*.code_delivery' => 'required',
-                    'sale.deliveries.*.operations.*.odoo_product_id' => 'required',
-                    'sale.deliveries.*.operations.*.product' => 'required',
-                    'sale.deliveries.*.operations.*.initial_demand' => 'required|numeric',
-                    'sale.deliveries.*.operations.*.done' => 'required|numeric',
                 ]);
 
                 if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
                 }
-
                 // Obtener el pedido
                 $requestData = (object) $request->sale;
 
@@ -233,58 +170,129 @@ class ApiOdooController extends Controller
         try {
             if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
                 $validator = Validator::make($request->all(), [
-                    'purchase' => 'bail|required|array',
-                    'purchase.code_order' => 'required',
-                    'purchase.code_sale' => 'required',
-                    'purchase.provider.name' => 'required',
-                    'purchase.provider.representante' => 'required',
-                    'purchase.sequence' => 'required',
-                    'purchase.order_date' => 'required|date',
-                    'purchase.planned_date' => 'required|date',
-                    'purchase.deliver_in' => 'required',
-                    'purchase.products' => 'required|array',
-                    'purchase.products.*.product' => 'required',
-                    'purchase.products.*.description' => 'required',
-                    'purchase.products.*.planned_date' => 'required|date',
-                    'purchase.products.*.quantity' => 'required|numeric'
+                    'purchase' => 'required|array|bail',
+                    'purchase.*.code_sale' => 'required',
+                    'purchase.*.type_purchase' => 'required',
+                    'purchase.*.sequence' => 'required',
+                    'purchase.*.company' => 'required',
+                    'purchase.*.code_purchase' => 'required',
+                    'purchase.*.order_date' => 'required|date:d-m-Y h:i:s',
+                    'purchase.*.provider_address' => 'required',
+                    'purchase.*.provider_name' => 'required',
+                    'purchase.*.supplier_representative' => 'required',
+                    'purchase.*.total' => 'required|numeric',
+                    'purchase.*.status' => 'required',
+                    'purchase.*.products' => 'required|array|bail',
+                    'purchase.*.products.*.odoo_product_id' => 'required',
+                    'purchase.*.products.*.product' => 'required',
+                    'purchase.*.products.*.description' => 'required',
+                    'purchase.*.products.*.planned_date' => 'required|date:d-m-Y h:i:s',
+                    'purchase.*.products.*.company' => 'required',
+                    'purchase.*.products.*.quantity' => 'required|numeric',
+                    'purchase.*.products.*.quantity_delivered' => 'required|numeric',
+                    'purchase.*.products.*.quantity_invoiced' => 'required|numeric',
+                    'purchase.*.products.*.unit_price' => 'required|numeric',
+                    'purchase.*.products.*.subtotal' => 'required|numeric',
                 ]);
 
                 if ($validator->fails()) {
-                    return response()->json(($validator->getMessageBag()), 201);
+                    return response()->json(($validator->getMessageBag()));
                 }
+            } else {
+                return response()->json(['message' => 'No Tienes autorizacion']);
+            }
+        } catch (Exception $th) {
+            return  response()->json(["Server Error Validate: " => $th->getMessage()], 400);
+        }
+    }
 
-                $requestData = (object) $request->purchase;
-                $planned_date = Carbon::parse($requestData->planned_date);
-                $order_date = Carbon::parse($requestData->order_date);
+    public function setReception(Request $request)
+    {
+        try {
+            if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
+                $validator = Validator::make($request->all(), [
+                    'reception' => 'required|array|bail',
+                    'reception.code_reception' => 'required',
+                    'reception.code_order' => 'required',
+                    'reception.company' => 'required',
+                    'reception.type_operation' => 'required',
+                    'reception.planned_date' => 'required|date:d-m-Y h:i:s',
+                    'reception.effective_date' => 'required|date:d-m-Y h:i:s',
+                    'reception.operations' => 'required|array|bail',
+                    'reception.operations.*.code_reception' => 'required',
+                    'reception.operations.*.odoo_product_id' => 'required',
+                    'reception.operations.*.product' => 'required',
+                    'reception.operations.*.initial_demand' => 'required|numeric',
+                    'reception.operations.*.done' => 'required|numeric',
+                ]);
 
-                $dataOrder = [
-                    'code_order' => $requestData->code_order,
-                    'code_sale' => $requestData->code_sale,
-                    'provider_name' => $requestData->provider['name'],
-                    'provider_address' => $requestData->provider['address'],
-                    'sequence' => $requestData->sequence,
-                    'order_date' => $order_date,
-                    'planned_date' => $planned_date,
-                    'deliver_in' => $requestData->deliver_in,
-                ];
-
-                $dataProducts = $requestData->products;
-                try {
-                    $orderPurchase = OrderPurchase::where("code_order", $requestData->code_order)->first();
-                    if ($orderPurchase) {
-                        $orderPurchase->update($dataOrder);
-                        foreach ($dataProducts as $product) {
-                        }
-                    } else {
-                        $orderPurchase = OrderPurchase::create($dataOrder);
-                        foreach ($dataProducts as $product) {
-                            // $product = Produc-
-                        }
-                    }
-                } catch (Exception $th) {
-                    return  response()->json(["Server Error Insert: " => $th->getMessage()], 400);
+                if ($validator->fails()) {
+                    return response()->json(($validator->getMessageBag()));
                 }
-                return response()->json(['message' => 'Actualizacion Completa', 'data' => ($request->purchase)]);
+            } else {
+                return response()->json(['message' => 'No Tienes autorizacion']);
+            }
+        } catch (Exception $th) {
+            return  response()->json(["Server Error Validate: " => $th->getMessage()], 400);
+        }
+    }
+
+    public function setIncidence(Request $request)
+    {
+        try {
+            if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
+                $validator = Validator::make($request->all(), [
+                    'incidence' => 'required|array|bail',
+                    'incidence.code_incidence' => 'required',
+                    'incidence.code_sale' => 'required',
+                    'incidence.client' => 'required',
+                    'incidence.requested_by' => 'required',
+                    'incidence.description' => 'required',
+                    'incidence.date_request' => 'required',
+                    'incidence.company' => 'required',
+                    'incidence.products' => 'required|array',
+                    'incidence.products.*.code_incidence' => 'required',
+                    'incidence.products.*.request' => 'required',
+                    'incidence.products.*.notes' => 'required',
+                    'incidence.products.*.product' => 'required',
+                    'incidence.products.*.quantity' => 'required|numeric',
+                    'incidence.products.*.cost' => 'required|numeric',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json(($validator->getMessageBag()));
+                }
+            } else {
+                return response()->json(['message' => 'No Tienes autorizacion']);
+            }
+        } catch (Exception $th) {
+            return  response()->json(["Server Error Validate: " => $th->getMessage()], 400);
+        }
+    }
+
+    public function setDelivery(Request $request)
+    {
+        try {
+            if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
+                $validator = Validator::make($request->all(), [
+                    'delivery' => 'required|array|bail',
+                    'delivery.code_delivery' => 'required',
+                    'delivery.code_sale' => 'required',
+                    'delivery.company' => 'required',
+                    'delivery.type_operation' => 'required',
+                    'delivery.planned_date' => 'required|date:d-m-Y h:i:s',
+                    'delivery.effective_date' => 'required|date:d-m-Y h:i:s',
+                    'delivery.operations' => 'required|array|bail',
+                    'delivery.operations.*.code_delivery' => 'required',
+                    'delivery.operations.*.odoo_product_id' => 'required',
+                    'delivery.operations.*.product' => 'required',
+                    'delivery.operations.*.initial_demand' => 'required|numeric',
+                    'delivery.operations.*.done' => 'required|numeric',
+                ]);
+
+                if ($validator->fails()) {
+                    return response()->json(($validator->getMessageBag()));
+                }
             } else {
                 return response()->json(['message' => 'No Tienes autorizacion']);
             }

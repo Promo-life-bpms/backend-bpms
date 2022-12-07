@@ -55,4 +55,9 @@ class Sale extends Model
     {
         return $this->hasMany(Incidencia::class, 'sale_id');
     }
+
+    public function routeDeliveries()
+    {
+        return $this->hasMany(CodeOrderDeliveryRoute::class, 'code_sale', 'code_sale');
+    }
 }
