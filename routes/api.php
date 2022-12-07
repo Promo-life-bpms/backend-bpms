@@ -22,6 +22,9 @@ use App\Http\Controllers\InspectionController;
 
 Route::post('setSale/v1', [ApiOdooController::class, 'setSale']);
 Route::post('setPurchase/v1', [ApiOdooController::class, 'setPurchase']);
+Route::post('setIncidence/v1', [ApiOdooController::class, 'setIncidence']);
+Route::post('setReception/v1', [ApiOdooController::class, 'setReception']);
+Route::post('setDelivery/v1', [ApiOdooController::class, 'setDelivery']);
 
 Route::get('users', [AuthController::class, 'allUsers']);
 Route::post('login', [AuthController::class, 'login']);
@@ -92,9 +95,9 @@ Route::delete('rutas-de-entrega/{deliveryRoute}', [DeliveryRouteController::clas
 Route::get('rutas-de-entrega/{ruta}', [ProductRouteController::class, 'productsToSchedule']);
 Route::get('rutas-de-entrega/{ruta}/', [ProductRouteController::class, 'productsToSchedule']);
 
-// Crear una remision 
+// Crear una remision
 Route::post('remision/setRemisiones', [DeliveryRouteController::class, 'setRemisiones']);
-// Ver remision 
+// Ver remision
 Route::get('remision/viewRemision', [DeliveryRouteController::class, 'viewRemision']);
 //show remision con productos
 Route::get('remision/showRemision', [DeliveryRouteController::class, 'showRemision']);
