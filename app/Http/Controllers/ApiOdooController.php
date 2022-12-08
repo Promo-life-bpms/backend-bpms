@@ -60,6 +60,7 @@ class ApiOdooController extends Controller
                     'sale.products.*.unit_price' => 'required|numeric',
                     'sale.products.*.subtotal' => 'required|numeric',
                     'sale.total' => 'required|numeric',
+                    'sale.status' => 'required',
                 ]);
 
                 if ($validator->fails()) {
@@ -225,6 +226,7 @@ class ApiOdooController extends Controller
                     'reception.operations.*.product' => 'required',
                     'reception.operations.*.initial_demand' => 'required|numeric',
                     'reception.operations.*.done' => 'required|numeric',
+                    'reception.status' => 'required',
                 ]);
 
                 if ($validator->fails()) {
@@ -258,6 +260,7 @@ class ApiOdooController extends Controller
                     'incidence.products.*.product' => 'required',
                     'incidence.products.*.quantity' => 'required|numeric',
                     'incidence.products.*.cost' => 'required|numeric',
+                    'incidence.status' => 'required',
                 ]);
 
                 if ($validator->fails()) {
@@ -289,6 +292,7 @@ class ApiOdooController extends Controller
                     'delivery.operations.*.product' => 'required',
                     'delivery.operations.*.initial_demand' => 'required|numeric',
                     'delivery.operations.*.done' => 'required|numeric',
+                    'delivery.status' => 'required',
                 ]);
 
                 if ($validator->fails()) {
