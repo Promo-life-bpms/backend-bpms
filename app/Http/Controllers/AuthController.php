@@ -69,7 +69,7 @@ class AuthController extends Controller
                 'user' => [
                     "name" => $user->name,
                     "email" => $user->email,
-                    "photo" => $user->photo
+                    "photo" => $user->photo ? env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . str_replace(' ', '%20', $user->photo) : null
                 ],
             ])->attempt($credentials)) {
                 return response()->json(['error' => 'Unauthorized'], 401);
@@ -110,7 +110,7 @@ class AuthController extends Controller
     {
         $users = User::with('whatRoles')->where('active', true)->get();
         foreach ($users as $user) {
-            $user->photo = $user->photo ? env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . $user->photo : null;
+            $user->photo = $user->photo ? env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . str_replace(' ', '%20', $user->photo) : null;
         }
         return response()->json([
             "users" => $users
