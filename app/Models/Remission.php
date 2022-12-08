@@ -12,6 +12,7 @@ class Remission extends Model
     public $table = "remisiones";
 
     protected $fillable = [
+        'code_remission',
         'comments',
         'satisfaction',
         'delivered',

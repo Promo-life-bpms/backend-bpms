@@ -15,6 +15,7 @@ class CreateRemisionesTable extends Migration
     {
         Schema::create('remisiones', function (Blueprint $table) {
             $table->id();
+            $table->string('code_remission');
             $table->string('comments');
             $table->string('satisfaction');
             $table->string('delivered');
@@ -23,7 +24,7 @@ class CreateRemisionesTable extends Migration
             $table->text('signature_received');
             $table->foreignId('delivery_route_id')->reference('id')->on('delivery_routes');
             $table->foreignId('user_chofer_id')->reference('id')->on('users');
-            $table->string('status');
+            $table->string('status')->default(1)->nullable();
             $table->timestamps();
         });
     }

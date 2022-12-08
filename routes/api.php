@@ -93,6 +93,8 @@ Route::group(['middleware' => 'auth'], function () {
 Route::post('remision/setRemisiones', [DeliveryRouteController::class, 'setRemisiones']);
 // Ver remision
 Route::get('remision/viewRemision', [DeliveryRouteController::class, 'viewRemision']);
-//show remision con productos
-Route::get('remision/showRemision', [DeliveryRouteController::class, 'showRemision']);
+//show remision por id
+Route::get('remision/showRemision/{id}', [DeliveryRouteController::class, 'showRemision']);
+//cancelar remision 
+Route::put('remision/cancelRemision/{id}', [DeliveryRouteController::class, 'cancelRemision']);
 
