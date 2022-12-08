@@ -16,7 +16,7 @@ class OrderPurchaseFactory extends Factory
         $company = ['PROMO LIFE', "BH TRADEMARKET"];
         $code = ["OC", "OT"];
         $seq = ["COMPRAS PEDIDO", "COMPRAS MAQUILA"];
-        $status =["Orden Confr","En Proceso","Entregado","Cancelado"];
+        $status =["Confirmado","En Proceso","Entregado","Cancelado"];
         return [
             'code_order' => $code[rand(0, 1)] . $this->faker->unique()->numberBetween(0, 10600),
             'provider_name' => $this->faker->company(),
