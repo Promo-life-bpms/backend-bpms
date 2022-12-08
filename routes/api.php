@@ -96,7 +96,7 @@ Route::get('rutas-de-entrega/{ruta}/', [ProductRouteController::class, 'products
 Route::post('remision/setRemisiones', [DeliveryRouteController::class, 'setRemisiones']);
 // Ver remision 
 Route::get('remision/viewRemision', [DeliveryRouteController::class, 'viewRemision']);
-//show remision con productos
+//show remision por id
 Route::get('remision/showRemision/{id}', [DeliveryRouteController::class, 'showRemision']);
 //cancelar remision 
 Route::put('remision/cancelRemision/{id}', [DeliveryRouteController::class, 'cancelRemision']);

@@ -10,9 +10,12 @@ use App\Models\ProductRemission;
 use App\Models\Remission;
 use App\Models\Role;
 use App\Models\Status;
+use Facade\FlareClient\Api;
+use Illuminate\Database\Console\DbCommand;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+
 
 
 class DeliveryRouteController extends Controller
@@ -98,9 +101,18 @@ class DeliveryRouteController extends Controller
         }
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
         // ::create
-
+        //codigo de ruta
+        $maxINSP = DeliveryRoute::max('code_route');
+        $idInsp = null;
+        if (!$maxINSP) {
+            $idInsp = 1;
+        } else {
+            $idInsp = (int) explode('-', $maxINSP)[1];
+            $idInsp++;
+        }
+        //codigo de ruta 
         $ruta = DeliveryRoute::create([
-
+            'code_route' => "RUT-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
             'date_of_delivery' => $request->date_of_delivery,
             'user_chofer_id' => $request->user_chofer_id,
             'type_of_product' => $request->type_of_product,
@@ -184,33 +196,105 @@ class DeliveryRouteController extends Controller
      */
     public function update(Request $request, DeliveryRoute $deliveryRoute, $id)
     {
+        /* 
+            Quiero que se actualize la ruta de entrega, se actualicen las ordendes existentes 
+            y la nuevas se guarden, lo mismo con los productos, y eliminar las ordendes y productos
+            que no esten en la solicitud pero si en los registros
 
-        // 
-        $ruta = DeliveryRoute::findOrFail($id); {
+            Revisar que exista la ruta de entrega
+            
+            Si no existe
+                Retornar Mensaje de No encontrado 404
+            Si existe
+                Actualiza la informacion de la ruta de entrega
 
-            $ruta->date_of_delivery = $request->date_of_delivery;
-            $ruta->user_chofer_id = $request->user_chofer_id;
-            $ruta->type_of_product = $request->type_of_product;
+                Por cada orden de compra que llega en la solicitud, revisar si existe o no
+                Si existe
+                    Entonces Actualizar la informacion de la orden de compra en ruta de entrega
+                            Por cada Producto
+                                Si existe
+                                    Actualizar la informacion de los productos
+                                Si no
+                                    Crear un producto nuevo
+                Si no
+                    Crear las ordenes de compra que no estan en la ruta de entrega
+                        guardan sus productos
+
+                Por cada orden de compra en la base de datos
+                    Si no existe en la solicitud
+                        Entonces
+                            Elimiar el registro (Elimiar sus productos relacionados)
+                    Si existe
+                        Por cada producto en esa ruta de entrega 
+                            Si no existe el produto en la solicitud
+                            Entonces
+                                Elimiar ese producto
+
+            Retornar mensaje de actualizacion completa
+
+        
+        */
+        $ruta = DeliveryRoute::findOrFail($id);
+
+        if (!$ruta) {
+            // Retornar mensaje
         }
 
+        $ruta->date_of_delivery = $request->date_of_delivery;
+        $ruta->user_chofer_id = $request->user_chofer_id;
+        $ruta->type_of_product = $request->type_of_product;
+        $ruta->save();
+
         foreach ($request->code_orders as $codeOrder) {
+
             $codeOrder = (object)$codeOrder;
 
-            $coderOrderRoute = CodeOrderDeliveryRoute::find($codeOrder->id);
+            //si trae id buscar en la BDD
+            if (CodeOrderDeliveryRoute::table('code_order_delivery_routes')->where($codeOrder->id)->exists()) {
+                // ...
+                $codeOrder->save();
+            }
 
-            $coderOrderRoute->update([
-                'code_sale' => $codeOrder->code_sale,
-                'code_order' => $codeOrder->code_order,
-                'type_of_origin' => $codeOrder->type_of_origin,
-                'delivery_address' => $codeOrder->delivery_address,
-                'type_of_destiny' => $codeOrder->type_of_destiny,
-                'destiny_address' => $codeOrder->destiny_address,
-                'hour' => $codeOrder->hour,
-                'attention_to' => $codeOrder->attention_to,
-                'action' => $codeOrder->action,
-                'num_guide' => $codeOrder->num_guide,
-                'observations' => $codeOrder->observations,
-            ]);
+            if (CodeOrderDeliveryRoute::table('code_order_delivery_routes')->where($codeOrder->id)->doesntExist()) {
+                // ...
+                $codeOrder = CodeOrderDeliveryRoute::create('id');
+            }
+            // si no crear uno nuevo 
+
+
+            $codeOrderRoute = CodeOrderDeliveryRoute::find($codeOrder->id)->first();
+
+            if ($codeOrderRoute == null) {
+                return $codeOrderRoute;
+                $newcodeOrderRoute = $ruta->codeDeliveryRoute()->create([
+                    'code_sale' => $codeOrder->code_sale,
+                    'code_order' => $codeOrder->code_order,
+                    'type_of_origin' => $codeOrder->type_of_origin,
+                    'delivery_address' => $codeOrder->delivery_address,
+                    'type_of_destiny' => $codeOrder->type_of_destiny,
+                    'destiny_address' => $codeOrder->destiny_address,
+                    'hour' => $codeOrder->hour,
+                    'attention_to' => $codeOrder->attention_to,
+                    'action' => $codeOrder->action,
+                    'num_guide' => $codeOrder->num_guide,
+                    'observations' => $codeOrder->observations,
+
+                ]);
+            } else {
+                $codeOrderRoute->update([
+                    'code_sale' => $codeOrder->code_sale,
+                    'code_order' => $codeOrder->code_order,
+                    'type_of_origin' => $codeOrder->type_of_origin,
+                    'delivery_address' => $codeOrder->delivery_address,
+                    'type_of_destiny' => $codeOrder->type_of_destiny,
+                    'destiny_address' => $codeOrder->destiny_address,
+                    'hour' => $codeOrder->hour,
+                    'attention_to' => $codeOrder->attention_to,
+                    'action' => $codeOrder->action,
+                    'num_guide' => $codeOrder->num_guide,
+                    'observations' => $codeOrder->observations,
+                ]);
+            }
 
             foreach ($codeOrder->products as $product) {
                 $product = (object)$product;
@@ -225,9 +309,6 @@ class DeliveryRouteController extends Controller
         }
         return response()->json('Ruta actualizada correctamente!');
     }
-
-
-
     /**
      * Remove the specified resource from storage.
      *
@@ -269,8 +350,19 @@ class DeliveryRouteController extends Controller
         }
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
         // ::create
+        //crear codigo de remision
+        $maxINC = Remission::max('code_remission');
+        $idinc = null;
+        if (!$maxINC) {
+            $idinc = 1;
+        } else {
+            $idinc = (int) explode('-', $maxINC)[1];
+            $idinc++;
+        }
+
 
         $remision = Remission::create([
+            'code_remission' => "RUT-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
             'comments' => $request->comments,
             'satisfaction' => $request->satisfaction,
             'delivered' => $request->delivered,
@@ -279,10 +371,7 @@ class DeliveryRouteController extends Controller
             'signature_received' => $request->signature_received,
             'delivery_route_id' => $request->delivery_route_id,
             'user_chofer_id' => $request->user_chofer_id,
-            'status'=> 1,2
-
-
-
+            'status' => 1
         ]);
         //crear los productos de esa remision de entrega
         //  $remision->productsDeliveryRoute()->create
@@ -302,7 +391,7 @@ class DeliveryRouteController extends Controller
 
     public function viewRemision()
     {
-        $remision = Remission::all();
+        $remision = Remission::where("status", 1)->get();
         return response()->json([
             "remisiones" => $remision,
             "mensaje" => "OK",
@@ -310,6 +399,7 @@ class DeliveryRouteController extends Controller
 
         ], 200);
     }
+
     public function showRemision($id)
     {
         $remision = Remission::find($id);
@@ -317,10 +407,18 @@ class DeliveryRouteController extends Controller
         return json_encode($remision);
     }
 
-    public function cancelRemision($id){
-        $id->status = 1;
-        $id->save();
-        return response()->json('Remision eliminada correctamente!');
-}
-    }
+    public function cancelRemision($id)
+    {
+        // Encontrar la remision por ID
+        $remision = Remission::where("id", $id)->first();
+        if (!$remision) {
+            return response()->json(["msg" => "No encontrado"], 404);
+        }
+        // Revisar si no esta cancelado
 
+        // Marcar como cancelada la remision
+        $remision->status = 2;
+        $remision->save();
+        return response()->json(["msg" => "Remision cancelada"], 200);
+    }
+}
