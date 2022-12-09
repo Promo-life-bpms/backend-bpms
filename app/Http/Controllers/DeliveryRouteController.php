@@ -194,7 +194,7 @@ class DeliveryRouteController extends Controller
      * @param  \App\Models\DeliveryRoute  $deliveryRoute
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, DeliveryRoute $deliveryRoute, $id)
+    public function update(Request $request,  $id)
     {
         /* 
             Quiero que se actualize la ruta de entrega, se actualicen las ordendes existentes 
@@ -234,79 +234,94 @@ class DeliveryRouteController extends Controller
 
         
         */
-        $ruta = DeliveryRoute::findOrFail($id);
+        $ruta = DeliveryRoute::find($id);
 
         if (!$ruta) {
             // Retornar mensaje
+            return response()->json([
+                'msg' => "ruta no encontrada"
+            ], 404);
         }
-
         $ruta->date_of_delivery = $request->date_of_delivery;
         $ruta->user_chofer_id = $request->user_chofer_id;
         $ruta->type_of_product = $request->type_of_product;
         $ruta->save();
 
+
         foreach ($request->code_orders as $codeOrder) {
 
-            $codeOrder = (object)$codeOrder;
-
-            //si trae id buscar en la BDD
-            if (CodeOrderDeliveryRoute::table('code_order_delivery_routes')->where($codeOrder->id)->exists()) {
-                // ...
-                $codeOrder->save();
+            $codeOrderRequest = (object) $codeOrder;
+            
+            $codeOrderDB = CodeOrderDeliveryRoute::find($codeOrderRequest->code_sale);
+            
+            if ($codeOrderDB) {
+                $codeOrderDB->code_sale = $codeOrderRequest->code_sale;
+                $codeOrderDB->code_order = $codeOrderRequest->code_order;
+                $codeOrderDB->type_of_origin = $codeOrderRequest->type_of_origin;
+                $codeOrderDB->delivery_address = $codeOrderRequest->delivery_address;
+                $codeOrderDB->type_of_destiny = $codeOrderRequest->type_of_destiny;
+                $codeOrderDB->destiny_address = $codeOrderRequest->destiny_address;
+                $codeOrderDB->hour = $codeOrderRequest->hour;
+                $codeOrderDB->attention_to = $codeOrderRequest->attention_to;
+                $codeOrderDB->action = $codeOrderRequest->action;
+                $codeOrderDB->num_guide = $codeOrderRequest->num_guide;
+                $codeOrderDB->observations = $codeOrderRequest->observations;
+                $codeOrderDB->save();
+                
+                foreach ($codeOrderRequest->products as $product) {
+                    $productRequest = (object)$product;
+                    // $productsDB = $codeOrderDB->productDeliveryRoute;
+                    ProductDeliveryRoute::updateOrCreate(
+                        ['code_order_route_id' => $codeOrderDB->id, "product" => $productRequest->product],
+                        ['amount' => $productRequest->amount]
+                    );
+                }
             }
 
-            if (CodeOrderDeliveryRoute::table('code_order_delivery_routes')->where($codeOrder->id)->doesntExist()) {
-                // ...
-                $codeOrder = CodeOrderDeliveryRoute::create('id');
-            }
-            // si no crear uno nuevo 
-
-
-            $codeOrderRoute = CodeOrderDeliveryRoute::find($codeOrder->id)->first();
-
-            if ($codeOrderRoute == null) {
-                return $codeOrderRoute;
-                $newcodeOrderRoute = $ruta->codeDeliveryRoute()->create([
-                    'code_sale' => $codeOrder->code_sale,
-                    'code_order' => $codeOrder->code_order,
-                    'type_of_origin' => $codeOrder->type_of_origin,
-                    'delivery_address' => $codeOrder->delivery_address,
-                    'type_of_destiny' => $codeOrder->type_of_destiny,
-                    'destiny_address' => $codeOrder->destiny_address,
-                    'hour' => $codeOrder->hour,
-                    'attention_to' => $codeOrder->attention_to,
-                    'action' => $codeOrder->action,
-                    'num_guide' => $codeOrder->num_guide,
-                    'observations' => $codeOrder->observations,
-
+            if (!$codeOrderDB) {
+                $ruta->codeDeliveryRoute()->create([
+                    'code_sale' => $codeOrderRequest->code_sale,
+                    'code_order' => $codeOrderRequest->code_order,
+                    'type_of_origin' => $codeOrderRequest->type_of_origin,
+                    'delivery_address' => $codeOrderRequest->delivery_address,
+                    'type_of_destiny' => $codeOrderRequest->type_of_destiny,
+                    'destiny_address' => $codeOrderRequest->destiny_address,
+                    'hour' => $codeOrderRequest->hour,
+                    'attention_to' => $codeOrderRequest->attention_to,
+                    'action' => $codeOrderRequest->action,
+                    'num_guide' => $codeOrderRequest->num_guide,
+                    'observations' => $codeOrderRequest->observations,
                 ]);
-            } else {
-                $codeOrderRoute->update([
-                    'code_sale' => $codeOrder->code_sale,
-                    'code_order' => $codeOrder->code_order,
-                    'type_of_origin' => $codeOrder->type_of_origin,
-                    'delivery_address' => $codeOrder->delivery_address,
-                    'type_of_destiny' => $codeOrder->type_of_destiny,
-                    'destiny_address' => $codeOrder->destiny_address,
-                    'hour' => $codeOrder->hour,
-                    'attention_to' => $codeOrder->attention_to,
-                    'action' => $codeOrder->action,
-                    'num_guide' => $codeOrder->num_guide,
-                    'observations' => $codeOrder->observations,
-                ]);
-            }
 
-            foreach ($codeOrder->products as $product) {
-                $product = (object)$product;
-
-                $codeOrderRoute = ProductDeliveryRoute::find($product->id);
-
-                $codeOrderRoute->update([
-                    'product' => $product->product,
-                    'amount' => $product->amount,
-                ]);
+                //$product->save();
             }
         }
+        foreach ($ruta->codeDeliveryRoute as $codeOrderDB) {
+
+            $existeEnElRequest = false;
+            
+            foreach ($request->code_orders as $codeOrderRequest) {
+                $codeOrderRequest = (object)$codeOrderRequest;
+                if ($codeOrderDB->id == $codeOrderRequest->id) {
+                    $existeEnElRequest = true;
+                }
+            }
+            
+            if($existeEnElRequest == false){
+                $codeOrderDB->delete();
+            }
+        }
+        /* if (!$codeOrder) {
+            $codeOrder = CodeOrderDeliveryRoute::find($id);
+            $codeOrder->delete();
+        } {
+            foreach ($codeOrder->products as $product) {
+                if (!$product) {
+                    $product = ProductDeliveryRoute::find($id);
+                    $product->delete();
+                }
+            }
+        } */
         return response()->json('Ruta actualizada correctamente!');
     }
     /**
