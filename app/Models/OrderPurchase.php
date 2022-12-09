@@ -12,16 +12,24 @@ class OrderPurchase extends Model
         'code_order',
         'code_sale',
         'provider_name',
+        'provider_address',
+        'supplier_representative',
         'sequence',
         'order_date',
         'planned_date',
-        'deliver_in',
         'company',
-        'status'
+        'status',
+        'type_purchase',
+        'total'
     ];
 
     public function sale()
     {
         return $this->belongsTo(Sale::class, "code_sale", "code_sale");
+    }
+
+    public function products()
+    {
+        return $this->hasMany(OrderPurchaseProduct::class);
     }
 }

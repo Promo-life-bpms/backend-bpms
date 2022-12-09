@@ -13,8 +13,13 @@ class OrderPurchaseProduct extends Model
         "odoo_product_id",
         "product",
         "description",
-        "quantity_ordered",
+        "planned_date",
+        "company",
+        "quantity",
+        "quantity_invoiced",
         "quantity_delivered",
+        "unit_price",
+        "subtotal",
     ];
 
     public function orderPurchase()
