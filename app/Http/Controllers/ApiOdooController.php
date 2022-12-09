@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Delivery;
+use App\Models\Incidence;
 use App\Models\OrderPurchase;
+use App\Models\Reception;
 use App\Models\Sale;
 use Carbon\Carbon;
 use Exception;
@@ -273,9 +276,9 @@ class ApiOdooController extends Controller
                             $productDB->delete();
                         }
                     }
-                }
-                if (count($errors) > 0) {
-                    return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
+                    if (count($errors) > 0) {
+                        return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
+                    }
                 }
                 return response()->json(['message' => 'Actualizacion Completa'], 200);
             } else {
@@ -310,6 +313,63 @@ class ApiOdooController extends Controller
                 if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
                 }
+
+                $reception = (object)$request->reception;
+                $dataReception = [
+                    'code_reception' => $reception->code_reception,
+                    'code_order' => $reception->code_order,
+                    'company' => $reception->company,
+                    'type_operation' => $reception->type_operation,
+                    'planned_date' => $reception->planned_date,
+                    'effective_date' => $reception->effective_date,
+                    'status' => $reception->status,
+                ];
+                $receptionDB = null;
+                try {
+                    $receptionDB = Reception::updateOrCreate(['code_reception' => $reception->code_reception], $dataReception);
+                } catch (Exception $th) {
+                    return response()->json(['message' => 'Error al crear la orden de compra', 'error' => $th->getMessage()], 400);
+                }
+
+                if ($receptionDB) {
+                    $errors = [];
+                    foreach ($reception->operations as $productRequest) {
+                        $productRequest = (object)$productRequest;
+                        $dataProduct =  [
+                            "odoo_product_id" => $productRequest->odoo_product_id,
+                            "product" => $productRequest->product,
+                            "code_reception" => $productRequest->code_reception,
+                            "initial_demand" => $productRequest->initial_demand,
+                            "done" => $productRequest->done,
+                        ];
+                        try {
+                            $receptionDB->productsReception()->updateOrCreate(
+                                [
+                                    "odoo_product_id" => $productRequest->odoo_product_id,
+                                    'reception_id' => $receptionDB->id
+                                ],
+                                $dataProduct
+                            );
+                        } catch (Exception $th) {
+                            array_push($errors, ['msg' => "Error al insertar el producto", 'error' => $th->getMessage()]);
+                        }
+                    }
+                    foreach ($receptionDB->productsReception as $productDB) {
+                        $existProduct = false;
+                        foreach ($reception->operations as $productRQ) {
+                            if ($productDB->odoo_product_id == $productRQ['odoo_product_id']) {
+                                $existProduct = true;
+                            }
+                        }
+                        if (!$existProduct) {
+                            $productDB->delete();
+                        }
+                    }
+                    if (count($errors) > 0) {
+                        return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
+                    }
+                }
+                return response()->json(['message' => 'Actualizacion Completa'], 200);
             } else {
                 return response()->json(['message' => 'No Tienes autorizacion']);
             }
@@ -344,6 +404,64 @@ class ApiOdooController extends Controller
                 if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
                 }
+
+                /*                 $incidence = (object)$request->incidence;
+                $dataIncidence = [
+                    'code_incidence' => $incidence->code_incidence,
+                    'code_sale' => $incidence->code_sale,
+                    'client' => $incidence->client,
+                    'requested_by' => $incidence->requested_by,
+                    'description' => $incidence->description,
+                    'date_request' => $incidence->date_request,
+                    'company' => $incidence->company,
+                    'status' => $incidence->status,
+                ];
+                $receptionDB = null;
+                try {
+                    $receptionDB = Incidence::updateOrCreate(['code_incidence' => $incidence->code_incidence], $dataIncidence);
+                } catch (Exception $th) {
+                    return response()->json(['message' => 'Error al crear la orden de compra', 'error' => $th->getMessage()], 400);
+                }
+
+                if ($receptionDB) {
+                    $errors = [];
+                    foreach ($reception->operations as $productRequest) {
+                        $productRequest = (object)$productRequest;
+                        $dataProduct =  [
+                            "odoo_product_id" => $productRequest->odoo_product_id,
+                            "product" => $productRequest->product,
+                            "code_reception" => $productRequest->code_reception,
+                            "initial_demand" => $productRequest->initial_demand,
+                            "done" => $productRequest->done,
+                        ];
+                        try {
+                            $receptionDB->productsReception()->updateOrCreate(
+                                [
+                                    "odoo_product_id" => $productRequest->odoo_product_id,
+                                    'reception_id' => $receptionDB->id
+                                ],
+                                $dataProduct
+                            );
+                        } catch (Exception $th) {
+                            array_push($errors, ['msg' => "Error al insertar el producto", 'error' => $th->getMessage()]);
+                        }
+                    }
+                    foreach ($receptionDB->productsReception as $productDB) {
+                        $existProduct = false;
+                        foreach ($reception->operations as $productRQ) {
+                            if ($productDB->odoo_product_id == $productRQ['odoo_product_id']) {
+                                $existProduct = true;
+                            }
+                        }
+                        if (!$existProduct) {
+                            $productDB->delete();
+                        }
+                    }
+                    if (count($errors) > 0) {
+                        return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
+                    }
+                }
+                return response()->json(['message' => 'Actualizacion Completa'], 200); */
             } else {
                 return response()->json(['message' => 'No Tienes autorizacion']);
             }
@@ -375,6 +493,62 @@ class ApiOdooController extends Controller
 
                 if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
+                }
+                $delivery = (object)$request->delivery;
+                $dataDelivery = [
+                    'code_delivery' => $delivery->code_delivery,
+                    'code_sale' => $delivery->code_sale,
+                    'company' => $delivery->company,
+                    'type_operation' => $delivery->type_operation,
+                    'planned_date' => $delivery->planned_date,
+                    'effective_date' => $delivery->effective_date,
+                    'status' => $delivery->status,
+                ];
+                $deliveryDB = null;
+                try {
+                    $deliveryDB = Delivery::updateOrCreate(['code_delivery' => $delivery->code_delivery], $dataDelivery);
+                } catch (Exception $th) {
+                    return response()->json(['message' => 'Error al crear la orden de compra', 'error' => $th->getMessage()], 400);
+                }
+
+                if ($deliveryDB) {
+                    $errors = [];
+                    foreach ($delivery->operations as $productRequest) {
+                        $productRequest = (object)$productRequest;
+                        $dataProduct =  [
+                            "odoo_product_id" => $productRequest->odoo_product_id,
+                            "product" => $productRequest->product,
+                            "code_delivery" => $productRequest->code_delivery,
+                            "initial_demand" => $productRequest->initial_demand,
+                            "done" => $productRequest->done,
+                        ];
+                        try {
+                            $deliveryDB->productsDelivery()->updateOrCreate(
+                                [
+                                    "odoo_product_id" => $productRequest->odoo_product_id,
+                                    'delivery_id' => $deliveryDB->id
+                                ],
+                                $dataProduct
+                            );
+                        } catch (Exception $th) {
+                            array_push($errors, ['msg' => "Error al insertar el producto", 'error' => $th->getMessage()]);
+                        }
+                    }
+                    foreach ($deliveryDB->productsdelivery as $productDB) {
+                        $existProduct = false;
+                        foreach ($delivery->operations as $productRQ) {
+                            if ($productDB->odoo_product_id == $productRQ['odoo_product_id']) {
+                                $existProduct = true;
+                            }
+                        }
+                        if (!$existProduct) {
+                            $productDB->delete();
+                        }
+                    }
+                    if (count($errors) > 0) {
+                        return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
+                    }
+                    return response()->json(['message' => 'Actualizacion Completa'], 200);
                 }
             } else {
                 return response()->json(['message' => 'No Tienes autorizacion']);
