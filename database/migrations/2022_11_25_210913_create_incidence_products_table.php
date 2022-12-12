@@ -15,17 +15,21 @@ class CreateIncidenceProductsTable extends Migration
     {
         Schema::create('incidence_products', function (Blueprint $table) {
             $table->id();
-            $table->string('cantidad_seleccionada');
-            $table->foreignId('id_order_purchase_products')
-            ->nullable()
-            ->constrained('order_purchase_products')
-            ->cascadeOnUpdate()
-            ->nullOnDelete();
-            $table->foreignId('id_incidence')
-            ->nullable()
-            ->constrained('incidences')
-            ->cascadeOnUpdate()
-            ->nullOnDelete();
+            $table->integer('quantity_selected');
+            $table->string('request')->nullable();
+            $table->text('notes')->nullable();
+            $table->text('product')->nullable();
+            $table->double('cost', 10, 2)->nullable();
+            $table->foreignId('order_purchase_product_id')
+                ->nullable()
+                ->constrained('order_purchase_products')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+            $table->foreignId('incidence_id')
+                ->nullable()
+                ->constrained('incidences')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
             $table->timestamps();
         });
     }

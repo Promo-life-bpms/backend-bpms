@@ -37,12 +37,11 @@ class Incidence extends Model
         'signature_elaborated',
         'reviewed',
         'signature_reviewed',
-        'general_comments',
         "sale_id"
     ];
 
-    public function incidenciaProducto()
+    public function productsIncidence()
     {
-        return $this->hasMany(IncidenceProduct::class, "id_incidence");
+        return $this->hasMany(IncidenceProduct::class, "incidence_id");
     }
 }
