@@ -19,8 +19,13 @@ class CreateOrderPurchaseProductsTable extends Migration
             $table->string("odoo_product_id", 20);
             $table->string("product");
             $table->text("description");
-            $table->integer("quantity_ordered");
+            $table->dateTime("planned_date")->nullable();
+            $table->string("company");
+            $table->integer("quantity");
+            $table->integer("quantity_invoiced");
             $table->integer("quantity_delivered");
+            $table->decimal("unit_price", 10, 2);
+            $table->decimal("subtotal", 10, 2);
             $table->timestamps();
         });
     }

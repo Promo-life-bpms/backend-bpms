@@ -17,13 +17,16 @@ class CreateOrderPurchasesTable extends Migration
             $table->id();
             $table->string('code_order', 20);
             $table->string('code_sale', 20);
-            $table->string('provider_name');
+            $table->text('provider_name');
+            $table->text('provider_address');
+            $table->text('supplier_representative');
             $table->string('sequence', 20);
-            $table->dateTime('order_date');
-            $table->dateTime('planned_date');
-            $table->text('deliver_in');
+            $table->dateTime('order_date')->nullable();
+            $table->dateTime('planned_date')->nullable();
             $table->string('company');
             $table->string("status");
+            $table->string("type_purchase");
+            $table->decimal("total", 10, 2);
             $table->timestamps();
         });
     }
