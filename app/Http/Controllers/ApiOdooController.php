@@ -405,7 +405,7 @@ class ApiOdooController extends Controller
                     return response()->json(($validator->getMessageBag()));
                 }
 
-                /*                 $incidence = (object)$request->incidence;
+                $incidence = (object)$request->incidence;
                 $dataIncidence = [
                     'code_incidence' => $incidence->code_incidence,
                     'code_sale' => $incidence->code_sale,
@@ -416,29 +416,30 @@ class ApiOdooController extends Controller
                     'company' => $incidence->company,
                     'status' => $incidence->status,
                 ];
-                $receptionDB = null;
+                $incidenceDB = null;
                 try {
-                    $receptionDB = Incidence::updateOrCreate(['code_incidence' => $incidence->code_incidence], $dataIncidence);
+                    $incidenceDB = Incidence::updateOrCreate(['code_incidence' => $incidence->code_incidence], $dataIncidence);
                 } catch (Exception $th) {
                     return response()->json(['message' => 'Error al crear la orden de compra', 'error' => $th->getMessage()], 400);
                 }
 
-                if ($receptionDB) {
+                if ($incidenceDB) {
                     $errors = [];
-                    foreach ($reception->operations as $productRequest) {
+                    foreach ($incidence->products as $productRequest) {
                         $productRequest = (object)$productRequest;
                         $dataProduct =  [
-                            "odoo_product_id" => $productRequest->odoo_product_id,
+                            "code_incidence" => $productRequest->code_incidence,
+                            "request" => $productRequest->request,
+                            "notes" => $productRequest->notes,
                             "product" => $productRequest->product,
-                            "code_reception" => $productRequest->code_reception,
-                            "initial_demand" => $productRequest->initial_demand,
-                            "done" => $productRequest->done,
+                            "quantity_selected" => $productRequest->quantity,
+                            "cost" => $productRequest->cost,
                         ];
                         try {
-                            $receptionDB->productsReception()->updateOrCreate(
+                            $incidenceDB->productsIncidence()->updateOrCreate(
                                 [
-                                    "odoo_product_id" => $productRequest->odoo_product_id,
-                                    'reception_id' => $receptionDB->id
+                                    "product" => $productRequest->product,
+                                    'incidence_id' => $incidenceDB->id
                                 ],
                                 $dataProduct
                             );
@@ -446,9 +447,10 @@ class ApiOdooController extends Controller
                             array_push($errors, ['msg' => "Error al insertar el producto", 'error' => $th->getMessage()]);
                         }
                     }
-                    foreach ($receptionDB->productsReception as $productDB) {
+
+                    /* foreach ($incidenceDB->productsIncidence as $productDB) {
                         $existProduct = false;
-                        foreach ($reception->operations as $productRQ) {
+                        foreach ($incidence->products as $productRQ) {
                             if ($productDB->odoo_product_id == $productRQ['odoo_product_id']) {
                                 $existProduct = true;
                             }
@@ -456,12 +458,12 @@ class ApiOdooController extends Controller
                         if (!$existProduct) {
                             $productDB->delete();
                         }
-                    }
+                    } */
                     if (count($errors) > 0) {
                         return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
                     }
                 }
-                return response()->json(['message' => 'Actualizacion Completa'], 200); */
+                return response()->json(['message' => 'Actualizacion Completa'], 200);
             } else {
                 return response()->json(['message' => 'No Tienes autorizacion']);
             }

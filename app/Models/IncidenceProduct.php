@@ -11,8 +11,12 @@ class IncidenceProduct extends Model
     use HasFactory;
     public $table = "incidence_products";
     protected $fillable = [
-        'id_order_purchase_products',
-        'cantidad_seleccionada',
-        'id_incidence'
+        'request',
+        'notes',
+        'product',
+        'cost',
+        'order_purchase_product_id',
+        'quantity_selected',
+        'incidence_id'
     ];
 }
