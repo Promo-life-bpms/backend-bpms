@@ -51,13 +51,18 @@ class Sale extends Model
         return $this->belongsTo(Status::class, 'status_id', 'id');
     }
 
-    public function incidencias()
+    public function incidences()
     {
-        return $this->hasMany(Incidencia::class, 'sale_id');
+        return $this->hasMany(Incidence::class, 'sale_id');
+    }
+
+    public function inspections()
+    {
+        return $this->hasMany(Inspection::class, 'sale_id');
     }
 
     public function routeDeliveries()
     {
-        return $this->hasMany(CodeOrderDeliveryRoute::class, 'code_sale', 'code_sale');
+        return $this->hasMany(CodeOrderDeliveryRoute::class, 'code_sale', 'code_sale')->with('deliveryRoute', 'productDeliveryRoute');
     }
 }

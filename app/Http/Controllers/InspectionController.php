@@ -79,7 +79,7 @@ class InspectionController extends Controller
                 ];
                 $inspection->productsSelected()->create($dataProductSelected);
             }
-            return response()->json(["msg" => "Inspeccion Creada Correctamente"], 200);
+            return response()->json(["msg" => "Inspeccion Creada Correctamente", 'data' => $inspection], 200);
         } catch (Exception $e) {
             return response()->json(["errors" => $e->getMessage()], 400);
         }

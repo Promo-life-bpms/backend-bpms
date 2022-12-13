@@ -10,6 +10,7 @@ use App\Models\ProductRemission;
 use App\Models\Remission;
 use App\Models\Role;
 use App\Models\Status;
+use Exception;
 use Facade\FlareClient\Api;
 use Illuminate\Database\Console\DbCommand;
 use Symfony\Component\HttpFoundation\Response;
@@ -47,7 +48,10 @@ class DeliveryRouteController extends Controller
         //pedidos por agendar
         //traer todos los usuarios que son choferes
         $rolChofer = Role::find(4);
-        $choferes = $rolChofer->users;
+        $choferes = [];
+        foreach ($rolChofer->users as $chofer) {
+            array_push($choferes, ['id' => $chofer->id, 'name' => $chofer->name]);
+        }
 
         // traer los productos de las ordenes de compra o trabajo que no han sido entregados o cancelados
         $per_page = 10;
@@ -55,7 +59,7 @@ class DeliveryRouteController extends Controller
         if ($request->per_page) {
             $per_page = $request->per_page;
         }
-        $orderPurchase = OrderPurchase::whereIn('status', ["Cancelado", "Confirmado"])->paginate($per_page);
+        $orderPurchase = OrderPurchase::with('products')->whereIn('status', ["Cancelado", "Confirmado"])->orderBy('code_sale', 'ASC')->paginate($per_page);
         return response()->json(['pedidos' => $orderPurchase, "choferes" => $choferes], 200);
     }
 
@@ -74,11 +78,9 @@ class DeliveryRouteController extends Controller
             'date_of_delivery' => 'required',
             'user_chofer_id' => 'required',
             'type_of_product' => 'required',
-
-
             'code_orders' => 'required|array',
-            'code_orders.*.code_sale' => 'required',
-            'code_orders.*.code_order' => 'required',
+            'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
+            'code_orders.*.code_order' => 'required|exists:order_purchases,code_order',
             'code_orders.*.type_of_origin' => 'required',
             'code_orders.*.delivery_address' => 'required',
             'code_orders.*.type_of_destiny' => 'required',
@@ -88,13 +90,9 @@ class DeliveryRouteController extends Controller
             'code_orders.*.action' => 'required',
             'code_orders.*.num_guide' => 'required',
             'code_orders.*.observations' => 'required',
-
             'code_orders.*.products' => 'required|array',
             'code_orders.*.products.*.product' => 'required',
             'code_orders.*.products.*.amount' => 'required'
-
-
-
         ]);
         if ($validation->fails()) {
             return response()->json(["errors" => $validation->getMessageBag()], 422);
@@ -110,7 +108,7 @@ class DeliveryRouteController extends Controller
             $idInsp = (int) explode('-', $maxINSP)[1];
             $idInsp++;
         }
-        //codigo de ruta 
+        //codigo de ruta
         $ruta = DeliveryRoute::create([
             'code_route' => "RUT-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
             'date_of_delivery' => $request->date_of_delivery,
@@ -125,7 +123,7 @@ class DeliveryRouteController extends Controller
         foreach ($request->code_orders as $codeOrder) {
             $codeOrder = (object)$codeOrder;
 
-            $codeOrderRoute =  $ruta->codeDeliveryRoute()->create([
+            $codeOrderRoute =  $ruta->codeOrderDeliveryRoute()->create([
                 'code_sale' => $codeOrder->code_sale,
                 'code_order' => $codeOrder->code_order,
                 'type_of_origin' => $codeOrder->type_of_origin,
@@ -149,7 +147,7 @@ class DeliveryRouteController extends Controller
             }
         }
 
-        return response()->json('Ruta creada exitosamente', Response::HTTP_CREATED);
+        return response()->json(['msg' => 'Ruta Creada Existosamente', 'data' => $ruta], Response::HTTP_CREATED);
     }
 
     /**
@@ -162,19 +160,19 @@ class DeliveryRouteController extends Controller
     {
         // Corresponde con la ruta  rutas-de-entrega
         // Buscamos un study por el ID.
-        $ruta = DeliveryRoute::find($id);
+        $ruta = DeliveryRoute::where('code_route', $id)->first();
         // Chequeaos si encontró o no la ruta
         if (!$ruta) {
             // Se devuelve un array errors con los errores detectados y código 404
             return response()->json(['errors' => (['code' => 404, 'message' => 'No se encuentra esa ruta de entrega.'])], 404);
         }
-        $ordenes = $ruta->codeDeliveryRoute;
+        $ordenes = $ruta->codeOrderDeliveryRoute;
         foreach ($ordenes as $ordenDeCompra) {
             $ordenDeCompra->productDeliveryRoute;
         }
 
         // Devolvemos la información encontrada.
-        return response()->json(['deliveryroute' => $ruta]);
+        return response()->json(['msg' => 'Consulta correcta', 'delivery_route' => $ruta]);
     }
 
     /**
@@ -196,45 +194,8 @@ class DeliveryRouteController extends Controller
      */
     public function update(Request $request,  $id)
     {
-        /* 
-            Quiero que se actualize la ruta de entrega, se actualicen las ordendes existentes 
-            y la nuevas se guarden, lo mismo con los productos, y eliminar las ordendes y productos
-            que no esten en la solicitud pero si en los registros
 
-            Revisar que exista la ruta de entrega
-            
-            Si no existe
-                Retornar Mensaje de No encontrado 404
-            Si existe
-                Actualiza la informacion de la ruta de entrega
-
-                Por cada orden de compra que llega en la solicitud, revisar si existe o no
-                Si existe
-                    Entonces Actualizar la informacion de la orden de compra en ruta de entrega
-                            Por cada Producto
-                                Si existe
-                                    Actualizar la informacion de los productos
-                                Si no
-                                    Crear un producto nuevo
-                Si no
-                    Crear las ordenes de compra que no estan en la ruta de entrega
-                        guardan sus productos
-
-                Por cada orden de compra en la base de datos
-                    Si no existe en la solicitud
-                        Entonces
-                            Elimiar el registro (Elimiar sus productos relacionados)
-                    Si existe
-                        Por cada producto en esa ruta de entrega 
-                            Si no existe el produto en la solicitud
-                            Entonces
-                                Elimiar ese producto
-
-            Retornar mensaje de actualizacion completa
-
-        
-        */
-        $ruta = DeliveryRoute::find($id);
+        $ruta = DeliveryRoute::where('code_route', $id)->first();
 
         if (!$ruta) {
             // Retornar mensaje
@@ -249,11 +210,10 @@ class DeliveryRouteController extends Controller
 
 
         foreach ($request->code_orders as $codeOrder) {
-
             $codeOrderRequest = (object) $codeOrder;
-            
+
             $codeOrderDB = CodeOrderDeliveryRoute::find($codeOrderRequest->code_sale);
-            
+
             if ($codeOrderDB) {
                 $codeOrderDB->code_sale = $codeOrderRequest->code_sale;
                 $codeOrderDB->code_order = $codeOrderRequest->code_order;
@@ -267,7 +227,7 @@ class DeliveryRouteController extends Controller
                 $codeOrderDB->num_guide = $codeOrderRequest->num_guide;
                 $codeOrderDB->observations = $codeOrderRequest->observations;
                 $codeOrderDB->save();
-                
+
                 foreach ($codeOrderRequest->products as $product) {
                     $productRequest = (object)$product;
                     // $productsDB = $codeOrderDB->productDeliveryRoute;
@@ -279,7 +239,7 @@ class DeliveryRouteController extends Controller
             }
 
             if (!$codeOrderDB) {
-                $ruta->codeDeliveryRoute()->create([
+                $ruta->codeOrderDeliveryRoute()->create([
                     'code_sale' => $codeOrderRequest->code_sale,
                     'code_order' => $codeOrderRequest->code_order,
                     'type_of_origin' => $codeOrderRequest->type_of_origin,
@@ -292,22 +252,20 @@ class DeliveryRouteController extends Controller
                     'num_guide' => $codeOrderRequest->num_guide,
                     'observations' => $codeOrderRequest->observations,
                 ]);
-
-                //$product->save();
             }
         }
-        foreach ($ruta->codeDeliveryRoute as $codeOrderDB) {
+        foreach ($ruta->codeOrderDeliveryRoute as $codeOrderDB) {
 
             $existeEnElRequest = false;
-            
+
             foreach ($request->code_orders as $codeOrderRequest) {
                 $codeOrderRequest = (object)$codeOrderRequest;
                 if ($codeOrderDB->id == $codeOrderRequest->id) {
                     $existeEnElRequest = true;
                 }
             }
-            
-            if($existeEnElRequest == false){
+
+            if ($existeEnElRequest == false) {
                 $codeOrderDB->delete();
             }
         }
@@ -330,17 +288,29 @@ class DeliveryRouteController extends Controller
      * @param  \App\Models\DeliveryRoute  $deliveryRoute
      * @return \Illuminate\Http\Response
      */
-    public function destroy(DeliveryRoute $deliveryRoute)
+    public function destroy($deliveryRoute)
     {
-        $deliveryRoute->is_active = false;
-        $deliveryRoute->save();
-        return response()->json('Ruta eliminada correctamente!');
+        $ruta = DeliveryRoute::where('code_route', $deliveryRoute)->first();
+        // Chequeaos si encontró o no la ruta
+        if (!$ruta) {
+            return response()->json(['errors' => (['code' => 404, 'message' => 'No se encuentra esa ruta de entrega.'])], 404);
+        }
+        try {
+            foreach ($ruta->codeOrderDeliveryRoute as $codr) {
+                $codr->productDeliveryRoute()->delete();
+                $codr->delete();
+            }
+            $ruta->delete();
+        } catch (Exception $e) {
+            return response()->json(['errors' => (['code' => 404, 'message' => 'Error al eliminar esta ruta.', 'code_error' => $e->getMessage()])], 404);
+            //throw $th;
+        }
+        // Se devuelve un array errors con los errores detectados y código 404
+        return response()->json(['msg' => 'Ruta eliminada correctamente!'], 200);
     }
 
     public function setRemisiones(Request $request)
     {
-
-
 
         $validation = Validator::make($request->all(), [
             'comments' => 'required',
