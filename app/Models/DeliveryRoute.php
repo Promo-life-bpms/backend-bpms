@@ -25,4 +25,9 @@ class DeliveryRoute extends Model
         //relacion hasmany() hacia product delivery route
         return $this->hasMany(CodeOrderDeliveryRoute::class, "delivery_route_id");
     }
+
+    public function remissions()
+    {
+        return $this->hasMany(Remission::class);
+    }
 }
