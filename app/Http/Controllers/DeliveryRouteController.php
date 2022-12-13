@@ -171,6 +171,7 @@ class DeliveryRouteController extends Controller
             $ordenDeCompra->productDeliveryRoute;
         }
 
+        $ruta->remissions;
         // Devolvemos la información encontrada.
         return response()->json(['msg' => 'Consulta correcta', 'delivery_route' => $ruta]);
     }
@@ -309,7 +310,7 @@ class DeliveryRouteController extends Controller
         return response()->json(['msg' => 'Ruta eliminada correctamente!'], 200);
     }
 
-    public function setRemisiones(Request $request)
+    public function setRemisiones(Request $request, $ruta)
     {
 
         $validation = Validator::make($request->all(), [
@@ -319,20 +320,21 @@ class DeliveryRouteController extends Controller
             'delivery_signature' => 'required',
             'received' => 'required',
             'signature_received' => 'required',
-            'delivery_route_id' => 'required',
             'user_chofer_id' => 'required',
             'status' => 'required',
-
             'product_remission' => 'required|array',
-            'product_remission.*.remission_id' => 'required',
+            // 'product_remission.*.remission_id' => 'required',
             'product_remission.*.delivered_quantity' => 'required',
-
-
-
         ]);
         if ($validation->fails()) {
             return response()->json(["errors" => $validation->getMessageBag()], 422);
         }
+        $deliveryRoute = DeliveryRoute::where('code_route', $ruta)->first();
+
+        if (!$deliveryRoute) {
+            return response()->json(['errors' => (['message' => 'Ruta de entrega no encontrada.'])], 404);
+        }
+
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
         // ::create
         //crear codigo de remision
@@ -345,16 +347,15 @@ class DeliveryRouteController extends Controller
             $idinc++;
         }
 
-
         $remision = Remission::create([
-            'code_remission' => "RUT-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
+            'code_remission' => "REM-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
             'comments' => $request->comments,
             'satisfaction' => $request->satisfaction,
             'delivered' => $request->delivered,
             'delivery_signature' => $request->delivery_signature,
             'received' => $request->received,
             'signature_received' => $request->signature_received,
-            'delivery_route_id' => $request->delivery_route_id,
+            'delivery_route_id' => $deliveryRoute->id,
             'user_chofer_id' => $request->user_chofer_id,
             'status' => 1
         ]);
@@ -365,13 +366,11 @@ class DeliveryRouteController extends Controller
             $product = (object)$product;
 
             $remision->productRemission()->create([
-                'remission_id' => $product->remission_id,
                 'delivered_quantity' => $product->delivered_quantity,
-
             ]);
         }
 
-        return response()->json('Remision creada exitosamente', Response::HTTP_CREATED);
+        return response()->json(['msg' => 'Remision creada exitosamente', 'data' => $remision], Response::HTTP_CREATED);
     }
 
     public function viewRemision()
@@ -385,20 +384,40 @@ class DeliveryRouteController extends Controller
         ], 200);
     }
 
-    public function showRemision($id)
+    public function showRemision($ruta, $id)
     {
-        $remision = Remission::find($id);
+        $deliveryRoute = DeliveryRoute::where('code_route', $ruta)->first();
+
+        if (!$deliveryRoute) {
+            return response()->json(['errors' => (['msg' => 'Ruta de entrega no encontrada.'])], 404);
+        }
+
+        $remision = Remission::where('code_remission', $id)->first();
+
+        if (!$remision) {
+            return response()->json(['errors' => (['msg' => 'Remision no encontrada.'])], 404);
+        }
         $remision->productRemission;
-        return json_encode($remision);
+        return response()->json(['errors' => (['msg' => 'Remision encontrada.', 'data'=>$remision])], 200);
     }
 
-    public function cancelRemision($id)
+    public function cancelRemision($ruta, $id)
     {
-        // Encontrar la remision por ID
-        $remision = Remission::where("id", $id)->first();
-        if (!$remision) {
-            return response()->json(["msg" => "No encontrado"], 404);
+        $deliveryRoute = DeliveryRoute::where('code_route', $ruta)->first();
+
+        if (!$deliveryRoute) {
+            return response()->json(['errors' => (['msg' => 'Ruta de entrega no encontrada.'])], 404);
         }
+        $remision = Remission::where('code_remission', $id)->first();
+
+        if (!$remision) {
+            return response()->json(['errors' => (['msg' => 'Remision no encontrada.'])], 404);
+        }
+
+        if ($remision->status == 2) {
+            return response()->json(["msg" => "Esta Remision se encuentra actualmente cancelada"], 200);
+        }
+
         // Revisar si no esta cancelado
 
         // Marcar como cancelada la remision
