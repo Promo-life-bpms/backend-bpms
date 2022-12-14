@@ -23,9 +23,9 @@ class CreateAdditionalSaleInformationTable extends Migration
             $table->text('delivery_policy');
             $table->boolean('schedule_change');
             $table->text('reason_for_change');
-            $table->dateTime('planned_date');
-            $table->dateTime('commitment_date');
-            $table->dateTime('effective_date');
+            $table->dateTime('planned_date')->nullable();
+            $table->dateTime('commitment_date')->nullable();
+            $table->dateTime('effective_date')->nullable();
             $table->timestamps();
         });
     }

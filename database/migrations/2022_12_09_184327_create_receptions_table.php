@@ -19,8 +19,8 @@ class CreateReceptionsTable extends Migration
             $table->string('code_order');
             $table->string('company');
             $table->string('type_operation');
-            $table->dateTime('planned_date');
-            $table->dateTime('effective_date');
+            $table->dateTime('planned_date')->nullable();
+            $table->dateTime('effective_date')->nullable();
             $table->string('status');
             $table->timestamps();
         });
