@@ -19,7 +19,7 @@ class ApiOdooController extends Controller
     {
         try {
             if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
-                $validator = Validator::make($request->all(), [
+                /* $validator = Validator::make($request->all(), [
                     'sale' => 'bail|required|array',
                     'sale.code_sale' => 'required',
                     'sale.name_sale' => 'required',
@@ -64,50 +64,49 @@ class ApiOdooController extends Controller
                     'sale.products.*.subtotal' => 'required|numeric',
                     'sale.total' => 'required|numeric',
                     'sale.status' => 'required',
-                ]);
+                ]); */
 
-                if ($validator->fails()) {
+                /* if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
-                }
+                } */
                 // Obtener el pedido
                 $requestData = (object) $request->sale;
 
                 // Obtener datos principales
-                $delivery_time = Carbon::parse($requestData->delivery_time);
-                $order_date = Carbon::parse($requestData->order_date);
+                $delivery_time = $requestData->delivery_time ?  Carbon::parse($requestData->delivery_time) : null;
+                $order_date = $requestData->order_date ?  Carbon::parse($requestData->order_date) : null;
                 $dataSale = [
-                    'code_sale' => $requestData->code_sale,
-                    'name_sale' => $requestData->name_sale,
-                    'sequence' => $requestData->sequence,
-                    'invoice_address' => $requestData->invoice_address,
-                    'delivery_address' => $requestData->delivery_address,
+                    'code_sale' => $requestData->code_sale ? $requestData->code_sale : ' ',
+                    'name_sale' => $requestData->name_sale ? $requestData->name_sale : ' ',
+                    'sequence' => $requestData->sequence ? $requestData->sequence : ' ',
+                    'invoice_address' => $requestData->invoice_address ? $requestData->invoice_address : ' ',
+                    'delivery_address' => $requestData->delivery_address ? $requestData->delivery_address : ' ',
                     'delivery_time' => $delivery_time,
-                    'delivery_instructions' => $requestData->delivery_instructions,
+                    'delivery_instructions' => $requestData->delivery_instructions ? $requestData->delivery_instructions : ' ',
                     'order_date' => $order_date,
-                    "incidence" => $requestData->incidence,
-                    'sample_required' => $requestData->sample_required,
-                    'labeling' => $requestData->labeling,
-                    'additional_information' => $requestData->additional_information,
-                    'tariff' => $requestData->tariff,
-                    'commercial_odoo_id' => $requestData->commercial['odoo_id'],
-                    'commercial_name' => $requestData->commercial['name'],
-                    'commercial_email' => $requestData->commercial['email'],
-                    'total' => $requestData->total,
+                    "incidence" => $requestData->incidence ? $requestData->incidence : false,
+                    'sample_required' => $requestData->sample_required ? $requestData->sample_required : false,
+                    'labeling' => $requestData->labeling ? $requestData->labeling : ' ',
+                    'additional_information' => $requestData->additional_information ? $requestData->additional_information : ' ',
+                    'tariff' => $requestData->tariff ? $requestData->tariff : ' ',
+                    'commercial_odoo_id' => $requestData->commercial['odoo_id'] ? $requestData->commercial['odoo_id'] : ' ',
+                    'commercial_name' => $requestData->commercial['name'] ? $requestData->commercial['name'] : ' ',
+                    'commercial_email' => $requestData->commercial['email'] ? $requestData->commercial['email']  : ' ',
+                    'total' => $requestData->total ? $requestData->total : 0,
                     'status_id' => 1,
                 ];
-
                 // Obtener datos secundarios
-                $planned_date = Carbon::parse($requestData->other_information['planned_date']);
-                $commitment_date = Carbon::parse($requestData->other_information['commitment_date']);
-                $effective_date = Carbon::parse($requestData->other_information['effective_date']);
+                $planned_date = $requestData->other_information['planned_date'] ? Carbon::parse($requestData->other_information['planned_date']) : null;
+                $commitment_date = $requestData->other_information['commitment_date'] ? Carbon::parse($requestData->other_information['commitment_date']) : null;
+                $effective_date = $requestData->other_information['effective_date'] ? Carbon::parse($requestData->other_information['effective_date']) : null;
                 $dataAdditionalInfo =  [
-                    'client_name' => $requestData->client['name'],
-                    'client_contact' => $requestData->client['contact'],
-                    'warehouse_company' => $requestData->other_information['warehouse_company'],
-                    'warehouse_address' => $requestData->other_information['warehouse_address'],
-                    'delivery_policy' => $requestData->other_information['delivery_policy'],
-                    'schedule_change' => $requestData->other_information['schedule_change'],
-                    'reason_for_change' => $requestData->other_information['reason_for_change'],
+                    'client_name' => $requestData->client['name'] ? $requestData->client['name'] : ' ',
+                    'client_contact' => $requestData->client['contact'] ? $requestData->client['contact']  : ' ',
+                    'warehouse_company' => $requestData->other_information['warehouse_company'] ? $requestData->other_information['warehouse_company'] : ' ',
+                    'warehouse_address' => $requestData->other_information['warehouse_address'] ? $requestData->other_information['warehouse_address']  : ' ',
+                    'delivery_policy' => $requestData->other_information['delivery_policy'] ? $requestData->other_information['delivery_policy'] : ' ',
+                    'schedule_change' => $requestData->other_information['schedule_change'] ? $requestData->other_information['schedule_change'] : false,
+                    'reason_for_change' => $requestData->other_information['reason_for_change'] ? $requestData->other_information['reason_for_change'] : ' ',
                     'planned_date' => $planned_date,
                     'commitment_date' => $commitment_date,
                     'effective_date' => $effective_date
@@ -131,20 +130,20 @@ class ApiOdooController extends Controller
                     foreach ($dataProducts as $product) {
                         $registered = false;
                         $dataProduct = [
-                            "odoo_product_id" => $product['odoo_product_id'],
-                            "product" => $product['product'],
-                            "description" => $product['description'],
-                            "provider" => $product['provider'],
-                            "logo" => $product['logo'],
-                            "key_product" => $product['key_product'],
-                            "type_sale" => $product['type_sale'],
-                            "cost_labeling" => $product['cost_labeling'],
-                            "clean_product_cost" => $product['clean_product_cost'],
-                            "quantity_ordered" => $product['quantity'],
-                            "quantity_delivered" => $product['quantity_delivered'],
-                            "quantity_invoiced" => $product['quantity_invoiced'],
-                            "unit_price" => $product['unit_price'],
-                            "subtotal" => $product['subtotal'],
+                            "odoo_product_id" => $product['odoo_product_id'] ?: " ",
+                            "product" => $product['product'] ?: " ",
+                            "description" => $product['description'] ?: " ",
+                            "provider" => $product['provider'] ?: " ",
+                            "logo" => $product['logo'] ?: " ",
+                            "key_product" => $product['key_product'] ?: " ",
+                            "type_sale" => $product['type_sale'] ?: " ",
+                            "cost_labeling" => $product['cost_labeling'] ?: 0.0,
+                            "clean_product_cost" => $product['clean_product_cost'] ?: 0,
+                            "quantity_ordered" => $product['quantity']   ?: 0,
+                            "quantity_delivered" => $product['quantity_delivered'] ?: 0,
+                            "quantity_invoiced" => $product['quantity_invoiced'] ?: 0,
+                            "unit_price" => $product['unit_price']   ?: 0,
+                            "subtotal" => $product['subtotal']   ?: 0,
                         ];
 
                         $sale->saleProducts()->updateOrCreate(
@@ -183,7 +182,7 @@ class ApiOdooController extends Controller
     {
         try {
             if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
-                $validator = Validator::make($request->all(), [
+                /*  $validator = Validator::make($request->all(), [
                     'purchase' => 'required|array|bail',
                     'purchase.code_sale' => 'required',
                     'purchase.code_purchase' => 'required',
@@ -212,21 +211,21 @@ class ApiOdooController extends Controller
 
                 if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
-                }
+                } */
                 $purchase = (object)$request->purchase;
                 $dataPurchase = [
-                    'code_order' => $purchase->code_purchase,
-                    'code_sale' => $purchase->code_sale,
-                    'provider_name' => $purchase->provider_name,
-                    'provider_address' => $purchase->provider_address,
-                    'supplier_representative' => $purchase->supplier_representative,
-                    'sequence' => $purchase->sequence,
-                    'order_date' => $purchase->order_date,
-                    'planned_date' => $purchase->planned_date,
-                    'company' => $purchase->company,
-                    'total' => $purchase->total,
-                    'status' => $purchase->status,
-                    'type_purchase' => $purchase->type_purchase,
+                    'code_order' => $purchase->code_purchase ?: " ",
+                    'code_sale' => $purchase->code_sale ?: " ",
+                    'provider_name' => $purchase->provider_name ?: " ",
+                    'provider_address' => $purchase->provider_address ?: " ",
+                    'supplier_representative' => $purchase->supplier_representative ?: " ",
+                    'sequence' => $purchase->sequence ?: " ",
+                    'order_date' => $purchase->order_date ?: null,
+                    'planned_date' => $purchase->planned_date ?: null,
+                    'company' => $purchase->company ?: " ",
+                    'total' => $purchase->total ?: 0,
+                    'status' => $purchase->status ?: " ",
+                    'type_purchase' => $purchase->type_purchase ?: " ",
                 ];
 
                 $orderPurchase = null;
@@ -242,16 +241,16 @@ class ApiOdooController extends Controller
                     foreach ($purchase->products as $productRequest) {
                         $productRequest = (object)$productRequest;
                         $dataProduct =  [
-                            "odoo_product_id" => $productRequest->odoo_product_id,
-                            "product" => $productRequest->product,
-                            "description" => $productRequest->description,
-                            "planned_date" => $productRequest->planned_date,
-                            "company" => $productRequest->company,
-                            "quantity" => $productRequest->quantity,
-                            "quantity_delivered" => $productRequest->quantity_delivered,
-                            "quantity_invoiced" => $productRequest->quantity_invoiced,
-                            "unit_price" => $productRequest->unit_price,
-                            "subtotal" => $productRequest->subtotal,
+                            "odoo_product_id" => $productRequest->odoo_product_id ?: " ",
+                            "product" => $productRequest->product ?: " ",
+                            "description" => $productRequest->description ?: " ",
+                            "planned_date" => $productRequest->planned_date ?: null,
+                            "company" => $productRequest->company ?: " ",
+                            "quantity" => $productRequest->quantity ?: 0,
+                            "quantity_delivered" => $productRequest->quantity_delivered ?: 0,
+                            "quantity_invoiced" => $productRequest->quantity_invoiced ?: 0,
+                            "unit_price" => $productRequest->unit_price ?: 0.00,
+                            "subtotal" => $productRequest->subtotal ?: 0.00,
                         ];
                         try {
                             $orderPurchase->products()->updateOrCreate(
@@ -293,7 +292,7 @@ class ApiOdooController extends Controller
     {
         try {
             if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
-                $validator = Validator::make($request->all(), [
+                /* $validator = Validator::make($request->all(), [
                     'reception' => 'required|array|bail',
                     'reception.code_reception' => 'required',
                     'reception.code_order' => 'required',
@@ -312,17 +311,17 @@ class ApiOdooController extends Controller
 
                 if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
-                }
+                } */
 
                 $reception = (object)$request->reception;
                 $dataReception = [
-                    'code_reception' => $reception->code_reception,
-                    'code_order' => $reception->code_order,
-                    'company' => $reception->company,
-                    'type_operation' => $reception->type_operation,
-                    'planned_date' => $reception->planned_date,
-                    'effective_date' => $reception->effective_date,
-                    'status' => $reception->status,
+                    'code_reception' => $reception->code_reception ?: " ",
+                    'code_order' => $reception->code_order ?: " ",
+                    'company' => $reception->company ?: " ",
+                    'type_operation' => $reception->type_operation ?: " ",
+                    'planned_date' => $reception->planned_date ?: null,
+                    'effective_date' => $reception->effective_date ?: null,
+                    'status' => $reception->status ?: " ",
                 ];
                 $receptionDB = null;
                 try {
@@ -336,11 +335,11 @@ class ApiOdooController extends Controller
                     foreach ($reception->operations as $productRequest) {
                         $productRequest = (object)$productRequest;
                         $dataProduct =  [
-                            "odoo_product_id" => $productRequest->odoo_product_id,
-                            "product" => $productRequest->product,
-                            "code_reception" => $productRequest->code_reception,
-                            "initial_demand" => $productRequest->initial_demand,
-                            "done" => $productRequest->done,
+                            "odoo_product_id" => $productRequest->odoo_product_id ?: " ",
+                            "product" => $productRequest->product ?: " ",
+                            "code_reception" => $productRequest->code_reception ?: " ",
+                            "initial_demand" => $productRequest->initial_demand ?: 0,
+                            "done" => $productRequest->done ?: 0,
                         ];
                         try {
                             $receptionDB->productsReception()->updateOrCreate(
@@ -382,7 +381,7 @@ class ApiOdooController extends Controller
     {
         try {
             if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
-                $validator = Validator::make($request->all(), [
+                /* $validator = Validator::make($request->all(), [
                     'incidence' => 'required|array|bail',
                     'incidence.code_incidence' => 'required',
                     'incidence.code_sale' => 'required',
@@ -403,42 +402,43 @@ class ApiOdooController extends Controller
 
                 if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
-                }
+                } */
 
-                /*                 $incidence = (object)$request->incidence;
+                $incidence = (object)$request->incidence;
                 $dataIncidence = [
-                    'code_incidence' => $incidence->code_incidence,
-                    'code_sale' => $incidence->code_sale,
-                    'client' => $incidence->client,
-                    'requested_by' => $incidence->requested_by,
-                    'description' => $incidence->description,
-                    'date_request' => $incidence->date_request,
-                    'company' => $incidence->company,
-                    'status' => $incidence->status,
+                    'code_incidence' => $incidence->code_incidence ?: " ",
+                    'code_sale' => $incidence->code_sale ?: " ",
+                    'client' => $incidence->client ?: " ",
+                    'requested_by' => $incidence->requested_by ?: " ",
+                    'description' => $incidence->description ?: " ",
+                    'date_request' => $incidence->date_request ?: null,
+                    'company' => $incidence->company ?: " ",
+                    'status' => $incidence->status ?: " ",
                 ];
-                $receptionDB = null;
+                $incidenceDB = null;
                 try {
-                    $receptionDB = Incidence::updateOrCreate(['code_incidence' => $incidence->code_incidence], $dataIncidence);
+                    $incidenceDB = Incidence::updateOrCreate(['code_incidence' => $incidence->code_incidence], $dataIncidence);
                 } catch (Exception $th) {
                     return response()->json(['message' => 'Error al crear la orden de compra', 'error' => $th->getMessage()], 400);
                 }
 
-                if ($receptionDB) {
+                if ($incidenceDB) {
                     $errors = [];
-                    foreach ($reception->operations as $productRequest) {
+                    foreach ($incidence->products as $productRequest) {
                         $productRequest = (object)$productRequest;
                         $dataProduct =  [
-                            "odoo_product_id" => $productRequest->odoo_product_id,
-                            "product" => $productRequest->product,
-                            "code_reception" => $productRequest->code_reception,
-                            "initial_demand" => $productRequest->initial_demand,
-                            "done" => $productRequest->done,
+                            "code_incidence" => $productRequest->code_incidence ?: " ",
+                            "request" => $productRequest->request ?: " ",
+                            "notes" => $productRequest->notes ?: " ",
+                            "product" => $productRequest->product ?: " ",
+                            "quantity_selected" => $productRequest->quantity ?: 0,
+                            "cost" => $productRequest->cost ?: 0.00,
                         ];
                         try {
-                            $receptionDB->productsReception()->updateOrCreate(
+                            $incidenceDB->productsIncidence()->updateOrCreate(
                                 [
-                                    "odoo_product_id" => $productRequest->odoo_product_id,
-                                    'reception_id' => $receptionDB->id
+                                    "product" => $productRequest->product,
+                                    'incidence_id' => $incidenceDB->id
                                 ],
                                 $dataProduct
                             );
@@ -446,9 +446,10 @@ class ApiOdooController extends Controller
                             array_push($errors, ['msg' => "Error al insertar el producto", 'error' => $th->getMessage()]);
                         }
                     }
-                    foreach ($receptionDB->productsReception as $productDB) {
+
+                    /* foreach ($incidenceDB->productsIncidence as $productDB) {
                         $existProduct = false;
-                        foreach ($reception->operations as $productRQ) {
+                        foreach ($incidence->products as $productRQ) {
                             if ($productDB->odoo_product_id == $productRQ['odoo_product_id']) {
                                 $existProduct = true;
                             }
@@ -456,12 +457,12 @@ class ApiOdooController extends Controller
                         if (!$existProduct) {
                             $productDB->delete();
                         }
-                    }
+                    } */
                     if (count($errors) > 0) {
                         return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
                     }
                 }
-                return response()->json(['message' => 'Actualizacion Completa'], 200); */
+                return response()->json(['message' => 'Actualizacion Completa'], 200);
             } else {
                 return response()->json(['message' => 'No Tienes autorizacion']);
             }
@@ -474,7 +475,7 @@ class ApiOdooController extends Controller
     {
         try {
             if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
-                $validator = Validator::make($request->all(), [
+                /* $validator = Validator::make($request->all(), [
                     'delivery' => 'required|array|bail',
                     'delivery.code_delivery' => 'required',
                     'delivery.code_sale' => 'required',
@@ -493,16 +494,16 @@ class ApiOdooController extends Controller
 
                 if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
-                }
+                } */
                 $delivery = (object)$request->delivery;
                 $dataDelivery = [
-                    'code_delivery' => $delivery->code_delivery,
-                    'code_sale' => $delivery->code_sale,
-                    'company' => $delivery->company,
-                    'type_operation' => $delivery->type_operation,
-                    'planned_date' => $delivery->planned_date,
-                    'effective_date' => $delivery->effective_date,
-                    'status' => $delivery->status,
+                    'code_delivery' => $delivery->code_delivery ?: " ",
+                    'code_sale' => $delivery->code_sale ?: " ",
+                    'company' => $delivery->company ?: " ",
+                    'type_operation' => $delivery->type_operation ?: " ",
+                    'planned_date' => $delivery->planned_date ?: null,
+                    'effective_date' => $delivery->effective_date ?: null,
+                    'status' => $delivery->status ?: " ",
                 ];
                 $deliveryDB = null;
                 try {
@@ -516,11 +517,11 @@ class ApiOdooController extends Controller
                     foreach ($delivery->operations as $productRequest) {
                         $productRequest = (object)$productRequest;
                         $dataProduct =  [
-                            "odoo_product_id" => $productRequest->odoo_product_id,
-                            "product" => $productRequest->product,
-                            "code_delivery" => $productRequest->code_delivery,
-                            "initial_demand" => $productRequest->initial_demand,
-                            "done" => $productRequest->done,
+                            "odoo_product_id" => $productRequest->odoo_product_id ?: " ",
+                            "product" => $productRequest->product ?: " ",
+                            "code_delivery" => $productRequest->code_delivery ?: " ",
+                            "initial_demand" => $productRequest->initial_demand ?: 0,
+                            "done" => $productRequest->done ?: 0,
                         ];
                         try {
                             $deliveryDB->productsDelivery()->updateOrCreate(

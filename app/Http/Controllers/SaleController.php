@@ -49,13 +49,15 @@ class SaleController extends Controller
             'saleProducts',
             'moreInformation',
             'orders',
-            'routeDeliveries'
-            // 'inspecciones',
-            // TODO: 'incidencias'
+            'routeDeliveries',
+            'inspections',
+            'incidences'
         ])->where('code_sale', $sale_id)->first();
+
         if ($sale) {
-            return response()->json(['pedido' => $sale], 200);
+            return response()->json(['data' => $sale], 200);
         }
+
         return response()->json(['pedido' => "No hay informacion acerca de este pedido"], 200);
     }
 }

@@ -13,14 +13,19 @@ class OrderPurchaseProductFactory extends Factory
      */
     public function definition()
     {
-
+        $company = ['PROMO LIFE', "BH TRADEMARKET"];
         $quantity = rand(1, 2000);
         return [
             "odoo_product_id" => rand(1, 200),
             "product" => $this->faker->word() . ' ' . $this->faker->word(),
             "description" => $this->faker->sentence(),
-            "quantity_ordered" => $quantity,
+            'planned_date' => $this->faker->dateTimeBetween('+1 week', '+2 week'),
+            'company' => $company[rand(0, 1)],
+            "quantity" => $quantity,
+            "quantity_invoiced" => $quantity,
             "quantity_delivered" => rand(0, $quantity),
+            'unit_price' => $this->faker->numberBetween(0, 100),
+            'subtotal' => $this->faker->numberBetween(0, 1000),
         ];
     }
 }
