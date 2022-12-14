@@ -20,7 +20,7 @@ class CreateIncidencesTable extends Migration
             $table->string("client");
             $table->string("requested_by");
             $table->text("description");
-            $table->date("date_request");
+            $table->date("date_request")->nullable();
             $table->string("company");
             $table->string("status");
 
