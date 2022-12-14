@@ -25,6 +25,8 @@ class IncidenceController extends Controller
         ], 200);
     }
 
+
+
     public function show($incidencia_id)
     {
         $incidencia = Incidence::where('num_incidencia', $incidencia_id)->first();
@@ -123,14 +125,12 @@ class IncidenceController extends Controller
 
         }
 
-
-
-
         //
-        return response()->json(["msg" => 'Incidencia creada exitosamente'], 201);
+        return response()->json(["msg" => 'Este es el Status'], 201);
         //return ('Se inserta la incidencia');
 
     }
+
 
 
     /**

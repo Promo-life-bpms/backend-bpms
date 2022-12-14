@@ -8,6 +8,7 @@ use App\Http\Controllers\IncidenceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\OrderPurchaseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,6 +61,11 @@ Route::group(['middleware' => 'auth'], function () {
     // Crear una incidencia
     Route::post('pedido/{pedido}/incidencias/', [IncidenceController::class, 'store']);
 
+    // Vista de status de incidencia
+    Route::post('order/{compra}/updatestatus', [OrderPurchaseController::class, 'store']);
+
+    Route::get('order/{compra}/updatestatus', [OrderPurchaseController::class, 'show']);
+
 
     // Seccion de Inspeccion de Calidad
 
@@ -95,6 +101,6 @@ Route::post('remision/setRemisiones', [DeliveryRouteController::class, 'setRemis
 Route::get('remision/viewRemision', [DeliveryRouteController::class, 'viewRemision']);
 //show remision por id
 Route::get('remision/showRemision/{id}', [DeliveryRouteController::class, 'showRemision']);
-//cancelar remision 
+//cancelar remision
 Route::put('remision/cancelRemision/{id}', [DeliveryRouteController::class, 'cancelRemision']);
 
