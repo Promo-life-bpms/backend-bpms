@@ -26,13 +26,13 @@ class IncidenceController extends Controller
         ], 200);
     }
 
-    public function show($incidencia_id)
+    public function show($incidencia)
     {
-        $incidencia = Incidence::where('internal_code_incidence', $incidencia_id)->first();
-        if (!$incidencia) {
+        $incidenciaDB = Incidence::where('internal_code_incidence', $incidencia)->first();
+        if (!$incidenciaDB) {
             return response()->json(["errors" => "No se ha encontrado la incidencia"], 404);
         }
-        return response()->json(["msj" => $incidencia]);
+        return response()->json(["data" => $incidenciaDB], 404);
     }
 
     /**

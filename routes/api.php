@@ -8,6 +8,7 @@ use App\Http\Controllers\IncidenceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\ReceptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,7 +45,13 @@ Route::group(['middleware' => 'auth'], function () {
     // Modal de un detalle de OC, OT
     // localhost/pedidos/PED456/orders/OC-568
     // localhost/pedidos/PED456/orders/OT-423
-    Route::get('pedidos/{pedido}/orders/{order}', [SaleController::class, 'show']);
+    // Route::get('pedidos/{pedido}/orders/{order}', [SaleController::class, 'show']);
+
+    // Recepciones de Inventario
+    Route::post('orders/{order}/receptions', [ReceptionController::class, 'saveReception']);
+
+    Route::get('orders/{order}/receptions/{reception}', [ReceptionController::class, 'getReception']);
+
 
 
     // Seccion para actualizar el estatus de maquila

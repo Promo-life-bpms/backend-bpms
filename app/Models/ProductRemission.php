@@ -14,10 +14,10 @@ class ProductRemission extends Model
     protected $fillable = [
         'remission_id',
         'delivered_quantity',
-       
+        "product"
         //
     ];
-   
+
     public function remission()
     {
        // return $this->hasMany(CodeOrderDeliveryRoute::class, "id_remision");

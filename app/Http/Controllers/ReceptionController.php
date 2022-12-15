@@ -4,26 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\DeliveryRoute;
 use App\Models\OrderPurchase;
+use App\Models\Reception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ReceptionController extends Controller
 {
-    public function setRemision(Request $request, $order)
+    public function saveReception(Request $request, $order)
     {
+        // Obtener la recepcion del los productos
         $validator = Validator::make($request->all(), [
-            'code_order' => 'required',
-            // 'code_reception' => 'required',
-            // 'company' => 'required',
-            // 'type_operation' => 'required',
-            // 'planned_date' => 'required|date:d-m-Y h:i:s',
-            // 'effective_date' => 'required|date:d-m-Y h:i:s',
-            'status' => 'required',
-            'operations' => 'required|array|bail',
-            // 'operations.*.code_reception' => 'required',
-            // 'operations.*.odoo_product_id' => 'required',
-            'operations.*.product' => 'required',
-            // 'operations.*.initial_demand' => 'required|numeric',
-            'operations.*.done' => 'required|numeric',
+            'products' => 'required|array|bail',
+            'products.*.product' => 'required',
+            'products.*.done' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -37,37 +30,50 @@ class ReceptionController extends Controller
         }
 
         $reception = (object)$request->all();
+
+        $maxINC = Reception::where('code_reception', 'LIKE', "%REC-IN%")->max('code_reception');
+        $idinc = null;
+        if (!$maxINC) {
+            $idinc = 1;
+        } else {
+            $idinc = (int) explode('-', $maxINC)[2];
+            $idinc++;
+        }
+
+        $code_reception =  "REC-IN-" . str_pad($idinc, 5, "0", STR_PAD_LEFT);
+
         $dataReception = [
-            'code_reception' => $reception->code_reception ?: " ",
-            'code_order' => $reception->code_order,
+            'code_reception' => $code_reception,
+            'code_order' => $order,
             'company' => $orderPurchase->sale->moreInformation->warehouse_company,
-            'type_operation' => $reception->type_operation ?: " ",
+            'type_operation' => $orderPurchase->sale->moreInformation->warehouse_company . ': Recepciones',
             'planned_date' => now(),
             'effective_date' => now(),
-            'status' => $reception->status ?: " ",
+            'status' => " ",
         ];
         $receptionDB = null;
         try {
-            $receptionDB = Reception::updateOrCreate(['code_reception' => $reception->code_reception], $dataReception);
+            $receptionDB = Reception::create($dataReception);
         } catch (Exception $th) {
             return response()->json(['message' => 'Error al crear la orden de compra', 'error' => $th->getMessage()], 400);
         }
 
         if ($receptionDB) {
             $errors = [];
-            foreach ($reception->operations as $productRequest) {
+            foreach ($reception->products as $productRequest) {
                 $productRequest = (object)$productRequest;
                 $dataProduct =  [
-                    "odoo_product_id" => $productRequest->odoo_product_id ?: " ",
+                    "odoo_product_id" => " ",
                     "product" => $productRequest->product ?: " ",
-                    "code_reception" => $productRequest->code_reception ?: " ",
-                    "initial_demand" => $productRequest->initial_demand ?: 0,
+                    "code_reception" => $code_reception,
+                    "initial_demand" => 0,
                     "done" => $productRequest->done ?: 0,
                 ];
+
                 try {
                     $receptionDB->productsReception()->updateOrCreate(
                         [
-                            "odoo_product_id" => $productRequest->odoo_product_id,
+                            "product" =>  $productRequest->product,
                             'reception_id' => $receptionDB->id
                         ],
                         $dataProduct
@@ -76,21 +82,29 @@ class ReceptionController extends Controller
                     array_push($errors, ['msg' => "Error al insertar el producto", 'error' => $th->getMessage()]);
                 }
             }
-            foreach ($receptionDB->productsReception as $productDB) {
-                $existProduct = false;
-                foreach ($reception->operations as $productRQ) {
-                    if ($productDB->odoo_product_id == $productRQ['odoo_product_id']) {
-                        $existProduct = true;
-                    }
-                }
-                if (!$existProduct) {
-                    $productDB->delete();
-                }
-            }
             if (count($errors) > 0) {
                 return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
             }
         }
-        return response()->json(['message' => 'Actualizacion Completa'], 200);
+        return response()->json(['message' => 'Creacion de la recepcion de inventario', 'data' => $receptionDB], 200);
+    }
+
+    public function getReception($order, $reception)
+    {
+        $orderPurchase = OrderPurchase::where('code_order', $order)->first();
+
+        if (!$orderPurchase) {
+            return response()->json(['errors' => (['msg' => 'Ruta de entrega no encontrada.'])], 404);
+        }
+
+        $reception = $orderPurchase->receptions->where('code_reception', $reception)->first();
+
+        if (!$reception) {
+            return response()->json(['errors' => (['msg' => 'Recepcion no encontrada.'])], 404);
+        }
+
+        $reception->productsReception;
+
+        return response()->json(['data' => $reception], 200);
     }
 }
