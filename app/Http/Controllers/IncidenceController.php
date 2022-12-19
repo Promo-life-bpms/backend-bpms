@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Incidence;
 use App\Models\OrderPurchaseProduct;
 use App\Models\Sale;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -25,6 +26,8 @@ class IncidenceController extends Controller
             "user" => "Marlene",
         ], 200);
     }
+
+
 
     public function show($incidencia_id)
     {
@@ -219,6 +222,7 @@ class IncidenceController extends Controller
 
         return response()->json(["msg" => 'Incidencia creada exitosamente'], 201);
     }
+
 
 
     /**
