@@ -39,12 +39,12 @@ class OrderPurchaseController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, $sale_id)
+    public function store(Request $request)
     {
         //
         $validation = Validator::make($request->all(), [
             'hora' => 'required',
-            'id_order_purchase' => 'required',
+            'id_order_purchases' => 'required',
             'status' => 'required',
 
             'status_purchase_products' => 'required|array',
@@ -54,24 +54,17 @@ class OrderPurchaseController extends Controller
         if ($validation->fails()) {
             return response()->json(["errors" => $validation->getMessageBag()], 422);
         }
-        $statusOT = StatusOT::create([
-            'hora' => $request->hora,
-            'id_order_purchase' =>$request->id_order_purchase,
-            'status'=>$request->status,
-            'id_order_purchase_products' =>$request->id_order_purchase_products,
-            'cantidad_seleccionada'=>$request->cantidad_seleccionada,
-        ]);
-        foreach ($request->statusOT as $statusOT) {
-            $statusOT = (object)$statusOT;
-            $statusOT =  $statusOT->statusOT()->create([
-               'id_order_purchase_products' => $statusOT->id_order_purchase_products,
-               'cantidad_seleccionada' => $statusOT->cantidad_seleccionada
+
+        foreach ($request->status_purchase_products as $newProductStatus) {
+            $statusOT = StatusOT::create([
+                'hora' => $request->hora,
+                'id_order_purchases' => $request->id_order_purchases,
+                'status' => $request->status,
+                'id_order_purchase_products' => $newProductStatus["id_order_purchase_products"],
+                'cantidad_seleccionada' => $newProductStatus["cantidad_seleccionada"],
             ]);
-
         }
-        //
-        return response()->json(["msg" => 'Este es el estatus'], 201);
-
+        return response()->json(["msg" => $statusOT], 201);
     }
 
 
@@ -81,14 +74,10 @@ class OrderPurchaseController extends Controller
      * @param  \App\Models\OrderPurchase  $orderPurchase
      * @return \Illuminate\Http\Response
      */
-    public function show(OrderPurchase $orderPurchase)
+    public function show(StatusOT $statusOT)
     {
-        //
-        $status = Status::where('status')->first();
-        if (!$status) {
-            return response()->json(["errors" => "No se ha encontrado el Status"], 404);
-        }
-        return response()->json(["msj"=>$status]);
+        $statusOT = StatusOT::all();
+        return response()->json(["msg" => $statusOT], 201);
     }
 
 

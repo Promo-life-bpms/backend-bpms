@@ -11,7 +11,7 @@ class StatusOT extends Model
 
     protected $fillable = [
         'hora',
-        'id_order_purchase',
+        'id_order_purchases',
         'status',
         'id_order_purchase_products',
         'cantidad_seleccionada',

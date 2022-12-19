@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,10 +12,10 @@ class CreateStatusOTTable extends Migration
      */
     public function up()
     {
-        Schema::create('status_o_t', function (Blueprint $table) {
+        Schema::create('status_o_t_s', function (Blueprint $table) {
             $table->id();
             $table->time('hora');
-            $table->foreignId('id_order_purchase')
+            $table->foreignId('id_order_purchases')
             ->nullable()
             ->constrained('order_purchases')
             ->cascadeOnUpdate()
@@ -27,10 +26,10 @@ class CreateStatusOTTable extends Migration
             ->constrained('order_purchase_products')
             ->cascadeOnUpdate()
             ->nullOnDelete();
-            $table->string('cantida_seleccionada');
+            $table->string('cantidad_seleccionada');
+            $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      *
@@ -38,6 +37,6 @@ class CreateStatusOTTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('status_o_t');
+        Schema::dropIfExists('status_o_t_s');
     }
 }
