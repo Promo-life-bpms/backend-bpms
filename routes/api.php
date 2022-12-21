@@ -8,6 +8,7 @@ use App\Http\Controllers\IncidenceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
 
 /*
@@ -45,7 +46,13 @@ Route::group(['middleware' => 'auth'], function () {
     // Modal de un detalle de OC, OT
     // localhost/pedidos/PED456/orders/OC-568
     // localhost/pedidos/PED456/orders/OT-423
-    Route::get('pedidos/{pedido}/orders/{order}', [SaleController::class, 'show']);
+    // Route::get('pedidos/{pedido}/orders/{order}', [SaleController::class, 'show']);
+
+    // Recepciones de Inventario
+    Route::post('orders/{order}/receptions', [ReceptionController::class, 'saveReception']);
+
+    Route::get('orders/{order}/receptions/{reception}', [ReceptionController::class, 'getReception']);
+
 
 
     // Seccion para actualizar el estatus de maquila
@@ -72,7 +79,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Leer pedidos por agendar
     Route::get('pedidos-por-agendar', [DeliveryRouteController::class, 'create']);
     // Guardar la ruta de entrega
-    Route::post('rutas-de-entrega/store', [DeliveryRouteController::class, 'store']);
+    Route::post('rutas-de-entrega', [DeliveryRouteController::class, 'store']);
     //ver una ruta de entrega
     Route::get('rutas-de-entrega/show/{id}', [DeliveryRouteController::class, 'show']);
 

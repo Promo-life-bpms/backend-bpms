@@ -114,7 +114,7 @@ class DeliveryRouteController extends Controller
             'date_of_delivery' => $request->date_of_delivery,
             'user_chofer_id' => $request->user_chofer_id,
             'type_of_product' => $request->type_of_product,
-            'status' => 'creado',
+            'status' => 'Pendiente',
             'is_active' => 1,
         ]);
         //crear los productos de esa ruta de entrega
@@ -325,6 +325,7 @@ class DeliveryRouteController extends Controller
             'product_remission' => 'required|array',
             // 'product_remission.*.remission_id' => 'required',
             'product_remission.*.delivered_quantity' => 'required',
+            'product_remission.*.product' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json(["errors" => $validation->getMessageBag()], 422);
@@ -367,8 +368,12 @@ class DeliveryRouteController extends Controller
 
             $remision->productRemission()->create([
                 'delivered_quantity' => $product->delivered_quantity,
+                'product' => $product->product,
             ]);
         }
+
+        // TODO: Crear una recepcion de inventario en caso de que el typo de origen sea Almacen
+
 
         return response()->json(['msg' => 'Remision creada exitosamente', 'data' => $remision], Response::HTTP_CREATED);
     }
@@ -398,7 +403,7 @@ class DeliveryRouteController extends Controller
             return response()->json(['errors' => (['msg' => 'Remision no encontrada.'])], 404);
         }
         $remision->productRemission;
-        return response()->json(['errors' => (['msg' => 'Remision encontrada.', 'data'=>$remision])], 200);
+        return response()->json(['errors' => (['msg' => 'Remision encontrada.', 'data' => $remision])], 200);
     }
 
     public function cancelRemision($ruta, $id)

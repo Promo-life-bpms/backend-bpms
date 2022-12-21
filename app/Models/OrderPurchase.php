@@ -32,4 +32,9 @@ class OrderPurchase extends Model
     {
         return $this->hasMany(OrderPurchaseProduct::class);
     }
+
+    public function receptions()
+    {
+        return $this->hasMany(Reception::class, "code_order", "code_order");
+    }
 }
