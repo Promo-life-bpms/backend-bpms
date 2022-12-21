@@ -29,4 +29,9 @@ class CodeOrderDeliveryRoute extends Model
     {
         return $this->hasMany(ProductDeliveryRoute::class, 'code_order_route_id');
     }
+
+    public function deliveryRoute()
+    {
+        return $this->belongsTo(DeliveryRoute::class, 'delivery_route_id');
+    }
 }

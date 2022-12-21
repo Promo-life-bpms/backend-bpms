@@ -15,27 +15,35 @@ class CreateIncidencesTable extends Migration
     {
         Schema::create('incidences', function (Blueprint $table) {
             $table->id();
-            $table->string('num_incidencia');
-            $table->string('area');
-            $table->string('motivo');
-            $table->string('tipo_de_producto');
-            $table->string('tipo_de_tecnica')->nullable();
-            $table->string('solucion_de_incidencia');
-            $table->string('responsable');
-            $table->date('fecha_creacion');
-            $table->string('status');
-            $table->text('evidencia');
-            $table->date('fecha_compromiso');
-            $table->string('solucion');
-            $table->date('fecha_solucion');
-            $table->string('id_user');
-            $table->string('elaboro');
-            $table->text('firma_elaboro');
-            $table->string('reviso');
-            $table->text('firma_reviso');
-            $table->text('comentarios_generales');
+            $table->string("code_incidence");
+            $table->string("code_sale");
+            $table->string("client");
+            $table->string("requested_by");
+            $table->text("description");
+            $table->date("date_request")->nullable();
+            $table->string("company");
+            $table->string("status");
+
+            $table->string('internal_code_incidence')->nullable();
+            $table->string('area')->nullable();
+            $table->string('reason')->nullable();
+            $table->string('product_type')->nullable();
+            $table->string('type_of_technique')->nullable();
+            $table->string('solution_of_incidence')->nullable();
+            $table->string('responsible')->nullable();
+            $table->date('creation_date')->nullable();
+            $table->string('internal_status')->nullable();
+            $table->text('evidence')->nullable();
+            $table->date('commitment_date')->nullable();
+            $table->string('solution')->nullable();
+            $table->date('solution_date')->nullable();
+            $table->string('user_id')->nullable();
+            $table->string('elaborated')->nullable();
+            $table->text('signature_elaborated')->nullable();
+            $table->string('reviewed')->nullable();
+            $table->text('signature_reviewed')->nullable();
             //Creacion de llave foranea
-            $table->foreignId('id_sales')
+            $table->foreignId('sale_id')
                 ->nullable()
                 ->constrained('sales')
                 ->cascadeOnUpdate()

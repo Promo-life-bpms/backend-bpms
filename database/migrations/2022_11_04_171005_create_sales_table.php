@@ -20,9 +20,9 @@ class CreateSalesTable extends Migration
             $table->string('sequence', 40);
             $table->text('invoice_address');
             $table->text('delivery_address');
-            $table->dateTime('delivery_time');
+            $table->dateTime('delivery_time')->nullable();
             $table->text('delivery_instructions');
-            $table->dateTime('order_date');
+            $table->dateTime('order_date')->nullable();
             $table->boolean('incidence');
             $table->boolean('sample_required')->default(false);
             $table->string('labeling', 191);

@@ -8,6 +8,7 @@ use App\Http\Controllers\IncidenceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\OrderPurchaseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,9 +42,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
     Route::get('inspections/{inspection}', [InspectionController::class, 'show']);
 
-
-
-
     // Modal de un detalle de OC, OT
     // localhost/pedidos/PED456/orders/OC-568
     // localhost/pedidos/PED456/orders/OT-423
@@ -60,12 +58,10 @@ Route::group(['middleware' => 'auth'], function () {
     // Crear una incidencia
     Route::post('pedido/{pedido}/incidencias/', [IncidenceController::class, 'store']);
 
+    // Vista de status de incidencia
+    Route::post('order/{compra}/updatestatus', [OrderPurchaseController::class, 'store']);
 
-    // Seccion de Inspeccion de Calidad
-
-    // Actualizar una inspeccion de calidad
-    // Route::get('inspections/{inspection}/edit', [SaleController::class, 'show']);
-    // Route::put('inspections/{inspection}/update', [SaleController::class, 'show']);
+    Route::get('order/{compra}/updatestatus', [OrderPurchaseController::class, 'show']);
 
     // SECCION RUTAS DE ENTREGA
 
@@ -84,17 +80,14 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('rutas-de-entrega/{ruta}/update', [DeliveryRouteController::class, 'update']);
 
     // Eliminar ruta de entrega
-    // Actualizar la ruta de entrega
     Route::delete('rutas-de-entrega/{deliveryRoute}', [DeliveryRouteController::class, 'destroy']);
+
+    // Crear una remision
+    Route::post('rutas-de-entrega/{ruta}/remision', [DeliveryRouteController::class, 'setRemisiones']);
+    // Ver remision
+    // Route::get('remision/viewRemision', [DeliveryRouteController::class, 'viewRemision']);
+    //show remision por id
+    Route::get('rutas-de-entrega/{ruta}/remision/{id}', [DeliveryRouteController::class, 'showRemision']);
+    //cancelar remision
+    Route::put('rutas-de-entrega/{ruta}/cancel-remision/{id}', [DeliveryRouteController::class, 'cancelRemision']);
 });
-
-
-// Crear una remision
-Route::post('remision/setRemisiones', [DeliveryRouteController::class, 'setRemisiones']);
-// Ver remision
-Route::get('remision/viewRemision', [DeliveryRouteController::class, 'viewRemision']);
-//show remision por id
-Route::get('remision/showRemision/{id}', [DeliveryRouteController::class, 'showRemision']);
-//cancelar remision 
-Route::put('remision/cancelRemision/{id}', [DeliveryRouteController::class, 'cancelRemision']);
-

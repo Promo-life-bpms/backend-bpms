@@ -18,14 +18,16 @@ class DeliveryRoute extends Model
         'user_chofer_id',
         'type_of_product',
         'status',
-
-        //
     ];
 
-    public function codeDeliveryRoute()
+    public function codeOrderDeliveryRoute()
     {
-        return $this->hasMany(CodeOrderDeliveryRoute::class, "delivery_route_id");
-
         //relacion hasmany() hacia product delivery route
+        return $this->hasMany(CodeOrderDeliveryRoute::class, "delivery_route_id");
+    }
+
+    public function remissions()
+    {
+        return $this->hasMany(Remission::class);
     }
 }
