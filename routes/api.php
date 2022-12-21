@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
+use App\Http\Controllers\OrderPurchaseController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +64,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('incidencias/{incidencia}', [IncidenceController::class, 'show']);
     // Crear una incidencia
     Route::post('pedido/{pedido}/incidencias/', [IncidenceController::class, 'store']);
+
+    // Vista de status de incidencia
+    Route::post('order/{compra}/updatestatus', [OrderPurchaseController::class, 'store']);
+
+    Route::get('order/{compra}/updatestatus', [OrderPurchaseController::class, 'show']);
 
     // SECCION RUTAS DE ENTREGA
 
