@@ -9,6 +9,7 @@ use App\Models\ProductDeliveryRoute;
 use App\Models\ProductRemission;
 use App\Models\Remission;
 use App\Models\Role;
+use App\Models\Sale;
 use App\Models\Status;
 use Exception;
 use Facade\FlareClient\Api;
@@ -59,7 +60,7 @@ class DeliveryRouteController extends Controller
         if ($request->per_page) {
             $per_page = $request->per_page;
         }
-        $orderPurchase = OrderPurchase::with('products')->whereIn('status', ["Cancelado", "Confirmado"])->orderBy('code_sale', 'ASC')->paginate($per_page);
+        $orderPurchase = Sale::join('order_purchases', 'order_purchases.code_sale', 'sales.code_sale')->whereIn('order_purchases.status', ["Cancelado", "Confirmado"])->orderBy('sales.code_sale', 'ASC')->paginate($per_page);
         return response()->json(['pedidos' => $orderPurchase, "choferes" => $choferes], 200);
     }
 
