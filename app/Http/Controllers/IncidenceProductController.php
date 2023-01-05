@@ -50,9 +50,9 @@ class IncidenceProductController extends Controller
         //validar que la informacion este correcta si no no se puede registrar
         // utilizar validator
         $validation = Validator::make($request->all(), [
-            'id_order_purchase_products'=>'required',
-            'cantidad_seleccionada'=>'required',
-            'id_incidence'=>'required'
+            'id_order_purchase_products' => 'required',
+            'cantidad_seleccionada' => 'required',
+            'id_incidence' => 'required'
         ]);
         if ($validation->fails()) {
             return response()->json(["errors" => $validation->getMessageBag()], 422);
@@ -61,9 +61,9 @@ class IncidenceProductController extends Controller
 
 
         $ProductIncidence = IncidenceProductController::create([
-            'id_order_purchase_products'=>$request->id_order_purchase_products,
-            'cantidad_seleccionada'=>$request->cantidad_seleccionada,
-            'id_incidence'=>$request->id_incidence
+            'id_order_purchase_products' => $request->id_order_purchase_products,
+            'cantidad_seleccionada' => $request->cantidad_seleccionada,
+            'id_incidence' => $request->id_incidence
         ]);
 
         return response()->json('Incidencia de productos creada exitosamente', Response::HTTP_CREATED);
@@ -118,12 +118,8 @@ class IncidenceProductController extends Controller
         //
         $ProductIncidence = Incidence::destroy($request->id);
         return response()->json([
-            "ProductIncidence" => $ProductIncidence,
-            "mensaje" => "Borrando registro",
-            "display_message" => "La incidencia se ha eliminado corectamente",
-            "user" => "Marlene",
-        ], 201);
+            "msg" => "La incidencia se ha eliminado corectamente",
+            "data"  =>  ['ProductIncidence', $ProductIncidence],
+        ], response::HTTP_OK); //201
     }
 }
-
-

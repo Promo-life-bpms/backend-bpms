@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use PhpParser\Node\Stmt\Return_;
 use Symfony\Contracts\Service\Attribute\Required;
+use Symfony\Component\HttpFoundation\Response;
 
 class OrderPurchaseController extends Controller
 {
@@ -52,7 +53,11 @@ class OrderPurchaseController extends Controller
             'status_purchase_products.*.cantidad_seleccionada' => 'required'
         ]);
         if ($validation->fails()) {
-            return response()->json(["errors" => $validation->getMessageBag()], 422);
+            return response()->json([
+                'msg' => "Error al ingresar los datos",
+                'data' =>
+                ["errorValidacion", $validation->getMessageBag()]
+            ], response::HTTP_UNPROCESSABLE_ENTITY); //422
         }
 
         foreach ($request->status_purchase_products as $newProductStatus) {
@@ -64,7 +69,7 @@ class OrderPurchaseController extends Controller
                 'cantidad_seleccionada' => $newProductStatus["cantidad_seleccionada"],
             ]);
         }
-        return response()->json(["msg" => $statusOT], 201);
+        return response()->json(["msg" => "Orden de Compra creada", 'data' => ["statusOT", $statusOT]], response::HTTP_CREATED); //201
     }
 
 
@@ -77,7 +82,7 @@ class OrderPurchaseController extends Controller
     public function show(StatusOT $statusOT)
     {
         $statusOT = StatusOT::all();
-        return response()->json(["msg" => $statusOT], 201);
+        return response()->json(["msg" => "Estado de la orden de compra", 'data' => ["statusOT", $statusOT]], response::HTTP_CREATED);
     }
 
 

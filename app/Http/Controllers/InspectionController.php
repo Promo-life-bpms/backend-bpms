@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Response;
 
 class InspectionController extends Controller
 {
@@ -38,11 +39,11 @@ class InspectionController extends Controller
         ]);
 
         if ($validation->fails()) {
-            return response()->json(["errors" => $validation->getMessageBag()], 400);
+            return response()->json(['msg' => "Error al crear la inspeccion de calidad", 'data' => ["errorValidacion" => $validation->getMessageBag()]], response::HTTP_BAD_REQUEST); //400
         }
         $sale = Sale::where('code_sale', $sale_id)->first();
         if (!$sale) {
-            return response()->json(["errors" => "No se ha encontrado el pedido"], 404);
+            return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
         }
 
         $maxINSP = Inspection::max('code_inspection');
@@ -79,9 +80,16 @@ class InspectionController extends Controller
                 ];
                 $inspection->productsSelected()->create($dataProductSelected);
             }
-            return response()->json(["msg" => "Inspeccion Creada Correctamente", 'data' => $inspection], 200);
+            return response()->json([
+                "msg" => "Inspeccion Creada Correctamente",
+                'data' =>
+                ["inspection" => $inspection]
+            ], response::HTTP_CREATED);
         } catch (Exception $e) {
-            return response()->json(["errors" => $e->getMessage()], 400);
+            return response()->json([
+                'msg' => "Inspeccion No Creada",
+                'data' => ["error", $e->getMessage()]
+            ], response::HTTP_BAD_REQUEST); //400
         }
     }
 
@@ -95,9 +103,13 @@ class InspectionController extends Controller
     {
         $inspection = Inspection::with('productsSelected')->where('code_inspection', $inspection_id)->first();
         if ($inspection) {
-            return response()->json(["inspection" => $inspection], 200);
+            return response()->json([
+                'msg' => "Inspeccion de calidad solicitada correctamente",
+                'data' =>
+                ["inspection" => $inspection]
+            ], response::HTTP_OK); //200
         }
-        return response()->json(["errors" => "No Encontrado"], 404);
+        return response()->json(["msg" => "Inspeccion No Encontrada"], response::HTTP_NOT_FOUND);
         // Detalle de la inspeccion
     }
 }
