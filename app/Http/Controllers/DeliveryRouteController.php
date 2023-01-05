@@ -132,7 +132,7 @@ class DeliveryRouteController extends Controller
             'date_of_delivery' => $request->date_of_delivery,
             'user_chofer_id' => $request->user_chofer_id,
             'type_of_product' => $request->type_of_product,
-            'status' => 'creado',
+            'status' => 'Pendiente',
             'is_active' => 1,
         ]);
         //crear los productos de esa ruta de entrega
@@ -353,6 +353,7 @@ class DeliveryRouteController extends Controller
             'product_remission' => 'required|array',
             // 'product_remission.*.remission_id' => 'required',
             'product_remission.*.delivered_quantity' => 'required',
+            'product_remission.*.product' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json([
@@ -398,10 +399,18 @@ class DeliveryRouteController extends Controller
 
             $remision->productRemission()->create([
                 'delivered_quantity' => $product->delivered_quantity,
+                'product' => $product->product,
             ]);
         }
 
+<<<<<<< HEAD
         return response()->json(['msg' => 'Remision creada exitosamente', 'data' => ["remision" => $remision]], Response::HTTP_CREATED);
+=======
+        // TODO: Crear una recepcion de inventario en caso de que el typo de origen sea Almacen
+
+
+        return response()->json(['msg' => 'Remision creada exitosamente', 'data' => $remision], Response::HTTP_CREATED);
+>>>>>>> dcf2e8ea7146f8fa4a27a87fb9e82764f1b144fd
     }
 
     public function viewRemision()
@@ -426,7 +435,11 @@ class DeliveryRouteController extends Controller
             return response()->json(['msg' =>  'Remision no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
         $remision->productRemission;
+<<<<<<< HEAD
         return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision", $remision]], response::HTTP_OK); //200
+=======
+        return response()->json(['errors' => (['msg' => 'Remision encontrada.', 'data' => $remision])], 200);
+>>>>>>> dcf2e8ea7146f8fa4a27a87fb9e82764f1b144fd
     }
 
     public function cancelRemision($ruta, $id)

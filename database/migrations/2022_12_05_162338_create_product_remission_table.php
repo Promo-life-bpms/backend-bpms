@@ -16,7 +16,8 @@ class CreateProductRemissionTable extends Migration
         Schema::create('product_remission', function (Blueprint $table) {
             $table->id();
             $table->foreignId('remission_id')->reference('id')->on('remisiones');
-            $table->string('delivered_quantity');
+            $table->integer('delivered_quantity');
+            $table->string('product');
             $table->timestamps();
         });
     }

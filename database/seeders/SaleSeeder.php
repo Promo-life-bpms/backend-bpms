@@ -18,7 +18,7 @@ class SaleSeeder extends Seeder
      */
     public function run()
     {
-        $sales =  Sale::factory()->count(50)->create();
+        $sales =  Sale::factory()->count(2)->create();
         foreach ($sales as $sale) {
             AdditionalSaleInformation::factory()
                 ->count(1)

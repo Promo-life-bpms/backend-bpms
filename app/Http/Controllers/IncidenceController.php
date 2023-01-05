@@ -27,15 +27,21 @@ class IncidenceController extends Controller
         ], response::HTTP_OK); //200
     }
 
-
-
-    public function show($incidencia_id)
+    public function show($incidencia)
     {
+<<<<<<< HEAD
         $incidencia = Incidence::where('internal_code_incidence', $incidencia_id)->first();
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
         return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $incidencia]], response::HTTP_OK);
+=======
+        $incidenciaDB = Incidence::where('internal_code_incidence', $incidencia)->first();
+        if (!$incidenciaDB) {
+            return response()->json(["errors" => "No se ha encontrado la incidencia"], 404);
+        }
+        return response()->json(["data" => $incidenciaDB], 404);
+>>>>>>> dcf2e8ea7146f8fa4a27a87fb9e82764f1b144fd
     }
 
     /**
