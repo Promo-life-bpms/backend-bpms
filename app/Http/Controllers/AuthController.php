@@ -44,7 +44,10 @@ class AuthController extends Controller
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
         $user->save();
-        return response($user, Response::HTTP_CREATED);
+        return response()->json([
+            'msg' => 'Usuario dado de alta correctamente',
+            'data' => ['user' => $user]
+        ], Response::HTTP_CREATED);
     }
 
     public function login(Request $request)
@@ -72,13 +75,16 @@ class AuthController extends Controller
                     "photo" => $user->photo ? env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . str_replace(' ', '%20', $user->photo) : null
                 ],
             ])->attempt($credentials)) {
-                return response()->json(['error' => 'Unauthorized'], 401);
+                return response()->json(['msg' => 'No autorizado'], response::HTTP_UNAUTHORIZED); //401
             }
             return $this->respondWithToken($token);
         } else {
-            return response()->json([
-                "msg" => "Correo incorrecto o no registrado"
-            ], Response::HTTP_UNAUTHORIZED);
+            return response()->json(
+                [
+                    "msg" => "Correo incorrecto o no registrado"
+                ],
+                Response::HTTP_UNAUTHORIZED
+            );
         }
     }
 
@@ -87,20 +93,21 @@ class AuthController extends Controller
         $user = User::find(auth()->user()->id);
         return response()->json([
             "message" => "Perfil de usuario",
-            "userData" => $user
+            "userData" => ['user' => $user]
         ], Response::HTTP_OK);
     }
 
     public function logout()
     {
         auth()->logout();
-        return response(["message" => "Se cerro sesion correctamente"], Response::HTTP_OK);
+        return response(["msg" => "Se cerro sesion correctamente"], Response::HTTP_OK);
     }
 
     protected function respondWithToken($token)
     {
         return response()->json([
-            'access_token' => $token,
+            'msg' => 'acceso al token',
+            'token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60
         ]);
@@ -113,8 +120,9 @@ class AuthController extends Controller
             $user->photo = $user->photo ? env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . str_replace(' ', '%20', $user->photo) : null;
         }
         return response()->json([
-            "users" => $users
-        ]);
+            'msg' => 'Lista de usuarios',
+            'data' => ["users" => $users]
+        ], response::HTTP_OK);
     }
 
     public function syncUsers()
@@ -168,7 +176,7 @@ class AuthController extends Controller
                             $user->save();
                         }
                     }
-                    return response()->json(['msg' => 'Actualizacion Completa']);
+                    return response()->json(['msg' => 'Actualizacion Completa'], response::HTTP_OK);
                 }
             }
         } catch (Exception $e) {

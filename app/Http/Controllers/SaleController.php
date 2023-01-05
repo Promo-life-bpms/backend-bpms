@@ -6,9 +6,11 @@ use App\Models\OrderPurchase;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Symfony\Component\HttpFoundation\Response;
 
 class SaleController extends Controller
 {
+    
     /**
      * Display a listing of the resource.
      *
@@ -25,7 +27,7 @@ class SaleController extends Controller
         }
 
 
-
+        $sales = null;
         if ($request->ordenes_proximas) {
             $sales =  Sale::with('currentStatus', "orders")
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
@@ -33,7 +35,6 @@ class SaleController extends Controller
                 ->orderby('order_purchases.planned_date', 'ASC')
                 ->paginate($per_page);
         } else {
-
             $sales = Sale::with('currentStatus', "orders")->paginate($per_page);
         }
 
@@ -42,9 +43,9 @@ class SaleController extends Controller
 
         // $ordenes = OrderPurchase::where('planned_date','=', Carbon::now());
         return response()->json([
-            'pedidos' => $sales,
+            'msg' => 'Lista de pedidos', 'data' => ["sales" => $sales]
             // 'ordenes' => $ordenes
-        ], 200);
+        ], response::HTTP_OK); //200
     }
 
     /**
@@ -69,15 +70,13 @@ class SaleController extends Controller
             'saleProducts',
             'moreInformation',
             'orders',
-            'routeDeliveries',
-            'inspections',
-            'incidences'
+            'routeDeliveries'
+            // 'inspecciones',
+            // TODO: 'incidencias'
         ])->where('code_sale', $sale_id)->first();
-
         if ($sale) {
-            return response()->json(['data' => $sale], 200);
+            return response()->json(['msg' => 'Detalle del pedido', 'data' => ["sale", $sale]], response::HTTP_OK); //200
         }
-
-        return response()->json(['pedido' => "No hay informacion acerca de este pedido"], 200);
+        return response()->json(['msg' => "No hay informacion acerca de este pedido"], response::HTTP_OK); //200
     }
 }

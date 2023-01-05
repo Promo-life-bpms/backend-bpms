@@ -9,6 +9,7 @@ use App\Models\ProductDeliveryRoute;
 use App\Models\ProductRemission;
 use App\Models\Remission;
 use App\Models\Role;
+use App\Models\Sale;
 use App\Models\Status;
 use Exception;
 use Facade\FlareClient\Api;
@@ -30,11 +31,11 @@ class DeliveryRouteController extends Controller
     {
         $ruta = DeliveryRoute::where("is_active", true)->get();
         return response()->json([
-            "rutas_de_entrega" => $ruta,
-            "mensaje" => "OK",
-            "display_message" => "Acceso de rutas correcto",
+            'msg' => "Acceso de rutas correcto",
+            'data' => ["ruta" => $ruta],
+        ], Response::HTTP_OK); //200
 
-        ], 200);
+
     }
 
 
@@ -59,8 +60,19 @@ class DeliveryRouteController extends Controller
         if ($request->per_page) {
             $per_page = $request->per_page;
         }
-        $orderPurchase = OrderPurchase::with('products')->whereIn('status', ["Cancelado", "Confirmado"])->orderBy('code_sale', 'ASC')->paginate($per_page);
-        return response()->json(['pedidos' => $orderPurchase, "choferes" => $choferes], 200);
+        $pedidos = Sale::join('order_purchases', 'order_purchases.code_sale', 'sales.code_sale')->whereIn('order_purchases.status', ["Cancelado", "Confirmado"])->orderBy('sales.code_sale', 'ASC')->paginate($per_page);
+        foreach ($pedidos as $pedido) {
+            $pedido->orders = $pedido->orders()->whereIn('order_purchases.status', ["Cancelado", "Confirmado"])->get();
+            foreach ($pedido->orders as $orden) {
+                $orden->products;
+            }
+        }
+        return response()->json([
+            'msg' => 'Pedidos por agendar',
+            'data' => [
+                "pedidos" => $pedidos, "choferes" => $choferes
+            ]
+        ], response::HTTP_OK);
     }
 
     /**
@@ -95,7 +107,13 @@ class DeliveryRouteController extends Controller
             'code_orders.*.products.*.amount' => 'required'
         ]);
         if ($validation->fails()) {
-            return response()->json(["errors" => $validation->getMessageBag()], 422);
+            return response()->json(
+                [
+                    'msg' => "Error al validar informacion de la ruta de entrega",
+                    'data' => ['errorValidacion' => $validation->getMessageBag()]
+                ],
+                response::HTTP_UNPROCESSABLE_ENTITY
+            ); // 422
         }
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
         // ::create
@@ -147,7 +165,12 @@ class DeliveryRouteController extends Controller
             }
         }
 
-        return response()->json(['msg' => 'Ruta Creada Existosamente', 'data' => $ruta], Response::HTTP_CREATED);
+        return response()->json([
+            'msg' => 'Ruta Creada Existosamente',
+            'data' => [
+                "ruta" =>  $ruta
+            ]
+        ], Response::HTTP_CREATED);
     }
 
     /**
@@ -164,7 +187,7 @@ class DeliveryRouteController extends Controller
         // Chequeaos si encontró o no la ruta
         if (!$ruta) {
             // Se devuelve un array errors con los errores detectados y código 404
-            return response()->json(['errors' => (['code' => 404, 'message' => 'No se encuentra esa ruta de entrega.'])], 404);
+            return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
         }
         $ordenes = $ruta->codeOrderDeliveryRoute;
         foreach ($ordenes as $ordenDeCompra) {
@@ -173,7 +196,7 @@ class DeliveryRouteController extends Controller
 
         $ruta->remissions;
         // Devolvemos la información encontrada.
-        return response()->json(['msg' => 'Consulta correcta', 'delivery_route' => $ruta]);
+        return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['ruta' => $ruta]], response::HTTP_OK);
     }
 
     /**
@@ -202,7 +225,7 @@ class DeliveryRouteController extends Controller
             // Retornar mensaje
             return response()->json([
                 'msg' => "ruta no encontrada"
-            ], 404);
+            ], response::HTTP_NOT_FOUND);
         }
         $ruta->date_of_delivery = $request->date_of_delivery;
         $ruta->user_chofer_id = $request->user_chofer_id;
@@ -281,7 +304,7 @@ class DeliveryRouteController extends Controller
                 }
             }
         } */
-        return response()->json('Ruta actualizada correctamente!');
+        return response()->json(['msg' => 'Ruta actualizada correctamente!'], response::HTTP_OK);
     }
     /**
      * Remove the specified resource from storage.
@@ -294,7 +317,7 @@ class DeliveryRouteController extends Controller
         $ruta = DeliveryRoute::where('code_route', $deliveryRoute)->first();
         // Chequeaos si encontró o no la ruta
         if (!$ruta) {
-            return response()->json(['errors' => (['code' => 404, 'message' => 'No se encuentra esa ruta de entrega.'])], 404);
+            return response()->json([(['msg' => 'No se encuentra esa ruta de entrega.'])], response::HTTP_NOT_FOUND);
         }
         try {
             foreach ($ruta->codeOrderDeliveryRoute as $codr) {
@@ -303,11 +326,16 @@ class DeliveryRouteController extends Controller
             }
             $ruta->delete();
         } catch (Exception $e) {
-            return response()->json(['errors' => (['code' => 404, 'message' => 'Error al eliminar esta ruta.', 'code_error' => $e->getMessage()])], 404);
+            return response()->json([
+                ([
+                    'msg' => 'Error al eliminar esta ruta.', 'data' =>
+                    ['error' => $e->getMessage()]
+                ])
+            ], response::HTTP_NOT_FOUND);
             //throw $th;
         }
         // Se devuelve un array errors con los errores detectados y código 404
-        return response()->json(['msg' => 'Ruta eliminada correctamente!'], 200);
+        return response()->json(['msg' => 'Ruta eliminada correctamente!'], response::HTTP_OK); //200
     }
 
     public function setRemisiones(Request $request, $ruta)
@@ -328,12 +356,15 @@ class DeliveryRouteController extends Controller
             'product_remission.*.product' => 'required',
         ]);
         if ($validation->fails()) {
-            return response()->json(["errors" => $validation->getMessageBag()], 422);
+            return response()->json([
+                'msg' => "Error de validacion de la remision",
+                'data' => ["errorValidacion" => $validation->getMessageBag()]
+            ], response::HTTP_UNPROCESSABLE_ENTITY); //422
         }
         $deliveryRoute = DeliveryRoute::where('code_route', $ruta)->first();
 
         if (!$deliveryRoute) {
-            return response()->json(['errors' => (['message' => 'Ruta de entrega no encontrada.'])], 404);
+            return response()->json(['msg' => 'Ruta de entrega no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
 
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
@@ -372,21 +403,22 @@ class DeliveryRouteController extends Controller
             ]);
         }
 
+<<<<<<< HEAD
+        return response()->json(['msg' => 'Remision creada exitosamente', 'data' => ["remision" => $remision]], Response::HTTP_CREATED);
+=======
         // TODO: Crear una recepcion de inventario en caso de que el typo de origen sea Almacen
 
 
         return response()->json(['msg' => 'Remision creada exitosamente', 'data' => $remision], Response::HTTP_CREATED);
+>>>>>>> dcf2e8ea7146f8fa4a27a87fb9e82764f1b144fd
     }
 
     public function viewRemision()
     {
         $remision = Remission::where("status", 1)->get();
         return response()->json([
-            "remisiones" => $remision,
-            "mensaje" => "OK",
-            "display_message" => "Acceso de remisiones correcto",
-
-        ], 200);
+            "msg" =>  "Acceso de remisiones correcto", 'data' => ["remision" => $remision]
+        ], response::HTTP_OK); //200
     }
 
     public function showRemision($ruta, $id)
@@ -394,16 +426,20 @@ class DeliveryRouteController extends Controller
         $deliveryRoute = DeliveryRoute::where('code_route', $ruta)->first();
 
         if (!$deliveryRoute) {
-            return response()->json(['errors' => (['msg' => 'Ruta de entrega no encontrada.'])], 404);
+            return response()->json(['msg' =>  'Ruta de entrega no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
 
         $remision = Remission::where('code_remission', $id)->first();
 
         if (!$remision) {
-            return response()->json(['errors' => (['msg' => 'Remision no encontrada.'])], 404);
+            return response()->json(['msg' =>  'Remision no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
         $remision->productRemission;
+<<<<<<< HEAD
+        return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision", $remision]], response::HTTP_OK); //200
+=======
         return response()->json(['errors' => (['msg' => 'Remision encontrada.', 'data' => $remision])], 200);
+>>>>>>> dcf2e8ea7146f8fa4a27a87fb9e82764f1b144fd
     }
 
     public function cancelRemision($ruta, $id)
@@ -411,16 +447,16 @@ class DeliveryRouteController extends Controller
         $deliveryRoute = DeliveryRoute::where('code_route', $ruta)->first();
 
         if (!$deliveryRoute) {
-            return response()->json(['errors' => (['msg' => 'Ruta de entrega no encontrada.'])], 404);
+            return response()->json(['msg' => 'Ruta de entrega no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
         $remision = Remission::where('code_remission', $id)->first();
 
         if (!$remision) {
-            return response()->json(['errors' => (['msg' => 'Remision no encontrada.'])], 404);
+            return response()->json(['msg' =>  'Remision no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
 
         if ($remision->status == 2) {
-            return response()->json(["msg" => "Esta Remision se encuentra actualmente cancelada"], 200);
+            return response()->json(["msg" => "Esta remision se encuentra actualmente cancelada"], response::HTTP_OK); //200
         }
 
         // Revisar si no esta cancelado
@@ -428,6 +464,6 @@ class DeliveryRouteController extends Controller
         // Marcar como cancelada la remision
         $remision->status = 2;
         $remision->save();
-        return response()->json(["msg" => "Remision cancelada"], 200);
+        return response()->json(["msg" => "Remision cancelada"], response::HTTP_OK); //200
     }
 }
