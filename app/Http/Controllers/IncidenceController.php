@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Contracts\Service\Attribute\Required;
+use Symfony\Component\HttpFoundation\Response;
 
 class IncidenceController extends Controller
 {
@@ -19,21 +20,20 @@ class IncidenceController extends Controller
      */
     public function index()
     {
-        $Incidencia = Incidence::all();
+        $Incidencias = Incidence::all();
         return response()->json([
-            "Incidencia" => $Incidencia,
-            "mensaje" => "OK",
-            "user" => "Marlene",
-        ], 200);
+            'msg' => "Lista de incidencias",
+            'data' => ["incidencias" => $Incidencias]
+        ], response::HTTP_OK); //200
     }
 
     public function show($incidencia)
     {
-        $incidenciaDB = Incidence::where('internal_code_incidence', $incidencia)->first();
-        if (!$incidenciaDB) {
-            return response()->json(["errors" => "No se ha encontrado la incidencia"], 404);
+        $incidencia = Incidence::where('internal_code_incidence', $incidencia)->first();
+        if (!$incidencia) {
+            return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
-        return response()->json(["data" => $incidenciaDB], 404);
+        return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $incidencia]], response::HTTP_OK);
     }
 
     /**
@@ -72,11 +72,15 @@ class IncidenceController extends Controller
         ]);
 
         if ($validation->fails()) {
-            return response()->json(["errors" => $validation->getMessageBag()], 422);
+            return response()->json([
+                "msg" => 'No se registro correctamente la informacion',
+                'data' =>
+                ["errorValidacion" => $validation->getMessageBag()]
+            ], response::HTTP_UNPROCESSABLE_ENTITY);
         }
         $sale = Sale::with('moreInformation')->where('code_sale', $sale_id)->first();
         if (!$sale) {
-            return response()->json(["errors" => "No se ha encontrado el pedido"], 404);
+            return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
         }
 
         //Crea codigo de incidencia
@@ -157,7 +161,7 @@ class IncidenceController extends Controller
                 break;
 
             default:
-                return response()->json(['msg' => 'No se pudo asignar el key para enviar la incidencia a Odoo correctamente'], 400);
+                return response()->json(['msg' => 'No se pudo asignar el key para enviar la incidencia a Odoo correctamente'], response::HTTP_BAD_REQUEST); //400
                 break;
         }
         try {
@@ -210,15 +214,29 @@ class IncidenceController extends Controller
             }
 
             if ($errors) {
-                return response()->json(['msg' => 'No se pudo crear la incidencia correctamente', 'error' => $message], 400);
+                return response()->json([
+                    'msg' => 'No se pudo crear la incidencia correctamente',
+                    'data' =>
+                    ["message" => $message]
+                ], response::HTTP_BAD_REQUEST);
             }
         } catch (Exception $exception) {
             $message = $exception->getMessage();
             $errors = true;
-            return response()->json(['msg' => 'No se pudo crear la incidencia correctamente', 'error' => $message], 400);
+            return response()->json(
+                [
+                    'msg' => 'No se pudo crear la incidencia correctamente',
+                    'data' => ["message" => $message]
+                ],
+                response::HTTP_BAD_REQUEST
+            );
         }
 
-        return response()->json(["msg" => 'Incidencia creada exitosamente'], 201);
+        return response()->json([
+            "msg" => 'Incidencia creada exitosamente',
+            'data' =>
+            ["incidencia" => $incidencia]
+        ], response::HTTP_CREATED);
     }
 
 
@@ -233,10 +251,8 @@ class IncidenceController extends Controller
     {
         $Incidencia = Incidence::destroy($request->id);
         return response()->json([
-            "Incidencia" => $Incidencia,
-            "mensaje" => "Borrando registro",
-            "display_message" => "La incidencia se ha eliminado corectamente",
-            "user" => "Marlene",
-        ], 201);
+            "msg" => "La incidencia se ha eliminado correctamente",
+            "data" => ['incidencia' => $Incidencia],
+        ], response::HTTP_OK); //201
     }
 }
