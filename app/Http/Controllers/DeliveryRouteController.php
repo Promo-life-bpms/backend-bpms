@@ -403,14 +403,7 @@ class DeliveryRouteController extends Controller
             ]);
         }
 
-<<<<<<< HEAD
         return response()->json(['msg' => 'Remision creada exitosamente', 'data' => ["remision" => $remision]], Response::HTTP_CREATED);
-=======
-        // TODO: Crear una recepcion de inventario en caso de que el typo de origen sea Almacen
-
-
-        return response()->json(['msg' => 'Remision creada exitosamente', 'data' => $remision], Response::HTTP_CREATED);
->>>>>>> dcf2e8ea7146f8fa4a27a87fb9e82764f1b144fd
     }
 
     public function viewRemision()
@@ -435,11 +428,7 @@ class DeliveryRouteController extends Controller
             return response()->json(['msg' =>  'Remision no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
         $remision->productRemission;
-<<<<<<< HEAD
         return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision", $remision]], response::HTTP_OK); //200
-=======
-        return response()->json(['errors' => (['msg' => 'Remision encontrada.', 'data' => $remision])], 200);
->>>>>>> dcf2e8ea7146f8fa4a27a87fb9e82764f1b144fd
     }
 
     public function cancelRemision($ruta, $id)

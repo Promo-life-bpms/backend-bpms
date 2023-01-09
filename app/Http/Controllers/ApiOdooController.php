@@ -313,59 +313,62 @@ class ApiOdooController extends Controller
                     return response()->json(($validator->getMessageBag()));
                 } */
 
-                $reception = (object)$request->reception;
-                $dataReception = [
-                    'code_reception' => $reception->code_reception ?: " ",
-                    'code_order' => $reception->code_order ?: " ",
-                    'company' => $reception->company ?: " ",
-                    'type_operation' => $reception->type_operation ?: " ",
-                    'planned_date' => $reception->planned_date ?: null,
-                    'effective_date' => $reception->effective_date ?: null,
-                    'status' => $reception->status ?: " ",
-                ];
-                $receptionDB = null;
-                try {
-                    $receptionDB = Reception::updateOrCreate(['code_reception' => $reception->code_reception], $dataReception);
-                } catch (Exception $th) {
-                    return response()->json(['message' => 'Error al crear la orden de compra', 'error' => $th->getMessage()], 400);
-                }
-
-                if ($receptionDB) {
-                    $errors = [];
-                    foreach ($reception->operations as $productRequest) {
-                        $productRequest = (object)$productRequest;
-                        $dataProduct =  [
-                            "odoo_product_id" => $productRequest->odoo_product_id ?: " ",
-                            "product" => $productRequest->product ?: " ",
-                            "code_reception" => $productRequest->code_reception ?: " ",
-                            "initial_demand" => $productRequest->initial_demand ?: 0,
-                            "done" => $productRequest->done ?: 0,
-                        ];
-                        try {
-                            $receptionDB->productsReception()->updateOrCreate(
-                                [
-                                    "odoo_product_id" => $productRequest->odoo_product_id,
-                                    'reception_id' => $receptionDB->id
-                                ],
-                                $dataProduct
-                            );
-                        } catch (Exception $th) {
-                            array_push($errors, ['msg' => "Error al insertar el producto", 'error' => $th->getMessage()]);
-                        }
+                $receptions = (object)$request->reception;
+                foreach ($receptions as $reception) {
+                    $reception = (object) $reception;
+                    $dataReception = [
+                        'code_reception' => $reception->code_reception ?: " ",
+                        'code_order' => $reception->code_order ?: " ",
+                        'company' => $reception->company ?: " ",
+                        'type_operation' => $reception->type_operation ?: " ",
+                        'planned_date' => $reception->planned_date ?: null,
+                        'effective_date' => $reception->effective_date ?: null,
+                        'status' => $reception->status ?: " ",
+                    ];
+                    $receptionDB = null;
+                    try {
+                        $receptionDB = Reception::updateOrCreate(['code_reception' => $reception->code_reception], $dataReception);
+                    } catch (Exception $th) {
+                        array_push($errors, ['msg' => "Error al insertar el producto", 'data' => $dataReception, 'error' => $th->getMessage()]);
                     }
-                    foreach ($receptionDB->productsReception as $productDB) {
-                        $existProduct = false;
-                        foreach ($reception->operations as $productRQ) {
-                            if ($productDB->odoo_product_id == $productRQ['odoo_product_id']) {
-                                $existProduct = true;
+
+                    if ($receptionDB) {
+                        $errors = [];
+                        foreach ($reception->operations as $productRequest) {
+                            $productRequest = (object)$productRequest;
+                            $dataProduct =  [
+                                "odoo_product_id" => $productRequest->odoo_product_id ?: " ",
+                                "product" => $productRequest->product ?: " ",
+                                "code_reception" => $productRequest->code_reception ?: " ",
+                                "initial_demand" => $productRequest->initial_demand ?: 0,
+                                "done" => $productRequest->done ?: 0,
+                            ];
+                            try {
+                                $receptionDB->productsReception()->updateOrCreate(
+                                    [
+                                        "odoo_product_id" => $productRequest->odoo_product_id,
+                                        'reception_id' => $receptionDB->id
+                                    ],
+                                    $dataProduct
+                                );
+                            } catch (Exception $th) {
+                                array_push($errors, ['msg' => "Error al insertar el producto", 'dataProduct' => $dataProduct, 'error' => $th->getMessage()]);
                             }
                         }
-                        if (!$existProduct) {
-                            $productDB->delete();
+                        foreach ($receptionDB->productsReception as $productDB) {
+                            $existProduct = false;
+                            foreach ($reception->operations as $productRQ) {
+                                if ($productDB->odoo_product_id == $productRQ['odoo_product_id']) {
+                                    $existProduct = true;
+                                }
+                            }
+                            if (!$existProduct) {
+                                $productDB->delete();
+                            }
                         }
-                    }
-                    if (count($errors) > 0) {
-                        return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
+                        if (count($errors) > 0) {
+                            return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
+                        }
                     }
                 }
                 return response()->json(['message' => 'Actualizacion Completa'], 200);
@@ -557,5 +560,10 @@ class ApiOdooController extends Controller
         } catch (Exception $th) {
             return  response()->json(["Server Error Validate: " => $th->getMessage()], 400);
         }
+    }
+
+    public function getTracking(Request $request)
+    {
+
     }
 }
