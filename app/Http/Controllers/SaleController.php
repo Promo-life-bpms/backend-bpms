@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SaleController extends Controller
 {
-    
+
     /**
      * Display a listing of the resource.
      *
@@ -29,13 +29,13 @@ class SaleController extends Controller
 
         $sales = null;
         if ($request->ordenes_proximas) {
-            $sales =  Sale::with('currentStatus', "orders")
+            $sales =  Sale::with('currentStatus', "orders", 'moreInformation')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
                 //->where('order_purchases.planned_date', '>=', $fechaProxima)
                 ->orderby('order_purchases.planned_date', 'ASC')
                 ->paginate($per_page);
         } else {
-            $sales = Sale::with('currentStatus', "orders")->paginate($per_page);
+            $sales = Sale::with('currentStatus', "orders", 'moreInformation')->paginate($per_page);
         }
 
 

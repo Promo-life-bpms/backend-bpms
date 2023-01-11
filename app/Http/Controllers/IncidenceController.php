@@ -44,6 +44,8 @@ class IncidenceController extends Controller
      */
     public function store(Request $request, $sale_id)
     {
+        // TODO: Calidad y ventas puede generar incidencias hasta 30 dias, despues solo calidad.
+
         //validar que la informacion este correcta si no no se puede registrar
         // utilizar validator
         $validation = Validator::make($request->all(), [
