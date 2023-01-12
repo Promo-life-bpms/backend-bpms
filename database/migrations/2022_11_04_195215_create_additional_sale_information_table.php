@@ -26,6 +26,7 @@ class CreateAdditionalSaleInformationTable extends Migration
             $table->dateTime('planned_date')->nullable();
             $table->dateTime('commitment_date')->nullable();
             $table->dateTime('effective_date')->nullable();
+            $table->string('company');
             $table->timestamps();
         });
     }

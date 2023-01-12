@@ -18,6 +18,6 @@ class DatabaseSeeder extends Seeder
         $this->call(StatusSeeder::class);
         $this->call(LaratrustSeeder::class);
         // $this->call(SaleSeeder::class);
-        // $this->call(UserSeeder::class);
+        $this->call(UserSeeder::class);
     }
 }
