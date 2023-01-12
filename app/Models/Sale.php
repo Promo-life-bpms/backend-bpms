@@ -27,6 +27,8 @@ class Sale extends Model
         'commercial_odoo_id',
         'commercial_name',
         'commercial_email',
+        'subtotal',
+        'taxes',
         'total',
         'status_id',
     ];
