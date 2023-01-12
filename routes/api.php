@@ -27,6 +27,7 @@ Route::post('setPurchase/v1', [ApiOdooController::class, 'setPurchase']);
 Route::post('setIncidence/v1', [ApiOdooController::class, 'setIncidence']);
 Route::post('setReception/v1', [ApiOdooController::class, 'setReception']);
 Route::post('setDelivery/v1', [ApiOdooController::class, 'setDelivery']);
+Route::post('setTracking/v1', [ApiOdooController::class, 'setTracking']);
 
 Route::get('users', [AuthController::class, 'allUsers']);
 Route::post('login', [AuthController::class, 'login']);

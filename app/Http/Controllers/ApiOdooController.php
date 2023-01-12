@@ -8,6 +8,7 @@ use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Reception;
 use App\Models\Sale;
+use App\Models\Tracking;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -562,8 +563,30 @@ class ApiOdooController extends Controller
         }
     }
 
-    public function getTracking(Request $request)
+    public function setTracking(Request $request)
     {
-
+        try {
+            if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
+                $tracking = (object)$request->tracking;
+                $dataTracking = [
+                    'object' => $tracking->object ?: " ",
+                    'code_object' => $tracking->code_object ?: " ",
+                    'name' => $tracking->name ?: " ",
+                    'change' => $tracking->change ?: " ",
+                    'date' => $tracking->date ?: " ",
+                ];
+                $trackingDB = null;
+                try {
+                    $trackingDB = Tracking::create($dataTracking);
+                } catch (Exception $th) {
+                    return response()->json(['message' => 'Error al crear el registro tipo Tracking', 'error' => $th->getMessage()], 400);
+                }
+                return response()->json(['message' => 'Actualizacion Completa'], 200);
+            } else {
+                return response()->json(['message' => 'No Tienes autorizacion']);
+            }
+        } catch (Exception $th) {
+            return  response()->json(["Server Error Validate: " => $th->getMessage()], 400);
+        }
     }
 }

@@ -15,6 +15,11 @@ class CreateTrackingsTable extends Migration
     {
         Schema::create('trackings', function (Blueprint $table) {
             $table->id();
+            $table->string('object');
+            $table->string('code_object');
+            $table->string('name');
+            $table->text('change');
+            $table->dateTime('date');
             $table->timestamps();
         });
     }
