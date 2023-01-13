@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Incidence;
+use App\Models\OrderPurchase;
 use App\Models\OrderPurchaseProduct;
 use App\Models\Sale;
 use Exception;
@@ -10,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Stmt\Return_;
 
 class IncidenceController extends Controller
 {
@@ -18,14 +21,7 @@ class IncidenceController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        $Incidencias = Incidence::all();
-        return response()->json([
-            'msg' => "Lista de incidencias",
-            'data' => ["incidencias" => $Incidencias]
-        ], response::HTTP_OK); //200
-    }
+
 
     public function show($incidencia)
     {
@@ -83,6 +79,7 @@ class IncidenceController extends Controller
             return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
         }
 
+
         //Crea codigo de incidencia
         $maxINC = Incidence::max('internal_code_incidence');
         $idinc = null;
@@ -92,6 +89,8 @@ class IncidenceController extends Controller
             $idinc = (int) explode('-', $maxINC)[1];
             $idinc++;
         }
+        $response = null;
+
 
         $incidencia = Incidence::create([
             "code_incidence" => 'No Definido',
@@ -123,12 +122,15 @@ class IncidenceController extends Controller
             'signature_reviewed' => $request->firma_reviso,
             'sale_id' => $sale->id
         ]);
+        $response = null;
 
         $dataProducts = [];
-
+        $orderpurchase_id = null;
         foreach ($request->incidence_products as $incidence_product) {
             $incidence_product = (object)$incidence_product;
             $productOrder = OrderPurchaseProduct::where("odoo_product_id", $incidence_product->id_order_purchase_products)->first();
+
+            $orderpurchase_id = $productOrder->order_purchase_id;
             $productOdoo = [
                 "pro_name" => '',
                 "pro_product_id" => $productOrder->product,
@@ -136,6 +138,7 @@ class IncidenceController extends Controller
                 "pro_currency_id" => "MXN",
                 "pro_price" => $productOrder->unit_price
             ];
+
             $incidencia->productsIncidence()->create([
                 'order_purchase_product_id' =>  $productOrder->id,
                 'quantity_selected' => $incidence_product->cantidad_seleccionada,
@@ -147,23 +150,27 @@ class IncidenceController extends Controller
             array_push($dataProducts, $productOdoo);
         }
 
+
         $keyOdoo = '';
-        $company = "Promo Life";
+        $company = $sale->moreInformation->warehouse_company;
 
         switch ($company) {
-            case 'Promo Life':
+            case 'PROMO LIFE':
                 $keyOdoo = 'c002a44464a3cbe6bd49344fcd99d06d';
                 # code...
                 break;
-            case 'BH Trademarket':
+            case 'BH':
                 $keyOdoo = 'b1bf4adf8d00ccec169d66fcce0b22ca';
                 # code...
                 break;
-
             default:
                 return response()->json(['msg' => 'No se pudo asignar el key para enviar la incidencia a Odoo correctamente'], response::HTTP_BAD_REQUEST); //400
                 break;
         }
+        $orderpurchase = OrderPurchase::find($orderpurchase_id);
+        if (!$orderpurchase) {
+            return response()->json(["msg" => "No se ha encontrado el OT/OC"], response::HTTP_NOT_FOUND);
+        };
         try {
             $url = 'https://api-promolife.vde-suite.com:5030/custom/Promolife/V2/incidences/create';
             $data =  [
@@ -173,9 +180,13 @@ class IncidenceController extends Controller
                         "sale_id" => $sale->code_sale,
                         "description" => $incidencia->description,
                         "date_incidence" => $incidencia->date_request,
-                        // "supplier_id" => "ALMACENES ÁNFORA SA DE CV",
+                        "supplier_id" => $orderpurchase->provider_name,
                         "line_ids" => $dataProducts,
-                        "po_ids" => [],
+                        "po_ids" => [
+                            [
+                                "com_id" => $orderpurchase->code_order
+                            ]
+                        ],
                     ]
                 ]
             ];
@@ -198,11 +209,12 @@ class IncidenceController extends Controller
                     $message = $dataResponse->detail;
                     $errors = true;
                 }
-
                 if (!$errors && $dataResponse[0]->success) {
                     if ($dataResponse[0]->success) {
                         $folio = $dataResponse[0]->Folio;
-                        //    Actualizar Folio de la Incidencia
+                        //Actualizar Folio de la Incidencia
+                        $incidencia->code_incidence = $folio;
+                        $incidencia->save();
                     } else {
                         $errors = true;
                         $message = $dataResponse[0]->message;
@@ -217,7 +229,7 @@ class IncidenceController extends Controller
                 return response()->json([
                     'msg' => 'No se pudo crear la incidencia correctamente',
                     'data' =>
-                    ["message" => $message]
+                    ["messageOdoo" => $message]
                 ], response::HTTP_BAD_REQUEST);
             }
         } catch (Exception $exception) {
@@ -235,7 +247,9 @@ class IncidenceController extends Controller
         return response()->json([
             "msg" => 'Incidencia creada exitosamente',
             'data' =>
-            ["incidencia" => $incidencia]
+            ["incidencia" => $incidencia,
+            'responseOdoo' => json_decode($response),
+            ]
         ], response::HTTP_CREATED);
     }
 
@@ -252,7 +266,9 @@ class IncidenceController extends Controller
         $Incidencia = Incidence::destroy($request->id);
         return response()->json([
             "msg" => "La incidencia se ha eliminado correctamente",
-            "data" => ['incidencia' => $Incidencia],
+            "data" => [
+                'incidencia' => $Incidencia,
+            ],
         ], response::HTTP_OK); //201
     }
 }

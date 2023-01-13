@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SaleController extends Controller
 {
-    
+
     /**
      * Display a listing of the resource.
      *
@@ -78,5 +78,15 @@ class SaleController extends Controller
             return response()->json(['msg' => 'Detalle del pedido', 'data' => ["sale", $sale]], response::HTTP_OK); //200
         }
         return response()->json(['msg' => "No hay informacion acerca de este pedido"], response::HTTP_OK); //200
+    }
+    public function viewPedidosPorVendedor()
+    {
+        $pedidos = auth()->user()->sales;
+
+        return response()->json([
+            'msg' => "Vizualizar mis pedidos",
+            'data' => ["pedidos" => $pedidos],
+        ], Response::HTTP_OK); //200
+
     }
 }

@@ -20,7 +20,6 @@ class IncidenceProductController extends Controller
     public function index()
     {
         $Incidencia = Incidence::all();
-
         return response()->json([
             "Incidencia" => $Incidencia,
             "mensaje" => "OK",
