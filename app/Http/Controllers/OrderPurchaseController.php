@@ -78,7 +78,7 @@ class OrderPurchaseController extends Controller
 
         $id_order_purchases = OrderPurchase::where('code_order', $id_order_purchases)->get();
         if(!$id_order_purchases){
-            return response()->json(["errors" => "No se ha encontrado la OT"], response::HTTP_NOT_FOUND);
+            return response()->json(["msg" => "No se ha encontrado la OT"], response::HTTP_NOT_FOUND);
         }
         return response()->json(["msg" => "Orden de compra", 'data' => ["id_order_purchases",$id_order_purchases]], response::HTTP_OK);
     }
