@@ -19,6 +19,7 @@ class OrderPurchase extends Model
         'planned_date',
         'company',
         'status',
+        'status_bpm',
         'type_purchase',
         'total'
     ];
