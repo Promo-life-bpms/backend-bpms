@@ -25,7 +25,7 @@ class CreateOrderPurchasesTable extends Migration
             $table->dateTime('planned_date')->nullable();
             $table->string('company');
             $table->string("status");
-            $table->string("status_bpm");
+            $table->string("status_bpm")->nullable();
             $table->string("type_purchase");
             $table->decimal("total", 10, 2);
             $table->timestamps();
