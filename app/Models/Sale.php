@@ -27,6 +27,8 @@ class Sale extends Model
         'commercial_odoo_id',
         'commercial_name',
         'commercial_email',
+        'subtotal',
+        'taxes',
         'total',
         'status_id',
     ];
@@ -52,6 +54,11 @@ class Sale extends Model
         return $this->hasMany(OrderPurchase::class, "code_sale", "code_sale");
     }
 
+    public function detailsOrders()
+    {
+        return $this->hasMany(OrderPurchase::class, "code_sale", "code_sale")->with('products');
+    }
+
     public function currentStatus()
     {
         return $this->belongsTo(Status::class, 'status_id', 'id');
@@ -70,5 +77,10 @@ class Sale extends Model
     public function routeDeliveries()
     {
         return $this->hasMany(CodeOrderDeliveryRoute::class, 'code_sale', 'code_sale')->with('deliveryRoute', 'productDeliveryRoute');
+    }
+
+    public function deliveries()
+    {
+        return $this->hasMany(Delivery::class, 'code_sale', 'code_sale');
     }
 }

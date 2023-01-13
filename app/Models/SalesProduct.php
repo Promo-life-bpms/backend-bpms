@@ -15,6 +15,7 @@ class SalesProduct extends Model
         "odoo_product_id",
         "product",
         "description",
+        "customization",
         "provider",
         "logo",
         "key_product",

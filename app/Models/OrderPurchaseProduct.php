@@ -19,6 +19,7 @@ class OrderPurchaseProduct extends Model
         "quantity_invoiced",
         "quantity_delivered",
         "unit_price",
+        "measurement_unit",
         "subtotal",
     ];
 

@@ -14,7 +14,7 @@ return [
         ],
         'maquilador' => [
             'profile' => 'c,r',
-     ],
+        ],
         'almacen' => [
             'profile' => 'r,u',
         ],

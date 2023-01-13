@@ -16,9 +16,9 @@ class CreateInspectionProductsTable extends Migration
         Schema::create('inspection_products', function (Blueprint $table) {
             $table->id();
             $table->foreignId("inspection_id")->references('id')->on('inspections');
-            $table->foreignId("product_id")->references('id')->on('order_purchase_products');
-            $table->foreignId("order_purchase_id")->references('id')->on('order_purchases');
-            $table->string("quantity_selected");
+            $table->string("odoo_product_id");
+            $table->string("code_order");
+            $table->integer("quantity_selected");
             $table->timestamps();
         });
     }

@@ -27,6 +27,7 @@ Route::post('setPurchase/v1', [ApiOdooController::class, 'setPurchase']);
 Route::post('setIncidence/v1', [ApiOdooController::class, 'setIncidence']);
 Route::post('setReception/v1', [ApiOdooController::class, 'setReception']);
 Route::post('setDelivery/v1', [ApiOdooController::class, 'setDelivery']);
+Route::post('setTracking/v1', [ApiOdooController::class, 'setTracking']);
 
 Route::get('users', [AuthController::class, 'allUsers']);
 Route::post('login', [AuthController::class, 'login']);
@@ -43,10 +44,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
     Route::get('inspections/{inspection}', [InspectionController::class, 'show']);
 
-    // Modal de un detalle de OC, OT
-    // localhost/pedidos/PED456/orders/OC-568
-    // localhost/pedidos/PED456/orders/OT-423
-    // Route::get('pedidos/{pedido}/orders/{order}', [SaleController::class, 'show']);
+    // Detalle de  OC, OT
+    Route::get('pedidos/{pedido}/orders/{order}', [OrderPurchaseController::class, 'show']);
 
     // Recepciones de Inventario
     Route::post('orders/{order}/receptions', [ReceptionController::class, 'saveReception']);
@@ -68,7 +67,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Vista de status de incidencia
     Route::post('order/{compra}/updatestatus', [OrderPurchaseController::class, 'store']);
 
-    Route::get('order/{compra}/updatestatus', [OrderPurchaseController::class, 'show']);
+    // Route::get('order/{compra}/updatestatus', [OrderPurchaseController::class, 'show']);
 
     // SECCION RUTAS DE ENTREGA
 

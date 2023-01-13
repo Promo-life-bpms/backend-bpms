@@ -50,7 +50,7 @@ class OrderPurchaseController extends Controller
             ], response::HTTP_UNPROCESSABLE_ENTITY); //422
         }
         $compra = OrderPurchase::where('code_order', $compra)->first();
-        if(!$compra){
+        if (!$compra) {
             return response()->json(["errors" => "No se ha encontrado la OT"], 404);
         }
 
@@ -73,14 +73,20 @@ class OrderPurchaseController extends Controller
      * @param  \App\Models\OrderPurchase  $orderPurchase
      * @return \Illuminate\Http\Response
      */
-    public function show($id_order_purchases)
+    public function show($pedido, $order)
     {
-
-        $id_order_purchases = OrderPurchase::where('code_order', $id_order_purchases)->get();
-        if(!$id_order_purchases){
-            return response()->json(["errors" => "No se ha encontrado la OT"], response::HTTP_NOT_FOUND);
+        $sale = Sale::where('code_sale', $pedido)->first();
+        if (!$sale) {
+            return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
         }
-        return response()->json(["msg" => "Orden de compra", 'data' => ["id_order_purchases",$id_order_purchases]], response::HTTP_OK);
+        $orderPurchase = $sale->orders()->where('code_order', $order)->first();
+        if (!$orderPurchase) {
+            return response()->json(["msg" => "No se ha encontrado la orden de compra, o no pertenece al pedido especificado"], response::HTTP_NOT_FOUND);
+        }
+        $orderPurchase->products;
+        $orderPurchase->receptions;
+        $orderPurchase->change_history = ["Informacion Pendiente"];
+        return response()->json(["msg" => "Orden de compra encontrada", 'data' => ["orderPurchase", $orderPurchase]], response::HTTP_OK);
     }
 
 
