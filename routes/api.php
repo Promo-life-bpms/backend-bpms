@@ -96,4 +96,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('rutas-de-entrega/{ruta}/remision/{id}', [DeliveryRouteController::class, 'showRemision']);
     //cancelar remision
     Route::put('rutas-de-entrega/{ruta}/cancel-remision/{id}', [DeliveryRouteController::class, 'cancelRemision']);
+
+
+    //Ver pedidos de cada vendedor
+    Route::get('pedidos/viewPedidosPorVendedor', [SaleController::class, 'viewPedidosPorVendedor']);
 });

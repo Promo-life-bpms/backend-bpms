@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laratrust\Traits\LaratrustUserTrait;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\Sale;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -41,6 +42,11 @@ class User extends Authenticatable implements JWTSubject
     public function whatRoles()
     {
         return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
+    }
+
+    public function sales()
+    {
+        return $this->hasMany(Sale::class, 'commercial_email', 'email');
     }
 
         /**
