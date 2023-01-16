@@ -200,7 +200,7 @@ class DeliveryRouteController extends Controller
             //$email = auth()->user()->email;
 
 
-            $user = User::find(1);
+       /*      $user = User::find(1);
 
             $msgRuta = [
                 'greeting' => 'Hola',
@@ -208,7 +208,7 @@ class DeliveryRouteController extends Controller
                 'bosdy' => 'Ruta de entrega creada',
             ];
 
-            $user->notify(new NotificationsNotificacion($msgRuta));
+            $user->notify(new NotificationsNotificacion($msgRuta)); */
         }
 
         return response()->json([
