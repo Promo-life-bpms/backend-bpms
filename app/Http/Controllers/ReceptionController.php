@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\OrderPurchaseProduct;
 use App\Models\ReceptionProduct;
 use PhpParser\Node\Stmt\Foreach_;
+use Symfony\Component\HttpFoundation\Response;
 
 class ReceptionController extends Controller
 {
@@ -32,7 +33,12 @@ class ReceptionController extends Controller
         }
 
         $orderPurchase = OrderPurchase::where('code_order', $order)->first();
-
+        if (!$orderPurchase) {
+            // Retornar mensaje
+            return response()->json([
+                'msg' => "Orden de compra no encontrada"
+            ], Response::HTTP_NOT_FOUND);
+        }
         $receptionsOfOrderPurchase = $orderPurchase->receptions;
 
         // Revisar si hay registros de recepciones de la orden de compra
@@ -60,7 +66,7 @@ class ReceptionController extends Controller
             $errors = [];
             foreach ($cantidadesRecibida as $key => $CantidadRecibida) {
                 $productSearch =  $orderPurchase->products()->where("odoo_product_id", $CantidadRecibida["odoo_product_id"])->first();
-                $cantidadOrdenada =  $productSearch->quantity_ordered;
+                $cantidadOrdenada =  $productSearch->quantity;
                 foreach ($request->products as $productRequest) {
                     if ($CantidadRecibida["odoo_product_id"] == $productRequest["product_id"]) {
                         if ($productRequest["done"] <= ($cantidadOrdenada -  (int)$CantidadRecibida["quantity"])) {
@@ -144,9 +150,9 @@ class ReceptionController extends Controller
 
                 $dataProduct =  [
                     "odoo_product_id" => $productRequest->product_id,
-                    "product" => " ", // TODO: Traer el nombre 
+                    "product" => $product->product,
                     "code_reception" => $code_reception,
-                    "initial_demand" => $product->quantity_ordered,
+                    "initial_demand" => $product->quantity,
                     "done" => $productRequest->done,
                 ];
 

@@ -24,6 +24,7 @@ use App\Models\Notificacion;
 
 use App\Notifications\Notificacion as NotificationsNotificacion;
 use Illuminate\Foundation\Auth\User as AuthUser;
+use Illuminate\Support\Facades\DB;
 
 class DeliveryRouteController extends Controller
 {
@@ -35,11 +36,15 @@ class DeliveryRouteController extends Controller
      */
     public function index()
     {
-        $ruta = DeliveryRoute::where("is_active", true)->get();
-        $cantidad = DeliveryRoute::select('codeOrderDeliveryRoute')->count();
+        DB::statement("SET SQL_MODE=''");
+        $rutas = DeliveryRoute::where("is_active", true)->get();
+        foreach ($rutas as $ruta) {
+            $ruta->count_sales = count($ruta->codeOrderDeliveryRoute()->groupBy("code_sale")->get());
+        }
+
         return response()->json([
             'msg' => "Acceso de rutas correcto",
-            'data' => ['cantidad' => $cantidad,"ruta" => $ruta],
+            'data' => ["rutas" => $rutas],
         ], Response::HTTP_OK); //200
 
 
@@ -67,7 +72,7 @@ class DeliveryRouteController extends Controller
         if ($request->per_page) {
             $per_page = $request->per_page;
         }
-        $pedidos = Sale::join('order_purchases', 'order_purchases.code_sale', 'sales.code_sale')->whereIn('order_purchases.status', ["Cancelado", "Confirmado"])->orderBy('sales.code_sale', 'ASC')->paginate($per_page);
+        $pedidos = Sale::join('order_purchases', 'order_purchases.code_sale', 'sales.code_sale')->whereIn('order_purchases.status_bpm', ["Cancelado", "Confirmado"])->orderBy('sales.code_sale', 'ASC')->paginate($per_page);
         foreach ($pedidos as $pedido) {
             $pedido->orders = $pedido->orders()->whereIn('order_purchases.status', ["Cancelado", "Confirmado"])->get();
             foreach ($pedido->orders as $orden) {
@@ -111,9 +116,8 @@ class DeliveryRouteController extends Controller
             'code_orders.*.num_guide' => 'required',
             'code_orders.*.observations' => 'required',
             'code_orders.*.products' => 'required|array',
-            'code_orders.*.products.*.product' => 'required',
+            'code_orders.*.products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
             'code_orders.*.products.*.amount' => 'required',
-            'code_orders.*.products.*.unit_price' => 'required'
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -141,7 +145,7 @@ class DeliveryRouteController extends Controller
             'date_of_delivery' => $request->date_of_delivery,
             'user_chofer_id' => $request->user_chofer_id,
             'type_of_product' => $request->type_of_product,
-            'type_of_chofer' => $request-> type_of_chofer,
+            'type_of_chofer' => $request->type_of_chofer,
             'status' => 'Pendiente',
             'is_active' => 1,
         ]);
@@ -164,14 +168,14 @@ class DeliveryRouteController extends Controller
                 'num_guide' => $codeOrder->num_guide,
                 'observations' => $codeOrder->observations,
             ]);
-            
-            
+
+
             foreach ($codeOrder->products as $newProduct) {
                 $newProduct = (object)$newProduct;
                 $codeOrderRoute->productDeliveryRoute()->create([
-                    'product' => $newProduct->product,
+                    'odoo_product_id' => $newProduct->odoo_product_id,
                     'amount' => $newProduct->amount,
-                    
+
                 ]);
             }
         }
@@ -195,7 +199,7 @@ class DeliveryRouteController extends Controller
             //
             //$email = auth()->user()->email;
 
-        
+
             $user = User::find(1);
 
             $msgRuta = [
@@ -226,25 +230,46 @@ class DeliveryRouteController extends Controller
         // Corresponde con la ruta  rutas-de-entrega
         // Buscamos un study por el ID.
         $ruta = DeliveryRoute::where('code_route', $id)->first();
-        
-      
-        
+
         // Chequeaos si encontró o no la ruta
         if (!$ruta) {
             // Se devuelve un array errors con los errores detectados y código 404
             return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
         }
-       
+
+        $pedidos = Sale::join("code_order_delivery_routes", "sales.code_sale", "code_order_delivery_routes.code_sale")->join("delivery_routes", "delivery_routes.id", "code_order_delivery_routes.delivery_route_id")->where("code_route", $id)->get();
+        foreach ($pedidos as $pedido) {
+            $orderPurchaseDeiveryRoute = $pedido->ordersDeliveryRoute()->where("delivery_route_id", $ruta->id)->get();
+            $pedido->ordersDeliveryRouteRegister = $orderPurchaseDeiveryRoute;
+        }
+        for ($i = 0; $i < count($pedidos); $i++) {
+            foreach ($pedidos[$i]->ordersDeliveryRouteRegister as $orderDeliveryRoute) {
+                foreach ($orderDeliveryRoute->productDeliveryRoute as $productDR) {
+                    # code...
+                    $productDR->completeInformation;
+                    $productDR->description = $productDR->completeInformation->description;
+                    $productDR->measurement_unit = $productDR->completeInformation->measurement_unit;
+                    $productDR->quantity = $productDR->completeInformation->quantity;
+                    $productDR->subtotal = $productDR->completeInformation->subtotal;
+                    unset($productDR->completeInformation);
+                }
+            }
+        }
+        return $pedidos;
+
+
+
+
         $codeOrden = CodeOrderDeliveryRoute::where('code_order', $id);
         foreach ($codeOrden as $ordenDeCompra) {
             $ordenDeCompra->codeOrderDeliveryRoute;
         }
-        $ordenes = $ruta->codeOrderDeliveryRoute; 
+        $ordenes = $ruta->codeOrderDeliveryRoute;
         foreach ($ordenes as $ordenDeCompra) {
-            $ordenDeCompra->productDeliveryRoute;
+            $ordenDeCompra->productDeliveryRoute->odoo_product_id;
         }
-        
-        
+
+
         $ruta->remissions;
         // Devolvemos la información encontrada.
         return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['ruta' => $ruta]], response::HTTP_OK);
@@ -465,6 +490,7 @@ class DeliveryRouteController extends Controller
     public function viewRemision()
     {
         $remision = Remission::where("status", 1)->get();
+
         return response()->json([
             "msg" =>  "Acceso de remisiones correcto", 'data' => ["remision" => $remision]
         ], response::HTTP_OK); //200

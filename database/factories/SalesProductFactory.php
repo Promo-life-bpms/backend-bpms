@@ -20,6 +20,7 @@ class SalesProductFactory extends Factory
             "description" => $this->faker->sentence(),
             "provider" => $this->faker->company(),
             "logo" => $this->faker->company(),
+            "customization" => $this->faker->word(),
             "key_product" => $this->faker->company(),
             "type_sale" => $this->faker->company(),
             "cost_labeling" => rand(0, $quantity),

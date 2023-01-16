@@ -16,4 +16,9 @@ class ReceptionProduct extends Model
         'initial_demand',
         'done',
     ];
+
+    public function completeInformation()
+    {
+        return $this->belongsTo(OrderPurchaseProduct::class, 'odoo_product_id', "odoo_product_id");
+    }
 }

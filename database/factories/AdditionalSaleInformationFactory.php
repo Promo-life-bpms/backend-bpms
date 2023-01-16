@@ -18,6 +18,7 @@ class AdditionalSaleInformationFactory extends Factory
             'client_name' => $this->faker->company(),
             'client_contact' => $this->faker->name(),
             'warehouse_company' => $companyWareHouse[round(0, 1)],
+            'company' => $companyWareHouse[round(0, 1)],
             'warehouse_address' => $this->faker->address(),
             'delivery_policy' => $this->faker->text(),
             'reason_for_change' => $this->faker->text(),
