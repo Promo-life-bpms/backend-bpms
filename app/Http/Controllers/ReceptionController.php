@@ -7,23 +7,99 @@ use App\Models\OrderPurchase;
 use App\Models\Reception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\OrderPurchaseProduct;
+use App\Models\ReceptionProduct;
+use PhpParser\Node\Stmt\Foreach_;
 
 class ReceptionController extends Controller
 {
+    public $CantidadRecibida = array();
     public function saveReception(Request $request, $order)
     {
+
         // Obtener la recepcion del los productos
         $validator = Validator::make($request->all(), [
             'products' => 'required|array|bail',
-            'products.*.product' => 'required',
+            //modificacion 
+            'products.*.product_id' => 'required|exists:order_purchase_products,odoo_product_id',
             'products.*.done' => 'required|numeric',
+
         ]);
+
 
         if ($validator->fails()) {
             return response()->json(($validator->getMessageBag()));
         }
 
         $orderPurchase = OrderPurchase::where('code_order', $order)->first();
+
+        $receptionsOfOrderPurchase = $orderPurchase->receptions;
+
+        // Revisar si hay registros de recepciones de la orden de compra
+        if (count($receptionsOfOrderPurchase) > 0) {
+            // Variable de acceso global, para guardar los prodcuts (Tipo Array) [odoo_product_id, cantdad recibida]
+            $cantidadesRecibida = [];
+            $orderPurchaseproducts = $orderPurchase->products;
+            foreach ($orderPurchaseproducts as $p) {
+                array_push($cantidadesRecibida, [
+                    "odoo_product_id" => $p->odoo_product_id,
+                    "quantity" => 0,
+                ]);
+            }
+
+            foreach ($receptionsOfOrderPurchase as $receptionOfOrderPurchase) {
+                foreach ($receptionOfOrderPurchase->productsReception as $productsReception) {
+                    // sumar la cantidad recibida a mi arreglo, relacionado con el producto
+                    foreach ($cantidadesRecibida as $key => $pCantidadRecibida) {
+                        if ($pCantidadRecibida["odoo_product_id"] == $productsReception->odoo_product_id) {
+                            $cantidadesRecibida[$key]["quantity"] = $cantidadesRecibida[$key]["quantity"] + $productsReception->done;
+                        }
+                    }
+                }
+            }
+            $errors = [];
+            foreach ($cantidadesRecibida as $key => $CantidadRecibida) {
+                $productSearch =  $orderPurchase->products()->where("odoo_product_id", $CantidadRecibida["odoo_product_id"])->first();
+                $cantidadOrdenada =  $productSearch->quantity_ordered;
+                foreach ($request->products as $productRequest) {
+                    if ($CantidadRecibida["odoo_product_id"] == $productRequest["product_id"]) {
+                        if ($productRequest["done"] <= ($cantidadOrdenada -  (int)$CantidadRecibida["quantity"])) {
+                        } else {
+                            array_push($errors, ["msg" => "Cantidad superada", "product" => $productSearch]);
+                        }
+                    }
+                }
+            }
+
+            if (count($errors) > 0) {
+                return response()->json($errors, 400);
+            }
+
+            /*  $receptionsOfOrderPurchase->productsReception;
+            // Revisar la suma de la cantidad recibida del producto
+            foreach ($orderPurchase->products as $requestCantidad) {
+                $requestCantidad = (object)$requestCantidad;
+
+
+                $quantity_delivered  = OrderPurchaseProduct::select('quantity')->first();
+                $quantity_ordered  = OrderPurchaseProduct::select('quantity_ordered')->first();
+
+                //  Revisar que la cantidad en el parametro done, sea menor o igual a la resta de cantidad pedida menos cantidad recibida
+                if ($quantity_ordered <= $quantity_delivered) {
+
+                    $resta = $quantity_ordered - $quantity_delivered;
+                    return $resta;
+
+                    /*  $resta1 = $
+                         return $resta; 
+                    $total = ReceptionProduct::where('done', '<=', $resta);
+                    return $total;
+                    if ($total - $quantity_ordered) {
+                    }
+                }
+            } */
+        }
+
 
         if (!$orderPurchase) {
             return response()->json(['errors' => (['msg' => 'Ruta de entrega no encontrada.'])], 404);
@@ -58,22 +134,26 @@ class ReceptionController extends Controller
             return response()->json(['message' => 'Error al crear la orden de compra', 'error' => $th->getMessage()], 400);
         }
 
+        //vaidacion no debe superar la cantidad pedida o demanda incial //return
         if ($receptionDB) {
+
             $errors = [];
             foreach ($reception->products as $productRequest) {
                 $productRequest = (object)$productRequest;
+                $product = OrderPurchaseProduct::where("odoo_product_id", "=", $productRequest->product_id)->first();
+
                 $dataProduct =  [
-                    "odoo_product_id" => " ",
-                    "product" => $productRequest->product ?: " ",
+                    "odoo_product_id" => $productRequest->product_id,
+                    "product" => " ", // TODO: Traer el nombre 
                     "code_reception" => $code_reception,
-                    "initial_demand" => 0,
-                    "done" => $productRequest->done ?: 0,
+                    "initial_demand" => $product->quantity_ordered,
+                    "done" => $productRequest->done,
                 ];
 
                 try {
                     $receptionDB->productsReception()->updateOrCreate(
                         [
-                            "product" =>  $productRequest->product,
+                            "odoo_product_id" => $productRequest->product_id,
                             'reception_id' => $receptionDB->id
                         ],
                         $dataProduct

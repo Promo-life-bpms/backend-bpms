@@ -10,18 +10,24 @@ use App\Models\ProductRemission;
 use App\Models\Remission;
 use App\Models\Role;
 use App\Models\Sale;
+use App\Models\User;
 use App\Models\Status;
 use Exception;
+use Illuminate\Notifications\Notifiable;
 use Facade\FlareClient\Api;
 use Illuminate\Database\Console\DbCommand;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+use App\Models\Notificacion;
 
+use App\Notifications\Notificacion as NotificationsNotificacion;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class DeliveryRouteController extends Controller
 {
+    use Notifiable;
     /**
      * Display a listing of the resource.
      *
@@ -30,9 +36,10 @@ class DeliveryRouteController extends Controller
     public function index()
     {
         $ruta = DeliveryRoute::where("is_active", true)->get();
+        $cantidad = DeliveryRoute::select('codeOrderDeliveryRoute')->count();
         return response()->json([
             'msg' => "Acceso de rutas correcto",
-            'data' => ["ruta" => $ruta],
+            'data' => ['cantidad' => $cantidad,"ruta" => $ruta],
         ], Response::HTTP_OK); //200
 
 
@@ -90,6 +97,7 @@ class DeliveryRouteController extends Controller
             'date_of_delivery' => 'required',
             'user_chofer_id' => 'required',
             'type_of_product' => 'required',
+            'type_of_chofer' => 'required',
             'code_orders' => 'required|array',
             'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
             'code_orders.*.code_order' => 'required|exists:order_purchases,code_order',
@@ -104,7 +112,8 @@ class DeliveryRouteController extends Controller
             'code_orders.*.observations' => 'required',
             'code_orders.*.products' => 'required|array',
             'code_orders.*.products.*.product' => 'required',
-            'code_orders.*.products.*.amount' => 'required'
+            'code_orders.*.products.*.amount' => 'required',
+            'code_orders.*.products.*.unit_price' => 'required'
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -132,6 +141,7 @@ class DeliveryRouteController extends Controller
             'date_of_delivery' => $request->date_of_delivery,
             'user_chofer_id' => $request->user_chofer_id,
             'type_of_product' => $request->type_of_product,
+            'type_of_chofer' => $request-> type_of_chofer,
             'status' => 'Pendiente',
             'is_active' => 1,
         ]);
@@ -154,15 +164,47 @@ class DeliveryRouteController extends Controller
                 'num_guide' => $codeOrder->num_guide,
                 'observations' => $codeOrder->observations,
             ]);
-
-
+            
+            
             foreach ($codeOrder->products as $newProduct) {
                 $newProduct = (object)$newProduct;
                 $codeOrderRoute->productDeliveryRoute()->create([
                     'product' => $newProduct->product,
                     'amount' => $newProduct->amount,
+                    
                 ]);
             }
+        }
+
+        // Revisar cuales son los pedidos que estan en la ruta de entrega
+
+        // Obtener el comercial email de cada pedido
+
+        // Enviar una notificacion a cada email
+
+        //prueba de notificacion
+
+        {
+            //  $user = User::where('email',"=", "commercial_email")->get();
+
+            //comercial
+
+            //
+
+            /* $sale = Sale::where('code_sale',  $request->code_orders $codeOrder->code_sale); */
+            //
+            //$email = auth()->user()->email;
+
+        
+            $user = User::find(1);
+
+            $msgRuta = [
+                'greeting' => 'Hola',
+                'body' => 'Ruta de entrega creada',
+                'bosdy' => 'Ruta de entrega creada',
+            ];
+
+            $user->notify(new NotificationsNotificacion($msgRuta));
         }
 
         return response()->json([
@@ -184,16 +226,25 @@ class DeliveryRouteController extends Controller
         // Corresponde con la ruta  rutas-de-entrega
         // Buscamos un study por el ID.
         $ruta = DeliveryRoute::where('code_route', $id)->first();
+        
+      
+        
         // Chequeaos si encontró o no la ruta
         if (!$ruta) {
             // Se devuelve un array errors con los errores detectados y código 404
             return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
         }
-        $ordenes = $ruta->codeOrderDeliveryRoute;
+       
+        $codeOrden = CodeOrderDeliveryRoute::where('code_order', $id);
+        foreach ($codeOrden as $ordenDeCompra) {
+            $ordenDeCompra->codeOrderDeliveryRoute;
+        }
+        $ordenes = $ruta->codeOrderDeliveryRoute; 
         foreach ($ordenes as $ordenDeCompra) {
             $ordenDeCompra->productDeliveryRoute;
         }
-
+        
+        
         $ruta->remissions;
         // Devolvemos la información encontrada.
         return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['ruta' => $ruta]], response::HTTP_OK);
@@ -255,7 +306,12 @@ class DeliveryRouteController extends Controller
                 foreach ($codeOrderRequest->products as $product) {
                     $productRequest = (object)$product;
                     // $productsDB = $codeOrderDB->productDeliveryRoute;
+
+
                     ProductDeliveryRoute::updateOrCreate(
+
+
+
                         ['code_order_route_id' => $codeOrderDB->id, "product" => $productRequest->product],
                         ['amount' => $productRequest->amount]
                     );
