@@ -200,7 +200,7 @@ class DeliveryRouteController extends Controller
             //$email = auth()->user()->email;
 
 
-       /*      $user = User::find(1);
+            /*      $user = User::find(1);
 
             $msgRuta = [
                 'greeting' => 'Hola',
@@ -255,24 +255,9 @@ class DeliveryRouteController extends Controller
                 }
             }
         }
-        return $pedidos;
-
-
-
-
-        $codeOrden = CodeOrderDeliveryRoute::where('code_order', $id);
-        foreach ($codeOrden as $ordenDeCompra) {
-            $ordenDeCompra->codeOrderDeliveryRoute;
-        }
-        $ordenes = $ruta->codeOrderDeliveryRoute;
-        foreach ($ordenes as $ordenDeCompra) {
-            $ordenDeCompra->productDeliveryRoute->odoo_product_id;
-        }
-
-
-        $ruta->remissions;
+        
         // Devolvemos la información encontrada.
-        return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['ruta' => $ruta]], response::HTTP_OK);
+        return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['pedidos' => $pedidos]], response::HTTP_OK);
     }
 
     /**
