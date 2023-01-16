@@ -22,7 +22,7 @@ class ReceptionController extends Controller
         $validator = Validator::make($request->all(), [
             'products' => 'required|array|bail',
             //modificacion 
-            'products.*.product_id' => 'required|exists:order_purchase_products,odoo_product_id',
+            'products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
             'products.*.done' => 'required|numeric',
 
         ]);
@@ -68,7 +68,7 @@ class ReceptionController extends Controller
                 $productSearch =  $orderPurchase->products()->where("odoo_product_id", $CantidadRecibida["odoo_product_id"])->first();
                 $cantidadOrdenada =  $productSearch->quantity;
                 foreach ($request->products as $productRequest) {
-                    if ($CantidadRecibida["odoo_product_id"] == $productRequest["product_id"]) {
+                    if ($CantidadRecibida["odoo_product_id"] == $productRequest["odoo_product_id"]) {
                         if ($productRequest["done"] <= ($cantidadOrdenada -  (int)$CantidadRecibida["quantity"])) {
                         } else {
                             array_push($errors, ["msg" => "Cantidad superada", "product" => $productSearch]);
@@ -146,10 +146,10 @@ class ReceptionController extends Controller
             $errors = [];
             foreach ($reception->products as $productRequest) {
                 $productRequest = (object)$productRequest;
-                $product = OrderPurchaseProduct::where("odoo_product_id", "=", $productRequest->product_id)->first();
+                $product = OrderPurchaseProduct::where("odoo_product_id", "=", $productRequest->odoo_product_id)->first();
 
                 $dataProduct =  [
-                    "odoo_product_id" => $productRequest->product_id,
+                    "odoo_product_id" => $productRequest->odoo_product_id,
                     "product" => $product->product,
                     "code_reception" => $code_reception,
                     "initial_demand" => $product->quantity,
@@ -159,7 +159,7 @@ class ReceptionController extends Controller
                 try {
                     $receptionDB->productsReception()->updateOrCreate(
                         [
-                            "odoo_product_id" => $productRequest->product_id,
+                            "odoo_product_id" => $productRequest->odoo_product_id,
                             'reception_id' => $receptionDB->id
                         ],
                         $dataProduct
