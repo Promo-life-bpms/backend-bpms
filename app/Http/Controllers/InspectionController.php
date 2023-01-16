@@ -33,8 +33,8 @@ class InspectionController extends Controller
             'quantity_denied' => 'required|numeric',
             'features_quantity' => 'required|array',
             'products_selected' => 'required|array',
-            'products_selected.*.product_id' => 'required',
-            'products_selected.*.order_purchase_id' => 'required',
+            'products_selected.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
+            'products_selected.*.code_order' => 'required|exists:order_purchases,code_order',
             'products_selected.*.quantity_selected' => 'required',
         ]);
 
@@ -74,8 +74,8 @@ class InspectionController extends Controller
             $inspection = Inspection::create($dataInspection);
             foreach ($request->products_selected as $productSelected) {
                 $dataProductSelected = [
-                    "product_id" => $productSelected['product_id'],
-                    "order_purchase_id" => $productSelected['order_purchase_id'],
+                    "odoo_product_id" => $productSelected['odoo_product_id'],
+                    "code_order" => $productSelected['code_order'],
                     "quantity_selected" => $productSelected['quantity_selected'],
                 ];
                 $inspection->productsSelected()->create($dataProductSelected);

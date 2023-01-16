@@ -20,7 +20,8 @@ class AdditionalSaleInformation extends Model
         'reason_for_change',
         'planned_date',
         'commitment_date',
-        'effective_date'
+        'effective_date',
+        'company',
     ];
 
     public function sale()

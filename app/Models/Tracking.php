@@ -10,7 +10,10 @@ class Tracking extends Model
     use HasFactory;
 
     protected $fillable = [
-        'reference_code',
+        'object',
+        'code_object',
+        'name',
         'change',
+        'date',
     ];
 }

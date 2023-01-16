@@ -19,6 +19,7 @@ class CreateSalesProductsTable extends Migration
             $table->string("odoo_product_id", 20);
             $table->string("product");
             $table->text("description");
+            $table->string("customization");
             $table->string("provider");
             $table->string("logo");
             $table->string("key_product");

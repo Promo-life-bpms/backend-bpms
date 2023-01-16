@@ -24,6 +24,7 @@ class CreateOrderPurchaseProductsTable extends Migration
             $table->integer("quantity");
             $table->integer("quantity_invoiced");
             $table->integer("quantity_delivered");
+            $table->string("measurement_unit");
             $table->decimal("unit_price", 10, 2);
             $table->decimal("subtotal", 10, 2);
             $table->timestamps();

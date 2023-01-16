@@ -10,8 +10,8 @@ class InspectionProduct extends Model
     use HasFactory;
     protected $fillable = [
         "inspection_id",
-        "product_id",
-        "order_purchase_id",
+        "odoo_product_id",
+        "code_order",
         "quantity_selected"
     ];
 }

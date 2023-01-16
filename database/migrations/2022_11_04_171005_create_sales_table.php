@@ -31,7 +31,9 @@ class CreateSalesTable extends Migration
             $table->string('commercial_name');
             $table->string('commercial_email');
             $table->string('commercial_odoo_id');
-            $table->decimal('total', 8, 2);
+            $table->decimal('subtotal', 16, 2);
+            $table->decimal('taxes', 16, 2);
+            $table->decimal('total', 16, 2);
             $table->foreignId('status_id')->constrained();
             $table->timestamps();
         });

@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SaleController extends Controller
 {
-    
+
     /**
      * Display a listing of the resource.
      *
@@ -29,19 +29,15 @@ class SaleController extends Controller
 
         $sales = null;
         if ($request->ordenes_proximas) {
-            $sales =  Sale::with('currentStatus', "orders")
+            $sales =  Sale::with('moreInformation', 'currentStatus', "detailsOrders")
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
                 //->where('order_purchases.planned_date', '>=', $fechaProxima)
                 ->orderby('order_purchases.planned_date', 'ASC')
                 ->paginate($per_page);
         } else {
-            $sales = Sale::with('currentStatus', "orders")->paginate($per_page);
+            $sales = Sale::with('moreInformation', 'currentStatus', "detailsOrders")->paginate($per_page);
         }
 
-
-
-
-        // $ordenes = OrderPurchase::where('planned_date','=', Carbon::now());
         return response()->json([
             'msg' => 'Lista de pedidos', 'data' => ["sales" => $sales]
             // 'ordenes' => $ordenes
@@ -66,17 +62,28 @@ class SaleController extends Controller
         # //TODO: Entregas Relacionadas, Datos generales
         */
         $sale = Sale::with([
+            'moreInformation',
             'currentStatus',
             'saleProducts',
-            'moreInformation',
-            'orders',
-            'routeDeliveries'
-            // 'inspecciones',
-            // TODO: 'incidencias'
+            'detailsOrders',
+            'routeDeliveries',
+            'inspections',
+            'incidences',
+            "deliveries"
         ])->where('code_sale', $sale_id)->first();
         if ($sale) {
             return response()->json(['msg' => 'Detalle del pedido', 'data' => ["sale", $sale]], response::HTTP_OK); //200
         }
         return response()->json(['msg' => "No hay informacion acerca de este pedido"], response::HTTP_OK); //200
+    }
+    public function viewPedidosPorVendedor()
+    {
+        $pedidos = auth()->user()->sales;
+
+        return response()->json([
+            'msg' => "Vizualizar mis pedidos",
+            'data' => ["pedidos" => $pedidos],
+        ], Response::HTTP_OK); //200
+
     }
 }
