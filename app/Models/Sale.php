@@ -83,4 +83,9 @@ class Sale extends Model
     {
         return $this->hasMany(Delivery::class, 'code_sale', 'code_sale');
     }
+
+    public function lastStatus()
+    {
+        return $this->hasOne(SaleStatusChange::class)->latestOfMany();
+    }
 }
