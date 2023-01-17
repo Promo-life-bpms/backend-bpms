@@ -62,7 +62,7 @@ Route::group(['middleware' => 'auth'], function () {
     // localhost/pedidos/PED456/incidencias/INC-423
     Route::get('incidencias/{incidencia}', [IncidenceController::class, 'show']);
     // Crear una incidencia
-    Route::post('pedido/{pedido}/incidencias/', [IncidenceController::class, 'store']);
+    Route::post('pedidos/{pedido}/incidencia', [IncidenceController::class, 'store']);
 
     // Vista de status de incidencia
     Route::post('order/{compra}/updatestatus', [OrderPurchaseController::class, 'store']);

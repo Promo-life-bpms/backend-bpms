@@ -8,6 +8,7 @@ use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Reception;
 use App\Models\Sale;
+use App\Models\SaleStatusChange;
 use App\Models\Tracking;
 use Carbon\Carbon;
 use Exception;
@@ -158,6 +159,10 @@ class ApiOdooController extends Controller
                             ],
                             $dataProduct
                         );
+                        SaleStatusChange::create([
+                            "sale_id" => $sale->id,
+                            "status_id" => 1,
+                        ]);
                     }
 
                     foreach ($sale->saleProducts as $productDB) {
