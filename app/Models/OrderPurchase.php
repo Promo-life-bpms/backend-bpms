@@ -38,4 +38,8 @@ class OrderPurchase extends Model
     {
         return $this->hasMany(Reception::class, "code_order", "code_order");
     }
+    public function receptionsWithProducts()
+    {
+        return $this->hasMany(Reception::class, "code_order", "code_order")->with("productsReception");
+    }
 }

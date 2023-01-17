@@ -16,7 +16,7 @@ class CreateProductDeliveryRoutesTable extends Migration
         Schema::create('product_delivery_routes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('code_order_route_id')->reference('id')->on('code_order_delivery_routes');
-            $table->string('product');
+            $table->string("odoo_product_id", 20);
             $table->string('amount');
             $table->timestamps();
         });

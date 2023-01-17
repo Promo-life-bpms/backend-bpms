@@ -16,6 +16,7 @@ class DeliveryRoute extends Model
         'is_active',
         'date_of_delivery',
         'user_chofer_id',
+        'type_of_chofer',
         'type_of_product',
         'status',
     ];
