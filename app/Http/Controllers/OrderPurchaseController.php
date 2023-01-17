@@ -84,7 +84,18 @@ class OrderPurchaseController extends Controller
             return response()->json(["msg" => "No se ha encontrado la orden de compra, o no pertenece al pedido especificado"], response::HTTP_NOT_FOUND);
         }
         $orderPurchase->products;
-        $orderPurchase->receptions;
+        $orderPurchase->receptionsWithProducts;
+        
+        //
+        foreach ($orderPurchase->receptionsWithProducts as $OrderP) {
+          foreach ($OrderP->productsReception as $productRec); # code...
+            
+            $productRec->completeInformation;
+           
+            $productRec->measurement_unit = $productRec->completeInformation->measurement_unit;
+           
+            unset($productRec->completeInformation);
+        }
         $orderPurchase->change_history = ["Informacion Pendiente"];
         return response()->json(["msg" => "Orden de compra encontrada", 'data' => ["orderPurchase", $orderPurchase]], response::HTTP_OK);
     }

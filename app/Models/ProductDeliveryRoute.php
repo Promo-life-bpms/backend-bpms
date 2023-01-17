@@ -10,12 +10,12 @@ class ProductDeliveryRoute extends Model
     use HasFactory;
     protected $fillable = [
         'code_order_route_id',
-        'product',
+        'odoo_product_id',
         'amount',
     ];
 
-    // public function deliveryRoute()
-    //{
-    //  return $this->belongsTo(CodeOrderDeliveryRoute::class, 'code_order_route_id');
-    //}
+    public function completeInformation()
+    {
+        return $this->belongsTo(OrderPurchaseProduct::class, 'odoo_product_id', "odoo_product_id");
+    }
 }

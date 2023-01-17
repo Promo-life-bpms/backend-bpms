@@ -24,6 +24,7 @@ class OrderPurchaseProductFactory extends Factory
             "quantity" => $quantity,
             "quantity_invoiced" => $quantity,
             "quantity_delivered" => rand(0, $quantity),
+            'measurement_unit' => "Pieza",
             'unit_price' => $this->faker->numberBetween(0, 100),
             'subtotal' => $this->faker->numberBetween(0, 1000),
         ];

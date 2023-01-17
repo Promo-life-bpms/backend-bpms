@@ -32,6 +32,8 @@ class SaleFactory extends Factory
             'commercial_name' => $this->faker->name(),
             'commercial_email' => $this->faker->unique()->safeEmail(),
             'commercial_odoo_id' => $this->faker->numberBetween(0, 100),
+            'subtotal' => $this->faker->numberBetween(0, 1000),
+            'taxes' => $this->faker->numberBetween(0, 1000),
             'total' => $this->faker->numberBetween(0, 1000),
             'status_id' => $statuses[rand(0, count($statuses) - 1)]
         ];
