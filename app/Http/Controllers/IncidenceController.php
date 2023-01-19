@@ -29,6 +29,7 @@ class IncidenceController extends Controller
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
+        $incidencia->productsIncidence;
         return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $incidencia]], response::HTTP_OK);
     }
 
@@ -102,7 +103,7 @@ class IncidenceController extends Controller
             "description" => $request->comentarios_generales,
             "date_request" => $request->fecha_creacion,
             "company" => $sale->moreInformation->warehouse_company,
-            "status" => '',
+            "status" => '', // TODO: Cambiarlo a odoo_status
 
             'internal_code_incidence' => "INCD-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
             'area' => $request->area,
