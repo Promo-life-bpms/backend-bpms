@@ -33,18 +33,6 @@ class Sale extends Model
         'status_id',
     ];
 
-    
-
-
-
-
-
-
-
-
-
-
-
 
 
     public function moreInformation()

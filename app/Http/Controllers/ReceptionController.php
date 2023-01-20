@@ -49,8 +49,8 @@ class ReceptionController extends Controller
             foreach ($orderPurchaseproducts as $p) {
                 array_push($cantidadesRecibida, [
                     "odoo_product_id" => $p->odoo_product_id,
-                    "quantity" => 0,
-                ]);
+                    "quantity"=> 0,
+                ]);  
             }
 
             foreach ($receptionsOfOrderPurchase as $receptionOfOrderPurchase) {
@@ -106,6 +106,8 @@ class ReceptionController extends Controller
             } */
         }
 
+        //validar si no hya una recpecion con productos ya creada (done,quantity) que el valor sea <=0
+        if( ! count($receptionsOfOrderPurchase ) < 0)
 
         if (!$orderPurchase) {
             return response()->json(['errors' => (['msg' => 'Ruta de entrega no encontrada.'])], 404);
