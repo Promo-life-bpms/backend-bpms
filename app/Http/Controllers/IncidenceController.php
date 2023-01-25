@@ -29,8 +29,37 @@ class IncidenceController extends Controller
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
-        $incidencia->productsIncidence;
-        return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $incidencia]], response::HTTP_OK);
+        foreach ($incidencia->productsIncidence as $productIncidence) {
+            // return  $productIncidence->completeInformation;
+            $productIncidence->completeInformation->orderPurchase;
+        }
+        DB::statement("SET SQL_MODE=''");
+        $dataIncidencia = OrderPurchase::join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
+            ->join('incidence_products', 'incidence_products.order_purchase_product_id', 'order_purchase_products.id')
+            ->where('incidence_products.incidence_id', $incidencia->id)
+            ->select('order_purchases.*')
+            ->groupBy('order_purchases.id')
+            ->get();
+        foreach ($dataIncidencia as $codeOrder) {
+            $codeOrder->incidenceProducts = $codeOrder->products()
+                ->join('incidence_products', 'incidence_products.order_purchase_product_id', 'order_purchase_products.id')
+                ->where('incidence_products.incidence_id', $incidencia->id)
+                ->where('order_purchase_products.order_purchase_id', $codeOrder->id)
+                ->get();
+            foreach ($codeOrder->incidenceProducts as $productIncidence) {
+                unset(
+                    $productIncidence->planned_date,
+                    $productIncidence->company,
+                    $productIncidence->quantity_invoiced,
+                    $productIncidence->quantity_delivered,
+                    $productIncidence->company,
+                    $productIncidence->unit_price,
+                );
+                # code...
+            }
+        }
+
+        return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $dataIncidencia]], response::HTTP_OK);
     }
 
     /**
@@ -250,8 +279,9 @@ class IncidenceController extends Controller
         return response()->json([
             "msg" => 'Incidencia creada exitosamente',
             'data' =>
-            ["incidencia" => $incidencia,
-            'responseOdoo' => json_decode($response),
+            [
+                "incidencia" => $incidencia,
+                'responseOdoo' => json_decode($response),
             ]
         ], response::HTTP_CREATED);
     }

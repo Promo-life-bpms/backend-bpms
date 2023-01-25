@@ -242,6 +242,9 @@ class DeliveryRouteController extends Controller
         foreach ($pedidos as $pedido) {
             $orderPurchaseDeiveryRoute = $pedido->ordersDeliveryRoute()->where("delivery_route_id", $ruta->id)->get();
             $pedido->ordersDeliveryRouteRegister = $orderPurchaseDeiveryRoute;
+            foreach ($pedido->ordersDeliveryRouteRegister as $odrr) {
+                $odrr->remmisions = $odrr->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')->where('code_order_delivery_routes.delivery_route_id', $ruta->id)->select('remisiones.code_remission')->get();
+            }
         }
         for ($i = 0; $i < count($pedidos); $i++) {
             foreach ($pedidos[$i]->ordersDeliveryRouteRegister as $orderDeliveryRoute) {
