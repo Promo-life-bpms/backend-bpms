@@ -83,8 +83,11 @@ class SaleController extends Controller
             'incidences',
             "ordersDeliveryRoute"
         ])->where('code_sale', $sale_id)->first();
-
         if ($sale) {
+            foreach ($sale->routeDeliveries as $routeDelivery) {
+                $routeDelivery->deliveryRoute->name_chofer = $routeDelivery->deliveryRoute->user->name;
+                unset($routeDelivery->deliveryRoute->user);
+            }
             $sale->lastStatus->slug = $sale->lastStatus->status->slug;
             $sale->lastStatus->last_status = $sale->lastStatus->status->status;
             unset($sale->lastStatus->status);

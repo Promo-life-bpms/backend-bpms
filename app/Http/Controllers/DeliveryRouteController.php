@@ -76,6 +76,10 @@ class DeliveryRouteController extends Controller
 
         foreach ($pedidos as $pedido) {
             $pedido->orders = $pedido->orders()->whereIn('order_purchases.status_bpm', ["Cancelado", "Confirmado"])->get();
+            $pedido->moreInformation;
+            $pedido->client_name = $pedido->moreInformation->client_name;
+            $pedido->client_contact = $pedido->moreInformation->client_contact;
+            unset($pedido->moreInformation);
             foreach ($pedido->orders as $orden) {
                 $orden->products;
             }
