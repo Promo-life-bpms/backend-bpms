@@ -29,7 +29,6 @@ class CreateIncidencesTable extends Migration
             $table->string('reason')->nullable();
             $table->string('product_type')->nullable();
             $table->string('type_of_technique')->nullable();
-            $table->string('solution_of_incidence')->nullable();
             $table->string('responsible')->nullable();
             $table->date('creation_date')->nullable();
             $table->string('bpm_status')->nullable();

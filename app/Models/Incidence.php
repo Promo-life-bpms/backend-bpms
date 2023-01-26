@@ -24,7 +24,6 @@ class Incidence extends Model
         'reason',
         'product_type',
         'type_of_technique',
-        'solution_of_incidence',
         'responsible',
         'creation_date',
         'bpm_status',
