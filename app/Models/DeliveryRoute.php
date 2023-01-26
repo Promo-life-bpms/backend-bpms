@@ -31,4 +31,10 @@ class DeliveryRoute extends Model
     {
         return $this->hasMany(Remission::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_chofer_id', 'id');
+        # code...
+    }
 }
