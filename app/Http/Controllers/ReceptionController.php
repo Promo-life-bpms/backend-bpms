@@ -21,7 +21,7 @@ class ReceptionController extends Controller
         // Obtener la recepcion del los productos
         $validator = Validator::make($request->all(), [
             'products' => 'required|array|bail',
-            //modificacion 
+            //modificacion
             'products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
             'products.*.done' => 'required|numeric',
 
@@ -97,7 +97,7 @@ class ReceptionController extends Controller
                     return $resta;
 
                     /*  $resta1 = $
-                         return $resta; 
+                         return $resta;
                     $total = ReceptionProduct::where('done', '<=', $resta);
                     return $total;
                     if ($total - $quantity_ordered) {
@@ -155,6 +155,8 @@ class ReceptionController extends Controller
                     "initial_demand" => $product->quantity,
                     "done" => $productRequest->done,
                 ];
+
+                // TODO:  Actualizar la cantidad recibida
 
                 try {
                     $receptionDB->productsReception()->updateOrCreate(

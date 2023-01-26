@@ -81,19 +81,21 @@ class SaleController extends Controller
             'routeDeliveries',
             'inspections',
             'incidences',
-            "deliveries"
+            "ordersDeliveryRoute"
         ])->where('code_sale', $sale_id)->first();
-        $sale->lastStatus->slug = $sale->lastStatus->status->slug;
-        $sale->lastStatus->last_status = $sale->lastStatus->status->status;
-        unset($sale->lastStatus->status);
-        unset($sale->lastStatus->id);
-        unset($sale->lastStatus->sale_id);
-        unset($sale->lastStatus->status_id);
-        unset($sale->lastStatus->updated_at);
 
         if ($sale) {
+            $sale->lastStatus->slug = $sale->lastStatus->status->slug;
+            $sale->lastStatus->last_status = $sale->lastStatus->status->status;
+            unset($sale->lastStatus->status);
+            unset($sale->lastStatus->id);
+            unset($sale->lastStatus->sale_id);
+            unset($sale->lastStatus->status_id);
+            unset($sale->lastStatus->updated_at);
+
             return response()->json(['msg' => 'Detalle del pedido', 'data' => ["sale", $sale]], response::HTTP_OK); //200
         }
+
         return response()->json(['msg' => "No hay informacion acerca de este pedido"], response::HTTP_OK); //200
     }
     public function viewPedidosPorVendedor()

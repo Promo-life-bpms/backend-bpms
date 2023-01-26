@@ -33,20 +33,6 @@ class Sale extends Model
         'status_id',
     ];
 
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
     public function moreInformation()
     {
         return $this->hasOne(AdditionalSaleInformation::class);

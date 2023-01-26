@@ -22,7 +22,7 @@ class CreateIncidencesTable extends Migration
             $table->text("description");
             $table->date("date_request")->nullable();
             $table->string("company");
-            $table->string("status");
+            $table->string("odoo_status");
 
             $table->string('internal_code_incidence')->nullable();
             $table->string('area')->nullable();
@@ -32,7 +32,7 @@ class CreateIncidencesTable extends Migration
             $table->string('solution_of_incidence')->nullable();
             $table->string('responsible')->nullable();
             $table->date('creation_date')->nullable();
-            $table->string('internal_status')->nullable();
+            $table->string('bpm_status')->nullable();
             $table->text('evidence')->nullable();
             $table->date('commitment_date')->nullable();
             $table->string('solution')->nullable();

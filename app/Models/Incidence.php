@@ -17,7 +17,7 @@ class Incidence extends Model
         "description",
         "date_request",
         "company",
-        "status",
+        "odoo_status",
 
         'internal_code_incidence',
         'area',
@@ -27,7 +27,7 @@ class Incidence extends Model
         'solution_of_incidence',
         'responsible',
         'creation_date',
-        'internal_status',
+        'bpm_status',
         'evidence',
         'commitment_date',
         'solution',

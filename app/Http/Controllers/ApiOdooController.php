@@ -13,6 +13,7 @@ use App\Models\Tracking;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class ApiOdooController extends Controller
@@ -431,7 +432,7 @@ class ApiOdooController extends Controller
                     'description' => $incidence->description ?: " ",
                     'date_request' => $incidence->date_request ?: null,
                     'company' => $incidence->company ?: " ",
-                    'status' => $incidence->status ?: " ",
+                    'odoo_status' => $incidence->status ?: " ",
                 ];
                 $incidenceDB = null;
                 try {
