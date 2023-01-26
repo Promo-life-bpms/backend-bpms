@@ -227,6 +227,7 @@ class DeliveryRouteController extends Controller
      */
     public function show($id)
     {
+
         // Corresponde con la ruta  rutas-de-entrega
         // Buscamos un study por el ID.
         $ruta = DeliveryRoute::where('code_route', $id)->first();
@@ -524,19 +525,27 @@ class DeliveryRouteController extends Controller
           $pedido->detailsOrders;
        //   return $pedido->detailsOrders;}   
           unset($pedido->moreInformation->detailsOrders);}
-        
-      /* 
-        foreach ($pedido as $order){
-            $pedido->detailsOrders; */
-         // return $pedido->detailsOrders;
-          //return  $order->detailsOrders;
-             /* o$rder->products;
-             return $order;
-            $order->order_purchase_id = $order->products->order_purchase_id;
-            unset($order->products); */
-       
-    //}
-        
+     /* 
+        foreach ($pedidos as $pedido) {
+
+            $pedido->moreInformation;
+            $pedido->client_name = $pedido->moreInformation->client_name;
+            $pedido->company = $pedido->moreInformation->company;
+          unset($pedido->moreInformation);
+        }
+
+          $pedido->detailsOrders;
+       //   return $pedido->detailsOrders;}   
+       foreach ($pedidos as $order) {
+        $order->detailsOrders;
+        $order->provider_name = $order->moreInformation->provider_name;
+        $order->supplier_representative = $order->moreInformation->supplier_representative;
+        $order->total = $order->moreInformation->total;
+        $order->status = $order->moreInformation->status;
+        unset($order->detailsOrders);
+       }
+ */
+     
 
 
 

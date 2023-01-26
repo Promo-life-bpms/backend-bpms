@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Inspection;
 use App\Models\Sale;
+use App\Models\InspectionProduct;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,6 +33,16 @@ class InspectionController extends Controller
             'quantity_revised' => 'required|numeric',
             'quantity_denied' => 'required|numeric',
             'features_quantity' => 'required|array',
+            'features_quantity.wrong_pantone_color' => 'required|numeric',
+            'features_quantity.damage_logo' => 'required|numeric',
+            'features_quantity.incorrect_logo' => 'required|numeric',
+            'features_quantity.incomplete_pieces' => 'required|numeric',
+            'features_quantity.merchandise_not_cut' => 'required|numeric',
+            'features_quantity.different_dimensions' => 'required|numeric',
+            'features_quantity.damaged_products' => 'required|numeric',
+            'features_quantity.product_does_not_perform_its_function' => 'required|numeric',
+            'features_quantity.wrong_product_code' => 'required|numeric',
+            'features_quantity.total' => 'required|numeric',
             'products_selected' => 'required|array',
             'products_selected.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
             'products_selected.*.code_order' => 'required|exists:order_purchases,code_order',
@@ -68,10 +79,24 @@ class InspectionController extends Controller
             'user_signature_reviewed' => $request->user_signature_reviewed,
             'quantity_revised' => $request->quantity_revised,
             'quantity_denied' => $request->quantity_denied,
-            'features_quantity' => json_encode($request->features_quantity)
+
         ];
         try {
             $inspection = Inspection::create($dataInspection);
+            $request->features_quantity = (object) $request->features_quantity;
+            $dataFeaturesQuantity = [
+                'wrong_pantone_color' =>  $request->features_quantity->wrong_pantone_color,
+                'damage_logo' => $request->features_quantity->damage_logo,
+                'incorrect_logo' => $request->features_quantity->incorrect_logo,
+                'incomplete_pieces' => $request->features_quantity->incomplete_pieces,
+                'merchandise_not_cut' => $request->features_quantity->merchandise_not_cut,
+                'different_dimensions' => $request->features_quantity->different_dimensions,
+                'damaged_products' => $request->features_quantity->damaged_products,
+                'product_does_not_perform_its_function' => $request->features_quantity->product_does_not_perform_its_function,
+                'wrong_product_code' => $request->features_quantity->wrong_product_code,
+                'total' => $request->features_quantity->total,
+            ];
+            $inspection->featuresQuantity()->create($dataFeaturesQuantity);
             foreach ($request->products_selected as $productSelected) {
                 $dataProductSelected = [
                     "odoo_product_id" => $productSelected['odoo_product_id'],
@@ -102,11 +127,67 @@ class InspectionController extends Controller
     public function show($inspection_id)
     {
         $inspection = Inspection::with('productsSelected')->where('code_inspection', $inspection_id)->first();
+        // $code_Order = InspectionProduct::all('code_order')->first();
+        //  return $code_Order->code_order;
+
+        $pedidoIns = Sale::join("additional_sale_information", "sales.id", "additional_sale_information.sale_id")
+            ->join("inspections", "inspections.sale_id", "additional_sale_information.sale_id")
+            ->where("code_inspection", $inspection_id)
+            ->select(
+                "sales.id",
+                "inspections.sale_id",
+                "sales.code_sale",
+                "inspections.code_inspection",
+                "sales.code_sale",
+                "additional_sale_information.client_name",
+                "additional_sale_information.warehouse_company",
+                'inspections.user_created_id',
+                'inspections.date_inspection',
+                'inspections.type_product',
+                'inspections.observations',
+                'inspections.user_created',
+                'inspections.user_signature_created',
+                'inspections.user_reviewed',
+                'inspections.user_signature_reviewed',
+                'inspections.quantity_revised',
+                'inspections.quantity_denied',
+                "additional_sale_information.sale_id"
+            )
+            ->first();
+
+        $ins = $pedidoIns->inspections()->where("code_inspection", $inspection_id)->first();
+
+        $pedidoIns->features_quantity = $ins->featuresQuantity;
+
+        // return $pedidoIns->details_orders;
+        $inspectionProduct = InspectionProduct::join('order_purchases', 'inspection_products.code_order', 'order_purchases.code_order')
+            ->select('inspection_products.code_order')
+            ->first();
+
+
+        $nuevo = $pedidoIns->detailsOrders->where('code_order', $inspectionProduct->code_order)->first();
+
+        unset($pedidoIns->detailsOrders);
+        // $pedidoIns->details_orders = $nuevo;
+
+        //return $pedidoIns->detailsOrders = $nuevo;;
+        $pedidoIns->detailsOrders = $nuevo;
+
+        // return $pedidoIns->detailsOrders = $nuevo;
+
+        //return $pedidoIns->details_orders;
+        // $pedidoIns->client_name = $pedidoIns->moreInformation->client_name;
+        // $pedidoIns->company = $pedidoIns->moreInformation->company;
+
+        //   return $pedidoIns->detailsOrders;}   
+        // unset($pedidoIns->moreInformation);
+
+
         if ($inspection) {
             return response()->json([
                 'msg' => "Inspeccion de calidad solicitada correctamente",
                 'data' =>
-                ["inspection" => $inspection]
+                ["inspection" => $pedidoIns]
             ], response::HTTP_OK); //200
         }
         return response()->json(["msg" => "Inspeccion No Encontrada"], response::HTTP_NOT_FOUND);
