@@ -73,8 +73,9 @@ class DeliveryRouteController extends Controller
             $per_page = $request->per_page;
         }
         $pedidos = Sale::join('order_purchases', 'order_purchases.code_sale', 'sales.code_sale')->whereIn('order_purchases.status_bpm', ["Cancelado", "Confirmado"])->orderBy('sales.code_sale', 'ASC')->paginate($per_page);
+
         foreach ($pedidos as $pedido) {
-            $pedido->orders = $pedido->orders()->whereIn('order_purchases.status', ["Cancelado", "Confirmado"])->get();
+            $pedido->orders = $pedido->orders()->whereIn('order_purchases.status_bpm', ["Cancelado", "Confirmado"])->get();
             foreach ($pedido->orders as $orden) {
                 $orden->products;
             }
@@ -255,7 +256,7 @@ class DeliveryRouteController extends Controller
                 }
             }
         }
-        
+
         // Devolvemos la información encontrada.
         return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['pedidos' => $pedidos]], response::HTTP_OK);
     }
