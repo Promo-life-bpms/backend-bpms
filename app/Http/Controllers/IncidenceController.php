@@ -31,7 +31,37 @@ class IncidenceController extends Controller
         }
         $incidencia->productsIncidence;
         unset($incidencia->requested_by);
-        return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $incidencia]], response::HTTP_OK);
+
+        foreach ($incidencia->productsIncidence as $productIncidence) {
+            $productIncidence->completeInformation->orderPurchase;
+        }
+
+        DB::statement("SET SQL_MODE=''");
+        $dataIncidencia = OrderPurchase::join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
+            ->join('incidence_products', 'incidence_products.order_purchase_product_id', 'order_purchase_products.id')
+            ->where('incidence_products.incidence_id', $incidencia->id)
+            ->select('order_purchases.*')
+            ->groupBy('order_purchases.id')
+            ->get();
+        foreach ($dataIncidencia as $codeOrder) {
+            $codeOrder->incidenceProducts = $codeOrder->products()
+                ->join('incidence_products', 'incidence_products.order_purchase_product_id', 'order_purchase_products.id')
+                ->where('incidence_products.incidence_id', $incidencia->id)
+                ->where('order_purchase_products.order_purchase_id', $codeOrder->id)
+                ->get();
+            foreach ($codeOrder->incidenceProducts as $productIncidence) {
+                unset(
+                    $productIncidence->planned_date,
+                    $productIncidence->company,
+                    $productIncidence->quantity_invoiced,
+                    $productIncidence->quantity_delivered,
+                    $productIncidence->company,
+                    $productIncidence->unit_price,
+                );
+            }
+        }
+
+        return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $dataIncidencia]], response::HTTP_OK);
     }
 
     /**

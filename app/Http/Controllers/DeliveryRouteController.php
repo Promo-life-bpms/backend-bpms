@@ -112,7 +112,7 @@ class DeliveryRouteController extends Controller
             'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
             'code_orders.*.code_order' => 'required|exists:order_purchases,code_order',
             'code_orders.*.type_of_origin' => 'required',
-            'code_orders.*.delivery_address' => 'required',
+            'code_orders.*.origin_address' => 'required',
             'code_orders.*.type_of_destiny' => 'required',
             'code_orders.*.destiny_address' => 'required',
             'code_orders.*.hour' => 'required|date_format:H:i:s',
@@ -164,7 +164,7 @@ class DeliveryRouteController extends Controller
                 'code_sale' => $codeOrder->code_sale,
                 'code_order' => $codeOrder->code_order,
                 'type_of_origin' => $codeOrder->type_of_origin,
-                'delivery_address' => $codeOrder->delivery_address,
+                'origin_address' => $codeOrder->origin_address,
                 'type_of_destiny' => $codeOrder->type_of_destiny,
                 'destiny_address' => $codeOrder->destiny_address,
                 'hour' => $codeOrder->hour,
@@ -246,6 +246,11 @@ class DeliveryRouteController extends Controller
         foreach ($pedidos as $pedido) {
             $orderPurchaseDeiveryRoute = $pedido->ordersDeliveryRoute()->where("delivery_route_id", $ruta->id)->get();
             $pedido->ordersDeliveryRouteRegister = $orderPurchaseDeiveryRoute;
+            foreach ($pedido->ordersDeliveryRouteRegister as $odrr) {
+                $odrr->remmisions = $odrr->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')->where('code_order_delivery_routes.delivery_route_id', $ruta->id)->select('remisiones.code_remission')->get();
+                // return $odrr;
+            }
+            // return $pedido;
         }
         for ($i = 0; $i < count($pedidos); $i++) {
             foreach ($pedidos[$i]->ordersDeliveryRouteRegister as $orderDeliveryRoute) {
@@ -308,7 +313,7 @@ class DeliveryRouteController extends Controller
                 $codeOrderDB->code_sale = $codeOrderRequest->code_sale;
                 $codeOrderDB->code_order = $codeOrderRequest->code_order;
                 $codeOrderDB->type_of_origin = $codeOrderRequest->type_of_origin;
-                $codeOrderDB->delivery_address = $codeOrderRequest->delivery_address;
+                $codeOrderDB->origin_address = $codeOrderRequest->origin_address;
                 $codeOrderDB->type_of_destiny = $codeOrderRequest->type_of_destiny;
                 $codeOrderDB->destiny_address = $codeOrderRequest->destiny_address;
                 $codeOrderDB->hour = $codeOrderRequest->hour;
@@ -338,7 +343,7 @@ class DeliveryRouteController extends Controller
                     'code_sale' => $codeOrderRequest->code_sale,
                     'code_order' => $codeOrderRequest->code_order,
                     'type_of_origin' => $codeOrderRequest->type_of_origin,
-                    'delivery_address' => $codeOrderRequest->delivery_address,
+                    'origin_address' => $codeOrderRequest->origin_address,
                     'type_of_destiny' => $codeOrderRequest->type_of_destiny,
                     'destiny_address' => $codeOrderRequest->destiny_address,
                     'hour' => $codeOrderRequest->hour,
