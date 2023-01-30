@@ -29,6 +29,8 @@ class IncidenceController extends Controller
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
+        $incidencia->productsIncidence;
+        unset($incidencia->requested_by);
         return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $incidencia]], response::HTTP_OK);
     }
 
@@ -40,7 +42,7 @@ class IncidenceController extends Controller
      */
     public function store(Request $request, $sale_id)
     {
-        // TODO: Calidad y ventas puede generar incidencias hasta 30 dias, despues solo calidad.
+        // TODO: Calidad y ventas puede generar incidencias hasta 30 dias de entregado el producto, despues solo calidad.
 
         //validar que la informacion este correcta si no no se puede registrar
         // utilizar validator
@@ -49,14 +51,11 @@ class IncidenceController extends Controller
             'motivo' => 'required',
             'tipo_de_producto' => 'required',
             'tipo_de_tecnica' => 'required',
-            'solucion_de_incidencia' => 'required',
             'responsable' => 'required',
             'fecha_creacion' => 'required',
-            'status' => 'required',
             'evidencia' => 'required',
             'fecha_compromiso' => 'required',
             'solucion' => 'required',
-            'fecha_solucion' => 'required',
             'id_user' => 'required',
             'elaboro' => 'required',
             'firma_elaboro' => 'required',
@@ -102,21 +101,20 @@ class IncidenceController extends Controller
             "description" => $request->comentarios_generales,
             "date_request" => $request->fecha_creacion,
             "company" => $sale->moreInformation->warehouse_company,
-            "status" => '',
+            "odoo_status" => 'Confirmado', // TODO: Cambiarlo a odoo_status
 
             'internal_code_incidence' => "INCD-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
             'area' => $request->area,
             'reason' => $request->motivo,
             'product_type' => $request->tipo_de_producto,
             'type_of_technique' => $request->tipo_de_tecnica,
-            'solution_of_incidence' => $request->solucion_de_incidencia,
             'responsible' => $request->responsable,
             'creation_date' => $request->fecha_creacion,
-            'internal_status' => $request->status,
+            'bpm_status' => "Creada",
             'evidence' => $request->evidencia,
             'commitment_date' => $request->fecha_compromiso,
             'solution' => $request->solucion,
-            'solution_date' => $request->fecha_solucion,
+            'solution_date' => null,
             'user_id' => $request->id_user,
             'elaborated' => $request->elaboro,
             'signature_elaborated' => $request->firma_elaboro,
@@ -249,8 +247,9 @@ class IncidenceController extends Controller
         return response()->json([
             "msg" => 'Incidencia creada exitosamente',
             'data' =>
-            ["incidencia" => $incidencia,
-            'responseOdoo' => json_decode($response),
+            [
+                "incidencia" => $incidencia,
+                'responseOdoo' => json_decode($response),
             ]
         ], response::HTTP_CREATED);
     }

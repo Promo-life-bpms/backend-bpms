@@ -15,6 +15,8 @@ class CreateSaleStatusChangesTable extends Migration
     {
         Schema::create('sale_status_changes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId("sale_id")->constrained();
+            $table->foreignId("status_id")->constrained();
             $table->timestamps();
         });
     }

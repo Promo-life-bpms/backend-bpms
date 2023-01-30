@@ -85,16 +85,20 @@ class OrderPurchaseController extends Controller
         }
         $orderPurchase->products;
         $orderPurchase->receptionsWithProducts;
-        
-        //
+
+        $quantityReceived = [];
         foreach ($orderPurchase->receptionsWithProducts as $OrderP) {
-          foreach ($OrderP->productsReception as $productRec); # code...
-            
-            $productRec->completeInformation;
-           
-            $productRec->measurement_unit = $productRec->completeInformation->measurement_unit;
-           
-            unset($productRec->completeInformation);
+            foreach ($OrderP->productsReception as $productRec) {
+                if (array_key_exists($productRec->odoo_product_id, $quantityReceived) == null) {
+                    $quantityReceived[$productRec->odoo_product_id] =  $productRec->done;
+                } else {
+                    $quantityReceived[$productRec->odoo_product_id] =   $quantityReceived[$productRec->odoo_product_id] + $productRec->done;
+                }
+                $productRec->completeInformation;
+                $productRec->total_amount_received = $quantityReceived[$productRec->odoo_product_id];
+                $productRec->measurement_unit = $productRec->completeInformation->measurement_unit;
+                unset($productRec->completeInformation);
+            }
         }
         $orderPurchase->change_history = ["Informacion Pendiente"];
         return response()->json(["msg" => "Orden de compra encontrada", 'data' => ["orderPurchase", $orderPurchase]], response::HTTP_OK);

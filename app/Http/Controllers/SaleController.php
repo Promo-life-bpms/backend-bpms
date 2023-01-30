@@ -29,13 +29,25 @@ class SaleController extends Controller
 
         $sales = null;
         if ($request->ordenes_proximas) {
-            $sales =  Sale::with('moreInformation', 'currentStatus', "detailsOrders")
+            $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
                 //->where('order_purchases.planned_date', '>=', $fechaProxima)
                 ->orderby('order_purchases.planned_date', 'ASC')
                 ->paginate($per_page);
         } else {
-            $sales = Sale::with('moreInformation', 'currentStatus', "detailsOrders")->paginate($per_page);
+            $sales = Sale::with('moreInformation', 'lastStatus', "detailsOrders")->paginate($per_page);
+        }
+
+        foreach ($sales as $sale) {
+            if ($sale->lastStatus) {
+                $sale->lastStatus->slug = $sale->lastStatus->status->slug;
+                $sale->lastStatus->last_status = $sale->lastStatus->status->status;
+                unset($sale->lastStatus->status);
+                unset($sale->lastStatus->id);
+                unset($sale->lastStatus->sale_id);
+                unset($sale->lastStatus->status_id);
+                unset($sale->lastStatus->updated_at);
+            }
         }
 
         return response()->json([
@@ -63,17 +75,30 @@ class SaleController extends Controller
         */
         $sale = Sale::with([
             'moreInformation',
-            'currentStatus',
+            'lastStatus',
             'saleProducts',
             'detailsOrders',
             'routeDeliveries',
             'inspections',
             'incidences',
-            "deliveries"
+            "ordersDeliveryRoute"
         ])->where('code_sale', $sale_id)->first();
         if ($sale) {
+            foreach ($sale->routeDeliveries as $routeDelivery) {
+                $routeDelivery->deliveryRoute->name_chofer = $routeDelivery->deliveryRoute->user->name;
+                unset($routeDelivery->deliveryRoute->user);
+            }
+            $sale->lastStatus->slug = $sale->lastStatus->status->slug;
+            $sale->lastStatus->last_status = $sale->lastStatus->status->status;
+            unset($sale->lastStatus->status);
+            unset($sale->lastStatus->id);
+            unset($sale->lastStatus->sale_id);
+            unset($sale->lastStatus->status_id);
+            unset($sale->lastStatus->updated_at);
+
             return response()->json(['msg' => 'Detalle del pedido', 'data' => ["sale", $sale]], response::HTTP_OK); //200
         }
+
         return response()->json(['msg' => "No hay informacion acerca de este pedido"], response::HTTP_OK); //200
     }
     public function viewPedidosPorVendedor()
