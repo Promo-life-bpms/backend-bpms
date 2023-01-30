@@ -127,8 +127,6 @@ class InspectionController extends Controller
     public function show($inspection_id)
     {
         $inspection = Inspection::with('productsSelected')->where('code_inspection', $inspection_id)->first();
-        // $code_Order = InspectionProduct::all('code_order')->first();
-        //  return $code_Order->code_order;
 
         $pedidoIns = Sale::join("additional_sale_information", "sales.id", "additional_sale_information.sale_id")
             ->join("inspections", "inspections.sale_id", "additional_sale_information.sale_id")
@@ -160,27 +158,33 @@ class InspectionController extends Controller
         $pedidoIns->features_quantity = $ins->featuresQuantity;
 
         // return $pedidoIns->details_orders;
-        $inspectionProduct = InspectionProduct::join('order_purchases', 'inspection_products.code_order', 'order_purchases.code_order')
+        $inspectionsOrder = InspectionProduct::join('order_purchases', 'inspection_products.code_order', 'order_purchases.code_order')
             ->select('inspection_products.code_order')
-            ->first();
+            ->where("inspection_products.inspection_id", $inspection->id)
+            ->get();
 
+        $ordenesnueva = [];
 
-        $nuevo = $pedidoIns->detailsOrders->where('code_order', $inspectionProduct->code_order)->first();
+        foreach ($inspectionsOrder as $orden) {
+            $productsSelected = [];
+            $nuevo = $pedidoIns->detailsOrders->where('code_order', $orden->code_order)->first();
+            
+            foreach ($nuevo->products as $product) {
+                foreach ($inspection->productsSelected as $pInspection) {
+                    if ($product->odoo_product_id == $pInspection->odoo_product_id) {
+                        array_push($productsSelected, $product);
+                    }
+                }
+            };
+            $nuevo->productsInspection = $productsSelected;
+            unset($nuevo->products);
+            
+            array_push($ordenesnueva, $nuevo);
+        }
 
         unset($pedidoIns->detailsOrders);
-        // $pedidoIns->details_orders = $nuevo;
+        $pedidoIns->detailsOrders = $ordenesnueva;
 
-        //return $pedidoIns->detailsOrders = $nuevo;;
-        $pedidoIns->detailsOrders = $nuevo;
-
-        // return $pedidoIns->detailsOrders = $nuevo;
-
-        //return $pedidoIns->details_orders;
-        // $pedidoIns->client_name = $pedidoIns->moreInformation->client_name;
-        // $pedidoIns->company = $pedidoIns->moreInformation->company;
-
-        //   return $pedidoIns->detailsOrders;}   
-        // unset($pedidoIns->moreInformation);
 
 
         if ($inspection) {
