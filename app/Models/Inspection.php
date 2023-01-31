@@ -22,11 +22,15 @@ class Inspection extends Model
         'user_signature_reviewed',
         'quantity_revised',
         'quantity_denied',
-        'features_quantity'
+
     ];
 
     public function productsSelected()
     {
         return $this->hasMany(InspectionProduct::class, 'inspection_id');
+    }
+    public function featuresQuantity()
+    {
+        return $this->hasMany(FeaturesQuantity::class);
     }
 }

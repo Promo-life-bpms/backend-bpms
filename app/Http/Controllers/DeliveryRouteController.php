@@ -232,6 +232,7 @@ class DeliveryRouteController extends Controller
      */
     public function show($id)
     {
+
         // Corresponde con la ruta  rutas-de-entrega
         // Buscamos un study por el ID.
         $ruta = DeliveryRoute::where('code_route', $id)->first();
@@ -242,7 +243,8 @@ class DeliveryRouteController extends Controller
             return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
         }
 
-        $pedidos = Sale::join("code_order_delivery_routes", "sales.code_sale", "code_order_delivery_routes.code_sale")->join("delivery_routes", "delivery_routes.id", "code_order_delivery_routes.delivery_route_id")->where("code_route", $id)->get();
+        $pedidos = Sale::join("code_order_delivery_routes", "sales.code_sale", "code_order_delivery_routes.code_sale")
+            ->join("delivery_routes", "delivery_routes.id", "code_order_delivery_routes.delivery_route_id")->where("code_route", $id)->get();
         foreach ($pedidos as $pedido) {
             $orderPurchaseDeiveryRoute = $pedido->ordersDeliveryRoute()->where("delivery_route_id", $ruta->id)->get();
             $pedido->ordersDeliveryRouteRegister = $orderPurchaseDeiveryRoute;
@@ -504,8 +506,68 @@ class DeliveryRouteController extends Controller
         if (!$remision) {
             return response()->json(['msg' =>  'Remision no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
-        $remision->productRemission;
-        return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision", $remision]], response::HTTP_OK); //200
+        //  $remision->productRemission;
+        //
+        $pedidos = Sale::join("code_order_delivery_routes", "sales.code_sale", "code_order_delivery_routes.code_sale")
+            ->join("delivery_routes", "delivery_routes.id", "code_order_delivery_routes.delivery_route_id")
+            ->join("remisiones", "remisiones.delivery_route_id", "delivery_routes.id")
+            ->select(
+                "sales.id",
+                "sales.code_sale",
+                "code_order_delivery_routes.code_sale",
+                "remisiones.code_remission",
+                "code_order_delivery_routes.delivery_route_id",
+                "code_order_delivery_routes.hour",
+                "code_order_delivery_routes.num_guide",
+                "code_order_delivery_routes.observations"
+
+            )
+            ->where("code_remission", $id)
+            ->get();
+      // return $pedidos;
+
+        foreach ($pedidos as $pedido) {
+
+            $pedido->moreInformation;
+            $pedido->client_name = $pedido->moreInformation->client_name;
+            $pedido->company = $pedido->moreInformation->company;
+         
+          $pedido->detailsOrders;
+       //   return $pedido->detailsOrders;}   
+          unset($pedido->moreInformation->detailsOrders);}
+     /* 
+        foreach ($pedidos as $pedido) {
+
+            $pedido->moreInformation;
+            $pedido->client_name = $pedido->moreInformation->client_name;
+            $pedido->company = $pedido->moreInformation->company;
+          unset($pedido->moreInformation);
+        }
+
+          $pedido->detailsOrders;
+       //   return $pedido->detailsOrders;}   
+       foreach ($pedidos as $order) {
+        $order->detailsOrders;
+        $order->provider_name = $order->moreInformation->provider_name;
+        $order->supplier_representative = $order->moreInformation->supplier_representative;
+        $order->total = $order->moreInformation->total;
+        $order->status = $order->moreInformation->status;
+        unset($order->detailsOrders);
+       }
+ */
+     
+
+
+
+
+
+
+
+        // Devolvemos la información encontrada.
+
+
+
+        return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision" => $pedidos]], response::HTTP_OK); //200
     }
 
     public function cancelRemision($ruta, $id)
