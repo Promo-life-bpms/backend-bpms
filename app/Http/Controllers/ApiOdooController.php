@@ -243,7 +243,7 @@ class ApiOdooController extends Controller
                 try {
                     $orderPurchase = OrderPurchase::updateOrCreate(['code_order' => $purchase->code_purchase,], $dataPurchase);
                     if ($orderPurchase->status_bpm == null) {
-                        $orderPurchase->status_bpm = "Orden de Compra Creada";
+                        $orderPurchase->status_bpm = "Pendiente";
                         $orderPurchase->save();
                     }
                 } catch (Exception $th) {

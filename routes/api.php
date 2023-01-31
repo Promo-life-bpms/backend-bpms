@@ -63,6 +63,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('incidencias/{incidencia}', [IncidenceController::class, 'show']);
     // Crear una incidencia
     Route::post('pedidos/{pedido}/incidencia', [IncidenceController::class, 'store']);
+    Route::patch('incidencias/{incidencia}', [IncidenceController::class, 'update']);
 
     // Vista de status de incidencia
     Route::post('order/{compra}/updatestatus', [OrderPurchaseController::class, 'store']);

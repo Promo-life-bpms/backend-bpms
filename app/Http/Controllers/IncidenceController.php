@@ -29,13 +29,7 @@ class IncidenceController extends Controller
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
-        $incidencia->productsIncidence;
         unset($incidencia->requested_by);
-
-        foreach ($incidencia->productsIncidence as $productIncidence) {
-            $productIncidence->completeInformation->orderPurchase;
-        }
-
         DB::statement("SET SQL_MODE=''");
         $dataIncidencia = OrderPurchase::join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
             ->join('incidence_products', 'incidence_products.order_purchase_product_id', 'order_purchase_products.id')
@@ -60,8 +54,8 @@ class IncidenceController extends Controller
                 );
             }
         }
-
-        return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $dataIncidencia]], response::HTTP_OK);
+        $incidencia->orderDetails = $dataIncidencia;
+        return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $incidencia]], response::HTTP_OK);
     }
 
     /**
@@ -187,11 +181,9 @@ class IncidenceController extends Controller
         switch ($company) {
             case 'PROMO LIFE':
                 $keyOdoo = 'c002a44464a3cbe6bd49344fcd99d06d';
-                # code...
                 break;
             case 'BH':
                 $keyOdoo = 'b1bf4adf8d00ccec169d66fcce0b22ca';
-                # code...
                 break;
             default:
                 return response()->json(['msg' => 'No se pudo asignar el key para enviar la incidencia a Odoo correctamente'], response::HTTP_BAD_REQUEST); //400
@@ -284,14 +276,27 @@ class IncidenceController extends Controller
         ], response::HTTP_CREATED);
     }
 
+    public function update(Request $request, $incidencia)
+    {
+        $validation = Validator::make($request->all(), [
+            'status' => 'required|in:Liberada,Cancelada',
+            'solution_date' => 'required_if:status,Liberada',
+        ]);
+        if ($validation->fails()) {
+            return response()->json([
+                "msg" => 'No se registro correctamente la informacion',
+                'data' => ["errorValidacion" => $validation->getMessageBag()]
+            ], response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+        $incidencia = Incidence::where('internal_code_incidence', $incidencia)->first();
+        if (!$incidencia) {
+            return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
+        }
+        $incidencia->bpm_status = $request->status;
+        $incidencia->solution_date = $request->solution_date;
+        $incidencia->save();
+    }
 
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Request $request)
     {
         $Incidencia = Incidence::destroy($request->id);

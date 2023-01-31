@@ -134,7 +134,6 @@ class DeliveryRouteController extends Controller
             ); // 422
         }
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
-        // ::create
         //codigo de ruta
         $maxINSP = DeliveryRoute::max('code_route');
         $idInsp = null;
@@ -144,7 +143,7 @@ class DeliveryRouteController extends Controller
             $idInsp = (int) explode('-', $maxINSP)[1];
             $idInsp++;
         }
-        //codigo de ruta
+
         $ruta = DeliveryRoute::create([
             'code_route' => "RUT-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
             'date_of_delivery' => $request->date_of_delivery,
@@ -174,7 +173,6 @@ class DeliveryRouteController extends Controller
                 'observations' => $codeOrder->observations,
             ]);
 
-
             foreach ($codeOrder->products as $newProduct) {
                 $newProduct = (object)$newProduct;
                 $codeOrderRoute->productDeliveryRoute()->create([
@@ -183,37 +181,6 @@ class DeliveryRouteController extends Controller
 
                 ]);
             }
-        }
-
-        // Revisar cuales son los pedidos que estan en la ruta de entrega
-
-        // Obtener el comercial email de cada pedido
-
-        // Enviar una notificacion a cada email
-
-        //prueba de notificacion
-
-        {
-            //  $user = User::where('email',"=", "commercial_email")->get();
-
-            //comercial
-
-            //
-
-            /* $sale = Sale::where('code_sale',  $request->code_orders $codeOrder->code_sale); */
-            //
-            //$email = auth()->user()->email;
-
-
-            /*      $user = User::find(1);
-
-            $msgRuta = [
-                'greeting' => 'Hola',
-                'body' => 'Ruta de entrega creada',
-                'bosdy' => 'Ruta de entrega creada',
-            ];
-
-            $user->notify(new NotificationsNotificacion($msgRuta)); */
         }
 
         return response()->json([
@@ -232,7 +199,6 @@ class DeliveryRouteController extends Controller
      */
     public function show($id)
     {
-
         // Corresponde con la ruta  rutas-de-entrega
         // Buscamos un study por el ID.
         $ruta = DeliveryRoute::where('code_route', $id)->first();
@@ -250,7 +216,7 @@ class DeliveryRouteController extends Controller
             $pedido->ordersDeliveryRouteRegister = $orderPurchaseDeiveryRoute;
             foreach ($pedido->ordersDeliveryRouteRegister as $odrr) {
                 $odrr->remmisions = $odrr->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')->where('code_order_delivery_routes.delivery_route_id', $ruta->id)->select('remisiones.code_remission')->get();
-                // return $odrr;
+                return $odrr;
             }
             // return $pedido;
         }
@@ -524,18 +490,19 @@ class DeliveryRouteController extends Controller
             )
             ->where("code_remission", $id)
             ->get();
-      // return $pedidos;
+        // return $pedidos;
 
         foreach ($pedidos as $pedido) {
 
             $pedido->moreInformation;
             $pedido->client_name = $pedido->moreInformation->client_name;
             $pedido->company = $pedido->moreInformation->company;
-         
-          $pedido->detailsOrders;
-       //   return $pedido->detailsOrders;}   
-          unset($pedido->moreInformation->detailsOrders);}
-     /* 
+
+            $pedido->detailsOrders;
+            //   return $pedido->detailsOrders;}
+            unset($pedido->moreInformation->detailsOrders);
+        }
+        /*
         foreach ($pedidos as $pedido) {
 
             $pedido->moreInformation;
@@ -545,7 +512,7 @@ class DeliveryRouteController extends Controller
         }
 
           $pedido->detailsOrders;
-       //   return $pedido->detailsOrders;}   
+       //   return $pedido->detailsOrders;}
        foreach ($pedidos as $order) {
         $order->detailsOrders;
         $order->provider_name = $order->moreInformation->provider_name;
@@ -555,7 +522,7 @@ class DeliveryRouteController extends Controller
         unset($order->detailsOrders);
        }
  */
-     
+
 
 
 
