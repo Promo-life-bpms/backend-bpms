@@ -10,6 +10,7 @@ use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
+use App\Http\Controllers\UploadImageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -103,4 +104,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     //Ver pedidos de cada vendedor
     Route::get('pedidos/viewPedidosPorVendedor', [SaleController::class, 'viewPedidosPorVendedor']);
+
+    Route::post('/image/upload', [UploadImageController::class, 'uploadImage']);
+    Route::post('/image/delete', [UploadImageController::class, 'deleteImage']);
 });
