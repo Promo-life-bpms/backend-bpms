@@ -248,6 +248,7 @@ class DeliveryRouteController extends Controller
         foreach ($pedidos as $pedido) {
             $orderPurchaseDeiveryRoute = $pedido->ordersDeliveryRoute()->where("delivery_route_id", $ruta->id)->get();
             $pedido->ordersDeliveryRouteRegister = $orderPurchaseDeiveryRoute;
+
         }
         for ($i = 0; $i < count($pedidos); $i++) {
             foreach ($pedidos[$i]->ordersDeliveryRouteRegister as $orderDeliveryRoute) {
@@ -426,7 +427,7 @@ class DeliveryRouteController extends Controller
             'product_remission' => 'required|array',
             // 'product_remission.*.remission_id' => 'required',
             'product_remission.*.delivered_quantity' => 'required',
-            'product_remission.*.product' => 'required',
+            'product_remission.*.order_purchase_product_id' => 'required|exists:order_purchase_products,id',
         ]);
         if ($validation->fails()) {
             return response()->json([
@@ -472,7 +473,7 @@ class DeliveryRouteController extends Controller
 
             $remision->productRemission()->create([
                 'delivered_quantity' => $product->delivered_quantity,
-                'product' => $product->product,
+                'order_purchase_product_id' => $product->order_purchase_product_id,
             ]);
         }
 
@@ -490,6 +491,8 @@ class DeliveryRouteController extends Controller
 
     public function showRemision($ruta, $id)
     {
+      
+        
         $deliveryRoute = DeliveryRoute::where('code_route', $ruta)->first();
 
         if (!$deliveryRoute) {
@@ -519,18 +522,48 @@ class DeliveryRouteController extends Controller
             )
             ->where("code_remission", $id)
             ->get();
-      // return $pedidos;
+
 
         foreach ($pedidos as $pedido) {
 
+
             $pedido->moreInformation;
+            // return $pedido->moreInformation;
             $pedido->client_name = $pedido->moreInformation->client_name;
             $pedido->company = $pedido->moreInformation->company;
-         
-          $pedido->detailsOrders;
-       //   return $pedido->detailsOrders;}   
-          unset($pedido->moreInformation->detailsOrders);}
-     /* 
+            unset($pedido->moreInformation);
+
+            //return $pedido;
+
+        }
+        $remisionPed = ProductRemission::join('order_purchase_products', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
+            ->select('product_remission.order_purchase_product_id')
+            ->where('product_remission.remission_id', $remision->id)
+            ->get();
+        
+
+        $rem = $pedido->detailsOrders;
+        foreach ($rem as $producto) {
+             return $producto;
+            $nuevo = $producto->products->where('remission_id', $remisionPed)->first();
+            //return $producto->products;
+            return $nuevo;
+        }
+        /* foreach ($remisionPed as $ordem){
+                 
+            } */
+        /*  foreach  ($pedido->detailsOrders as $orden)   {
+            $orden->products;
+
+            
+         }    */
+        // unset($pedido->detailsOrders);  
+        // return $pedido->detailsOrders;
+
+        //   return $pedido->detailsOrders;}   
+
+
+        /* 
         foreach ($pedidos as $pedido) {
 
             $pedido->moreInformation;
@@ -550,7 +583,7 @@ class DeliveryRouteController extends Controller
         unset($order->detailsOrders);
        }
  */
-     
+
 
 
 

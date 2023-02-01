@@ -14,7 +14,7 @@ class ProductRemission extends Model
     protected $fillable = [
         'remission_id',
         'delivered_quantity',
-        "product"
+        "order_purchase_product_id",
         //
     ];
 

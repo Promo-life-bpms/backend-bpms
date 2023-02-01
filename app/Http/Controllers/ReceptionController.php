@@ -60,7 +60,7 @@ class ReceptionController extends Controller
                 $cantidadOrdenada =  $productSearch->quantity;
                 foreach ($request->products as $productRequest) {
                     if ($CantidadRecibida["odoo_product_id"] == $productRequest["odoo_product_id"]) {
-                        if ($productRequest["done"] <= ($cantidadOrdenada -  (int)$CantidadRecibida["quantity"])) {
+                        if ($productRequest["done"] <= ($cantidadOrdenada - (int)$CantidadRecibida["quantity"])) {
                         } else {
                             array_push($errors, ["msg" => "Cantidad superada", "product" => $productSearch]);
                         }
@@ -190,9 +190,9 @@ class ReceptionController extends Controller
                     "initial_demand" => $product->quantity,
                     "done" => $productRequest->done,
                 ];
-
-                // TODO:  Actualizar la cantidad recibida
-
+                $product->quantity_delivered = $product->quantity_delivered + $productRequest->done;
+                $product->save();
+ 
                 try {
                     $receptionDB->productsReception()->updateOrCreate(
                         [
