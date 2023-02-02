@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Notificacion;
-
+use App\Models\OrderPurchaseProduct;
 use App\Notifications\Notificacion as NotificationsNotificacion;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Illuminate\Support\Facades\DB;
@@ -39,6 +39,8 @@ class DeliveryRouteController extends Controller
         DB::statement("SET SQL_MODE=''");
         $rutas = DeliveryRoute::where("is_active", true)->get();
         foreach ($rutas as $ruta) {
+            $ruta->user_chofer_name = $ruta->user->name;
+            unset($ruta->user);
             $ruta->count_sales = count($ruta->codeOrderDeliveryRoute()->groupBy("code_sale")->get());
         }
 
@@ -461,8 +463,6 @@ class DeliveryRouteController extends Controller
 
     public function showRemision($ruta, $id)
     {
-      
-        
         $deliveryRoute = DeliveryRoute::where('code_route', $ruta)->first();
 
         if (!$deliveryRoute) {
@@ -474,98 +474,43 @@ class DeliveryRouteController extends Controller
         if (!$remision) {
             return response()->json(['msg' =>  'Remision no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
-        //  $remision->productRemission;
-        //
-        $pedidos = Sale::join("code_order_delivery_routes", "sales.code_sale", "code_order_delivery_routes.code_sale")
-            ->join("delivery_routes", "delivery_routes.id", "code_order_delivery_routes.delivery_route_id")
-            ->join("remisiones", "remisiones.delivery_route_id", "delivery_routes.id")
-            ->select(
-                "sales.id",
-                "sales.code_sale",
-                "code_order_delivery_routes.code_sale",
-                "remisiones.code_remission",
-                "code_order_delivery_routes.delivery_route_id",
-                "code_order_delivery_routes.hour",
-                "code_order_delivery_routes.num_guide",
-                "code_order_delivery_routes.observations"
 
-            )
-            ->where("code_remission", $id)
+        DB::statement("SET SQL_MODE=''");
+        $pedidos = Sale::join("order_purchases", "sales.code_sale", "order_purchases.code_sale")
+            ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
+            ->join('product_remission', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
+            ->where("product_remission.remission_id", $remision->id)
+            ->select('sales.*')
+            ->groupBy('sales.id')
             ->get();
-        // return $pedidos;
+
 
         foreach ($pedidos as $pedido) {
-
-
             $pedido->moreInformation;
-            // return $pedido->moreInformation;
-            $pedido->client_name = $pedido->moreInformation->client_name;
-            $pedido->company = $pedido->moreInformation->company;
-            unset($pedido->moreInformation);
 
-            //return $pedido;
+            $pedido->ordersProduct = $pedido->orders()
+                ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
+                ->join('product_remission', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
+                ->where("product_remission.remission_id", $remision->id)
+                ->select("order_purchases.*")
+                ->get();
 
+            foreach ($pedido->ordersProduct as $prueba) {
+                $prueba->productRemision = $prueba->products()
+                    ->join('product_remission', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
+                    ->where('product_remission.remission_id', $remision->id)
+                    ->where('order_purchase_products.order_purchase_id', $prueba->id)
+                    ->select("order_purchase_products.*", "product_remission.*")
+                    ->get();
+            }
         }
-        $remisionPed = ProductRemission::join('order_purchase_products', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
-            ->select('product_remission.order_purchase_product_id')
-            ->where('product_remission.remission_id', $remision->id)
-            ->get();
-        
-
-        $rem = $pedido->detailsOrders;
-        foreach ($rem as $producto) {
-             return $producto;
-            $nuevo = $producto->products->where('remission_id', $remisionPed)->first();
-            //return $producto->products;
-            return $nuevo;
-        }
-        /* foreach ($remisionPed as $ordem){
-                 
-            } */
-        /*  foreach  ($pedido->detailsOrders as $orden)   {
-            $orden->products;
-
-            
-         }    */
-        // unset($pedido->detailsOrders);  
-        // return $pedido->detailsOrders;
-
-        //   return $pedido->detailsOrders;}   
-
-
-        /* 
-        foreach ($pedidos as $pedido) {
-
-            $pedido->moreInformation;
-            $pedido->client_name = $pedido->moreInformation->client_name;
-            $pedido->company = $pedido->moreInformation->company;
-          unset($pedido->moreInformation);
-        }
-
-          $pedido->detailsOrders;
-       //   return $pedido->detailsOrders;}
-       foreach ($pedidos as $order) {
-        $order->detailsOrders;
-        $order->provider_name = $order->moreInformation->provider_name;
-        $order->supplier_representative = $order->moreInformation->supplier_representative;
-        $order->total = $order->moreInformation->total;
-        $order->status = $order->moreInformation->status;
-        unset($order->detailsOrders);
-       }
- */
-
-
-
-
-
-
 
 
         // Devolvemos la información encontrada.
 
+        $remision->products_remision = $pedido;
 
-
-        return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision" => $pedidos]], response::HTTP_OK); //200
+        return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision" => $remision]], response::HTTP_OK); //200
     }
 
     public function cancelRemision($ruta, $id)
