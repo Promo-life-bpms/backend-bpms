@@ -29,6 +29,32 @@ class IncidenceController extends Controller
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
+        unset($incidencia->requested_by);
+        DB::statement("SET SQL_MODE=''");
+        $dataIncidencia = OrderPurchase::join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
+            ->join('incidence_products', 'incidence_products.order_purchase_product_id', 'order_purchase_products.id')
+            ->where('incidence_products.incidence_id', $incidencia->id)
+            ->select('order_purchases.*')
+            ->groupBy('order_purchases.id')
+            ->get();
+        foreach ($dataIncidencia as $codeOrder) {
+            $codeOrder->incidenceProducts = $codeOrder->products()
+                ->join('incidence_products', 'incidence_products.order_purchase_product_id', 'order_purchase_products.id')
+                ->where('incidence_products.incidence_id', $incidencia->id)
+                ->where('order_purchase_products.order_purchase_id', $codeOrder->id)
+                ->get();
+            foreach ($codeOrder->incidenceProducts as $productIncidence) {
+                unset(
+                    $productIncidence->planned_date,
+                    $productIncidence->company,
+                    $productIncidence->quantity_invoiced,
+                    $productIncidence->quantity_delivered,
+                    $productIncidence->company,
+                    $productIncidence->unit_price,
+                );
+            }
+        }
+        $incidencia->orderDetails = $dataIncidencia;
         return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $incidencia]], response::HTTP_OK);
     }
 
@@ -40,7 +66,7 @@ class IncidenceController extends Controller
      */
     public function store(Request $request, $sale_id)
     {
-        // TODO: Calidad y ventas puede generar incidencias hasta 30 dias, despues solo calidad.
+        // TODO: Calidad y ventas puede generar incidencias hasta 30 dias de entregado el producto, despues solo calidad.
 
         //validar que la informacion este correcta si no no se puede registrar
         // utilizar validator
@@ -49,14 +75,11 @@ class IncidenceController extends Controller
             'motivo' => 'required',
             'tipo_de_producto' => 'required',
             'tipo_de_tecnica' => 'required',
-            'solucion_de_incidencia' => 'required',
             'responsable' => 'required',
             'fecha_creacion' => 'required',
-            'status' => 'required',
             'evidencia' => 'required',
             'fecha_compromiso' => 'required',
             'solucion' => 'required',
-            'fecha_solucion' => 'required',
             'id_user' => 'required',
             'elaboro' => 'required',
             'firma_elaboro' => 'required',
@@ -102,21 +125,20 @@ class IncidenceController extends Controller
             "description" => $request->comentarios_generales,
             "date_request" => $request->fecha_creacion,
             "company" => $sale->moreInformation->warehouse_company,
-            "status" => '',
+            "odoo_status" => 'Confirmado', // TODO: Cambiarlo a odoo_status
 
             'internal_code_incidence' => "INCD-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
             'area' => $request->area,
             'reason' => $request->motivo,
             'product_type' => $request->tipo_de_producto,
             'type_of_technique' => $request->tipo_de_tecnica,
-            'solution_of_incidence' => $request->solucion_de_incidencia,
             'responsible' => $request->responsable,
             'creation_date' => $request->fecha_creacion,
-            'internal_status' => $request->status,
+            'bpm_status' => "Creada",
             'evidence' => $request->evidencia,
             'commitment_date' => $request->fecha_compromiso,
             'solution' => $request->solucion,
-            'solution_date' => $request->fecha_solucion,
+            'solution_date' => null,
             'user_id' => $request->id_user,
             'elaborated' => $request->elaboro,
             'signature_elaborated' => $request->firma_elaboro,
@@ -159,11 +181,9 @@ class IncidenceController extends Controller
         switch ($company) {
             case 'PROMO LIFE':
                 $keyOdoo = 'c002a44464a3cbe6bd49344fcd99d06d';
-                # code...
                 break;
             case 'BH':
                 $keyOdoo = 'b1bf4adf8d00ccec169d66fcce0b22ca';
-                # code...
                 break;
             default:
                 return response()->json(['msg' => 'No se pudo asignar el key para enviar la incidencia a Odoo correctamente'], response::HTTP_BAD_REQUEST); //400
@@ -249,20 +269,34 @@ class IncidenceController extends Controller
         return response()->json([
             "msg" => 'Incidencia creada exitosamente',
             'data' =>
-            ["incidencia" => $incidencia,
-            'responseOdoo' => json_decode($response),
+            [
+                "incidencia" => $incidencia,
+                'responseOdoo' => json_decode($response),
             ]
         ], response::HTTP_CREATED);
     }
 
+    public function update(Request $request, $incidencia)
+    {
+        $validation = Validator::make($request->all(), [
+            'status' => 'required|in:Liberada,Cancelada',
+            'solution_date' => 'required_if:status,Liberada',
+        ]);
+        if ($validation->fails()) {
+            return response()->json([
+                "msg" => 'No se registro correctamente la informacion',
+                'data' => ["errorValidacion" => $validation->getMessageBag()]
+            ], response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+        $incidencia = Incidence::where('internal_code_incidence', $incidencia)->first();
+        if (!$incidencia) {
+            return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
+        }
+        $incidencia->bpm_status = $request->status;
+        $incidencia->solution_date = $request->solution_date;
+        $incidencia->save();
+    }
 
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Request $request)
     {
         $Incidencia = Incidence::destroy($request->id);

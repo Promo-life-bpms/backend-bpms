@@ -10,6 +10,7 @@ use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
+use App\Http\Controllers\UploadImageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,7 +63,8 @@ Route::group(['middleware' => 'auth'], function () {
     // localhost/pedidos/PED456/incidencias/INC-423
     Route::get('incidencias/{incidencia}', [IncidenceController::class, 'show']);
     // Crear una incidencia
-    Route::post('pedido/{pedido}/incidencias/', [IncidenceController::class, 'store']);
+    Route::post('pedidos/{pedido}/incidencia', [IncidenceController::class, 'store']);
+    Route::patch('incidencias/{incidencia}', [IncidenceController::class, 'update']);
 
     // Vista de status de incidencia
     Route::post('order/{compra}/updatestatus', [OrderPurchaseController::class, 'store']);
@@ -96,8 +98,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('rutas-de-entrega/{ruta}/remision/{id}', [DeliveryRouteController::class, 'showRemision']);
     //cancelar remision
     Route::put('rutas-de-entrega/{ruta}/cancel-remision/{id}', [DeliveryRouteController::class, 'cancelRemision']);
+    //notificaciones
+    // Route::get('notificacion', [DeliveryRouteController::class, 'store' ]);
 
 
     //Ver pedidos de cada vendedor
     Route::get('pedidos-vendedor/viewPedidosPorVendedor', [SaleController::class, 'viewPedidosPorVendedor']);
+
+    Route::post('/image/upload', [UploadImageController::class, 'uploadImage']);
+    Route::post('/image/delete', [UploadImageController::class, 'deleteImage']);
 });

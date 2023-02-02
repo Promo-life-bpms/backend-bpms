@@ -19,7 +19,7 @@ class CodeOrderDeliveryRoutes extends Migration
             $table->string('code_sale');
             $table->string('code_order');
             $table->string('type_of_origin');
-            $table->text('delivery_address');
+            $table->text('origin_address');
             $table->string('type_of_destiny');
             $table->text('destiny_address');
             $table->time('hour');

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSaleStatusChangesTable extends Migration
+class CreateNotificationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,12 @@ class CreateSaleStatusChangesTable extends Migration
      */
     public function up()
     {
-        Schema::create('sale_status_changes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId("sale_id")->constrained();
-            $table->foreignId("status_id")->constrained();
+        Schema::create('notifications', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->morphs('notifiable');
+            $table->text('data');
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ class CreateSaleStatusChangesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sale_status_changes');
+        Schema::dropIfExists('notifications');
     }
 }

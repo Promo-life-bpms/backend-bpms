@@ -104,7 +104,23 @@ class OrderPurchaseController extends Controller
             );
         }
         $orderPurchase->products;
-        $orderPurchase->receptions;
+        $orderPurchase->receptionsWithProducts;
+
+        $quantityReceived = [];
+        foreach ($orderPurchase->receptionsWithProducts as $OrderP) {
+            foreach ($OrderP->productsReception as $productRec) {
+                if (array_key_exists($productRec->odoo_product_id, $quantityReceived) == null) {
+                    $quantityReceived[$productRec->odoo_product_id] =  $productRec->done;
+                } else {
+                    $quantityReceived[$productRec->odoo_product_id] =   $quantityReceived[$productRec->odoo_product_id] + $productRec->done;
+                }
+                $productRec->completeInformation;
+                $productRec->total_amount_received = $quantityReceived[$productRec->odoo_product_id];
+                $productRec->measurement_unit = $productRec->completeInformation->measurement_unit;
+                unset($productRec->completeInformation);
+            }
+        }
+
         //Se crea el campo de last status con el valor de i retornando el mismo
         $orderPurchase->historyStatus;
         for ($i = 0; $i < count($orderPurchase->historyStatus); $i++) {

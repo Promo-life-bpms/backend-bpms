@@ -31,4 +31,5 @@ class Remission extends Model
 
         //relacion hasmany() hacia product delivery route
     }
+    
 }

@@ -16,6 +16,7 @@ class DeliveryRoute extends Model
         'is_active',
         'date_of_delivery',
         'user_chofer_id',
+        'type_of_chofer',
         'type_of_product',
         'status',
     ];
@@ -29,5 +30,11 @@ class DeliveryRoute extends Model
     public function remissions()
     {
         return $this->hasMany(Remission::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_chofer_id', 'id');
+        # code...
     }
 }

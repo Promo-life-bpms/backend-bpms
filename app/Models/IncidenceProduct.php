@@ -19,4 +19,9 @@ class IncidenceProduct extends Model
         'quantity_selected',
         'incidence_id'
     ];
+
+    public function completeInformation()
+    {
+        return $this->belongsTo(OrderPurchaseProduct::class, 'order_purchase_product_id', 'id');
+    }
 }

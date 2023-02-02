@@ -13,7 +13,7 @@ class CodeOrderDeliveryRoute extends Model
         'code_sale',
         'code_order',
         'type_of_origin',
-        'delivery_address',
+        'origin_address',
         'type_of_destiny',
         'destiny_address',
         'hour',
@@ -29,6 +29,10 @@ class CodeOrderDeliveryRoute extends Model
     {
         return $this->hasMany(ProductDeliveryRoute::class, 'code_order_route_id');
     }
+    /*     public function productDeliveryRouteAllInformation()
+    {
+        return $this->hasMany(ProductDeliveryRoute::class, 'code_order_route_id')->with("completeInformation");
+    } */
 
     public function deliveryRoute()
     {

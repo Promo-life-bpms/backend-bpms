@@ -33,6 +33,8 @@ class Sale extends Model
         'status_id',
     ];
 
+
+
     public function moreInformation()
     {
         return $this->hasOne(AdditionalSaleInformation::class);
@@ -58,6 +60,12 @@ class Sale extends Model
         return $this->hasMany(OrderPurchase::class, "code_sale", "code_sale")->with('products');
     }
 
+    public function ordersDeliveryRoute()
+    {
+        return $this->hasMany(CodeOrderDeliveryRoute::class, "code_sale", "code_sale")->with('productDeliveryRoute');
+        //return $this->hasMany(CodeOrderDeliveryRoute::class, "code_sale", "code_sale")->with('productDeliveryRouteAllInformation');
+    }
+
     public function currentStatus()
     {
         return $this->belongsTo(Status::class, 'status_id', 'id');
@@ -81,5 +89,10 @@ class Sale extends Model
     public function deliveries()
     {
         return $this->hasMany(Delivery::class, 'code_sale', 'code_sale');
+    }
+
+    public function lastStatus()
+    {
+        return $this->hasOne(SaleStatusChange::class)->latestOfMany();
     }
 }
