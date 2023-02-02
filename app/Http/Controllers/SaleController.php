@@ -71,19 +71,19 @@ class SaleController extends Controller
             'incidences',
             "deliveries"
         ])->where('code_sale', $sale_id)->first();
+        //Detalle del pedido seleccionado
         if ($sale) {
             return response()->json(['msg' => 'Detalle del pedido', 'data' => ["sale", $sale]], response::HTTP_OK); //200
         }
         return response()->json(['msg' => "No hay informacion acerca de este pedido"], response::HTTP_OK); //200
     }
+     //Ver pedidos de cada vendedor
     public function viewPedidosPorVendedor()
     {
         $pedidos = auth()->user()->sales;
-
         return response()->json([
             'msg' => "Vizualizar mis pedidos",
             'data' => ["pedidos" => $pedidos],
         ], Response::HTTP_OK); //200
-
     }
 }

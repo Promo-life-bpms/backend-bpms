@@ -99,5 +99,5 @@ Route::group(['middleware' => 'auth'], function () {
 
 
     //Ver pedidos de cada vendedor
-    Route::get('pedidos/viewPedidosPorVendedor', [SaleController::class, 'viewPedidosPorVendedor']);
+    Route::get('pedidos-vendedor/viewPedidosPorVendedor', [SaleController::class, 'viewPedidosPorVendedor']);
 });
