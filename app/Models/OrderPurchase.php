@@ -38,8 +38,13 @@ class OrderPurchase extends Model
     {
         return $this->hasMany(Reception::class, "code_order", "code_order");
     }
+    public function historyStatus()
+    {
+        return $this->hasMany(StatusOT::class, "id_order_purchases", "id")->with("StatusProductsOT");
+    }
+    
     public function receptionsWithProducts()
     {
-        return $this->hasMany(Reception::class, "code_order", "code_order")->with("productsReception");
+        return $this->hasMany(Reception::class, "code_order", "code_order")->orderBy('created_at', 'DESC')->with("productsReception");
     }
 }

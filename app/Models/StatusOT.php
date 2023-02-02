@@ -13,15 +13,12 @@ class StatusOT extends Model
         'hora',
         'id_order_purchases',
         'status',
-        'id_order_purchase_products',
-        'cantidad_seleccionada',
 
 
         //COLACAR TODOS LOS CAMPOS CORRESPONDIENTES DE TODA LA TABLA
     ];
-
-    public function StatusOT()
+    public function StatusProductsOT()
     {
-        return $this->hasMany(StatusOT::class);
+        return $this->hasMany(StatusProductsOT::class, "id_status_o_t_s");
     }
 }

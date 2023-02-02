@@ -21,12 +21,6 @@ class CreateStatusOTTable extends Migration
             ->cascadeOnUpdate()
             ->nullOnDelete();
             $table->string('status');
-            $table->foreignId('id_order_purchase_products')
-            ->nullable()
-            ->constrained('order_purchase_products')
-            ->cascadeOnUpdate()
-            ->nullOnDelete();
-            $table->string('cantidad_seleccionada');
             $table->timestamps();
         });
     }

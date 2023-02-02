@@ -83,6 +83,7 @@ class SaleController extends Controller
             'incidences',
             "ordersDeliveryRoute"
         ])->where('code_sale', $sale_id)->first();
+        //Detalle del pedido seleccionado
         if ($sale) {
             foreach ($sale->routeDeliveries as $routeDelivery) {
                 $routeDelivery->deliveryRoute->name_chofer = $routeDelivery->deliveryRoute->user->name;
@@ -101,14 +102,13 @@ class SaleController extends Controller
 
         return response()->json(['msg' => "No hay informacion acerca de este pedido"], response::HTTP_OK); //200
     }
+     //Ver pedidos de cada vendedor
     public function viewPedidosPorVendedor()
     {
         $pedidos = auth()->user()->sales;
-
         return response()->json([
             'msg' => "Vizualizar mis pedidos",
             'data' => ["pedidos" => $pedidos],
         ], Response::HTTP_OK); //200
-
     }
 }
