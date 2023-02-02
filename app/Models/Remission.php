@@ -22,14 +22,13 @@ class Remission extends Model
         'delivery_route_id',
         'user_chofer_id',
         'status'
-        //
     ];
-   
+
     public function productRemission()
     {
         return $this->hasMany(ProductRemission::class, "remission_id");
 
         //relacion hasmany() hacia product delivery route
     }
-    
+
 }

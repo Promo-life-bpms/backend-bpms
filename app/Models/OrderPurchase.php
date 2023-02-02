@@ -45,6 +45,6 @@ class OrderPurchase extends Model
     
     public function receptionsWithProducts()
     {
-        return $this->hasMany(Reception::class, "code_order", "code_order")->with("productsReception");
+        return $this->hasMany(Reception::class, "code_order", "code_order")->orderBy('created_at', 'DESC')->with("productsReception");
     }
 }
