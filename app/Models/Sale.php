@@ -50,7 +50,6 @@ class Sale extends Model
         return $this->hasMany(User::class, 'email', 'commercial_email');
     }
 
-
     public function orders()
     {
         return $this->hasMany(OrderPurchase::class, "code_sale", "code_sale");

@@ -126,6 +126,7 @@ class ReceptionController extends Controller
             foreach ($cantidadesRecibida as $key => $CantidadRecibida) {
                 $productSearch =  $orderPurchase->products()->where("odoo_product_id", $CantidadRecibida["odoo_product_id"])->first();
                 $cantidadOrdenada =  $productSearch->quantity;
+                
                 foreach ($request->products as $productRequest) {
                     if ($CantidadRecibida["odoo_product_id"] == $productRequest["odoo_product_id"]) {
                         if ($productRequest["done"] <= ($cantidadOrdenada -  (int)$CantidadRecibida["quantity"])) {
