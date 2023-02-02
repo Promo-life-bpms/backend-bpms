@@ -54,13 +54,18 @@ class OrderPurchaseController extends Controller
             return response()->json(["errors" => "No se ha encontrado la OT"], 404);
         }
         //entrar a el array y seleccionar el status purchase product /y de ahi la cantidad
+        $errors = [];
         foreach ($request->status_purchase_products as $updateCantidad) {
             $cantidadSeleccionada = $updateCantidad['cantidad_seleccionada'];
+            $productSearch = OrderPurchaseProduct::where('odoo_product_id', $updateCantidad['odoo_product_id'])->first()->product;
             $quantity = OrderPurchaseProduct::where('odoo_product_id', $updateCantidad['odoo_product_id'])->first()->quantity;
             if (($cantidadSeleccionada) <= ($quantity)) {
             } else {
-                return ["msg" => "Cantidad superada"];
+                array_push($errors, ["msg" => "Cantidad superada", "product" => $productSearch]);
             }
+        }
+        if (count($errors) > 0) {
+            return response()->json($errors, 400);
         }
 
         //Revisamos si hay errores
