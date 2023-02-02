@@ -127,7 +127,9 @@ class InspectionController extends Controller
     public function show($inspection_id)
     {
         $inspection = Inspection::with('productsSelected')->where('code_inspection', $inspection_id)->first();
-
+        if (!$inspection) {
+            return response()->json(["msg" => "No se ha encontrado la inspeccion"], response::HTTP_NOT_FOUND); //404
+        }
         $pedidoIns = Sale::join("additional_sale_information", "sales.id", "additional_sale_information.sale_id")
             ->join("inspections", "inspections.sale_id", "additional_sale_information.sale_id")
             ->where("code_inspection", $inspection_id)
@@ -168,33 +170,38 @@ class InspectionController extends Controller
         foreach ($inspectionsOrder as $orden) {
             $productsSelected = [];
             $nuevo = $pedidoIns->detailsOrders->where('code_order', $orden->code_order)->first();
-            
+
             foreach ($nuevo->products as $product) {
                 foreach ($inspection->productsSelected as $pInspection) {
+                  //  return $pInspection;
                     if ($product->odoo_product_id == $pInspection->odoo_product_id) {
+                     
+                      $product->quantity_selected = $pInspection->quantity_selected;
+
                         array_push($productsSelected, $product);
+                      
                     }
                 }
+                //return $inspection->productsSelected;
             };
+
             $nuevo->productsInspection = $productsSelected;
+
+
             unset($nuevo->products);
-            
+
             array_push($ordenesnueva, $nuevo);
         }
 
         unset($pedidoIns->detailsOrders);
         $pedidoIns->detailsOrders = $ordenesnueva;
 
+        return response()->json([
+            'msg' => "Inspeccion de calidad solicitada correctamente",
+            'data' =>
+            ["inspection" => $pedidoIns]
+        ], response::HTTP_OK); //200
 
-
-        if ($inspection) {
-            return response()->json([
-                'msg' => "Inspeccion de calidad solicitada correctamente",
-                'data' =>
-                ["inspection" => $pedidoIns]
-            ], response::HTTP_OK); //200
-        }
-        return response()->json(["msg" => "Inspeccion No Encontrada"], response::HTTP_NOT_FOUND);
         // Detalle de la inspeccion
     }
 }

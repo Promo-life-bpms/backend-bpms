@@ -17,7 +17,7 @@ class CreateProductRemissionTable extends Migration
             $table->id();
             $table->foreignId('remission_id')->reference('id')->on('remisiones');
             $table->integer('delivered_quantity');
-            $table->string('product');
+            $table->string('order_purchase_product_id');
             $table->timestamps();
         });
     }
