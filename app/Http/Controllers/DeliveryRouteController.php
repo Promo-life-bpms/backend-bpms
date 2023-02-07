@@ -201,41 +201,60 @@ class DeliveryRouteController extends Controller
      */
     public function show($id)
     {
+
         // Corresponde con la ruta  rutas-de-entrega
         // Buscamos un study por el ID.
         $ruta = DeliveryRoute::where('code_route', $id)->first();
-
+        //return $ruta;
         // Chequeaos si encontró o no la ruta
         if (!$ruta) {
             // Se devuelve un array errors con los errores detectados y código 404
             return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
         }
-
-        $pedidos = Sale::join("code_order_delivery_routes", "sales.code_sale", "code_order_delivery_routes.code_sale")
-            ->join("delivery_routes", "delivery_routes.id", "code_order_delivery_routes.delivery_route_id")->where("code_route", $id)->get();
+        DB::statement("SET SQL_MODE=''");
+        $pedidos = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
+            ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->join("order_purchases", "order_purchases.code_sale", "sales.code_sale")
+            ->join("order_purchase_products", "order_purchase_products.order_purchase_id", "order_purchases.id")
+            ->join("product_delivery_routes", "product_delivery_routes.odoo_product_id", "order_purchase_products.odoo_product_id")
+            ->where("code_order_delivery_routes.delivery_route_id", $ruta->id)
+            ->select(
+                'sales.*',
+                'code_order_delivery_routes.*',
+                'additional_sale_information.client_name',
+                'additional_sale_information.client_contact',
+                'additional_sale_information.warehouse_company',
+                'additional_sale_information.planned_date',
+                'additional_sale_information.company'
+            )
+            ->groupBy('sales.id')
+            ->get();
         foreach ($pedidos as $pedido) {
-            $orderPurchaseDeiveryRoute = $pedido->ordersDeliveryRoute()->where("delivery_route_id", $ruta->id)->get();
-            $pedido->ordersDeliveryRouteRegister = $orderPurchaseDeiveryRoute;
-            foreach ($pedido->ordersDeliveryRouteRegister as $odrr) {
-                $odrr->remmisions = $odrr->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')->where('code_order_delivery_routes.delivery_route_id', $ruta->id)->select('remisiones.code_remission')->get();
-                return $odrr;
+            //$pedido->moreInformation;
+
+            $pedido->orders = $pedido->orders()
+                ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
+                ->join("product_delivery_routes", "product_delivery_routes.odoo_product_id", "order_purchase_products.odoo_product_id")
+                ->where("product_delivery_routes.code_order_route_id", $ruta->id)
+                ->select("order_purchases.*")
+                ->get();
+            foreach ($pedido->orders as $productNew) {
+
+                $productNew->producto = $productNew->products()
+                    ->join('product_delivery_routes', 'product_delivery_routes.odoo_product_id', 'order_purchase_products.odoo_product_id')
+                    ->where('product_delivery_routes.id', $ruta->id)
+                    ->where('order_purchase_products.order_purchase_id', $productNew->id)
+                    ->select(
+                        'order_purchase_products.*',
+                        'product_delivery_routes.*'
+                    )
+                    ->get();
+                //  $productNew->products = $productNew->producto;
             }
-            // return $pedido;
-        }
-        for ($i = 0; $i < count($pedidos); $i++) {
-            foreach ($pedidos[$i]->ordersDeliveryRouteRegister as $orderDeliveryRoute) {
-                foreach ($orderDeliveryRoute->productDeliveryRoute as $productDR) {
-                    # code...
-                    $productDR->completeInformation;
-                    $productDR->description = $productDR->completeInformation->description;
-                    $productDR->measurement_unit = $productDR->completeInformation->measurement_unit;
-                    $productDR->quantity = $productDR->completeInformation->quantity;
-                    $productDR->subtotal = $productDR->completeInformation->subtotal;
-                    unset($productDR->completeInformation);
-                }
-            }
+            $ruta->orders = $pedido;
         }
 
+        
         // Devolvemos la información encontrada.
         return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['pedidos' => $pedidos]], response::HTTP_OK);
     }
@@ -470,23 +489,24 @@ class DeliveryRouteController extends Controller
         }
 
         $remision = Remission::where('code_remission', $id)->first();
-
+        //return $remision->id;
         if (!$remision) {
             return response()->json(['msg' =>  'Remision no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
 
         DB::statement("SET SQL_MODE=''");
-        $pedidos = Sale::join("order_purchases", "sales.code_sale", "order_purchases.code_sale")
+        $pedidos = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
+            ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->join("order_purchases", "sales.code_sale", "order_purchases.code_sale")
             ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
             ->join('product_remission', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
             ->where("product_remission.remission_id", $remision->id)
-            ->select('sales.*')
+            ->select('sales.*', 'code_order_delivery_routes.*', 'additional_sale_information.*')
             ->groupBy('sales.id')
             ->get();
 
-
         foreach ($pedidos as $pedido) {
-            $pedido->moreInformation;
+
 
             $pedido->ordersProduct = $pedido->orders()
                 ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
@@ -494,21 +514,21 @@ class DeliveryRouteController extends Controller
                 ->where("product_remission.remission_id", $remision->id)
                 ->select("order_purchases.*")
                 ->get();
-
-            foreach ($pedido->ordersProduct as $prueba) {
-                $prueba->productRemision = $prueba->products()
-                    ->join('product_remission', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
-                    ->where('product_remission.remission_id', $remision->id)
-                    ->where('order_purchase_products.order_purchase_id', $prueba->id)
-                    ->select("order_purchase_products.*", "product_remission.*")
-                    ->get();
-            }
         }
+        foreach ($pedido->ordersProduct as $prueba) {
+            $prueba->productRemision = $prueba->products()
+                ->join('product_remission', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
+                ->where('product_remission.remission_id', $remision->id)
+                ->where('order_purchase_products.order_purchase_id', $prueba->id)
+                ->select("order_purchase_products.*", "product_remission.*")
+                ->get();
+        }
+
 
 
         // Devolvemos la información encontrada.
 
-        $remision->products_remision = $pedido;
+        $remision->pedido = $pedido;
 
         return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision" => $remision]], response::HTTP_OK); //200
     }
