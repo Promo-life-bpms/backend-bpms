@@ -88,7 +88,7 @@ class IncidenceController extends Controller
             'comentarios_generales' => 'required',
 
             'incidence_products' => 'required|array',
-            'incidence_products.*.id_order_purchase_products' => 'required|exists:order_purchase_products,odoo_product_id',
+            'incidence_products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
             'incidence_products.*.cantidad_seleccionada' => 'required'
         ]);
 
@@ -278,6 +278,7 @@ class IncidenceController extends Controller
 
     public function update(Request $request, $incidencia)
     {
+        //return $request;
         $validation = Validator::make($request->all(), [
             'status' => 'required|in:Liberada,Cancelada',
             'solution_date' => 'required_if:status,Liberada',
@@ -289,12 +290,15 @@ class IncidenceController extends Controller
             ], response::HTTP_UNPROCESSABLE_ENTITY);
         }
         $incidencia = Incidence::where('internal_code_incidence', $incidencia)->first();
+       
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
         $incidencia->bpm_status = $request->status;
         $incidencia->solution_date = $request->solution_date;
+        $incidencia->user_solution =  auth()->user()->name;
         $incidencia->save();
+        return response()->json(["msg" => "Se actualizo la incidencia"], response::HTTP_NOT_FOUND);
     }
 
     public function destroy(Request $request)
