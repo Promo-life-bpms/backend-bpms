@@ -215,6 +215,7 @@ class DeliveryRouteController extends Controller
         }
         DB::statement("SET SQL_MODE=''");
         $pedidos = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
+            //->join('code_order_delivery_routes','code_order_delivery_routes.delivery_route_id','delivery_routes.id')
             ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
             ->join("order_purchases", "order_purchases.code_sale", "sales.code_sale")
             ->join("order_purchase_products", "order_purchase_products.order_purchase_id", "order_purchases.id")
@@ -231,33 +232,44 @@ class DeliveryRouteController extends Controller
             )
             ->groupBy('sales.id')
             ->get();
+        //return $pedidos;
         foreach ($pedidos as $pedido) {
             //$pedido->moreInformation;
+            $ordersDeliveryRoute =  $pedido->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
+            $new =  $ordersDeliveryRoute->deliveryRoute;
+            $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')->where('code_order_delivery_routes.delivery_route_id', $ruta->id)->select('remisiones.code_remission')->first();
 
+            $pedido->remission_id = $new ? $new->code_remission : null;
+            //return $pedido;
+            //return $pedido->orders;
+            DB::statement("SET SQL_MODE=''");
             $pedido->details_orders = $pedido->orders()
                 ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
                 ->join("product_delivery_routes", "product_delivery_routes.odoo_product_id", "order_purchase_products.odoo_product_id")
-                ->where("product_delivery_routes.code_order_route_id", $ruta->id)
+                ->join("code_order_delivery_routes", "code_order_delivery_routes.id", "product_delivery_routes.code_order_route_id")
+                ->where("code_order_delivery_routes.delivery_route_id", $ruta->id)
                 ->select("order_purchases.*")
+                ->groupBy('order_purchases.id')
                 ->get();
-               // unset($pedido->details_orders);
+            // unset($pedido->details_orders);
             foreach ($pedido->details_orders as $productNew) {
-
+                DB::statement("SET SQL_MODE=''");
                 $productNew->products = $productNew->products()
                     ->join('product_delivery_routes', 'product_delivery_routes.odoo_product_id', 'order_purchase_products.odoo_product_id')
-                    ->where('product_delivery_routes.id', $ruta->id)
+                    ->join("code_order_delivery_routes", "code_order_delivery_routes.id", "product_delivery_routes.code_order_route_id")
+                    ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
                     ->where('order_purchase_products.order_purchase_id', $productNew->id)
                     ->select(
                         'order_purchase_products.*',
                         'product_delivery_routes.*'
                     )
+                    ->groupBy('order_purchase_products.id')
                     ->get();
-              
             }
             $ruta->pedido = $pedido;
         }
 
-        
+
         // Devolvemos la información encontrada.
         return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['ruta' => $ruta]], response::HTTP_OK);
     }
@@ -317,7 +329,7 @@ class DeliveryRouteController extends Controller
 
                 foreach ($codeOrderRequest->products as $product) {
                     $productRequest = (object)$product;
-                    return $product;    
+                    return $product;
                     // $productsDB = $codeOrderDB->productDeliveryRoute;
 
 
