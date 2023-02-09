@@ -88,8 +88,8 @@ class IncidenceController extends Controller
             'comentarios_generales' => 'required',
 
             'incidence_products' => 'required|array',
-            'incidence_products.*.id_order_purchase_products' => 'required|exists:order_purchase_products,odoo_product_id',
-            'incidence_products.*.cantidad_seleccionada' => 'required'
+            'incidence_products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
+            'incidence_products.*.quantity_selected' => 'required'
         ]);
 
         if ($validation->fails()) {
@@ -152,20 +152,21 @@ class IncidenceController extends Controller
         $orderpurchase_id = null;
         foreach ($request->incidence_products as $incidence_product) {
             $incidence_product = (object)$incidence_product;
-            $productOrder = OrderPurchaseProduct::where("odoo_product_id", $incidence_product->id_order_purchase_products)->first();
+          //  return $incidence_product;
+            $productOrder = OrderPurchaseProduct::where("odoo_product_id", $incidence_product->odoo_product_id)->first();
 
             $orderpurchase_id = $productOrder->order_purchase_id;
             $productOdoo = [
                 "pro_name" => '',
                 "pro_product_id" => $productOrder->product,
-                "pro_qty" => $incidence_product->cantidad_seleccionada,
+                "pro_qty" => $incidence_product->quantity_selected,
                 "pro_currency_id" => "MXN",
                 "pro_price" => $productOrder->unit_price
             ];
 
             $incidencia->productsIncidence()->create([
                 'order_purchase_product_id' =>  $productOrder->id,
-                'quantity_selected' => $incidence_product->cantidad_seleccionada,
+                'quantity_selected' => $incidence_product->quantity_selected,
                 'request' => '',
                 'notes' => '',
                 'product' => $productOrder->product,
@@ -278,6 +279,7 @@ class IncidenceController extends Controller
 
     public function update(Request $request, $incidencia)
     {
+        //return $request;
         $validation = Validator::make($request->all(), [
             'status' => 'required|in:Liberada,Cancelada',
             'solution_date' => 'required_if:status,Liberada',
@@ -289,12 +291,15 @@ class IncidenceController extends Controller
             ], response::HTTP_UNPROCESSABLE_ENTITY);
         }
         $incidencia = Incidence::where('internal_code_incidence', $incidencia)->first();
+       
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
         $incidencia->bpm_status = $request->status;
         $incidencia->solution_date = $request->solution_date;
+        $incidencia->user_solution =  auth()->user()->name;
         $incidencia->save();
+        return response()->json(["msg" => "Se actualizo la incidencia"], response::HTTP_NOT_FOUND);
     }
 
     public function destroy(Request $request)
