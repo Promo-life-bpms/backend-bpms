@@ -36,6 +36,7 @@ class Incidence extends Model
         'signature_elaborated',
         'reviewed',
         'signature_reviewed',
+        'user_solution',
         "sale_id"
     ];
 

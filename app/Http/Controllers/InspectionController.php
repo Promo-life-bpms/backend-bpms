@@ -8,6 +8,7 @@ use App\Models\InspectionProduct;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -130,6 +131,7 @@ class InspectionController extends Controller
         if (!$inspection) {
             return response()->json(["msg" => "No se ha encontrado la inspeccion"], response::HTTP_NOT_FOUND); //404
         }
+        DB::statement("SET SQL_MODE=''");
         $pedidoIns = Sale::join("additional_sale_information", "sales.id", "additional_sale_information.sale_id")
             ->join("inspections", "inspections.sale_id", "additional_sale_information.sale_id")
             ->where("code_inspection", $inspection_id)
@@ -163,8 +165,9 @@ class InspectionController extends Controller
         $inspectionsOrder = InspectionProduct::join('order_purchases', 'inspection_products.code_order', 'order_purchases.code_order')
             ->select('inspection_products.code_order')
             ->where("inspection_products.inspection_id", $inspection->id)
+            ->groupBy('order_purchases.id')
             ->get();
-
+                
         $ordenesnueva = [];
 
         foreach ($inspectionsOrder as $orden) {

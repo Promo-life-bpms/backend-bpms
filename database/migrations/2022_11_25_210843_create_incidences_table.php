@@ -41,6 +41,7 @@ class CreateIncidencesTable extends Migration
             $table->text('signature_elaborated')->nullable();
             $table->string('reviewed')->nullable();
             $table->text('signature_reviewed')->nullable();
+            $table->string('user_solution')->nullable();
             //Creacion de llave foranea
             $table->foreignId('sale_id')
                 ->nullable()
