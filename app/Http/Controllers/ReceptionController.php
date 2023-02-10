@@ -49,11 +49,10 @@ class ReceptionController extends Controller
             foreach ($orderPurchaseproducts as $p) {
                 array_push($cantidadesRecibida, [
                     "odoo_product_id" => $p->odoo_product_id,
-                    "quantity"=> 0,
-                ]);  
+                    "quantity" => 0,
+                ]);
             }
 
-            
             $errors = [];
             foreach ($cantidadesRecibida as $key => $CantidadRecibida) {
                 $productSearch =  $orderPurchase->products()->where("odoo_product_id", $CantidadRecibida["odoo_product_id"])->first();
@@ -98,19 +97,17 @@ class ReceptionController extends Controller
         }
 
         //validar si no hya una recpecion con productos ya creada (done,quantity) que el valor sea <=0
-        if( !$receptionsOfOrderPurchase )  {
-            $cantidadesRecibida = [];  
+        if (!$receptionsOfOrderPurchase) {
+            $cantidadesRecibida = [];
             $orderPurchaseproducts = $orderPurchase->products;
-            if (!$orderPurchaseproducts){
-          
-            foreach ($orderPurchaseproducts as $p) {
-                
-                array_push($cantidadesRecibida, [
-                    "odoo_product_id" => $p->odoo_product_id,
-                    "quantity"=>  0,
-                ]);  
+            if (!$orderPurchaseproducts) {
+                foreach ($orderPurchaseproducts as $p) {
+                    array_push($cantidadesRecibida, [
+                        "odoo_product_id" => $p->odoo_product_id,
+                        "quantity" =>  0,
+                    ]);
+                }
             }
-        }
 
             foreach ($receptionsOfOrderPurchase as $receptionOfOrderPurchase) {
                 foreach ($receptionOfOrderPurchase->productsReception as $productsReception) {
@@ -126,7 +123,7 @@ class ReceptionController extends Controller
             foreach ($cantidadesRecibida as $key => $CantidadRecibida) {
                 $productSearch =  $orderPurchase->products()->where("odoo_product_id", $CantidadRecibida["odoo_product_id"])->first();
                 $cantidadOrdenada =  $productSearch->quantity;
-                
+
                 foreach ($request->products as $productRequest) {
                     if ($CantidadRecibida["odoo_product_id"] == $productRequest["odoo_product_id"]) {
                         if ($productRequest["done"] <= ($cantidadOrdenada -  (int)$CantidadRecibida["quantity"])) {
@@ -140,7 +137,6 @@ class ReceptionController extends Controller
             if (count($errors) > 0) {
                 return response()->json($errors, 400);
             }
-
         }
 
         if (!$orderPurchase) {
@@ -193,7 +189,7 @@ class ReceptionController extends Controller
                 ];
                 $product->quantity_delivered = $product->quantity_delivered + $productRequest->done;
                 $product->save();
- 
+
                 try {
                     $receptionDB->productsReception()->updateOrCreate(
                         [
