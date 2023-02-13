@@ -437,6 +437,7 @@ class DeliveryRouteController extends Controller
             'product_remission.*.order_purchase_product_id' => 'required|exists:order_purchase_products,id',
         ]);
         if ($validation->fails()) {
+
             return response()->json([
                 'msg' => "Error de validacion de la remision",
                 'data' => ["errorValidacion" => $validation->getMessageBag()]
@@ -447,6 +448,18 @@ class DeliveryRouteController extends Controller
         if (!$deliveryRoute) {
             return response()->json(['msg' => 'Ruta de entrega no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
+        $errores = [];
+        foreach ($request->product_remission as $productRemision) {
+            $product = OrderPurchaseProduct::find($productRemision["order_purchase_product_id"]);
+            if (!$product->orderPurchase->codeOrderDeliveryRoute($deliveryRoute->id)) {
+                array_push($errores, "El producto con el order_purchase_id: '" . $productRemision["order_purchase_product_id"] . "' no pertecene a esa ruta de entrega");
+            }
+        }
+        if (count($errores) > 0) {
+            return response()->json($errores, 400);
+        }
+
+
 
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
         // ::create
@@ -522,29 +535,28 @@ class DeliveryRouteController extends Controller
             ->get();
 
         foreach ($pedidos as $pedido) {
-
-
             $pedido->ordersProduct = $pedido->orders()
                 ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
                 ->join('product_remission', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
                 ->where("product_remission.remission_id", $remision->id)
                 ->select("order_purchases.*")
                 ->get();
+            foreach ($pedido->ordersProduct as $prueba) {
+                $prueba->productRemision = $prueba->products()
+                    ->join('product_remission', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
+                    ->where('product_remission.remission_id', $remision->id)
+                    ->where('order_purchase_products.order_purchase_id', $prueba->id)
+                    ->select("order_purchase_products.*", "product_remission.*")
+                    ->get();
+            }
         }
-        foreach ($pedido->ordersProduct as $prueba) {
-            $prueba->productRemision = $prueba->products()
-                ->join('product_remission', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
-                ->where('product_remission.remission_id', $remision->id)
-                ->where('order_purchase_products.order_purchase_id', $prueba->id)
-                ->select("order_purchase_products.*", "product_remission.*")
-                ->get();
-        }
+
 
 
 
         // Devolvemos la información encontrada.
 
-        $remision->pedido = $pedido;
+        $remision->pedidos= $pedidos;
 
         return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision" => $remision]], response::HTTP_OK); //200
     }
