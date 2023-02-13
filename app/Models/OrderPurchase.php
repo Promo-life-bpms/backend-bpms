@@ -47,4 +47,10 @@ class OrderPurchase extends Model
     {
         return $this->hasMany(Reception::class, "code_order", "code_order")->orderBy('created_at', 'DESC')->with("productsReception");
     }
+
+    public function codeOrderDeliveryRoute($route_id)
+    {
+        //relacion hasmany() hacia product delivery route
+        return $this->hasOne(CodeOrderDeliveryRoute::class, "code_order", "code_order")->where("code_order_delivery_routes.delivery_route_id", $route_id)->first();
+    }
 }
