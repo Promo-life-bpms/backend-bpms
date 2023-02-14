@@ -136,6 +136,33 @@ class DeliveryRouteController extends Controller
                 response::HTTP_UNPROCESSABLE_ENTITY
             ); // 422
         }
+
+        // Validar que la informacion sea la correcta
+        $errores = [];
+        foreach ($request->code_orders as $saleOrder) {
+            $saleOrder = (object)$saleOrder;
+            $saleOrderBD = Sale::where('code_sale', $saleOrder->code_sale)->first();
+            foreach ($saleOrder->orders as $orderRQ) {
+                $orderRQ = (object) $orderRQ;
+                $orderDB = OrderPurchase::where('code_sale', $saleOrder->code_sale)->where('code_order', $orderRQ->code_order)->first();
+                if (!$orderDB) {
+                    array_push($errores, 'La orden de compra ' . $orderRQ->code_order . ' no pertenece al pedido ' . $saleOrder->code_sale);
+                    continue;
+                }
+                foreach ($orderRQ->products as $productRQ) {
+                    $productRQ = (object) $productRQ;
+                    $productDB = OrderPurchaseProduct::where('odoo_product_id', $productRQ->odoo_product_id)->where('order_purchase_id', $orderDB->id)->first();
+                    if (!$productDB) {
+                        array_push($errores, 'El producto ' . $productRQ->odoo_product_id . ' no pertenece a la orden de compra ' . $orderRQ->code_order);
+                        continue;
+                    }
+                }
+                // return $saleOrder->code_sale;
+            }
+        }
+        if (count($errores) > 0) {
+            return response()->json($errores, 400);
+        }
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
         //codigo de ruta
         $maxINSP = DeliveryRoute::max('code_route');
@@ -236,7 +263,7 @@ class DeliveryRouteController extends Controller
             )
             ->groupBy('sales.id')
             ->get();
-        //return $pedidos;
+
         foreach ($pedidos as $pedido) {
             //$pedido->moreInformation;
             $ordersDeliveryRoute =  $pedido->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
@@ -271,8 +298,8 @@ class DeliveryRouteController extends Controller
                     ->groupBy('order_purchase_products.id')
                     ->get();
             }
-            $ruta->pedido = $pedido;
         }
+        $ruta->pedidos = $pedidos;
 
 
         // Devolvemos la información encontrada.
