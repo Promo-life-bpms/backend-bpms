@@ -323,7 +323,7 @@ class DeliveryRouteController extends Controller
      * @param  \App\Models\DeliveryRoute  $deliveryRoute
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request,  $id)
+    /*   public function update(Request $request,  $id)
     {
 
         $ruta = DeliveryRoute::where('code_route', $id)->first();
@@ -406,25 +406,56 @@ class DeliveryRouteController extends Controller
                 $codeOrderDB->delete();
             }
         }
-        /* if (!$codeOrder) {
-            $codeOrder = CodeOrderDeliveryRoute::find($id);
-            $codeOrder->delete();
-        } {
-            foreach ($codeOrder->products as $product) {
-                if (!$product) {
-                    $product = ProductDeliveryRoute::find($id);
-                    $product->delete();
-                }
-            }
-        } */
+
         return response()->json(['msg' => 'Ruta actualizada correctamente!'], response::HTTP_OK);
-    }
+    } */
     /**
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\DeliveryRoute  $deliveryRoute
      * @return \Illuminate\Http\Response
      */
+    public function updateStatus(Request $request,  $id)
+    {
+
+        $validation = Validator::make($request->all(), [
+            'status' => 'required|in:Cancelada',
+            'elaborated' => 'required',
+            'revised' => 'required',
+            'reason' => 'required'
+        ]);
+        if ($validation->fails()) {
+
+            return response()->json([
+                'msg' => "Error de validacion de la remision",
+                'data' => ["errorValidacion" => $validation->getMessageBag()]
+            ], response::HTTP_UNPROCESSABLE_ENTITY); //422
+        }
+        $ruta = DeliveryRoute::where('code_route', $id)->first();
+
+        if (!$ruta) {
+            // Retornar mensaje
+            return response()->json([
+                'msg' => "ruta no encontrada"
+            ], response::HTTP_NOT_FOUND);
+        }
+        //
+        $user =  auth()->user();
+        // return  $user =  auth()->user();
+
+        foreach ($user->whatRoles as $rol) {
+            if ("maquilador" == $rol->name) {                
+                $ruta->status = $request->status;
+                $ruta->elaborated = $request->elaborated;
+                $ruta->revised = $request->revised;
+                $ruta->reason = $request->reason;
+                $ruta->save();
+                return response()->json(['msg' => 'Status de la ruta actualizada correctamente'], response::HTTP_ACCEPTED);
+            }
+        }
+
+        return response()->json(['msg' => 'Solo mesa de control puede modificar el status'], response::HTTP_BAD_REQUEST);
+    }
     public function destroy($deliveryRoute)
     {
         $ruta = DeliveryRoute::where('code_route', $deliveryRoute)->first();
@@ -484,18 +515,18 @@ class DeliveryRouteController extends Controller
         //
         $newStatus = $request->status;
         if ($newStatus == 'Liberada') {
-        $errores = [];
-        foreach ($request->product_remission as $productRemision) {
-            $product = OrderPurchaseProduct::find($productRemision["order_purchase_product_id"]);
-            if (!$product->orderPurchase->codeOrderDeliveryRoute($deliveryRoute->id)) {
-                array_push($errores, "El producto con el order_purchase_id: '" . $productRemision["order_purchase_product_id"] . "' no pertecene a esa ruta de entrega");
+            $errores = [];
+            foreach ($request->product_remission as $productRemision) {
+                $product = OrderPurchaseProduct::find($productRemision["order_purchase_product_id"]);
+                if (!$product->orderPurchase->codeOrderDeliveryRoute($deliveryRoute->id)) {
+                    array_push($errores, "El producto con el order_purchase_id: '" . $productRemision["order_purchase_product_id"] . "' no pertecene a esa ruta de entrega");
+                }
+            }
+            if (count($errores) > 0) {
+                return response()->json($errores, 400);
             }
         }
-        if (count($errores) > 0) {
-            return response()->json($errores, 400);
-        }
-    }
-    
+
 
 
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
@@ -539,7 +570,7 @@ class DeliveryRouteController extends Controller
 
 
         if ($newStatus == 'Liberada') {
-        
+
             foreach ($request->product_remission as $product) {
                 $product = (object)$product;
 

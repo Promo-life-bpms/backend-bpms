@@ -19,6 +19,9 @@ class DeliveryRoute extends Model
         'type_of_chofer',
         'type_of_product',
         'status',
+        'elaborated',
+        'revised',
+        'reason'
     ];
 
     public function codeOrderDeliveryRoute()

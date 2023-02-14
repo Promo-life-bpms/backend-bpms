@@ -23,6 +23,9 @@ class CreateDeliveryRoutesTable extends Migration
             $table->string('type_of_chofer');
             $table->string('type_of_product');
             $table->string('status');
+            $table->string('elaborated')->nullable();
+            $table->string('revised')->nullable();
+            $table->string('reason')->nullable();
             $table->timestamps();
         });
     }
