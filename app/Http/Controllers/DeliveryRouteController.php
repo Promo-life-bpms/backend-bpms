@@ -112,7 +112,6 @@ class DeliveryRouteController extends Controller
             'type_of_chofer' => 'required',
             'code_orders' => 'required|array',
             'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
-            'code_orders.*.code_order' => 'required|exists:order_purchases,code_order',
             'code_orders.*.type_of_origin' => 'required',
             'code_orders.*.origin_address' => 'required',
             'code_orders.*.type_of_destiny' => 'required',
@@ -122,9 +121,11 @@ class DeliveryRouteController extends Controller
             'code_orders.*.action' => 'required',
             'code_orders.*.num_guide' => 'required',
             'code_orders.*.observations' => 'required',
-            'code_orders.*.products' => 'required|array',
-            'code_orders.*.products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
-            'code_orders.*.products.*.amount' => 'required',
+            'code_orders.*.orders' => 'required|array',
+            'code_orders.*.orders.*.code_order' => 'required|exists:order_purchases,code_order',
+            'code_orders.*.orders.*.products' => 'required|array',
+            'code_orders.*.orders.*.products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
+            'code_orders.*.orders.*.products.*.amount' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -134,6 +135,33 @@ class DeliveryRouteController extends Controller
                 ],
                 response::HTTP_UNPROCESSABLE_ENTITY
             ); // 422
+        }
+
+        // Validar que la informacion sea la correcta
+        $errores = [];
+        foreach ($request->code_orders as $saleOrder) {
+            $saleOrder = (object)$saleOrder;
+            $saleOrderBD = Sale::where('code_sale', $saleOrder->code_sale)->first();
+            foreach ($saleOrder->orders as $orderRQ) {
+                $orderRQ = (object) $orderRQ;
+                $orderDB = OrderPurchase::where('code_sale', $saleOrder->code_sale)->where('code_order', $orderRQ->code_order)->first();
+                if (!$orderDB) {
+                    array_push($errores, 'La orden de compra ' . $orderRQ->code_order . ' no pertenece al pedido ' . $saleOrder->code_sale);
+                    continue;
+                }
+                foreach ($orderRQ->products as $productRQ) {
+                    $productRQ = (object) $productRQ;
+                    $productDB = OrderPurchaseProduct::where('odoo_product_id', $productRQ->odoo_product_id)->where('order_purchase_id', $orderDB->id)->first();
+                    if (!$productDB) {
+                        array_push($errores, 'El producto ' . $productRQ->odoo_product_id . ' no pertenece a la orden de compra ' . $orderRQ->code_order);
+                        continue;
+                    }
+                }
+                // return $saleOrder->code_sale;
+            }
+        }
+        if (count($errores) > 0) {
+            return response()->json($errores, 400);
         }
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
         //codigo de ruta
@@ -160,10 +188,8 @@ class DeliveryRouteController extends Controller
         //retornar un mensaje
         foreach ($request->code_orders as $codeOrder) {
             $codeOrder = (object)$codeOrder;
-
-            $codeOrderRoute =  $ruta->codeOrderDeliveryRoute()->create([
+            $dataSale = [
                 'code_sale' => $codeOrder->code_sale,
-                'code_order' => $codeOrder->code_order,
                 'type_of_origin' => $codeOrder->type_of_origin,
                 'origin_address' => $codeOrder->origin_address,
                 'type_of_destiny' => $codeOrder->type_of_destiny,
@@ -173,15 +199,20 @@ class DeliveryRouteController extends Controller
                 'action' => $codeOrder->action,
                 'num_guide' => $codeOrder->num_guide,
                 'observations' => $codeOrder->observations,
-            ]);
+            ];
 
-            foreach ($codeOrder->products as $newProduct) {
-                $newProduct = (object)$newProduct;
-                $codeOrderRoute->productDeliveryRoute()->create([
-                    'odoo_product_id' => $newProduct->odoo_product_id,
-                    'amount' => $newProduct->amount,
+            foreach ($codeOrder->orders as $order) {
+                $order = (object) $order;
+                $dataSale['code_order'] = $order->code_order;
+                $codeOrderRoute =  $ruta->codeOrderDeliveryRoute()->create($dataSale);
+                foreach ($order->products as $newProduct) {
+                    $newProduct = (object)$newProduct;
+                    $codeOrderRoute->productDeliveryRoute()->create([
+                        'odoo_product_id' => $newProduct->odoo_product_id,
+                        'amount' => $newProduct->amount,
 
-                ]);
+                    ]);
+                }
             }
         }
 
@@ -232,7 +263,7 @@ class DeliveryRouteController extends Controller
             )
             ->groupBy('sales.id')
             ->get();
-        //return $pedidos;
+
         foreach ($pedidos as $pedido) {
             //$pedido->moreInformation;
             $ordersDeliveryRoute =  $pedido->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
@@ -240,6 +271,7 @@ class DeliveryRouteController extends Controller
             $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')->where('code_order_delivery_routes.delivery_route_id', $ruta->id)->select('remisiones.code_remission')->first();
 
             $pedido->remission_id = $new ? $new->code_remission : null;
+            unset($pedido->ordersDeliveryRoute);
             //return $pedido;
             //return $pedido->orders;
             DB::statement("SET SQL_MODE=''");
@@ -266,8 +298,8 @@ class DeliveryRouteController extends Controller
                     ->groupBy('order_purchase_products.id')
                     ->get();
             }
-            $ruta->pedido = $pedido;
         }
+        $ruta->pedidos = $pedidos;
 
 
         // Devolvemos la información encontrada.
