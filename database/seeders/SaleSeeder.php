@@ -7,6 +7,7 @@ use App\Models\OrderPurchase;
 use App\Models\OrderPurchaseProduct;
 use App\Models\Sale;
 use App\Models\SalesProduct;
+use App\Models\SaleStatusChange;
 use Illuminate\Database\Seeder;
 
 class SaleSeeder extends Seeder
@@ -20,6 +21,10 @@ class SaleSeeder extends Seeder
     {
         $sales =  Sale::factory()->count(20)->create();
         foreach ($sales as $sale) {
+            SaleStatusChange::create([
+                "sale_id" => $sale->id,
+                "status_id" => 1,
+            ]);
             AdditionalSaleInformation::factory()
                 ->count(1)
                 ->for($sale)
