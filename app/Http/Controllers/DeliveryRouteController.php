@@ -430,12 +430,13 @@ class DeliveryRouteController extends Controller
             'received' => 'required',
             'signature_received' => 'required',
             'user_chofer_id' => 'required',
-            'status' => 'required',
-            'product_remission' => 'required|array',
+            'status' => 'required|in:Liberada,Cancelada',
+            'product_remission' => 'required_if:status,Liberada|array',
             // 'product_remission.*.remission_id' => 'required',
             'product_remission.*.delivered_quantity' => 'required',
             'product_remission.*.order_purchase_product_id' => 'required|exists:order_purchase_products,id',
         ]);
+        //return $request;
         if ($validation->fails()) {
 
             return response()->json([
@@ -448,6 +449,9 @@ class DeliveryRouteController extends Controller
         if (!$deliveryRoute) {
             return response()->json(['msg' => 'Ruta de entrega no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
+        //
+        $newStatus = $request->status;
+        if ($newStatus == 'Liberada') {
         $errores = [];
         foreach ($request->product_remission as $productRemision) {
             $product = OrderPurchaseProduct::find($productRemision["order_purchase_product_id"]);
@@ -458,7 +462,8 @@ class DeliveryRouteController extends Controller
         if (count($errores) > 0) {
             return response()->json($errores, 400);
         }
-
+    }
+    
 
 
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
@@ -483,21 +488,38 @@ class DeliveryRouteController extends Controller
             'signature_received' => $request->signature_received,
             'delivery_route_id' => $deliveryRoute->id,
             'user_chofer_id' => $request->user_chofer_id,
-            'status' => 1
+            'status' => $request->status
         ]);
         //crear los productos de esa remision de entrega
         //  $remision->productsDeliveryRoute()->create
         //retornar un mensaje
-        foreach ($request->product_remission as $product) {
-            $product = (object)$product;
 
-            $remision->productRemission()->create([
-                'delivered_quantity' => $product->delivered_quantity,
-                'order_purchase_product_id' => $product->order_purchase_product_id,
-            ]);
+
+        /*  if ($ = 'Cancelada'){
+           return response()->json(['msg' => 'Remision cancelada', ], response::HTTP_NOT_FOUND); //404
+           
+        } */
+        $newStatus = $request->status;
+        /*  $status = Remission::where('status',$newStatus)
+            ->select(['status'])
+            ->first(); */
+        // return $newStatus;
+
+
+        if ($newStatus == 'Liberada') {
+        
+            foreach ($request->product_remission as $product) {
+                $product = (object)$product;
+
+                $remision->productRemission()->create([
+                    'delivered_quantity' => $product->delivered_quantity,
+                    'order_purchase_product_id' => $product->order_purchase_product_id,
+                ]);
+            }
+
+            return response()->json(['msg' => 'Remision creada exitosamente', 'data' => ["remision" => $remision]], Response::HTTP_CREATED);
         }
-
-        return response()->json(['msg' => 'Remision creada exitosamente', 'data' => ["remision" => $remision]], Response::HTTP_CREATED);
+        return response()->json(['msg' =>  'Se creo una remsion con status cancelado']);
     }
 
     public function viewRemision()
@@ -556,7 +578,7 @@ class DeliveryRouteController extends Controller
 
         // Devolvemos la información encontrada.
 
-        $remision->pedidos= $pedidos;
+        $remision->pedidos = $pedidos;
 
         return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision" => $remision]], response::HTTP_OK); //200
     }
@@ -581,6 +603,7 @@ class DeliveryRouteController extends Controller
         // Revisar si no esta cancelado
 
         // Marcar como cancelada la remision
+
         $remision->status = 2;
         $remision->save();
         return response()->json(["msg" => "Remision cancelada"], response::HTTP_OK); //200
