@@ -30,7 +30,7 @@ return [
         'ventas' => [
             'profile' => 'u,d',
         ],
-        'logistica' => [
+        'logistica-y-mesa-de-control' => [
             'profile' => 'r,u',
         ],
 
