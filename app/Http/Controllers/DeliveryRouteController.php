@@ -444,7 +444,7 @@ class DeliveryRouteController extends Controller
         // return  $user =  auth()->user();
 
         foreach ($user->whatRoles as $rol) {
-            if ("maquilador" == $rol->name) {                
+            if ("logistica-y-mesa-de-control" == $rol->name) {                
                 $ruta->status = $request->status;
                 $ruta->elaborated = $request->elaborated;
                 $ruta->revised = $request->revised;
