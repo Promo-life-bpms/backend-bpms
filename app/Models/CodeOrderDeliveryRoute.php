@@ -21,8 +21,7 @@ class CodeOrderDeliveryRoute extends Model
         'action',
         'num_guide',
         'observations',
-
-
+        'status',
     ];
 
     public function productDeliveryRoute()
