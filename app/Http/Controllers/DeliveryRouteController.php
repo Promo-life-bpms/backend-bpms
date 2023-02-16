@@ -254,7 +254,15 @@ class DeliveryRouteController extends Controller
             ->where("code_order_delivery_routes.delivery_route_id", $ruta->id)
             ->select(
                 'sales.*',
-                'code_order_delivery_routes.*',
+                'code_order_delivery_routes.type_of_origin',
+                'code_order_delivery_routes.origin_address',
+                'code_order_delivery_routes.type_of_destiny',
+                'code_order_delivery_routes.destiny_address',
+                'code_order_delivery_routes.hour',
+                'code_order_delivery_routes.attention_to',
+                'code_order_delivery_routes.action',
+                'code_order_delivery_routes.num_guide',
+                'code_order_delivery_routes.observations',
                 'additional_sale_information.client_name',
                 'additional_sale_information.client_contact',
                 'additional_sale_information.warehouse_company',
@@ -293,7 +301,7 @@ class DeliveryRouteController extends Controller
                     ->where('order_purchase_products.order_purchase_id', $productNew->id)
                     ->select(
                         'order_purchase_products.*',
-                        'product_delivery_routes.*'
+                        'product_delivery_routes.amount'
                     )
                     ->groupBy('order_purchase_products.id')
                     ->get();
@@ -444,7 +452,7 @@ class DeliveryRouteController extends Controller
         // return  $user =  auth()->user();
 
         foreach ($user->whatRoles as $rol) {
-            if ("logistica-y-mesa-de-control" == $rol->name) {                
+            if ("logistica-y-mesa-de-control" == $rol->name) {
                 $ruta->status = $request->status;
                 $ruta->elaborated = $request->elaborated;
                 $ruta->revised = $request->revised;
@@ -518,7 +526,9 @@ class DeliveryRouteController extends Controller
             $errores = [];
             foreach ($request->product_remission as $productRemision) {
                 $product = OrderPurchaseProduct::find($productRemision["order_purchase_product_id"]);
+                 
                 if (!$product->orderPurchase->codeOrderDeliveryRoute($deliveryRoute->id)) {
+                    // return $deliveryRoute->id;
                     array_push($errores, "El producto con el order_purchase_id: '" . $productRemision["order_purchase_product_id"] . "' no pertecene a esa ruta de entrega");
                 }
             }
