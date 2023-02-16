@@ -25,6 +25,7 @@ class CodeOrderDeliveryRoutes extends Migration
             $table->time('hour');
             $table->string('attention_to');
             $table->string('action');
+            $table->string('status');
             $table->string('num_guide')->nullable();
             $table->text('observations')->nullable();
             $table->timestamps();

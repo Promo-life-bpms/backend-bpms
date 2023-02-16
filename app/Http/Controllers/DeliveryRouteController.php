@@ -199,6 +199,7 @@ class DeliveryRouteController extends Controller
                 'action' => $codeOrder->action,
                 'num_guide' => $codeOrder->num_guide,
                 'observations' => $codeOrder->observations,
+                'status' => 'Pendiente',
             ];
 
             foreach ($codeOrder->orders as $order) {
@@ -210,7 +211,6 @@ class DeliveryRouteController extends Controller
                     $codeOrderRoute->productDeliveryRoute()->create([
                         'odoo_product_id' => $newProduct->odoo_product_id,
                         'amount' => $newProduct->amount,
-
                     ]);
                 }
             }
@@ -280,6 +280,7 @@ class DeliveryRouteController extends Controller
 
             $pedido->remission_id = $new ? $new->code_remission : null;
             unset($pedido->ordersDeliveryRoute);
+            unset($pedido->status_id);
             //return $pedido;
             //return $pedido->orders;
             DB::statement("SET SQL_MODE=''");
@@ -570,7 +571,7 @@ class DeliveryRouteController extends Controller
 
         /*  if ($ = 'Cancelada'){
            return response()->json(['msg' => 'Remision cancelada', ], response::HTTP_NOT_FOUND); //404
-           
+
         } */
         $newStatus = $request->status;
         /*  $status = Remission::where('status',$newStatus)
