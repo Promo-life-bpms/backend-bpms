@@ -503,6 +503,7 @@ class DeliveryRouteController extends Controller
             'signature_received' => 'required',
             'user_chofer_id' => 'required',
             'status' => 'required|in:Liberada,Cancelada',
+            'evidence' => 'required',
             'product_remission' => 'required_if:status,Liberada|array',
             // 'product_remission.*.remission_id' => 'required',
             'product_remission.*.delivered_quantity' => 'required',
@@ -562,7 +563,8 @@ class DeliveryRouteController extends Controller
             'signature_received' => $request->signature_received,
             'delivery_route_id' => $deliveryRoute->id,
             'user_chofer_id' => $request->user_chofer_id,
-            'status' => $request->status
+            'status' => $request->status,
+            'evidence' => $request->evidence,
         ]);
         //crear los productos de esa remision de entrega
         //  $remision->productsDeliveryRoute()->create

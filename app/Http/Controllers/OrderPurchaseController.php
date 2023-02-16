@@ -125,6 +125,7 @@ class OrderPurchaseController extends Controller
                 unset($productRec->completeInformation);
             }
         }
+        $orderPurchase->receptionsWithProducts = array_reverse($orderPurchase->receptionsWithProducts);
 
         //Se crea el campo de last status con el valor de i retornando el mismo
         $orderPurchase->historyStatus;
@@ -142,6 +143,7 @@ class OrderPurchaseController extends Controller
                 unset($productStatus->completeInformation);
             }
         }
+        $orderPurchase->historyStatus = array_reverse($orderPurchase->historyStatus);
         return response()->json(["msg" => "Orden de compra encontrada", 'data' => ["orderPurchase", $orderPurchase]], response::HTTP_OK);
     }
 
