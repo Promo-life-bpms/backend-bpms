@@ -69,7 +69,7 @@ class OrderPurchaseController extends Controller
         }
 
         //Revisamos si hay errores
-        // rEGISTRO 
+        // rEGISTRO
         $newStatus = StatusOT::create([
             "hora" => $request->hora,
             "id_order_purchases" => $request->id_order_purchases,
@@ -109,10 +109,10 @@ class OrderPurchaseController extends Controller
             );
         }
         $orderPurchase->products;
-        $orderPurchase->receptionsWithProducts;
+        $orderPurchase->receptionsWithTheirProducts;
 
         $quantityReceived = [];
-        foreach ($orderPurchase->receptionsWithProducts as $OrderP) {
+        foreach ($orderPurchase->receptionsWithTheirProducts as $OrderP) {
             foreach ($OrderP->productsReception as $productRec) {
                 if (array_key_exists($productRec->odoo_product_id, $quantityReceived) == null) {
                     $quantityReceived[$productRec->odoo_product_id] =  $productRec->done;
@@ -125,16 +125,18 @@ class OrderPurchaseController extends Controller
                 unset($productRec->completeInformation);
             }
         }
-        $orderPurchase->receptionsWithProducts = array_reverse($orderPurchase->receptionsWithProducts);
-
+        $orderPurchase->receptionsWithProducts = array_reverse($orderPurchase->receptionsWithTheirProducts->toArray());
+        unset($orderPurchase->receptionsWithTheirProducts);
         //Se crea el campo de last status con el valor de i retornando el mismo
-        $orderPurchase->historyStatus;
-        for ($i = 0; $i < count($orderPurchase->historyStatus); $i++) {
+        $orderPurchase->theirHistoryStatus;
+        for ($i = 0; $i < count($orderPurchase->theirHistoryStatus); $i++) {
             if ($i > 0) {
-                $orderPurchase->historyStatus[$i]->last_status = $orderPurchase->historyStatus[$i - 1]->status;
+                $orderPurchase->theirHistoryStatus[$i]->last_status = $orderPurchase->theirHistoryStatus[$i - 1]->status;
+            } else {
+                $orderPurchase->theirHistoryStatus[$i]->last_status = 'Pendiente';
             }
         }
-        foreach ($orderPurchase->historyStatus as $statusRegistered) {
+        foreach ($orderPurchase->theirHistoryStatus as $statusRegistered) {
             foreach ($statusRegistered->StatusProductsOT as $productStatus) {
                 $productStatus->completeInformation;
                 $productStatus->product = $productStatus->completeInformation->product;
@@ -143,7 +145,8 @@ class OrderPurchaseController extends Controller
                 unset($productStatus->completeInformation);
             }
         }
-        $orderPurchase->historyStatus = array_reverse($orderPurchase->historyStatus);
+        $orderPurchase->historyStatus = array_reverse($orderPurchase->theirHistoryStatus->toArray());
+        unset($orderPurchase->theirHistoryStatus);
         return response()->json(["msg" => "Orden de compra encontrada", 'data' => ["orderPurchase", $orderPurchase]], response::HTTP_OK);
     }
 
