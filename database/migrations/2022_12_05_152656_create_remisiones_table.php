@@ -25,6 +25,7 @@ class CreateRemisionesTable extends Migration
             $table->foreignId('delivery_route_id')->reference('id')->on('delivery_routes');
             $table->foreignId('user_chofer_id')->reference('id')->on('users');
             $table->string('status')->default(1)->nullable();
+            $table->text('evidence');
             $table->timestamps();
         });
     }
