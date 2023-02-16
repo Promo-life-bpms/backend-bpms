@@ -454,7 +454,7 @@ class DeliveryRouteController extends Controller
         // return  $user =  auth()->user();
 
         foreach ($user->whatRoles as $rol) {
-            if ("logistica-y-mesa-de-control" == $rol->name) {
+            if ("logistica-y-mesa-de-control" == $rol->name || "administrator" == $rol->name) {
                 $ruta->status = $request->status;
                 $ruta->elaborated = $request->elaborated;
                 $ruta->revised = $request->revised;
@@ -510,7 +510,6 @@ class DeliveryRouteController extends Controller
             'product_remission.*.delivered_quantity' => 'required',
             'product_remission.*.order_purchase_product_id' => 'required|exists:order_purchase_products,id',
         ]);
-        //return $request;
         if ($validation->fails()) {
 
             return response()->json([
@@ -523,7 +522,6 @@ class DeliveryRouteController extends Controller
         if (!$deliveryRoute) {
             return response()->json(['msg' => 'Ruta de entrega no encontrada.'], response::HTTP_NOT_FOUND); //404
         }
-        //
         $newStatus = $request->status;
         if ($newStatus == 'Liberada') {
             $errores = [];
@@ -540,10 +538,6 @@ class DeliveryRouteController extends Controller
             }
         }
 
-
-
-        // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
-        // ::create
         //crear codigo de remision
         $maxINC = Remission::max('code_remission');
         $idinc = null;
@@ -568,26 +562,11 @@ class DeliveryRouteController extends Controller
             'evidence' => $request->evidence,
         ]);
         //crear los productos de esa remision de entrega
-        //  $remision->productsDeliveryRoute()->create
-        //retornar un mensaje
 
-
-        /*  if ($ = 'Cancelada'){
-           return response()->json(['msg' => 'Remision cancelada', ], response::HTTP_NOT_FOUND); //404
-
-        } */
         $newStatus = $request->status;
-        /*  $status = Remission::where('status',$newStatus)
-            ->select(['status'])
-            ->first(); */
-        // return $newStatus;
-
-
         if ($newStatus == 'Liberada') {
-
             foreach ($request->product_remission as $product) {
                 $product = (object)$product;
-
                 $remision->productRemission()->create([
                     'delivered_quantity' => $product->delivered_quantity,
                     'order_purchase_product_id' => $product->order_purchase_product_id,
