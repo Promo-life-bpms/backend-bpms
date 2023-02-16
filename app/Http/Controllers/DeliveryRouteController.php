@@ -572,9 +572,38 @@ class DeliveryRouteController extends Controller
                     'order_purchase_product_id' => $product->order_purchase_product_id,
                 ]);
             }
-
-            return response()->json(['msg' => 'Remision creada exitosamente', 'data' => ["remision" => $remision]], Response::HTTP_CREATED);
         }
+        foreach ($deliveryRoute->codeOrderDeliveryRoute->groupBy('code_sale')->first() as $pedido) {
+            $entregaCompleta = "Entrega Completa";
+            foreach ($deliveryRoute->codeOrderDeliveryRoute()->where('code_sale', $pedido->code_sale)->get() as $orderDR) {
+                foreach ($orderDR->productDeliveryRoute as $product) {
+                    // return  $deliveryRoute->remissions;
+                    $cantidad_entregada = $deliveryRoute->remissions()
+                        ->join('product_remission', 'product_remission.remission_id', 'remisiones.id')
+                        ->join('order_purchase_products', 'order_purchase_products.id', 'product_remission.order_purchase_product_id')
+                        ->where('order_purchase_products.odoo_product_id', $product->odoo_product_id)
+                        ->sum('product_remission.delivered_quantity');
+                    // return [$cantidad_entregada, $product->amount, $cantidad_entregada <= $product->amount];
+                    if ($cantidad_entregada < $product->amount) {
+                        $entregaCompleta = "Entrega Parcial";
+                        break;
+                    }
+                }
+                if ($entregaCompleta == "Entrega Parcial") {
+                    break;
+                }
+            }
+            // Actualizar el estado de ese pedido(Ordenes Deliveries)
+            return $entregaCompleta;
+        }
+        // Revisar a que codigo de orden y pedido de compra pertenecen los products
+        // Revisar si hay mas productos en esa orden de esa ruta
+        // Revisar si hay mas ordenes en ese pedido
+        // Revisar si ese pedido se completo correctamente o no
+        // Actualizar el estatus del pedido en especifico
+        // Actualizar el estado de la ruta de entrega
+        return $deliveryRoute->remissions->join;
+        return response()->json(['msg' => 'Remision creada exitosamente', 'data' => ["remision" => $remision]], Response::HTTP_CREATED);
         return response()->json(['msg' =>  'Se creo una remsion con status cancelado']);
     }
 
