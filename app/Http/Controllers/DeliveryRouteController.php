@@ -236,14 +236,14 @@ class DeliveryRouteController extends Controller
         // Corresponde con la ruta  rutas-de-entrega
         // Buscamos un study por el ID.
         $ruta = DeliveryRoute::where('code_route', $id)->first();
-        $ruta->user_chofer_name = $ruta->user->name;
-        unset($ruta->user);
         //return $ruta;
         // Chequeaos si encontró o no la ruta
         if (!$ruta) {
             // Se devuelve un array errors con los errores detectados y código 404
             return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
         }
+        $ruta->user_chofer_name = $ruta->user->name;
+        unset($ruta->user);
         DB::statement("SET SQL_MODE=''");
         $pedidos = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
             //->join('code_order_delivery_routes','code_order_delivery_routes.delivery_route_id','delivery_routes.id')
@@ -572,10 +572,79 @@ class DeliveryRouteController extends Controller
                     'order_purchase_product_id' => $product->order_purchase_product_id,
                 ]);
             }
-
-            return response()->json(['msg' => 'Remision creada exitosamente', 'data' => ["remision" => $remision]], Response::HTTP_CREATED);
         }
-        return response()->json(['msg' =>  'Se creo una remsion con status cancelado']);
+        DB::statement("SET SQL_MODE=''");
+        foreach ($deliveryRoute->codeOrderDeliveryRoute()->groupBy('code_sale')->get() as $pedido) {
+            DB::statement("SET SQL_MODE=''");
+            $haveRemissions = $deliveryRoute->remissions()
+                ->join('product_remission', 'product_remission.remission_id', 'remisiones.id')
+                ->join('order_purchase_products', 'order_purchase_products.id', 'product_remission.order_purchase_product_id')
+                ->join('order_purchases', 'order_purchases.id', 'order_purchase_products.order_purchase_id')
+                ->where('order_purchases.code_sale', $pedido->code_sale)
+                ->where('order_purchases.code_sale', $pedido->code_sale)
+                ->select('remisiones.*')
+                ->groupBy('remisiones.id')
+                ->get();
+            if (count($haveRemissions) > 0) {
+                $statusPedido = "Entrega Completa";
+                foreach ($deliveryRoute->codeOrderDeliveryRoute()->where('code_sale', $pedido->code_sale)->get() as $orderDR) {
+                    foreach ($orderDR->productDeliveryRoute as $product) {
+                        // return  $deliveryRoute->remissions;
+                        $cantidad_entregada = $deliveryRoute->remissions()
+                            ->join('product_remission', 'product_remission.remission_id', 'remisiones.id')
+                            ->join('order_purchase_products', 'order_purchase_products.id', 'product_remission.order_purchase_product_id')
+                            ->where('order_purchase_products.odoo_product_id', $product->odoo_product_id)
+                            ->sum('product_remission.delivered_quantity');
+                        // return [$cantidad_entregada, $product->amount, $cantidad_entregada <= $product->amount];
+                        if ($cantidad_entregada < $product->amount) {
+                            $statusPedido = "Entrega Parcial";
+                            break;
+                        }
+                    }
+                    if ($statusPedido == "Entrega Parcial") {
+                        break;
+                    }
+                }
+                foreach ($deliveryRoute->codeOrderDeliveryRoute()->where('code_sale', $pedido->code_sale)->get() as $orderDR) {
+                    $orderDR->status =  $statusPedido;
+                    $orderDR->save();
+                }
+            }
+        }
+        $statuses = [
+            "Pendiente" => 0,
+            "Entrega Parcial" => 0,
+            "Entrega Completa" => 0
+        ];
+        foreach ($deliveryRoute->codeOrderDeliveryRoute()->groupBy('code_sale')->get() as $ped) {
+            switch ($ped->status) {
+                case 'Pendiente':
+                    $statuses["Pendiente"]++;
+                    break;
+                case 'Entrega Parcial':
+                    $statuses["Entrega Parcial"]++;
+                    break;
+                case 'Entrega Completa':
+                    $statuses["Entrega Completa"]++;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        if ($statuses["Pendiente"] > 0) {
+            $deliveryRoute->status =  'En Proceso';
+            $deliveryRoute->save();
+        } else if ($statuses["Entrega Parcial"] > 0) {
+            $deliveryRoute->status = 'Entrega Parcial';
+            $deliveryRoute->save();
+        } else {
+            $deliveryRoute->status = 'Entrega Completa';
+            $deliveryRoute->save();
+        }
+
+        return response()->json(['msg' => 'Remision creada exitosamente', 'data' => ["remision" => $remision]], Response::HTTP_CREATED);
+        // return response()->json(['msg' =>  'Se creo una remsion con status cancelado']);
     }
 
     public function viewRemision()
