@@ -205,6 +205,13 @@ class ReceptionController extends Controller
             if (count($errors) > 0) {
                 return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
             }
+            $receptionDB->productsReception;
+            foreach ($receptionDB->productsReception as $productRecep) {
+                $productRecep->odoo_product_id;
+                $product = OrderPurchaseProduct::where("odoo_product_id", "=", $productRequest->odoo_product_id)->first();
+                $product->quantity_delivered;
+                $productRecep->quantity_delivered = $product->quantity_delivered;
+            }
         }
         return response()->json(['message' => 'Creacion de la recepcion de inventario', 'data' => $receptionDB], 200);
     }
