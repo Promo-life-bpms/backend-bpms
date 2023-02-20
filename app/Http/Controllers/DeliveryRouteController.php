@@ -571,6 +571,13 @@ class DeliveryRouteController extends Controller
                     'delivered_quantity' => $product->delivered_quantity,
                     'order_purchase_product_id' => $product->order_purchase_product_id,
                 ]);
+                $orderPurchaseProduct = OrderPurchaseProduct::find($product->order_purchase_product_id);
+                $sale =  $orderPurchaseProduct->orderPurchase->sale;
+                $saleProduct = $sale->saleProducts()->where('odoo_product_id', $orderPurchaseProduct->odoo_product_id)->first();
+                if ($saleProduct) {
+                    $saleProduct->quantity_delivered = $saleProduct->quantity_delivered + $product->delivered_quantity;
+                    $saleProduct->save();
+                }
             }
         }
         DB::statement("SET SQL_MODE=''");
