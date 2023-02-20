@@ -139,10 +139,6 @@ class ReceptionController extends Controller
             }
         }
 
-        if (!$orderPurchase) {
-            return response()->json(['errors' => (['msg' => 'Ruta de entrega no encontrada.'])], 404);
-        }
-
         $reception = (object)$request->all();
 
         $maxINC = Reception::where('code_reception', 'LIKE', "%REC-IN%")->max('code_reception');
