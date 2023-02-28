@@ -274,14 +274,20 @@ class DeliveryRouteController extends Controller
             ->get();
 
         foreach ($pedidos as $pedido) {
-            //$pedido->moreInformation;
-            $ordersDeliveryRoute =  $pedido->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
-            $new =  $ordersDeliveryRoute->deliveryRoute;
-            $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')->where('code_order_delivery_routes.delivery_route_id', $ruta->id)->select('remisiones.code_remission')->first();
+            $pedido = $pedidos[1];
+            $new = CodeOrderDeliveryRoute::join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')
+                ->join('product_remission', 'product_remission.remission_id', 'remisiones.id')
+                ->join('order_purchase_products', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
+                ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
+                ->where('code_order_delivery_routes.code_sale', $pedido->code_sale)
+                // ->select('remisiones.code_remission')
+                ->get();
+            return $new;
 
-            $pedido->remission_id = $new ? $new->code_remission : null;
+            // $pedido->remission_id = $new ? $new->code_remission : null;
             unset($pedido->ordersDeliveryRoute);
             unset($pedido->status_id);
+            return    $new;
             //return $pedido;
             //return $pedido->orders;
             DB::statement("SET SQL_MODE=''");

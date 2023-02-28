@@ -132,6 +132,10 @@ class ApiOdooController extends Controller
                     } else {
                         $sale = Sale::create($dataSale);
                         $sale->moreInformation()->create($dataAdditionalInfo);
+                        SaleStatusChange::create([
+                            "sale_id" => $sale->id,
+                            "status_id" => 1,
+                        ]);
                     }
                     foreach ($dataProducts as $product) {
                         $registered = false;
@@ -160,10 +164,6 @@ class ApiOdooController extends Controller
                             ],
                             $dataProduct
                         );
-                        SaleStatusChange::create([
-                            "sale_id" => $sale->id,
-                            "status_id" => 1,
-                        ]);
                     }
 
                     foreach ($sale->saleProducts as $productDB) {

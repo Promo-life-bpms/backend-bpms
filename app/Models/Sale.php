@@ -83,7 +83,8 @@ class Sale extends Model
 
     public function routeDeliveries()
     {
-        return $this->hasMany(CodeOrderDeliveryRoute::class, 'code_sale', 'code_sale')->with('deliveryRoute', 'productDeliveryRoute');
+        \DB::statement("SET SQL_MODE=''");
+        return $this->hasMany(CodeOrderDeliveryRoute::class, 'code_sale', 'code_sale')->groupBy('code_order_delivery_routes.delivery_route_id')->with('deliveryRoute', 'productDeliveryRoute');
     }
 
     public function deliveries()
