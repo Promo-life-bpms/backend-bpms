@@ -164,6 +164,7 @@ class ApiOdooController extends Controller
                             "sale_id" => $sale->id,
                             "status_id" => 1,
                         ]);
+                        //Confirmado:
                     }
 
                     foreach ($sale->saleProducts as $productDB) {
@@ -276,6 +277,11 @@ class ApiOdooController extends Controller
                                 ],
                                 $dataProduct
                             );
+                            SaleStatusChange::create([
+                                'order_purchase_id' => $orderPurchase->id,
+                                "status_id" => 2,
+                            ]);
+
                         } catch (Exception $th) {
                             array_push($errors, ['msg' => "Error al insertar el producto", 'error' => $th->getMessage()]);
                         }

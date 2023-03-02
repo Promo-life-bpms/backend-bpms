@@ -208,6 +208,7 @@ class ReceptionController extends Controller
                 $product->quantity_delivered;
                 $productRecep->quantity_delivered = $product->quantity_delivered;
             }
+            //Inventario contabilizado:
         }
         return response()->json(['message' => 'Creacion de la recepcion de inventario', 'data' => $receptionDB], 200);
     }
@@ -225,6 +226,7 @@ class ReceptionController extends Controller
         if (!$reception) {
             return response()->json(['errors' => (['msg' => 'Recepcion no encontrada.'])], 404);
         }
+        //Inventario contabilizado:
 
         $reception->productsReception;
 
