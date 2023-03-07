@@ -132,6 +132,10 @@ class ApiOdooController extends Controller
                     } else {
                         $sale = Sale::create($dataSale);
                         $sale->moreInformation()->create($dataAdditionalInfo);
+                        SaleStatusChange::create([
+                            "sale_id" => $sale->id,
+                            "status_id" => 1,
+                        ]);
                     }
                     foreach ($dataProducts as $product) {
                         $registered = false;

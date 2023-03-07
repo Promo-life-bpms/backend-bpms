@@ -8,8 +8,7 @@ use App\Models\Reception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\OrderPurchaseProduct;
-use App\Models\ReceptionProduct;
-use PhpParser\Node\Stmt\Foreach_;
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
 
 class ReceptionController extends Controller
