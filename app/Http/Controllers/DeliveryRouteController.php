@@ -5,25 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\CodeOrderDeliveryRoute;
 use App\Models\DeliveryRoute;
 use App\Models\OrderPurchase;
-use App\Models\ProductDeliveryRoute;
-use App\Models\ProductRemission;
 use App\Models\Remission;
 use App\Models\Role;
 use App\Models\Sale;
-use App\Models\User;
-use App\Models\Status;
 use Exception;
 use Illuminate\Notifications\Notifiable;
-use Facade\FlareClient\Api;
-use Illuminate\Database\Console\DbCommand;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
-use App\Models\Notificacion;
 use App\Models\OrderPurchaseProduct;
-use App\Notifications\Notificacion as NotificationsNotificacion;
-use Illuminate\Foundation\Auth\User as AuthUser;
 use Illuminate\Support\Facades\DB;
 
 class DeliveryRouteController extends Controller
@@ -274,20 +264,19 @@ class DeliveryRouteController extends Controller
             ->get();
 
         foreach ($pedidos as $pedido) {
-            $pedido = $pedidos[1];
-            $new = CodeOrderDeliveryRoute::join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')
-                ->join('product_remission', 'product_remission.remission_id', 'remisiones.id')
-                ->join('order_purchase_products', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
-                ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
-                ->where('code_order_delivery_routes.code_sale', $pedido->code_sale)
-                // ->select('remisiones.code_remission')
-                ->get();
-            return $new;
+            $new = Remission::join('product_remission', 'product_remission.remission_id', 'remisiones.id')
+                ->join('order_purchase_products', 'order_purchase_products.id', 'product_remission.order_purchase_product_id')
+                ->join('order_purchases', 'order_purchases.id', 'order_purchase_products.order_purchase_id')
+                ->where('remisiones.delivery_route_id', $ruta->id)
+                ->where('order_purchases.code_sale', $pedido->code_sale)
+                ->select('remisiones.code_remission')
+                ->first();
+
+            $pedido->remission_id = $new ? $new->code_remission : null;
 
             // $pedido->remission_id = $new ? $new->code_remission : null;
             unset($pedido->ordersDeliveryRoute);
             unset($pedido->status_id);
-            return    $new;
             //return $pedido;
             //return $pedido->orders;
             DB::statement("SET SQL_MODE=''");
