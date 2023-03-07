@@ -164,10 +164,7 @@ class ApiOdooController extends Controller
                             ],
                             $dataProduct
                         );
-                        SaleStatusChange::create([
-                            "sale_id" => $sale->id,
-                            "status_id" => 1,
-                        ]);
+
                         //Confirmado:
                     }
 
@@ -251,6 +248,18 @@ class ApiOdooController extends Controller
                         $orderPurchase->status_bpm = "Pendiente";
                         $orderPurchase->save();
                     }
+
+                    $sale = Sale::where('code_sale', $orderPurchase->code_sale)->first();
+                    if ($sale) {
+                        if ($sale->lastStatus) {
+                            if ($sale->lastStatus->status_id < 2) {
+                                SaleStatusChange::create([
+                                    'sale_id' => $sale->id,
+                                    "status_id" => 2,
+                                ]);
+                            }
+                        }
+                    }
                 } catch (Exception $th) {
                     //throw $th;
                     return response()->json(['message' => 'Error al crear la orden de compra', 'error' => $th->getMessage()], 400);
@@ -281,11 +290,6 @@ class ApiOdooController extends Controller
                                 ],
                                 $dataProduct
                             );
-                            SaleStatusChange::create([
-                                'order_purchase_id' => $orderPurchase->id,
-                                "status_id" => 2,
-                            ]);
-
                         } catch (Exception $th) {
                             array_push($errors, ['msg' => "Error al insertar el producto", 'error' => $th->getMessage()]);
                         }
@@ -321,7 +325,7 @@ class ApiOdooController extends Controller
                 /* $validator = Validator::make($request->all(), [
                     'reception' => 'required|array|bail',
                     'reception.code_reception' => 'required',
-                    'reception.code_order' => 'required',
+                    'reception.code_sale' => 'required',
                     'reception.company' => 'required',
                     'reception.type_operation' => 'required',
                     'reception.planned_date' => 'required|date:d-m-Y h:i:s',

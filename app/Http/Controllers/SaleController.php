@@ -191,19 +191,19 @@ class SaleController extends Controller
         while ($tiempoInicio <= $tiempoFin) {
             # Podemos recuperar la fecha actual y formatearla
 
-                $fechaActual =  date("Y-m-d", $tiempoInicio);
-                printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+            $fechaActual =  date("Y-m-d", $tiempoInicio);
+            printf("Fecha dentro del periodo : %s\n ", $fechaActual);
 
-                # Sumar el incremento para que en algún momento termine el ciclo
-                $tiempoInicio += $dia;
+            # Sumar el incremento para que en algún momento termine el ciclo
+            $tiempoInicio += $dia;
 
-          /*   if ($diasDiferencia > 7 && $diasDiferencia <= 31) {
+            /*   if ($diasDiferencia > 7 && $diasDiferencia <= 31) {
                 $fechaActual =  date("Y-m-d", $tiempoInicio);
                 printf("Fecha dentro del periodo : %s\n ", $fechaActual);
 
                 # Sumar el incremento para que en algún momento termine el ciclo
                 $tiempoInicio += $dos_dias;} */
-            }
+        }
 
 
 
@@ -214,5 +214,10 @@ class SaleController extends Controller
         ];
         //grafica
 
+    }
+    public function calendario()
+    {
+        $ped = Sale::with(['moreInformation'])->get();
+        return $ped;
     }
 }

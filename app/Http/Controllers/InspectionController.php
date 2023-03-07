@@ -109,6 +109,8 @@ class InspectionController extends Controller
             }
             //Inspección de calidad liberada
 
+            /* if ($sa) {
+            } */
             return response()->json([
                 "msg" => "Inspeccion Creada Correctamente",
                 'data' =>
@@ -179,13 +181,12 @@ class InspectionController extends Controller
 
             foreach ($nuevo->products as $product) {
                 foreach ($inspection->productsSelected as $pInspection) {
-                  //  return $pInspection;
+                    //  return $pInspection;
                     if ($product->odoo_product_id == $pInspection->odoo_product_id) {
 
-                      $product->quantity_selected = $pInspection->quantity_selected;
+                        $product->quantity_selected = $pInspection->quantity_selected;
 
                         array_push($productsSelected, $product);
-
                     }
                 }
                 //return $inspection->productsSelected;

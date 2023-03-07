@@ -42,6 +42,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('pedidos', [SaleController::class, 'index']);
     //estadisticas
     Route::get('estadistica', [SaleController::class, 'estadisticas']);
+    //calendario
+    Route::get('calendario', [SaleController::class, 'calendario']);
+
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
 
     Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
