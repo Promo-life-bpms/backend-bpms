@@ -13,6 +13,7 @@ use App\Models\Sale;
 use App\Models\SaleStatusChange;
 use Illuminate\Support\Facades\DB;
 use PhpParser\Node\Stmt\Foreach_;
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
 
 class ReceptionController extends Controller
