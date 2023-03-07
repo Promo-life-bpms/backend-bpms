@@ -53,6 +53,7 @@ class InspectionController extends Controller
         if ($validation->fails()) {
             return response()->json(['msg' => "Error al crear la inspeccion de calidad", 'data' => ["errorValidacion" => $validation->getMessageBag()]], response::HTTP_BAD_REQUEST); //400
         }
+
         $sale = Sale::where('code_sale', $sale_id)->first();
         if (!$sale) {
             return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
@@ -106,6 +107,8 @@ class InspectionController extends Controller
                 ];
                 $inspection->productsSelected()->create($dataProductSelected);
             }
+            //Inspección de calidad liberada
+
             return response()->json([
                 "msg" => "Inspeccion Creada Correctamente",
                 'data' =>
@@ -167,7 +170,7 @@ class InspectionController extends Controller
             ->where("inspection_products.inspection_id", $inspection->id)
             ->groupBy('order_purchases.id')
             ->get();
-                
+
         $ordenesnueva = [];
 
         foreach ($inspectionsOrder as $orden) {
@@ -178,11 +181,11 @@ class InspectionController extends Controller
                 foreach ($inspection->productsSelected as $pInspection) {
                   //  return $pInspection;
                     if ($product->odoo_product_id == $pInspection->odoo_product_id) {
-                     
+
                       $product->quantity_selected = $pInspection->quantity_selected;
 
                         array_push($productsSelected, $product);
-                      
+
                     }
                 }
                 //return $inspection->productsSelected;

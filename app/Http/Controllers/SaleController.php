@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
+use DateInterval;
+use DateTime;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Validator;
 
 class SaleController extends Controller
 {
@@ -102,7 +108,7 @@ class SaleController extends Controller
 
         return response()->json(['msg' => "No hay informacion acerca de este pedido"], response::HTTP_OK); //200
     }
-     //Ver pedidos de cada vendedor
+    //Ver pedidos de cada vendedor
     public function viewPedidosPorVendedor()
     {
         $pedidos = auth()->user()->sales;
@@ -110,5 +116,103 @@ class SaleController extends Controller
             'msg' => "Vizualizar mis pedidos",
             'data' => ["pedidos" => $pedidos],
         ], Response::HTTP_OK); //200
+    }
+
+    public function estadisticas(Request $request)
+    {
+        $validation = Validator::make($request->all(), [
+            'date_end' => 'required|date_format:Y-m-d',
+            'date_initial' => 'required|date_format:Y-m-d',
+            'company' => 'required',
+        ]);
+        if ($validation->fails()) {
+            return response()->json(
+                [
+                    'msg' => "Error al validar informacion de la ruta de entrega",
+                    'data' => ['errorValidacion' => $validation->getMessageBag()]
+                ],
+                response::HTTP_UNPROCESSABLE_ENTITY
+            ); // 422
+        }
+
+        $date_end = date($request->date_end);
+        $date_initial = date($request->date_initial);
+        $company = $request->company;
+        $sales = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->where('additional_sale_information.company', 'LIKE', '%' . $company . '%')
+            ->whereBetween('additional_sale_information.planned_date', [$date_initial, $date_end])
+            ->count();
+        $fechaExpiracion = Carbon::parse($date_initial);
+        $diasDiferencia = $fechaExpiracion->diffInDays($date_end);
+
+        $salesAnterior = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->where('additional_sale_information.company', 'LIKE', '%' . $company . '%')
+            ->whereBetween('additional_sale_information.planned_date', [$fechaExpiracion->subDays($diasDiferencia), Carbon::parse($date_end)->subDays($diasDiferencia)])
+            ->count();
+        //return [$sales, $salesAnterior];
+        $porcentajePedido = round(((($sales - $salesAnterior) / $salesAnterior) * 100), 0);
+
+        $incidencia = Incidence::where('incidences.company', 'LIKE', '%' . $company . '%')
+            ->whereBetween('incidences.creation_date', [$date_initial, $date_end])
+            ->count();
+
+        $incidenciaAnterior = Incidence::where('incidences.company', 'LIKE', '%' . $company . '%')
+            ->whereBetween('incidences.creation_date', [$fechaExpiracion->subDays($diasDiferencia), Carbon::parse($date_end)->subDays($diasDiferencia)])
+            ->count();
+        $porcentajeIncidencia = round(((($incidencia - $incidenciaAnterior) / $incidenciaAnterior) * 100), 0);
+
+        switch ($diasDiferencia) {
+            case ($diasDiferencia <= 7):
+                $msg = 'dia';
+                break;
+
+            case ($diasDiferencia > 7 && $diasDiferencia <= 31):
+
+                $msg = 'dos dias';
+                break;
+            case ($diasDiferencia > 31 && $diasDiferencia <= 182):
+
+                $msg = 'dos semanas';
+                break;
+            case ($diasDiferencia > 182 && $diasDiferencia <= 365):
+
+                $msg = 'mes';
+                break;
+
+
+            default:
+                $msg = 'no cumple';
+        }
+        $tiempoInicio = strtotime($date_initial);
+        $tiempoFin = strtotime($date_end);
+        $dia = 86400;
+        $dos_dias = 172800;
+
+        while ($tiempoInicio <= $tiempoFin) {
+            # Podemos recuperar la fecha actual y formatearla
+
+                $fechaActual =  date("Y-m-d", $tiempoInicio);
+                printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+
+                # Sumar el incremento para que en algún momento termine el ciclo
+                $tiempoInicio += $dia;
+
+          /*   if ($diasDiferencia > 7 && $diasDiferencia <= 31) {
+                $fechaActual =  date("Y-m-d", $tiempoInicio);
+                printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+
+                # Sumar el incremento para que en algún momento termine el ciclo
+                $tiempoInicio += $dos_dias;} */
+            }
+
+
+
+        return [
+            "pedidos" => $sales, "periodo_anterior" => $salesAnterior, "porcentaje" => $porcentajePedido . "%",
+            "incidencias" => $incidencia, "incidencia_anterior" => $incidenciaAnterior, "porcentaje2" => $porcentajeIncidencia . "%",
+            "dias" => $msg
+        ];
+        //grafica
+
     }
 }

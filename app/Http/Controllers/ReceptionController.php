@@ -138,10 +138,6 @@ class ReceptionController extends Controller
             }
         }
 
-        if (!$orderPurchase) {
-            return response()->json(['errors' => (['msg' => 'Ruta de entrega no encontrada.'])], 404);
-        }
-
         $reception = (object)$request->all();
 
         $maxINC = Reception::where('code_reception', 'LIKE', "%REC-IN%")->max('code_reception');
@@ -204,6 +200,14 @@ class ReceptionController extends Controller
             if (count($errors) > 0) {
                 return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
             }
+            $receptionDB->productsReception;
+            foreach ($receptionDB->productsReception as $productRecep) {
+                $productRecep->odoo_product_id;
+                $product = OrderPurchaseProduct::where("odoo_product_id", "=", $productRequest->odoo_product_id)->first();
+                $product->quantity_delivered;
+                $productRecep->quantity_delivered = $product->quantity_delivered;
+            }
+            //Inventario contabilizado:
         }
         return response()->json(['message' => 'Creacion de la recepcion de inventario', 'data' => $receptionDB], 200);
     }
@@ -221,6 +225,7 @@ class ReceptionController extends Controller
         if (!$reception) {
             return response()->json(['errors' => (['msg' => 'Recepcion no encontrada.'])], 404);
         }
+        //Inventario contabilizado:
 
         $reception->productsReception;
 

@@ -40,6 +40,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('user-profile', [AuthController::class, 'userProfile']);
 
     Route::get('pedidos', [SaleController::class, 'index']);
+    //estadisticas
+    Route::get('estadistica', [SaleController::class, 'estadisticas']);
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
 
     Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
