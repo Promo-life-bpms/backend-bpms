@@ -291,7 +291,7 @@ class IncidenceController extends Controller
             ], response::HTTP_UNPROCESSABLE_ENTITY);
         }
         $incidencia = Incidence::where('internal_code_incidence', $incidencia)->first();
-       
+
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
@@ -299,7 +299,7 @@ class IncidenceController extends Controller
         $incidencia->solution_date = $request->solution_date;
         $incidencia->user_solution =  auth()->user()->name;
         $incidencia->save();
-        return response()->json(["msg" => "Se actualizo la incidencia"], response::HTTP_NOT_FOUND);
+        return response()->json(["msg" => "Se actualizo la incidencia"], response::HTTP_ACCEPTED);
     }
 
     public function destroy(Request $request)

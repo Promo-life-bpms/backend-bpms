@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Models\Notificacion;
 use App\Models\OrderPurchaseProduct;
+use App\Models\SaleStatusChange;
 use App\Notifications\Notificacion as NotificationsNotificacion;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Illuminate\Support\Facades\DB;
@@ -108,7 +109,7 @@ class DeliveryRouteController extends Controller
         $validation = Validator::make($request->all(), [
             'date_of_delivery' => 'required',
             'user_chofer_id' => 'required',
-            'type_of_product' => 'required',
+            'type_of_product' => 'required|in:Limpio,Maquilado',
             'type_of_chofer' => 'required',
             'code_orders' => 'required|array',
             'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
@@ -183,6 +184,7 @@ class DeliveryRouteController extends Controller
             'status' => 'Pendiente',
             'is_active' => 1,
         ]);
+
         //crear los productos de esa ruta de entrega
         //  $ruta->productsDeliveryRoute()->create
         //retornar un mensaje
@@ -202,6 +204,9 @@ class DeliveryRouteController extends Controller
                 'status' => 'Pendiente',
             ];
 
+            // Agendado en ruta de entrega (Material maquilado):
+            //Agendado en ruta de entrega (Material maquilado):
+
             foreach ($codeOrder->orders as $order) {
                 $order = (object) $order;
                 $dataSale['code_order'] = $order->code_order;
@@ -213,6 +218,18 @@ class DeliveryRouteController extends Controller
                         'amount' => $newProduct->amount,
                     ]);
                 }
+            }
+            $limpio = $request->type_of_product;
+            if ($limpio = ["Limpio"]) {
+                SaleStatusChange::create([
+                    'code_route' => $ruta->id,
+                    "status_id" => 3
+                ]);
+            } else {
+                SaleStatusChange::create([
+                    'code_route' => $ruta->id,
+                    "status_id" => 5
+                ]);
             }
         }
 
@@ -561,7 +578,11 @@ class DeliveryRouteController extends Controller
             'status' => $request->status,
             'evidence' => $request->evidence,
         ]);
+
         //crear los productos de esa remision de entrega
+        //    En bodega del maquilador:
+        //En bodega de PL (Material maquilado):
+        //Agendado en ruta de entrega de cliente:
 
         $newStatus = $request->status;
         if ($newStatus == 'Liberada') {
@@ -592,6 +613,7 @@ class DeliveryRouteController extends Controller
                 ->select('remisiones.*')
                 ->groupBy('remisiones.id')
                 ->get();
+            //  Entrega completa al cliente:
             if (count($haveRemissions) > 0) {
                 $statusPedido = "Entrega Completa";
                 foreach ($deliveryRoute->codeOrderDeliveryRoute()->where('code_sale', $pedido->code_sale)->get() as $orderDR) {
@@ -603,11 +625,15 @@ class DeliveryRouteController extends Controller
                             ->where('order_purchase_products.odoo_product_id', $product->odoo_product_id)
                             ->sum('product_remission.delivered_quantity');
                         // return [$cantidad_entregada, $product->amount, $cantidad_entregada <= $product->amount];
+                        //  Entrega completa al cliente:
+
                         if ($cantidad_entregada < $product->amount) {
                             $statusPedido = "Entrega Parcial";
                             break;
                         }
+                        // Entrega parcial al cliente:
                     }
+
                     if ($statusPedido == "Entrega Parcial") {
                         break;
                     }
