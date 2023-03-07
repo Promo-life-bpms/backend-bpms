@@ -9,6 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\OrderPurchaseProduct;
 use App\Models\ReceptionProduct;
+use App\Models\Sale;
+use App\Models\SaleStatusChange;
+use Illuminate\Support\Facades\DB;
 use PhpParser\Node\Stmt\Foreach_;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -51,6 +54,8 @@ class ReceptionController extends Controller
                     "odoo_product_id" => $p->odoo_product_id,
                     "quantity" => 0,
                 ]);
+
+                //prueba
             }
 
             $errors = [];
@@ -208,8 +213,30 @@ class ReceptionController extends Controller
                 $product->quantity_delivered;
                 $productRecep->quantity_delivered = $product->quantity_delivered;
             }
-            //Inventario contabilizado:
         }
+        /* $sale = $orderPurchase->sale;
+        $pedidos = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->join("order_purchases", "order_purchases.code_sale", "sales.code_sale")
+            ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
+            ->where("sales.id", $sale->id)
+            ->select("order_purchase_products.quantity_delivered")
+            ->get();
+            return $pedidos;
+
+        if ($pedidos ==  $productRecep->quantity_delivered) {
+
+            if (count($sale) > 0) {
+                SaleStatusChange::create([
+                    'sale_id' => $sale->id,
+                    "status_id" => 9
+                ]);
+                return ('hola');
+            } else {
+                return 'ok';
+            }
+        }
+        */
+
         return response()->json(['message' => 'Creacion de la recepcion de inventario', 'data' => $receptionDB], 200);
     }
 
