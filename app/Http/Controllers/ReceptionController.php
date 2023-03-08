@@ -215,7 +215,7 @@ class ReceptionController extends Controller
                 $productRecep->quantity_delivered = $product->quantity_delivered;
             }
         }
-        /* $sale = $orderPurchase->sale;
+        $sale = $orderPurchase->sale;
         $pedidos = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
             ->join("order_purchases", "order_purchases.code_sale", "sales.code_sale")
             ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
@@ -236,7 +236,7 @@ class ReceptionController extends Controller
                 return 'ok';
             }
         }
-        */
+
 
         return response()->json(['message' => 'Creacion de la recepcion de inventario', 'data' => $receptionDB], 200);
     }

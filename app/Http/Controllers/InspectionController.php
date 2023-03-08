@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Inspection;
 use App\Models\Sale;
 use App\Models\InspectionProduct;
+use App\Models\SaleStatusChange;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -108,9 +109,19 @@ class InspectionController extends Controller
                 $inspection->productsSelected()->create($dataProductSelected);
             }
             //Inspección de calidad liberada
+           $quantity_denied = $request->quantity_denied;
+           $total = $request->features_quantity->total;
+           if ($total < $quantity_denied){
+            if ($sale->lastStatus) {
+                if ($sale->lastStatus->status_id < 9) {
+                    SaleStatusChange::create([
+                        'sale_id' => $sale->id,
+                        "status_id" => 9
+                    ]);
+                }
+            }
+           }
 
-            /* if ($sa) {
-            } */
             return response()->json([
                 "msg" => "Inspeccion Creada Correctamente",
                 'data' =>
