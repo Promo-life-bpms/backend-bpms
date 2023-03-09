@@ -89,6 +89,7 @@ class SaleController extends Controller
             'incidences',
             "ordersDeliveryRoute"
         ])->where('code_sale', $sale_id)->first();
+
         //Detalle del pedido seleccionado
         if ($sale) {
             foreach ($sale->routeDeliveries as $routeDelivery) {
@@ -187,6 +188,8 @@ class SaleController extends Controller
         $tiempoFin = strtotime($date_end);
         $dia = 86400;
         $dos_dias = 172800;
+        $semana = 604800;
+        $mes = 2419200;
 
         while ($tiempoInicio <= $tiempoFin) {
             # Podemos recuperar la fecha actual y formatearla
@@ -197,7 +200,7 @@ class SaleController extends Controller
             # Sumar el incremento para que en algún momento termine el ciclo
             $tiempoInicio += $dia;
 
-            /*   if ($diasDiferencia > 7 && $diasDiferencia <= 31) {
+          /*     if ($diasDiferencia > 7 && $diasDiferencia <= 31) {
                 $fechaActual =  date("Y-m-d", $tiempoInicio);
                 printf("Fecha dentro del periodo : %s\n ", $fechaActual);
 
