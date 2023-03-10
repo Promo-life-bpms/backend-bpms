@@ -141,8 +141,9 @@ class SaleController extends Controller
         $company = $request->company;
         $sales = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
             ->where('additional_sale_information.company', 'LIKE', '%' . $company . '%')
-            ->whereBetween('additional_sale_information.planned_date', [$date_initial, $date_end])
+            ->whereBetween('additional_sale_information.planned_date', [$date_initial, $date_end])->get()
             ->count();
+
         $fechaExpiracion = Carbon::parse($date_initial);
         $diasDiferencia = $fechaExpiracion->diffInDays($date_end);
 
@@ -150,8 +151,17 @@ class SaleController extends Controller
             ->where('additional_sale_information.company', 'LIKE', '%' . $company . '%')
             ->whereBetween('additional_sale_information.planned_date', [$fechaExpiracion->subDays($diasDiferencia), Carbon::parse($date_end)->subDays($diasDiferencia)])
             ->count();
-        //return [$sales, $salesAnterior];
-        $porcentajePedido = round(((($sales - $salesAnterior) / $salesAnterior) * 100), 0);
+        // return [$sales, $salesAnterior];
+        if ($salesAnterior > 0) {
+            $porcentajePedido = round(((($sales - $salesAnterior) / $salesAnterior) * 100), 0);
+        } else {
+            return response()->json(
+                [
+                    'msg' => "Sin pedidos en el periodo seleccionado",
+                ],
+
+            );
+        }
 
         $incidencia = Incidence::where('incidences.company', 'LIKE', '%' . $company . '%')
             ->whereBetween('incidences.creation_date', [$date_initial, $date_end])
@@ -160,8 +170,16 @@ class SaleController extends Controller
         $incidenciaAnterior = Incidence::where('incidences.company', 'LIKE', '%' . $company . '%')
             ->whereBetween('incidences.creation_date', [$fechaExpiracion->subDays($diasDiferencia), Carbon::parse($date_end)->subDays($diasDiferencia)])
             ->count();
-        $porcentajeIncidencia = round(((($incidencia - $incidenciaAnterior) / $incidenciaAnterior) * 100), 0);
+        if ($incidenciaAnterior > 0) {
+            $porcentajeIncidencia = round(((($incidencia - $incidenciaAnterior) / $incidenciaAnterior) * 100), 0);
+        } else {
+            return response()->json(
+                [
+                    'msg' => "Sin incidencias en el periodo seleccionado",
+                ],
 
+            );
+        }
         switch ($diasDiferencia) {
             case ($diasDiferencia <= 7):
                 $msg = 'dia';
@@ -190,22 +208,43 @@ class SaleController extends Controller
         $dos_dias = 172800;
         $semana = 604800;
         $mes = 2419200;
+        /*  $sale = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->where('additional_sale_information.company', 'LIKE', '%' . $company . '%')
+            ->whereBetween('additional_sale_information.planned_date', [$date_initial, $date_end])
+            ->select('additional_sale_information.planned_date')
+            ->get();
+ */
 
+
+
+
+        //return $sale;
         while ($tiempoInicio <= $tiempoFin) {
-            # Podemos recuperar la fecha actual y formatearla
 
-            $fechaActual =  date("Y-m-d", $tiempoInicio);
-            printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+            if ($diasDiferencia <= 7) {
 
-            # Sumar el incremento para que en algún momento termine el ciclo
-            $tiempoInicio += $dia;
-
-          /*     if ($diasDiferencia > 7 && $diasDiferencia <= 31) {
                 $fechaActual =  date("Y-m-d", $tiempoInicio);
+
                 printf("Fecha dentro del periodo : %s\n ", $fechaActual);
 
-                # Sumar el incremento para que en algún momento termine el ciclo
-                $tiempoInicio += $dos_dias;} */
+                    printf("Pedido : %s\n ", $sales);
+
+                $tiempoInicio += $dia;
+            } else if ($diasDiferencia > 7 && $diasDiferencia <= 31) {
+
+                $fechaActual =  date("Y-m-d", $tiempoInicio);
+                printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+                $tiempoInicio += $dos_dias;
+            }
+            if ($diasDiferencia > 31 && $diasDiferencia <= 182) {
+                $fechaActual =  date("Y-m-d", $tiempoInicio);
+                printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+                $tiempoInicio += $semana;
+            } else if ($diasDiferencia > 182 && $diasDiferencia <= 365) {
+                $fechaActual =  date("Y-m-d", $tiempoInicio);
+                printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+                $tiempoInicio += $mes;
+            }
         }
 
 
