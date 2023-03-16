@@ -7,20 +7,18 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class Notificacion extends Notification
+class SendAccessNotificaion extends Notification
 {
     use Queueable;
 
-    private $msgRuta;
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct($msgRuta)
+    public function __construct()
     {
         //
-        $this->msgRuta = $msgRuta;
     }
 
     /**
@@ -31,7 +29,7 @@ class Notificacion extends Notification
      */
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -44,7 +42,7 @@ class Notificacion extends Notification
     {
         return (new MailMessage)
                     ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/notificaciones'))
+                    ->action('Notification Action', url('/'))
                     ->line('Thank you for using our application!');
     }
 
@@ -57,7 +55,7 @@ class Notificacion extends Notification
     public function toArray($notifiable)
     {
         return [
-            $this->msgRuta
+            1,2,3,3
         ];
     }
 }

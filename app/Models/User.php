@@ -13,7 +13,8 @@ use App\Models\Sale;
 class User extends Authenticatable implements JWTSubject
 {
     use LaratrustUserTrait;
-    use HasFactory, Notifiable;
+    use HasFactory;
+    //use Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -39,6 +40,17 @@ class User extends Authenticatable implements JWTSubject
         'password',
     ];
 
+    public function routeNotificationForMail($notification)
+    {
+        // Return email address only...
+        return $this->email_address;
+
+        // Return email address and name...
+        return [$this->email_address => $this->name];
+    }
+    public function notify($instance)
+    {
+    }
     public function whatRoles()
     {
         return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
@@ -49,7 +61,7 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(Sale::class, 'commercial_email', 'email');
     }
 
-        /**
+    /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *
      * @return mixed

@@ -42,6 +42,10 @@ class OrderPurchase extends Model
     {
         return $this->hasMany(StatusOT::class, "id_order_purchases", "id")->with("StatusProductsOT");
     }
+    public function lastStatusOT()
+    {
+        return $this->hasOne(StatusOT::class, "id_order_purchases", "id")->latestOfMany();
+    }
 
     public function receptionsWithTheirProducts()
     {

