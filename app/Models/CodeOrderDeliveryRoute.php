@@ -10,6 +10,9 @@ class CodeOrderDeliveryRoute extends Model
     use HasFactory;
     protected $fillable = [
         'delivery_route_id',
+        'user_chofer_id',
+        'type_of_chofer',
+        'type_of_product',
         'code_sale',
         'code_order',
         'type_of_origin',
