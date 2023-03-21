@@ -19,9 +19,6 @@ class CreateDeliveryRoutesTable extends Migration
             $table->string('code_route');
             $table->boolean('is_active')->default(1)->nullable();
             $table->date('date_of_delivery');
-            $table->foreignId('user_chofer_id')->reference('id')->on('users');
-            $table->string('type_of_chofer');
-            $table->string('type_of_product');
             $table->string('status');
             $table->string('elaborated')->nullable();
             $table->string('revised')->nullable();
