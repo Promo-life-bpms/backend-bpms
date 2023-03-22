@@ -152,7 +152,7 @@ class IncidenceController extends Controller
         $orderpurchase_id = null;
         foreach ($request->incidence_products as $incidence_product) {
             $incidence_product = (object)$incidence_product;
-          //  return $incidence_product;
+
             $productOrder = OrderPurchaseProduct::where("odoo_product_id", $incidence_product->odoo_product_id)->first();
 
             $orderpurchase_id = $productOrder->order_purchase_id;
@@ -181,10 +181,10 @@ class IncidenceController extends Controller
 
         switch ($company) {
             case 'PROMO LIFE':
-                $keyOdoo = 'c002a44464a3cbe6bd49344fcd99d06d';
+                $keyOdoo = config('key_odoo.key_pl');
                 break;
             case 'BH':
-                $keyOdoo = 'b1bf4adf8d00ccec169d66fcce0b22ca';
+                $keyOdoo = config('key_odoo.key_bh');
                 break;
             default:
                 return response()->json(['msg' => 'No se pudo asignar el key para enviar la incidencia a Odoo correctamente'], response::HTTP_BAD_REQUEST); //400
@@ -195,7 +195,7 @@ class IncidenceController extends Controller
             return response()->json(["msg" => "No se ha encontrado el OT/OC"], response::HTTP_NOT_FOUND);
         };
         try {
-            $url = 'https://api-promolife.vde-suite.com:5030/custom/Promolife/V2/incidences/create';
+            $url = config('key_odoo.endpoint_incidence');
             $data =  [
                 'incidencias' => [
                     [
