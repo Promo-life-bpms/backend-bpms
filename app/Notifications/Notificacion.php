@@ -17,10 +17,10 @@ class Notificacion extends Notification
      *
      * @return void
      */
-    public function __construct($msgRuta)
+    public function __construct()
     {
         //
-        $this->msgRuta = $msgRuta;
+
     }
 
     /**
@@ -57,7 +57,7 @@ class Notificacion extends Notification
     public function toArray($notifiable)
     {
         return [
-            $this->msgRuta
+
         ];
     }
 }

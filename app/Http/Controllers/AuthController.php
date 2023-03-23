@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Http\Controllers\Controller;
 use App\Notifications\Acces;
 use App\Notifications\SendAccessNotificaion;
+use App\Notifications\TestN;
 use Exception;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -58,18 +59,42 @@ class AuthController extends Controller
     {
         $users = User::all();
 
-        foreach ($users as $user) {
+        if ($users) {
 
-            try {
-                //$user->notify(new SendAccessNotificaion());
-                Notification::send($user, new SendAccessNotificaion());
-            } catch (Exception $y) {
-                return $y;
+            foreach ($users as $user) {
+                $email =  $user->email;
+                $password = str::random(10);
+                $user->password = bcrypt($password);
+                $user->save();
+                Notification::route('mail', $email)
+                    ->notify(new TestN($password, $email));
             }
+        } else {
+            return response()->json(['No hay usuarios regstrados']);
+        }
+        try {
+           $user->email;
+           if (!$user->email){
+            return response()->json([
+                'msg' => 'No existe ese usuario',
+            ], response::HTTP_BAD_REQUEST);
+           }
+
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+            return response()->json(
+                [
+                    'msg' => 'El usuario no tiene acceso',
+                    'data' => ["message" => $message]
+                ],
+                response::HTTP_BAD_REQUEST
+            );
         }
 
+        return response()->json(['Correos enviados correctamente']);
     }
-    public function Acces(){
+    public function Acces()
+    {
         $usersAccess = User::select('users.email', 'users.password')->get();
 
         return $usersAccess;

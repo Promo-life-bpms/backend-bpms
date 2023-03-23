@@ -6,19 +6,23 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use PhpParser\Node\Expr\Cast\String_;
 
-class SendAccessNotificaion extends Notification
+class TestN extends Notification
 {
     use Queueable;
 
+    protected $password;
+    protected $email;
     /**
      * Create a new notification instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(String $password, String $email)
     {
-        //
+        $this->password = $password;
+        $this->email = $email;
     }
 
     /**
@@ -41,9 +45,12 @@ class SendAccessNotificaion extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->line('Bienvenido al BPMS')
+            ->line('Has sido registrado correctamente')
+            ->line('Tu password es: ' . $this->password)
+            ->line('tu correo es :' . $this->email)
+            ->action('Acceder', url('https://dev-bpms.promolife.online/api'))
+            ->line('¡Gracias!');
     }
 
     /**
@@ -54,5 +61,8 @@ class SendAccessNotificaion extends Notification
      */
     public function toArray($notifiable)
     {
+        return [
+            //
+        ];
     }
 }

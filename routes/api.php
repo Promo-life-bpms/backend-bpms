@@ -96,7 +96,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('rutas-de-entrega/show/{id}', [DeliveryRouteController::class, 'show']);
 
     // Actualizar la ruta de entrega
-    //Route::put('rutas-de-entrega/{ruta}/update', [DeliveryRouteController::class, 'update']);
+    Route::put('rutas-de-entrega/{ruta}/update', [DeliveryRouteController::class, 'update']);
     Route::put('rutas-de-entrega/{ruta}/updateStatus', [DeliveryRouteController::class, 'updateStatus']);
     // Eliminar ruta de entrega
     Route::delete('rutas-de-entrega/{deliveryRoute}', [DeliveryRouteController::class, 'destroy']);
