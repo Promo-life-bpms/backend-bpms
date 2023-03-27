@@ -59,7 +59,26 @@ class AuthController extends Controller
     {
         $users = User::all();
 
-        if ($users) {
+        if (!$users) {
+
+                return response()->json(['No hay usuarios regstrados']);
+         }
+
+
+         try {
+
+
+         } catch (Exception $e) {
+             $message = $e->getMessage();
+             return response()->json(
+                 [
+                     'msg' => 'El usuario no tiene acceso',
+                     'data' => ["message" => $message]
+                 ],
+                 response::HTTP_BAD_REQUEST
+             );
+         }
+
 
             foreach ($users as $user) {
                 $email =  $user->email;
@@ -69,27 +88,8 @@ class AuthController extends Controller
                 Notification::route('mail', $email)
                     ->notify(new TestN($password, $email));
             }
-        } else {
-            return response()->json(['No hay usuarios regstrados']);
-        }
-        try {
-           $user->email;
-           if (!$user->email){
-            return response()->json([
-                'msg' => 'No existe ese usuario',
-            ], response::HTTP_BAD_REQUEST);
-           }
 
-        } catch (Exception $e) {
-            $message = $e->getMessage();
-            return response()->json(
-                [
-                    'msg' => 'El usuario no tiene acceso',
-                    'data' => ["message" => $message]
-                ],
-                response::HTTP_BAD_REQUEST
-            );
-        }
+
 
         return response()->json(['Correos enviados correctamente']);
     }

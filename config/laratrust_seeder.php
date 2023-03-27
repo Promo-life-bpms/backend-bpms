@@ -34,7 +34,7 @@ return [
             'profile' => 'r,u',
         ],
         'gerente' =>[
-            'profile' => 'c,r'
+            'profile' => 'r,u'
         ],
         'asistente_de_gerente' => [
             'profile' => 'r,u'

@@ -32,19 +32,24 @@ class SaleController extends Controller
             //Asignarle el valor al var per_page
             $per_page = $request->per_page;
         }
+        $user =  auth()->user();
 
-
+        // return $com;
         $sales = null;
         if ($request->ordenes_proximas) {
             $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")
+                ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
-                //->where('order_purchases.planned_date', '>=', $fechaProxima)
+                ->where('additional_sale_information.company', $user->company)
                 ->orderby('order_purchases.planned_date', 'ASC')
                 ->paginate($per_page);
         } else {
-            $sales = Sale::with('moreInformation', 'lastStatus', "detailsOrders")->paginate($per_page);
+            $sales = Sale::with('moreInformation', 'lastStatus', "detailsOrders")
+                ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+                ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
+                ->where('additional_sale_information.company', $user->company)
+                ->paginate($per_page);
         }
-
         foreach ($sales as $sale) {
             if ($sale->lastStatus) {
                 $sale->lastStatus->slug = $sale->lastStatus->status->slug;
@@ -56,6 +61,7 @@ class SaleController extends Controller
                 unset($sale->lastStatus->updated_at);
             }
         }
+
 
         return response()->json([
             'msg' => 'Lista de pedidos', 'data' => ["sales" => $sales]
@@ -90,7 +96,6 @@ class SaleController extends Controller
             'incidences',
             "ordersDeliveryRoute"
         ])->where('code_sale', $sale_id)->first();
-
         //Detalle del pedido seleccionado
         if ($sale) {
             foreach ($sale->routeDeliveries as $routeDelivery) {

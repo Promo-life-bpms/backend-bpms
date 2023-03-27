@@ -314,24 +314,47 @@ class DeliveryRouteController extends Controller
                 response::HTTP_UNPROCESSABLE_ENTITY
             ); // 422
         }
-        $rutaDB = DeliveryRoute::where('code_route', $ruta)->first();
-        // Chequeaos si encontró o no la ruta
-        if (!$rutaDB) {
-            // Se devuelve un array errors con los errores detectados y código 404
-            return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
+        $user =  auth()->user();
+        foreach ($user->whatRoles as $rol) {
+            # code...
+            switch ($rol->name) {
+
+                case ("logistica-y-mesa-de-control" == $rol->name):
+
+                    break;
+                case ("administrator" == $rol->name):
+
+                    break;
+
+                default:
+                    return response()->json(
+                        [
+                            'msg' => "No tienes autorizacion para modificar los choferes",
+                        ],
+
+                    );
+                    break;
+            }
+
+            $rutaDB = DeliveryRoute::where('code_route', $ruta)->first();
+            // Chequeaos si encontró o no la ruta
+            if (!$rutaDB) {
+                // Se devuelve un array errors con los errores detectados y código 404
+                return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
+            }
+            $pedidosRuta = $rutaDB->codeOrderDeliveryRoute()->where('code_sale', $pedido)->get();
+            foreach ($pedidosRuta as $codeOrder) {
+                $codeOrder = (object)$codeOrder;
+                $dataSale = [
+                    'user_chofer_id' => $request->user_chofer_id,
+                    'type_of_product' => $request->type_of_product,
+                    'type_of_chofer' => $request->type_of_chofer,
+                    'num_guide' => $request->num_guide,
+                ];
+                $codeOrder->update($dataSale);
+            }
         }
-        $pedidosRuta = $rutaDB->codeOrderDeliveryRoute()->where('code_sale', $pedido)->get();
-        foreach ($pedidosRuta as $codeOrder) {
-            $codeOrder = (object)$codeOrder;
-            $dataSale = [
-                'user_chofer_id' => $request->user_chofer_id,
-                'type_of_product' => $request->type_of_product,
-                'type_of_chofer' => $request->type_of_chofer,
-                'num_guide' => $request->num_guide,
-            ];
-            $codeOrder->update($dataSale);
-        }
-        return [$request->all(), $ruta, $pedido];
+        return response()->json(['msg'  => 'Actualizacion de informacion de choferes exitosa'], response::HTTP_CREATED);
     }
     /**
      * Display the specified resource.
