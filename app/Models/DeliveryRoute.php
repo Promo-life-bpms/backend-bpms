@@ -15,9 +15,9 @@ class DeliveryRoute extends Model
         'code_route',
         'is_active',
         'date_of_delivery',
-        'user_chofer_id',
-        'type_of_chofer',
-        'type_of_product',
+        // 'user_chofer_id',
+        // 'type_of_chofer',
+        // 'type_of_product',
         'status',
         'elaborated',
         'revised',
@@ -26,7 +26,6 @@ class DeliveryRoute extends Model
 
     public function codeOrderDeliveryRoute()
     {
-        //relacion hasmany() hacia product delivery route
         return $this->hasMany(CodeOrderDeliveryRoute::class, "delivery_route_id");
     }
 
@@ -38,6 +37,5 @@ class DeliveryRoute extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_chofer_id', 'id');
-        # code...
     }
 }

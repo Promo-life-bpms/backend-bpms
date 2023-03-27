@@ -16,6 +16,9 @@ class CodeOrderDeliveryRoutes extends Migration
         Schema::create('code_order_delivery_routes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('delivery_route_id')->reference('id')->on('delivery_routes');
+            $table->foreignId('user_chofer_id')->reference('id')->on('users')->nullable();
+            $table->string('type_of_chofer')->nullable();
+            $table->string('type_of_product')->nullable();
             $table->string('code_sale');
             $table->string('code_order');
             $table->string('type_of_origin');
