@@ -58,36 +58,19 @@ class AuthController extends Controller
     public function userAccess()
     {
         $users = User::all();
+        foreach ($users as $user) {
+            $email =  $user->email;
+            $password = str::random(10);
+            $user->password = bcrypt($password);
+            $user->save();
+            Notification::route('mail', $email)
+                ->notify(new TestN($password, $email));
+                try {
 
-        if (!$users) {
-
-                return response()->json(['No hay usuarios regstrados']);
-         }
-
-
-         try {
-
-
-         } catch (Exception $e) {
-             $message = $e->getMessage();
-             return response()->json(
-                 [
-                     'msg' => 'El usuario no tiene acceso',
-                     'data' => ["message" => $message]
-                 ],
-                 response::HTTP_BAD_REQUEST
-             );
-         }
-
-
-            foreach ($users as $user) {
-                $email =  $user->email;
-                $password = str::random(10);
-                $user->password = bcrypt($password);
-                $user->save();
-                Notification::route('mail', $email)
-                    ->notify(new TestN($password, $email));
-            }
+                } catch (\Throwable $th) {
+                    //throw $th;
+                }
+        }
 
 
 

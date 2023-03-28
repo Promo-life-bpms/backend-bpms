@@ -32,24 +32,30 @@ class SaleController extends Controller
             //Asignarle el valor al var per_page
             $per_page = $request->per_page;
         }
-        $user =  auth()->user();
 
-        // return $com;
+
         $sales = null;
+        $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente','asistente_de_gerente'])->first();
+
+        // return $isSeller;
         if ($request->ordenes_proximas) {
+
             $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")
                 ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
-                ->where('additional_sale_information.company', $user->company)
                 ->orderby('order_purchases.planned_date', 'ASC')
                 ->paginate($per_page);
         } else {
-            $sales = Sale::with('moreInformation', 'lastStatus', "detailsOrders")
+            $sales = Sale::with('lastStatus', "detailsOrders")
                 ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
-                ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
-                ->where('additional_sale_information.company', $user->company)
+                ->when($isSeller !== null, function ($query) {
+                    $user =  auth()->user();
+
+                    $query->where('additional_sale_information.company', $user->company);
+                })
                 ->paginate($per_page);
         }
+       // return $sales;
         foreach ($sales as $sale) {
             if ($sale->lastStatus) {
                 $sale->lastStatus->slug = $sale->lastStatus->status->slug;
