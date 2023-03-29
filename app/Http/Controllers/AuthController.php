@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Http\Controllers\Controller;
 use App\Notifications\Acces;
-use App\Notifications\SendAccessNotificaion;
-use App\Notifications\TestN;
+use App\Notifications\NotificationAccesUser;
 use Exception;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -58,18 +57,21 @@ class AuthController extends Controller
     public function userAccess()
     {
         $users = User::all();
+        $data =[];
         foreach ($users as $user) {
             $email =  $user->email;
             $password = str::random(10);
             $user->password = bcrypt($password);
             $user->save();
             Notification::route('mail', $email)
-                ->notify(new TestN($password, $email));
-                try {
+                ->notify(new NotificationAccesUser($password, $email));
+           try {
+                Notification::route('mail', $email)
+                    ->notify(new NotificationAccesUser($password, $email));
+            } catch (\Exception $e) {
+                array_push($data, [$email,$e->getMessage()]);
 
-                } catch (\Throwable $th) {
-                    //throw $th;
-                }
+            }
         }
 
 

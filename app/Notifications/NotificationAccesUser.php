@@ -8,7 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use PhpParser\Node\Expr\Cast\String_;
 
-class TestN extends Notification
+class NotificationAccesUser extends Notification
 {
     use Queueable;
 
@@ -49,7 +49,7 @@ class TestN extends Notification
             ->line('Has sido registrado correctamente')
             ->line('Tu password es: ' . $this->password)
             ->line('tu correo es :' . $this->email)
-            ->action('Acceder', url('https://dev-bpms.promolife.online/api'))
+            ->action('Acceder', url(env("APP_URL", "")))
             ->line('¡Gracias!');
     }
 

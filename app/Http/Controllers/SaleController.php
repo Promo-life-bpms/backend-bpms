@@ -274,7 +274,7 @@ class SaleController extends Controller
             //->whereBetween('order_purchases.order_date', [$date_initial, $date_end])
             //->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
             ->get();
-        return $pendientes;
+        //return $pendientes;
 
         $completado = OrderPurchase::where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
             ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
