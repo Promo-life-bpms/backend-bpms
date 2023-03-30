@@ -35,7 +35,7 @@ class SaleController extends Controller
 
 
         $sales = null;
-        $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente','asistente_de_gerente'])->first();
+        $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente', 'asistente_de_gerente'])->first();
 
         // return $isSeller;
         if ($request->ordenes_proximas) {
@@ -55,7 +55,7 @@ class SaleController extends Controller
                 })
                 ->paginate($per_page);
         }
-       // return $sales;
+        // return $sales;
         foreach ($sales as $sale) {
             if ($sale->lastStatus) {
                 $sale->lastStatus->slug = $sale->lastStatus->status->slug;
@@ -164,17 +164,10 @@ class SaleController extends Controller
             ->whereBetween('additional_sale_information.planned_date', [$fechaExpiracion->subDays($diasDiferencia), Carbon::parse($date_end)->subDays($diasDiferencia)])
             ->count();
         // return [$sales, $salesAnterior];
+        $porcentajePedido = 0;
         if ($salesAnterior > 0) {
             $porcentajePedido = round(((($sales - $salesAnterior) / $salesAnterior) * 100), 0);
-        } else {
-            /*   return response()->json(
-                [
-                    'msg' => "Sin pedidos en el periodo seleccionado",
-                ],
-
-            ); */
         }
-
         $incidencia = Incidence::where('incidences.company', 'LIKE', '%' . $company . '%')
             ->whereBetween('incidences.creation_date', [$date_initial, $date_end])
             ->count();
@@ -184,7 +177,7 @@ class SaleController extends Controller
             ->count();
 
 
-
+        $porcentajeIncidencia = 0;
         if ($incidenciaAnterior > 0) {
             $porcentajeIncidencia = round(((($incidencia - $incidenciaAnterior) / $incidenciaAnterior) * 100), 0);
         } else {
@@ -265,23 +258,26 @@ class SaleController extends Controller
             ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
             ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
             ->get();
-        return $ot;
-
+        //return $ot;
+        $status = StatusOT::all('status');
+        //return $status;
         $pendientes = OrderPurchase::join('status_o_t_s', 'status_o_t_s.id_order_purchases', 'order_purchases.id')
             ->where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
             ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
-            ->whereIn('status_o_t_s.status', ["Retrasado", "Pendiente", "En espera de entrega de maquilador", "Listo para recoger"])
+            ->whereIn('status_o_t_s.status', ["Pendiente", "Retrasado", "En espera de entrega del maquilador",])
             //->whereBetween('order_purchases.order_date', [$date_initial, $date_end])
-            //->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
-            ->get();
-        //return $pendientes;
+            ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
+            ->count();
 
-        $completado = OrderPurchase::where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
+
+        $completado = OrderPurchase::join('status_o_t_s', 'status_o_t_s.id_order_purchases', 'order_purchases.id')
+            ->where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
             ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
-            ->whereIn('order_purchases.status', ["Listo para recoger", "Recepcion Inventario Parcial", "Recepcion Inventario Completo"])
-            ->whereBetween('order_purchases.order_date', [$date_initial, $date_end])
-            ->select('order_purchases.status')
-            ->get();
+            ->whereIn('status_o_t_s.status', ["Listo para recoger", "Recepcion inventario parcial", "Recepcion inventario Completo"])
+            ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
+            //->select('order_purchases.status')
+            ->count();
+        return $completado;
         return [
             "pedidos" => $sales, "periodo_anterior" => $salesAnterior, "porcentaje" => $porcentajePedido . "%",
             "incidencias" => $incidencia, "incidencia_anterior" => $incidenciaAnterior, "porcentaje2" => $porcentajeIncidencia . "%",
