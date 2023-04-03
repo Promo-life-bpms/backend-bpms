@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdditionalSaleInformation;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Sale;
@@ -273,23 +274,49 @@ class SaleController extends Controller
         $completado = OrderPurchase::join('status_o_t_s', 'status_o_t_s.id_order_purchases', 'order_purchases.id')
             ->where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
             ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
-            ->whereIn('status_o_t_s.status', ["Listo para recoger", "Recepcion inventario parcial", "Recepcion inventario Completo"])
+            ->whereIn('status_o_t_s.status', ["Listo para recoger", "RIP", "Recepcion inventario Completo"])
             ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
             //->select('order_purchases.status')
             ->count();
-        return $completado;
+        //return $completado;
+        $totalMaquilador = $pendientes + $completado;
+        $porcentaje = 100 / $totalMaquilador;
+        $porcentajePendiente = $porcentaje * $pendientes;
+        $porcentajeCompletado = $porcentaje * $completado;
+
         return [
             "pedidos" => $sales, "periodo_anterior" => $salesAnterior, "porcentaje" => $porcentajePedido . "%",
             "incidencias" => $incidencia, "incidencia_anterior" => $incidenciaAnterior, "porcentaje2" => $porcentajeIncidencia . "%",
+            "pedidos_pendientes_del_maquilador" => $porcentajePendiente . "%", "pedidos_completados_del_maquilador" => $porcentajeCompletado . "%"
 
         ];
-        //grafica de pastel
-
-
     }
-    public function calendario()
+    public function calendario(Request $request)
     {
-        $ped = Sale::with(['moreInformation'])->get();
-        return $ped;
+        /*   $ped = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->select('additional_sale_information.planned_date', 'sales.code_sale')
+            ->get(); */
+        $ped = AdditionalSaleInformation::all();
+
+        /*    $ped = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->select(
+            DB::raw('sum(sales.code_sale) as code_sale  '),
+            DB::raw("DATE_FORMAT(planned_date,'%M %Y') as months")
+
+        )
+            ->groupBy('months')
+            ->get();
+            return $ped; */
+        $pedido = AdditionalSaleInformation::select(
+            \DB::raw('SUBSTRING_INDEX(additional_sale_information.planned_date, " ", 1) as planned_date'),
+        )
+            ->get();
+
+        $fecha = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->orderby('additional_sale_information.planned_date')
+            ->select('sales.code_sale')
+            ->where('additional_sale_information.planned_date', $pedido)
+            ->get();
+        return $fecha;
     }
 }
