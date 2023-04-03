@@ -439,7 +439,12 @@ class DeliveryRouteController extends Controller
                 $ordersDeliveryRoute =  $pedido->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
                 $new =  $ordersDeliveryRoute->deliveryRoute;
                 $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')->where('code_order_delivery_routes.delivery_route_id', $ruta->id)->select('remisiones.code_remission')->first();
-
+                if ($pedido->user_chofer_id) {
+                    $pedido->chofer_name = User::find($pedido->user_chofer_id)->name;
+                } else {
+                    $pedido->chofer_name = "Sin Chofer Asignado";
+                }
+                unset($pedido->user_chofer_id);
                 $pedido->remission_id = $new ? $new->code_remission : null;
                 unset($pedido->ordersDeliveryRoute);
                 unset($pedido->status_id);
