@@ -129,7 +129,6 @@ class DeliveryRouteController extends Controller
             'code_orders.*.hour' => 'required|date_format:H:i:s',
             'code_orders.*.attention_to' => 'required',
             'code_orders.*.action' => 'required',
-            'code_orders.*.observations' => 'required',
             'code_orders.*.orders' => 'required|array',
             'code_orders.*.orders.*.code_order' => 'required|exists:order_purchases,code_order',
             'code_orders.*.orders.*.products' => 'required|array',
@@ -208,7 +207,6 @@ class DeliveryRouteController extends Controller
                 'hour' => $codeOrder->hour,
                 'attention_to' => $codeOrder->attention_to,
                 'action' => $codeOrder->action,
-                'observations' => $codeOrder->observations,
                 'status' => 'Pendiente',
             ];
 
@@ -275,7 +273,6 @@ class DeliveryRouteController extends Controller
             'user_chofer_id' => 'required',
             'type_of_product' => 'required|in:Limpio,Maquilado',
             'type_of_chofer' => 'required',
-            'code_orders.*.num_guide' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -293,17 +290,22 @@ class DeliveryRouteController extends Controller
             return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
         }
         $pedidosRuta = $rutaDB->codeOrderDeliveryRoute()->where('code_sale', $pedido)->get();
-        foreach ($pedidosRuta as $codeOrder) {
-            $codeOrder = (object)$codeOrder;
-            $dataSale = [
-                'user_chofer_id' => $request->user_chofer_id,
-                'type_of_product' => $request->type_of_product,
-                'type_of_chofer' => $request->type_of_chofer,
-                'num_guide' => $request->num_guide,
-            ];
-            $codeOrder->update($dataSale);
+        if (count($pedidosRuta) > 0) {
+            foreach ($pedidosRuta as $codeOrder) {
+
+                $codeOrder = (object)$codeOrder;
+                $dataSale = [
+                    'user_chofer_id' => $request->user_chofer_id,
+                    'type_of_product' => $request->type_of_product,
+                    'type_of_chofer' => $request->type_of_chofer,
+                    'num_guide' => $request->num_guide,
+                    'observations' => $request->observations,
+                ];
+                $codeOrder->update($dataSale);
+                return response()->json(['msg'  => 'Actualizacion completa.'], response::HTTP_ACCEPTED);;
+            }
         }
-        return [$request->all(), $ruta, $pedido];
+        return response()->json(['msg'  => 'No se encuentra ese pedido en la ruta.'], response::HTTP_NOT_FOUND); //404
     }
     /**
      * Display the specified resource.
