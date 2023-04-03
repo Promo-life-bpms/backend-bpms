@@ -21,7 +21,7 @@ class ApiOdooController extends Controller
     public function setSale(Request $request)
     {
         try {
-            if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
+            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
                 /* $validator = Validator::make($request->all(), [
                     'sale' => 'bail|required|array',
                     'sale.code_sale' => 'required',
@@ -194,7 +194,7 @@ class ApiOdooController extends Controller
     public function setPurchase(Request $request)
     {
         try {
-            if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
+            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
                 /*  $validator = Validator::make($request->all(), [
                     'purchase' => 'required|array|bail',
                     'purchase.code_sale' => 'required',
@@ -321,7 +321,7 @@ class ApiOdooController extends Controller
     public function setReception(Request $request)
     {
         try {
-            if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
+            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
                 /* $validator = Validator::make($request->all(), [
                     'reception' => 'required|array|bail',
                     'reception.code_reception' => 'required',
@@ -413,7 +413,7 @@ class ApiOdooController extends Controller
     public function setIncidence(Request $request)
     {
         try {
-            if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
+            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
                 /* $validator = Validator::make($request->all(), [
                     'incidence' => 'required|array|bail',
                     'incidence.code_incidence' => 'required',
@@ -507,7 +507,7 @@ class ApiOdooController extends Controller
     public function setDelivery(Request $request)
     {
         try {
-            if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
+            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
                 /* $validator = Validator::make($request->all(), [
                     'delivery' => 'required|array|bail',
                     'delivery.code_delivery' => 'required',
@@ -599,7 +599,7 @@ class ApiOdooController extends Controller
     public function setTracking(Request $request)
     {
         try {
-            if ($request->header('token') == 'YA8FHVMEWISONRUBVVMEW') {
+            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
                 $tracking = (object)$request->tracking;
                 $dataTracking = [
                     'object' => $tracking->object ?: " ",
