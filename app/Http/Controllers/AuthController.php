@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Exception;
 
 class AuthController extends Controller
 {
@@ -28,7 +29,7 @@ class AuthController extends Controller
             'photo' => 'required',
         ]);
 
-        $user =  User::create([
+        $user = User::create([
             'name' => $request->name . " " . $request->lastname,
             'email' => $request->email,
             'email_verified_at' => now(),
