@@ -105,10 +105,10 @@ class SaleController extends Controller
         ])->where('code_sale', $sale_id)->first();
         //Detalle del pedido seleccionado
         if ($sale) {
-            foreach ($sale->routeDeliveries as $routeDelivery) {
+            /*  foreach ($sale->routeDeliveries as $routeDelivery) {
                 $routeDelivery->deliveryRoute->name_chofer = $routeDelivery->deliveryRoute->user->name;
                 unset($routeDelivery->deliveryRoute->user);
-            }
+            } */
             $sale->lastStatus->slug = $sale->lastStatus->status->slug;
             $sale->lastStatus->last_status = $sale->lastStatus->status->status;
             unset($sale->lastStatus->status);

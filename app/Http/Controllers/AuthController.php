@@ -33,7 +33,7 @@ class AuthController extends Controller
             'photo' => 'required',
         ]);
 
-        $user =  User::create([
+        $user = User::create([
             'name' => $request->name . " " . $request->lastname,
             'email' => $request->email,
             'email_verified_at' => now(),

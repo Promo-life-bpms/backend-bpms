@@ -303,7 +303,6 @@ class DeliveryRouteController extends Controller
             'user_chofer_id' => 'required',
             'type_of_product' => 'required|in:Limpio,Maquilado',
             'type_of_chofer' => 'required',
-            'code_orders.*.num_guide' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -354,7 +353,23 @@ class DeliveryRouteController extends Controller
                 $codeOrder->update($dataSale);
             }
         }
-        return response()->json(['msg'  => 'Actualizacion de informacion de choferes exitosa'], response::HTTP_CREATED);
+        $pedidosRuta = $rutaDB->codeOrderDeliveryRoute()->where('code_sale', $pedido)->get();
+        if (count($pedidosRuta) > 0) {
+            foreach ($pedidosRuta as $codeOrder) {
+
+                $codeOrder = (object)$codeOrder;
+                $dataSale = [
+                    'user_chofer_id' => $request->user_chofer_id,
+                    'type_of_product' => $request->type_of_product,
+                    'type_of_chofer' => $request->type_of_chofer,
+                    'num_guide' => $request->num_guide,
+                    'observations' => $request->observations,
+                ];
+                $codeOrder->update($dataSale);
+                return response()->json(['msg'  => 'Actualizacion completa.'], response::HTTP_ACCEPTED);;
+            }
+        }
+        return response()->json(['msg'  => 'No se encuentra ese pedido en la ruta.'], response::HTTP_NOT_FOUND); //404
     }
     /**
      * Display the specified resource.
@@ -391,6 +406,9 @@ class DeliveryRouteController extends Controller
                 ->select(
                     'sales.*',
                     'code_order_delivery_routes.type_of_origin',
+                    'code_order_delivery_routes.user_chofer_id',
+                    'code_order_delivery_routes.type_of_product',
+                    'code_order_delivery_routes.type_of_chofer',
                     'code_order_delivery_routes.origin_address',
                     'code_order_delivery_routes.type_of_destiny',
                     'code_order_delivery_routes.destiny_address',
@@ -465,6 +483,9 @@ class DeliveryRouteController extends Controller
                     'code_order_delivery_routes.hour',
                     'code_order_delivery_routes.attention_to',
                     'code_order_delivery_routes.action',
+                    'code_order_delivery_routes.user_chofer_id',
+                    'code_order_delivery_routes.type_of_product',
+                    'code_order_delivery_routes.type_of_chofer',
                     'code_order_delivery_routes.num_guide',
                     'code_order_delivery_routes.observations',
                     'code_order_delivery_routes.status',
@@ -482,7 +503,12 @@ class DeliveryRouteController extends Controller
                 $ordersDeliveryRoute =  $pedido->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
                 $new =  $ordersDeliveryRoute->deliveryRoute;
                 $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')->where('code_order_delivery_routes.delivery_route_id', $ruta->id)->select('remisiones.code_remission')->first();
-
+                if ($pedido->user_chofer_id) {
+                    $pedido->chofer_name = User::find($pedido->user_chofer_id)->name;
+                } else {
+                    $pedido->chofer_name = "Sin Chofer Asignado";
+                }
+                unset($pedido->user_chofer_id);
                 $pedido->remission_id = $new ? $new->code_remission : null;
                 unset($pedido->ordersDeliveryRoute);
                 unset($pedido->status_id);
