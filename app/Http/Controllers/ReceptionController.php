@@ -231,9 +231,7 @@ class ReceptionController extends Controller
                     'sale_id' => $sale->id,
                     "status_id" => 9
                 ]);
-                return ('hola');
-            } else {
-                return 'ok';
+
             }
         }
 

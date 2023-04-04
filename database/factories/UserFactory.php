@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Notifications\Notifiable;
+use  Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Nette\Utils\Random;
 
@@ -13,6 +15,7 @@ class UserFactory extends Factory
      *
      * @return array
      */
+    use Notifiable;
     public function definition()
     {
         return [

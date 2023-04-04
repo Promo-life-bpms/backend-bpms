@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\OrderPurchaseProduct;
+use App\Models\Remission;
 use App\Models\Sale;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -66,10 +68,12 @@ class IncidenceController extends Controller
      */
     public function store(Request $request, $sale_id)
     {
-        // TODO: Calidad y ventas puede generar incidencias hasta 30 dias de entregado el producto, despues solo calidad.
 
+        // TODO: Calidad y ventas puede generar incidencias hasta 30 dias de entregado el producto, despues solo calidad.
+        //return $sale_id;
         //validar que la informacion este correcta si no no se puede registrar
         // utilizar validator
+        $incidencia = '';
         $validation = Validator::make($request->all(), [
             'area' => 'required',
             'motivo' => 'required',
@@ -103,9 +107,51 @@ class IncidenceController extends Controller
         if (!$sale) {
             return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
         }
+        $remision = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
+            ->join('delivery_routes', 'delivery_routes.id', 'code_order_delivery_routes.delivery_route_id')
+            ->join('remisiones', 'remisiones.delivery_route_id', 'delivery_routes.id')
+            ->where('sales.code_sale', $sale_id)
+            ->get();
+        //return $remision;
 
+        if (count($remision) > 0) {
+            return response()->json([
+                "msg" => 'No hay remisiones'
+            ]);
+        }
+        $rem = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
+            ->join('delivery_routes', 'delivery_routes.id', 'code_order_delivery_routes.delivery_route_id')
+            ->join('remisiones', 'remisiones.delivery_route_id', 'delivery_routes.id')
+            ->where('sales.code_sale', $sale_id)
+            ->select('remisiones.*')
+            ->first();
 
-        //Crea codigo de incidencia
+        $diasDiferencia = $rem->created_at->diffInDays(now());
+
+        //return $date;
+        //return $date;
+        $user =  auth()->user();
+        $aux = false;
+        // return $user;
+        foreach ($user->whatRoles as $rol) {
+            switch ($rol->name) {
+                case "control_calidad":
+                    $aux = true;
+                    break;
+                case "ventas":
+                    // return $rol->name;
+                    if ($diasDiferencia <= 30) {
+                        $aux = true;
+                    }
+                    break;
+                default:
+                    return response()->json(['No tienes permiso de crear una incidencia']);
+                    break;
+            }
+        }
+        if ($aux == false) {
+            return response()->json(['No tienes permiso de crear una incidencia']);
+        }
         $maxINC = Incidence::max('internal_code_incidence');
         $idinc = null;
         if (!$maxINC) {
@@ -115,6 +161,7 @@ class IncidenceController extends Controller
             $idinc++;
         }
         $response = null;
+
 
 
         $incidencia = Incidence::create([
@@ -228,20 +275,26 @@ class IncidenceController extends Controller
             $message = '';
             if ($response !== false) {
                 $dataResponse = json_decode($response);
-                if (isset($dataResponse->error)) {
-                    $message = $dataResponse->detail;
-                    $errors = true;
-                }
-                if (!$errors && $dataResponse[0]->success) {
-                    if ($dataResponse[0]->success) {
-                        $folio = $dataResponse[0]->Folio;
-                        //Actualizar Folio de la Incidencia
-                        $incidencia->code_incidence = $folio;
-                        $incidencia->save();
-                    } else {
+                if ($dataResponse) {
+                    if (isset($dataResponse->error)) {
+                        $message = $dataResponse->detail;
                         $errors = true;
-                        $message = $dataResponse[0]->message;
                     }
+                    if (!$errors && $dataResponse[0]->success) {
+                        if ($dataResponse[0]->success) {
+                            $folio = $dataResponse[0]->Folio;
+                            //Actualizar Folio de la Incidencia
+                            $incidencia->code_incidence = $folio;
+                            $incidencia->save();
+                        } else {
+                            $errors = true;
+                            $message = $dataResponse[0]->message;
+                        }
+                    }
+                } else {
+
+                    $errors = true;
+                    $message = "Error de Conexion a odoo";
                 }
             } else {
                 $errors = true;
@@ -252,7 +305,10 @@ class IncidenceController extends Controller
                 return response()->json([
                     'msg' => 'No se pudo crear la incidencia correctamente',
                     'data' =>
-                    ["messageOdoo" => $message]
+                    [
+                        "messageOdoo" => $message,
+                        "incidencia" => $incidencia
+                    ]
                 ], response::HTTP_BAD_REQUEST);
             }
         } catch (Exception $exception) {
@@ -267,10 +323,13 @@ class IncidenceController extends Controller
             );
         }
 
+
+
         return response()->json([
             "msg" => 'Incidencia creada exitosamente',
             'data' =>
             [
+
                 "incidencia" => $incidencia,
                 'responseOdoo' => json_decode($response),
             ]

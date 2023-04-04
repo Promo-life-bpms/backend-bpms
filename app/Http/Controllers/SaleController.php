@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdditionalSaleInformation;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Sale;
+use App\Models\StatusOT;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -34,16 +36,27 @@ class SaleController extends Controller
 
 
         $sales = null;
+        $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente', 'asistente_de_gerente'])->first();
+
+        // return $isSeller;
         if ($request->ordenes_proximas) {
+
             $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")
+                ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
-                //->where('order_purchases.planned_date', '>=', $fechaProxima)
                 ->orderby('order_purchases.planned_date', 'ASC')
                 ->paginate($per_page);
         } else {
-            $sales = Sale::with('moreInformation', 'lastStatus', "detailsOrders")->paginate($per_page);
-        }
+            $sales = Sale::with('lastStatus', "detailsOrders")
+                ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+                ->when($isSeller !== null, function ($query) {
+                    $user =  auth()->user();
 
+                    $query->where('additional_sale_information.company', $user->company);
+                })
+                ->paginate($per_page);
+        }
+        // return $sales;
         foreach ($sales as $sale) {
             if ($sale->lastStatus) {
                 $sale->lastStatus->slug = $sale->lastStatus->status->slug;
@@ -55,6 +68,7 @@ class SaleController extends Controller
                 unset($sale->lastStatus->updated_at);
             }
         }
+
 
         return response()->json([
             'msg' => 'Lista de pedidos', 'data' => ["sales" => $sales]
@@ -89,13 +103,12 @@ class SaleController extends Controller
             'incidences',
             "ordersDeliveryRoute"
         ])->where('code_sale', $sale_id)->first();
-
         //Detalle del pedido seleccionado
         if ($sale) {
-            foreach ($sale->routeDeliveries as $routeDelivery) {
+            /*  foreach ($sale->routeDeliveries as $routeDelivery) {
                 $routeDelivery->deliveryRoute->name_chofer = $routeDelivery->deliveryRoute->user->name;
                 unset($routeDelivery->deliveryRoute->user);
-            }
+            } */
             $sale->lastStatus->slug = $sale->lastStatus->status->slug;
             $sale->lastStatus->last_status = $sale->lastStatus->status->status;
             unset($sale->lastStatus->status);
@@ -124,7 +137,7 @@ class SaleController extends Controller
         $validation = Validator::make($request->all(), [
             'date_end' => 'required|date_format:Y-m-d',
             'date_initial' => 'required|date_format:Y-m-d',
-            'company' => 'required',
+            'company' => '',
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -141,8 +154,9 @@ class SaleController extends Controller
         $company = $request->company;
         $sales = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
             ->where('additional_sale_information.company', 'LIKE', '%' . $company . '%')
-            ->whereBetween('additional_sale_information.planned_date', [$date_initial, $date_end])
+            ->whereBetween('additional_sale_information.planned_date', [$date_initial, $date_end])->get()
             ->count();
+
         $fechaExpiracion = Carbon::parse($date_initial);
         $diasDiferencia = $fechaExpiracion->diffInDays($date_end);
 
@@ -150,9 +164,11 @@ class SaleController extends Controller
             ->where('additional_sale_information.company', 'LIKE', '%' . $company . '%')
             ->whereBetween('additional_sale_information.planned_date', [$fechaExpiracion->subDays($diasDiferencia), Carbon::parse($date_end)->subDays($diasDiferencia)])
             ->count();
-        //return [$sales, $salesAnterior];
-        $porcentajePedido = round(((($sales - $salesAnterior) / $salesAnterior) * 100), 0);
-
+        // return [$sales, $salesAnterior];
+        $porcentajePedido = 0;
+        if ($salesAnterior > 0) {
+            $porcentajePedido = round(((($sales - $salesAnterior) / $salesAnterior) * 100), 0);
+        }
         $incidencia = Incidence::where('incidences.company', 'LIKE', '%' . $company . '%')
             ->whereBetween('incidences.creation_date', [$date_initial, $date_end])
             ->count();
@@ -160,30 +176,34 @@ class SaleController extends Controller
         $incidenciaAnterior = Incidence::where('incidences.company', 'LIKE', '%' . $company . '%')
             ->whereBetween('incidences.creation_date', [$fechaExpiracion->subDays($diasDiferencia), Carbon::parse($date_end)->subDays($diasDiferencia)])
             ->count();
-        $porcentajeIncidencia = round(((($incidencia - $incidenciaAnterior) / $incidenciaAnterior) * 100), 0);
-
-        switch ($diasDiferencia) {
-            case ($diasDiferencia <= 7):
-                $msg = 'dia';
-                break;
-
-            case ($diasDiferencia > 7 && $diasDiferencia <= 31):
-
-                $msg = 'dos dias';
-                break;
-            case ($diasDiferencia > 31 && $diasDiferencia <= 182):
-
-                $msg = 'dos semanas';
-                break;
-            case ($diasDiferencia > 182 && $diasDiferencia <= 365):
-
-                $msg = 'mes';
-                break;
 
 
-            default:
-                $msg = 'no cumple';
+        $porcentajeIncidencia = 0;
+        if ($incidenciaAnterior > 0) {
+            $porcentajeIncidencia = round(((($incidencia - $incidenciaAnterior) / $incidenciaAnterior) * 100), 0);
+        } else {
+            /*   return response()->json(
+                [
+                    'msg' => "Sin incidencias en el periodo seleccionado",
+                ],
+
+            ); */
         }
+
+
+
+        $sale = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->where('additional_sale_information.company', 'LIKE', '%' . $company . '%')
+            ->whereBetween('additional_sale_information.planned_date', [$date_initial, $date_end])
+            ->select('additional_sale_information.planned_date')
+            ->select(\DB::raw('SUBSTRING_INDEX(additional_sale_information.planned_date, " ", 1) as planned_date'))
+            ->get();
+        $incidenciaPer = Incidence::where('incidences.company', 'LIKE', '%' . $company . '%')
+            ->whereBetween('incidences.creation_date', [$date_initial, $date_end])
+            ->select('incidences.creation_date')
+            ->select(\DB::raw('SUBSTRING_INDEX(incidences.creation_date, " ", 1) as creation_date'))
+            ->get();
+
         $tiempoInicio = strtotime($date_initial);
         $tiempoFin = strtotime($date_end);
         $dia = 86400;
@@ -192,35 +212,111 @@ class SaleController extends Controller
         $mes = 2419200;
 
         while ($tiempoInicio <= $tiempoFin) {
-            # Podemos recuperar la fecha actual y formatearla
+            switch ($diasDiferencia) {
+                case ($diasDiferencia <= 7):
+                    $fechaActual = date("Y-m-d", $tiempoInicio);
+                    printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+                    printf("Pedidos : %s\n ", $sale->where('planned_date', $fechaActual)->count());
+                    printf("Incidencias : %s\n ", $incidenciaPer->where('creation_date', $fechaActual)->count());
+                    $tiempoInicio += $dia;
+                    break;
 
-            $fechaActual =  date("Y-m-d", $tiempoInicio);
-            printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+                case ($diasDiferencia > 7 && $diasDiferencia <= 31):
+                    $fechaActual = date("Y-m-d", $tiempoInicio);
+                    $fechaSiguiente = date("Y-m-d", $tiempoInicio + $dia);
+                    printf("Fecha dentro del periodo : %s\n", $fechaActual);
+                    printf("Pedidos : %s\n ", $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count());
+                    printf("Incidencias : %s\n ", $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count());
+                    $tiempoInicio += $dos_dias;
+                    break;
+                case ($diasDiferencia > 31 && $diasDiferencia <= 182):
 
-            # Sumar el incremento para que en algún momento termine el ciclo
-            $tiempoInicio += $dia;
+                    $fechaActual = date("Y-m-d", $tiempoInicio);
+                    $fechaSiguiente = date("Y-m-d", $tiempoInicio + $semana);
+                    printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+                    printf("Pedidos : %s\n ", $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count());
+                    printf("Incidencias : %s\n ", $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count());
+                    $tiempoInicio += $semana;
 
-          /*     if ($diasDiferencia > 7 && $diasDiferencia <= 31) {
-                $fechaActual =  date("Y-m-d", $tiempoInicio);
-                printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+                    break;
+                case ($diasDiferencia > 182 && $diasDiferencia <= 365):
+                    $fechaActual = date("Y-m-d", $tiempoInicio);
+                    $fechaSiguiente = date("Y-m-d", $tiempoInicio + $mes);
+                    printf("Fecha dentro del periodo : %s\n ", $fechaActual);
+                    printf("Pedidos : %s\n ", $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count());
+                    printf("Incidencias : %s\n ", $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count());
+                    $tiempoInicio += $mes;
+                    break;
 
-                # Sumar el incremento para que en algún momento termine el ciclo
-                $tiempoInicio += $dos_dias;} */
+
+                default:
+                    $msg = 'no cumple';
+            }
         }
 
+        $ot = OrderPurchase::with("lastStatusOT")
+            ->where('order_purchases.code_order', 'LIKE',  'OT' . '%')
+            ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
+            ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
+            ->get();
+        //return $ot;
+        $status = StatusOT::all('status');
+        //return $status;
+        $pendientes = OrderPurchase::join('status_o_t_s', 'status_o_t_s.id_order_purchases', 'order_purchases.id')
+            ->where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
+            ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
+            ->whereIn('status_o_t_s.status', ["Pendiente", "Retrasado", "En espera de entrega del maquilador",])
+            //->whereBetween('order_purchases.order_date', [$date_initial, $date_end])
+            ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
+            ->count();
 
+
+        $completado = OrderPurchase::join('status_o_t_s', 'status_o_t_s.id_order_purchases', 'order_purchases.id')
+            ->where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
+            ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
+            ->whereIn('status_o_t_s.status', ["Listo para recoger", "RIP", "Recepcion inventario Completo"])
+            ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
+            //->select('order_purchases.status')
+            ->count();
+        //return $completado;
+        $totalMaquilador = $pendientes + $completado;
+        $porcentaje = 100 / $totalMaquilador;
+        $porcentajePendiente = $porcentaje * $pendientes;
+        $porcentajeCompletado = $porcentaje * $completado;
 
         return [
             "pedidos" => $sales, "periodo_anterior" => $salesAnterior, "porcentaje" => $porcentajePedido . "%",
             "incidencias" => $incidencia, "incidencia_anterior" => $incidenciaAnterior, "porcentaje2" => $porcentajeIncidencia . "%",
-            "dias" => $msg
-        ];
-        //grafica
+            "pedidos_pendientes_del_maquilador" => $porcentajePendiente . "%", "pedidos_completados_del_maquilador" => $porcentajeCompletado . "%"
 
+        ];
     }
-    public function calendario()
+    public function calendario(Request $request)
     {
-        $ped = Sale::with(['moreInformation'])->get();
-        return $ped;
+        /*   $ped = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->select('additional_sale_information.planned_date', 'sales.code_sale')
+            ->get(); */
+        $ped = AdditionalSaleInformation::all();
+
+        /*    $ped = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->select(
+            DB::raw('sum(sales.code_sale) as code_sale  '),
+            DB::raw("DATE_FORMAT(planned_date,'%M %Y') as months")
+
+        )
+            ->groupBy('months')
+            ->get();
+            return $ped; */
+        $pedido = AdditionalSaleInformation::select(
+            \DB::raw('SUBSTRING_INDEX(additional_sale_information.planned_date, " ", 1) as planned_date'),
+        )
+            ->get();
+
+        $fecha = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->orderby('additional_sale_information.planned_date')
+            ->select('sales.code_sale')
+            ->where('additional_sale_information.planned_date', $pedido)
+            ->get();
+        return $fecha;
     }
 }

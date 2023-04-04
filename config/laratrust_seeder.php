@@ -33,6 +33,12 @@ return [
         'logistica-y-mesa-de-control' => [
             'profile' => 'r,u',
         ],
+        'gerente' =>[
+            'profile' => 'r,u'
+        ],
+        'asistente_de_gerente' => [
+            'profile' => 'r,u'
+        ],
 
     ],
     'permissions_map' => [

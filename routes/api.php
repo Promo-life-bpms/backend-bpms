@@ -11,6 +11,8 @@ use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
 use App\Http\Controllers\UploadImageController;
+use App\Notifications\Acces;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +36,10 @@ Route::get('users', [AuthController::class, 'allUsers']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('syncUsers', [AuthController::class, 'syncUsers']);
+//Acceso
+Route::get('Acces', [AuthController::class, 'Acces']);
+Route::get('userAccess', [AuthController::class, 'userAccess']);
+
 
 Route::group(['middleware' => 'auth'], function () {
     Route::post('logout', [AuthController::class, 'logout']);
@@ -90,7 +96,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('rutas-de-entrega/show/{id}', [DeliveryRouteController::class, 'show']);
 
     // Actualizar la ruta de entrega
-    //Route::put('rutas-de-entrega/{ruta}/update', [DeliveryRouteController::class, 'update']);
+    Route::put('rutas-de-entrega/{ruta}/update', [DeliveryRouteController::class, 'update']);
     Route::put('rutas-de-entrega/{ruta}/updateStatus', [DeliveryRouteController::class, 'updateStatus']);
     Route::patch('rutas-de-entrega/{ruta}/pedido/{pedido}', [DeliveryRouteController::class, 'updateInfoChofer']);
     // Eliminar ruta de entrega

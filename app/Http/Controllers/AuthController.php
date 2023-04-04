@@ -4,18 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Notifications\Acces;
+use App\Notifications\NotificationAccesUser;
+use Exception;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
-use Exception;
+
 
 class AuthController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'allUsers', 'syncUsers']]);
+        $this->middleware('auth:api', ['except' => ['login', 'allUsers', 'syncUsers', "userAccess"]]);
     }
 
     public function register(Request $request)
@@ -50,7 +54,36 @@ class AuthController extends Controller
             'data' => ['user' => $user]
         ], Response::HTTP_CREATED);
     }
+    public function userAccess()
+    {
+        $users = User::all();
+        $data =[];
+        foreach ($users as $user) {
+            $email =  $user->email;
+            $password = str::random(10);
+            $user->password = bcrypt($password);
+            $user->save();
+            Notification::route('mail', $email)
+                ->notify(new NotificationAccesUser($password, $email));
+           try {
+                Notification::route('mail', $email)
+                    ->notify(new NotificationAccesUser($password, $email));
+            } catch (\Exception $e) {
+                array_push($data, [$email,$e->getMessage()]);
 
+            }
+        }
+
+
+
+        return response()->json(['Correos enviados correctamente']);
+    }
+    public function Acces()
+    {
+        $usersAccess = User::select('users.email', 'users.password')->get();
+
+        return $usersAccess;
+    }
     public function login(Request $request)
     {
 

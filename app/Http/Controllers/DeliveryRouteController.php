@@ -117,148 +117,178 @@ class DeliveryRouteController extends Controller
     {
         //validar que la informacion este correcta si no no se puede registrar
         // utilizar validator
+        $user =  auth()->user();
 
-        $validation = Validator::make($request->all(), [
-            'date_of_delivery' => 'required',
-            'code_orders' => 'required|array',
-            'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
-            'code_orders.*.type_of_origin' => 'required',
-            'code_orders.*.origin_address' => 'required',
-            'code_orders.*.type_of_destiny' => 'required',
-            'code_orders.*.destiny_address' => 'required',
-            'code_orders.*.hour' => 'required|date_format:H:i:s',
-            'code_orders.*.attention_to' => 'required',
-            'code_orders.*.action' => 'required',
-            'code_orders.*.orders' => 'required|array',
-            'code_orders.*.orders.*.code_order' => 'required|exists:order_purchases,code_order',
-            'code_orders.*.orders.*.products' => 'required|array',
-            'code_orders.*.orders.*.products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
-            'code_orders.*.orders.*.products.*.amount' => 'required',
-        ]);
-        if ($validation->fails()) {
-            return response()->json(
-                [
-                    'msg' => "Error al validar informacion de la ruta de entrega",
-                    'data' => ['errorValidacion' => $validation->getMessageBag()]
-                ],
-                response::HTTP_UNPROCESSABLE_ENTITY
-            ); // 422
-        }
+        foreach ($user->whatRoles as $rol) {
+            switch ($rol->name) {
 
-        // Validar que la informacion sea la correcta
-        $errores = [];
-        foreach ($request->code_orders as $saleOrder) {
-            $saleOrder = (object)$saleOrder;
-            $saleOrderBD = Sale::where('code_sale', $saleOrder->code_sale)->first();
-            foreach ($saleOrder->orders as $orderRQ) {
-                $orderRQ = (object) $orderRQ;
-                $orderDB = OrderPurchase::where('code_sale', $saleOrder->code_sale)->where('code_order', $orderRQ->code_order)->first();
-                if (!$orderDB) {
-                    array_push($errores, 'La orden de compra ' . $orderRQ->code_order . ' no pertenece al pedido ' . $saleOrder->code_sale);
-                    continue;
-                }
-                foreach ($orderRQ->products as $productRQ) {
-                    $productRQ = (object) $productRQ;
-                    $productDB = OrderPurchaseProduct::where('odoo_product_id', $productRQ->odoo_product_id)->where('order_purchase_id', $orderDB->id)->first();
-                    if (!$productDB) {
-                        array_push($errores, 'El producto ' . $productRQ->odoo_product_id . ' no pertenece a la orden de compra ' . $orderRQ->code_order);
+                case ("logistica-y-mesa-de-control" == $rol->name):
+
+                    break;
+                case ("administrator" == $rol->name):
+
+                    break;
+                case ("compras" == $rol->name):
+
+                    break;
+
+                default:
+                    return response()->json(
+                        [
+                            'msg' => "No tienes autorizacion para generar una ruta de entrega",
+                        ],
+
+                    );
+                    break;
+            }
+            //switch con casos de true para logistica, administrador y compras
+
+
+            $validation = Validator::make($request->all(), [
+                'date_of_delivery' => 'required',
+                'code_orders' => 'required|array',
+                'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
+                'code_orders.*.type_of_origin' => 'required',
+                'code_orders.*.origin_address' => 'required',
+                'code_orders.*.type_of_destiny' => 'required',
+                'code_orders.*.destiny_address' => 'required',
+                'code_orders.*.hour' => 'required|date_format:H:i:s',
+                'code_orders.*.attention_to' => 'required',
+                'code_orders.*.action' => 'required',
+                'code_orders.*.observations' => 'required',
+                'code_orders.*.orders' => 'required|array',
+                'code_orders.*.orders.*.code_order' => 'required|exists:order_purchases,code_order',
+                'code_orders.*.orders.*.products' => 'required|array',
+                'code_orders.*.orders.*.products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
+                'code_orders.*.orders.*.products.*.amount' => 'required',
+            ]);
+            if ($validation->fails()) {
+                return response()->json(
+                    [
+                        'msg' => "Error al validar informacion de la ruta de entrega",
+                        'data' => ['errorValidacion' => $validation->getMessageBag()]
+                    ],
+                    response::HTTP_UNPROCESSABLE_ENTITY
+                ); // 422
+            }
+
+            // Validar que la informacion sea la correcta
+            $errores = [];
+            foreach ($request->code_orders as $saleOrder) {
+                $saleOrder = (object)$saleOrder;
+                $saleOrderBD = Sale::where('code_sale', $saleOrder->code_sale)->first();
+                foreach ($saleOrder->orders as $orderRQ) {
+                    $orderRQ = (object) $orderRQ;
+                    $orderDB = OrderPurchase::where('code_sale', $saleOrder->code_sale)->where('code_order', $orderRQ->code_order)->first();
+                    if (!$orderDB) {
+                        array_push($errores, 'La orden de compra ' . $orderRQ->code_order . ' no pertenece al pedido ' . $saleOrder->code_sale);
                         continue;
                     }
-                }
-                // return $saleOrder->code_sale;
-            }
-        }
-        if (count($errores) > 0) {
-            return response()->json($errores, 400);
-        }
-        // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
-        //codigo de ruta
-        $maxINSP = DeliveryRoute::max('code_route');
-        $idInsp = null;
-        if (!$maxINSP) {
-            $idInsp = 1;
-        } else {
-            $idInsp = (int) explode('-', $maxINSP)[1];
-            $idInsp++;
-        }
-
-        $ruta = DeliveryRoute::create([
-            'code_route' => "RUT-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
-            'date_of_delivery' => $request->date_of_delivery,
-            'status' => 'Pendiente',
-            'is_active' => 1,
-        ]);
-
-        //crear los productos de esa ruta de entrega
-        //  $ruta->productsDeliveryRoute()->create
-        //retornar un mensaje
-        foreach ($request->code_orders as $codeOrder) {
-            $codeOrder = (object)$codeOrder;
-            $dataSale = [
-                'code_sale' => $codeOrder->code_sale,
-                'type_of_origin' => $codeOrder->type_of_origin,
-                'origin_address' => $codeOrder->origin_address,
-                'type_of_destiny' => $codeOrder->type_of_destiny,
-                'destiny_address' => $codeOrder->destiny_address,
-                'user_chofer_id' => null,
-                'type_of_product' => null,
-                'type_of_chofer' => null,
-                'num_guide' => null,
-                'hour' => $codeOrder->hour,
-                'attention_to' => $codeOrder->attention_to,
-                'action' => $codeOrder->action,
-                'status' => 'Pendiente',
-            ];
-
-            // Agendado en ruta de entrega (Material maquilado):
-            //Agendado en ruta de entrega (Material maquilado):
-
-            foreach ($codeOrder->orders as $order) {
-                $saleOrderBD = Sale::where('code_sale', $codeOrder->code_sale)->first();
-                $order = (object) $order;
-                $dataSale['code_order'] = $order->code_order;
-                $codeOrderRoute =  $ruta->codeOrderDeliveryRoute()->create($dataSale);
-                foreach ($order->products as $newProduct) {
-                    $newProduct = (object)$newProduct;
-                    $codeOrderRoute->productDeliveryRoute()->create([
-                        'odoo_product_id' => $newProduct->odoo_product_id,
-                        'amount' => $newProduct->amount,
-                    ]);
-                }
-                $type_of_product = $request->type_of_product;
-                $type_of_destiny =  $codeOrder->type_of_destiny;
-                if ($type_of_destiny == 'Cliente') {
-                    if ($saleOrderBD->lastStatus) {
-                        if ($saleOrderBD->lastStatus->status_id < 10) {
-                            SaleStatusChange::create([
-                                'sale_id' => $saleOrderBD->id,
-                                "status_id" => 10
-                            ]);
+                    foreach ($orderRQ->products as $productRQ) {
+                        $productRQ = (object) $productRQ;
+                        $productDB = OrderPurchaseProduct::where('odoo_product_id', $productRQ->odoo_product_id)->where('order_purchase_id', $orderDB->id)->first();
+                        if (!$productDB) {
+                            array_push($errores, 'El producto ' . $productRQ->odoo_product_id . ' no pertenece a la orden de compra ' . $orderRQ->code_order);
+                            continue;
                         }
                     }
-                } else {
-                    if ($type_of_product == "Limpio") {
+                    // return $saleOrder->code_sale;
+                }
+            }
+            if (count($errores) > 0) {
+                return response()->json($errores, 400);
+            }
+            // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
+            //codigo de ruta
+            $maxINSP = DeliveryRoute::max('code_route');
+            $idInsp = null;
+            if (!$maxINSP) {
+                $idInsp = 1;
+            } else {
+                $idInsp = (int) explode('-', $maxINSP)[1];
+                $idInsp++;
+            }
+
+            $ruta = DeliveryRoute::create([
+                'code_route' => "RUT-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
+                'date_of_delivery' => $request->date_of_delivery,
+                'status' => 'Pendiente',
+                'is_active' => 1,
+            ]);
+
+            //crear los productos de esa ruta de entrega
+            //  $ruta->productsDeliveryRoute()->create
+            //retornar un mensaje
+            foreach ($request->code_orders as $codeOrder) {
+                $codeOrder = (object)$codeOrder;
+                $dataSale = [
+                    'code_sale' => $codeOrder->code_sale,
+                    'type_of_origin' => $codeOrder->type_of_origin,
+                    'origin_address' => $codeOrder->origin_address,
+                    'type_of_destiny' => $codeOrder->type_of_destiny,
+                    'destiny_address' => $codeOrder->destiny_address,
+                    'user_chofer_id' => null,
+                    'type_of_product' => null,
+                    'type_of_chofer' => null,
+                    'num_guide' => null,
+                    'hour' => $codeOrder->hour,
+                    'attention_to' => $codeOrder->attention_to,
+                    'action' => $codeOrder->action,
+                    'observations' => $codeOrder->observations,
+                    'status' => 'Pendiente',
+                ];
+
+                // Agendado en ruta de entrega (Material maquilado):
+                //Agendado en ruta de entrega (Material maquilado):
+
+                foreach ($codeOrder->orders as $order) {
+                    $saleOrderBD = Sale::where('code_sale', $codeOrder->code_sale)->first();
+                    $order = (object) $order;
+                    $dataSale['code_order'] = $order->code_order;
+                    $codeOrderRoute =  $ruta->codeOrderDeliveryRoute()->create($dataSale);
+                    foreach ($order->products as $newProduct) {
+                        $newProduct = (object)$newProduct;
+                        $codeOrderRoute->productDeliveryRoute()->create([
+                            'odoo_product_id' => $newProduct->odoo_product_id,
+                            'amount' => $newProduct->amount,
+                        ]);
+                    }
+                    $type_of_product = $request->type_of_product;
+                    $type_of_destiny =  $codeOrder->type_of_destiny;
+                    if ($type_of_destiny == 'Cliente') {
                         if ($saleOrderBD->lastStatus) {
-                            if ($saleOrderBD->lastStatus->status_id < 3) {
+                            if ($saleOrderBD->lastStatus->status_id < 10) {
                                 SaleStatusChange::create([
                                     'sale_id' => $saleOrderBD->id,
-                                    "status_id" => 3
+                                    "status_id" => 10
                                 ]);
                             }
                         }
                     } else {
-                        if ($saleOrderBD->lastStatus) {
-                            if ($saleOrderBD->lastStatus->status_id < 5) {
-                                SaleStatusChange::create([
-                                    'sale_id' => $saleOrderBD->id,
-                                    "status_id" => 5
-                                ]);
+                        if ($type_of_product == "Limpio") {
+                            if ($saleOrderBD->lastStatus) {
+                                if ($saleOrderBD->lastStatus->status_id < 3) {
+                                    SaleStatusChange::create([
+                                        'sale_id' => $saleOrderBD->id,
+                                        "status_id" => 3
+                                    ]);
+                                }
+                            }
+                        } else {
+                            if ($saleOrderBD->lastStatus) {
+                                if ($saleOrderBD->lastStatus->status_id < 5) {
+                                    SaleStatusChange::create([
+                                        'sale_id' => $saleOrderBD->id,
+                                        "status_id" => 5
+                                    ]);
+                                }
                             }
                         }
                     }
                 }
             }
         }
+
         return response()->json([
             'msg' => 'Ruta Creada Existosamente',
             'data' => [
@@ -283,11 +313,45 @@ class DeliveryRouteController extends Controller
                 response::HTTP_UNPROCESSABLE_ENTITY
             ); // 422
         }
-        $rutaDB = DeliveryRoute::where('code_route', $ruta)->first();
-        // Chequeaos si encontró o no la ruta
-        if (!$rutaDB) {
-            // Se devuelve un array errors con los errores detectados y código 404
-            return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
+        $user =  auth()->user();
+        foreach ($user->whatRoles as $rol) {
+            # code...
+            switch ($rol->name) {
+
+                case ("logistica-y-mesa-de-control" == $rol->name):
+
+                    break;
+                case ("administrator" == $rol->name):
+
+                    break;
+
+                default:
+                    return response()->json(
+                        [
+                            'msg' => "No tienes autorizacion para modificar los choferes",
+                        ],
+
+                    );
+                    break;
+            }
+
+            $rutaDB = DeliveryRoute::where('code_route', $ruta)->first();
+            // Chequeaos si encontró o no la ruta
+            if (!$rutaDB) {
+                // Se devuelve un array errors con los errores detectados y código 404
+                return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
+            }
+            $pedidosRuta = $rutaDB->codeOrderDeliveryRoute()->where('code_sale', $pedido)->get();
+            foreach ($pedidosRuta as $codeOrder) {
+                $codeOrder = (object)$codeOrder;
+                $dataSale = [
+                    'user_chofer_id' => $request->user_chofer_id,
+                    'type_of_product' => $request->type_of_product,
+                    'type_of_chofer' => $request->type_of_chofer,
+                    'num_guide' => $request->num_guide,
+                ];
+                $codeOrder->update($dataSale);
+            }
         }
         $pedidosRuta = $rutaDB->codeOrderDeliveryRoute()->where('code_sale', $pedido)->get();
         if (count($pedidosRuta) > 0) {
@@ -664,19 +728,19 @@ class DeliveryRouteController extends Controller
 
 
         $validation = Validator::make($request->all(), [
-            'comments' => 'required',
-            'satisfaction' => 'required',
-            'delivered' => 'required',
-            'delivery_signature' => 'required',
-            'received' => 'required',
-            'signature_received' => 'required',
+            'comments' => 'required_if:status,Cancelada',
+            'satisfaction' => 'required_if:status,Liberada',
+            'delivered' => 'required_if:status,Liberada',
+            'delivery_signature' => 'required_if:status,Liberada',
+            'received' => 'required_if:status,Liberada',
+            'signature_received' => 'required_if:status,Liberada',
             'user_chofer_id' => 'required',
             'status' => 'required|in:Liberada,Cancelada',
-            'evidence' => 'required',
+            'evidence' => 'required_if:status,Liberada',
             'product_remission' => 'required_if:status,Liberada|array',
             // 'product_remission.*.remission_id' => 'required',
-            'product_remission.*.delivered_quantity' => 'required',
-            'product_remission.*.order_purchase_product_id' => 'required|exists:order_purchase_products,id',
+            'product_remission.*.delivered_quantity' => 'required_if:status,Liberada',
+            'product_remission.*.order_purchase_product_id' => 'required_if:status,Liberada|exists:order_purchase_products,id',
         ]);
         if ($validation->fails()) {
 
@@ -722,7 +786,7 @@ class DeliveryRouteController extends Controller
             'satisfaction' => $request->satisfaction,
             'delivered' => $request->delivered,
             'delivery_signature' => $request->delivery_signature,
-            'received' => $request->received,
+            'received' => $request->received ?: null,
             'signature_received' => $request->signature_received,
             'delivery_route_id' => $deliveryRoute->id,
             'user_chofer_id' => $request->user_chofer_id,
@@ -762,7 +826,6 @@ class DeliveryRouteController extends Controller
                 ->join('product_remission', 'product_remission.remission_id', 'remisiones.id')
                 ->join('order_purchase_products', 'order_purchase_products.id', 'product_remission.order_purchase_product_id')
                 ->join('order_purchases', 'order_purchases.id', 'order_purchase_products.order_purchase_id')
-                ->where('order_purchases.code_sale', $pedido->code_sale)
                 ->where('order_purchases.code_sale', $pedido->code_sale)
                 ->select('remisiones.*')
                 ->groupBy('remisiones.id')
