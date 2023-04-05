@@ -2,29 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CodeOrderDeliveryRoute;
 use App\Models\DeliveryRoute;
 use App\Models\OrderPurchase;
-use App\Models\ProductDeliveryRoute;
-use App\Models\ProductRemission;
 use App\Models\Remission;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\User;
-use App\Models\Status;
 use Exception;
 use Illuminate\Notifications\Notifiable;
-use Facade\FlareClient\Api;
-use Illuminate\Database\Console\DbCommand;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-
-use App\Models\Notificacion;
 use App\Models\OrderPurchaseProduct;
 use App\Models\SaleStatusChange;
-use App\Notifications\Notificacion as NotificationsNotificacion;
-use Illuminate\Foundation\Auth\User as AuthUser;
 use Illuminate\Support\Facades\DB;
 
 class DeliveryRouteController extends Controller
