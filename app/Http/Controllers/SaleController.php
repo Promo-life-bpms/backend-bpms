@@ -211,47 +211,43 @@ class SaleController extends Controller
         $semana = 604800;
         $mes = 2419200;
 
+        $datos = [];
         while ($tiempoInicio <= $tiempoFin) {
 
             switch ($diasDiferencia) {
 
                 case ($diasDiferencia <= 7):
 
-                        # code...
-
                     $fechaActual = date("Y-m-d", $tiempoInicio);
-                    printf("Fecha dentro del periodo : %s\n ", $fechaActual);
-                    printf("Pedidos : %s\n ", $sale->where('planned_date', $fechaActual)->count());
-                    printf("Incidencias : %s\n ", $incidenciaPer->where('creation_date', $fechaActual)->count());
-
-                    $tiempoInicio += $dia ;
-
+                    $ped = $sale->where('planned_date', $fechaActual)->count();
+                    $inc = $incidenciaPer->where('creation_date', $fechaActual)->count();
+                    $tiempoInicio += $dia;
+                    $datos[] = ['Fecha dentro del periodo:' =>$fechaActual, 'Pedidos'=>$ped, "Incidencias"=>$inc];
                     break;
                 case ($diasDiferencia > 7 && $diasDiferencia <= 31):
                     $fechaActual = date("Y-m-d", $tiempoInicio);
                     $fechaSiguiente = date("Y-m-d", $tiempoInicio + $dia);
-                    printf("Fecha dentro del periodo : %s\n", $fechaActual);
-                    printf("Pedidos : %s\n ", $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count());
-                    printf("Incidencias : %s\n ", $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count());
+                    $ped = $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count();
+                    $inc = $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count();
                     $tiempoInicio += $dos_dias;
+                    $datos[] = ['Fecha dentro del periodo:' =>$fechaActual, 'Pedidos'=>$ped, "Incidencias"=>$inc];
                     break;
                 case ($diasDiferencia > 31 && $diasDiferencia <= 182):
 
                     $fechaActual = date("Y-m-d", $tiempoInicio);
                     $fechaSiguiente = date("Y-m-d", $tiempoInicio + $semana);
-                    printf("Fecha dentro del periodo : %s\n ", $fechaActual);
-                    printf("Pedidos : %s\n ", $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count());
-                    printf("Incidencias : %s\n ", $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count());
+                    $ped = $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count();
+                    $inc = $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count();
                     $tiempoInicio += $semana;
-
+                    $datos[] = ['Fecha dentro del periodo:' =>$fechaActual, 'Pedidos'=>$ped, "Incidencias"=>$inc];
                     break;
                 case ($diasDiferencia > 182 && $diasDiferencia <= 365):
                     $fechaActual = date("Y-m-d", $tiempoInicio);
                     $fechaSiguiente = date("Y-m-d", $tiempoInicio + $mes);
-                    printf("Fecha dentro del periodo : %s\n ", $fechaActual);
-                    printf("Pedidos : %s\n ", $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count());
-                    printf("Incidencias : %s\n ", $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count());
+                    $ped = $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count();
+                    $inc = $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count();
                     $tiempoInicio += $mes;
+                    $datos[] = ['Fecha dentro del periodo:' =>$fechaActual, 'Pedidos'=>$ped, "Incidencias"=>$inc];
                     break;
 
 
@@ -277,7 +273,7 @@ class SaleController extends Controller
             //->select('order_purchases.status')
             ->count();
         //return $completado;
-        $porcentaje =0;
+        $porcentaje = 0;
         $totalMaquilador = $pendientes + $completado;
         if ($totalMaquilador > 0) {
             $porcentaje = 100 / $totalMaquilador;
@@ -288,11 +284,13 @@ class SaleController extends Controller
         $total = $pendientes + $completado;
 
         return [
+            "tarjetas" =>  $tarjetas = [
             "pedidos" => $sales, "porcentaje" => $porcentajePedido . "%",
-            "incidencias" => $incidencia, "porcentaje2" => $porcentajeIncidencia . "%",
-
+            "incidencias" => $incidencia, "porcentaje2" => $porcentajeIncidencia . "%"],
+            "grafica" => $datos,
+            "grafica_de_pastel"=> $grafica =[
             "pedidos_pendientes_del_maquilador" => $porcentajePendiente . "%", "pedidos_completados_del_maquilador" => $porcentajeCompletado . "%",
-            "total" => $total
+            "total" => $total],
 
         ];
     }
