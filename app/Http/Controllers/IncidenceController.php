@@ -112,9 +112,10 @@ class IncidenceController extends Controller
             ->join('remisiones', 'remisiones.delivery_route_id', 'delivery_routes.id')
             ->where('sales.code_sale', $sale_id)
             ->get();
+
         //return $remision;
 
-        if (count($remision) > 0) {
+        if (count($remision) <= 0) {
             return response()->json([
                 "msg" => 'No hay remisiones'
             ]);
@@ -127,12 +128,9 @@ class IncidenceController extends Controller
             ->first();
 
         $diasDiferencia = $rem->created_at->diffInDays(now());
-
-        //return $date;
-        //return $date;
         $user =  auth()->user();
         $aux = false;
-        // return $user;
+        return $user;
         foreach ($user->whatRoles as $rol) {
             switch ($rol->name) {
                 case "control_calidad":
@@ -150,7 +148,7 @@ class IncidenceController extends Controller
             }
         }
         if ($aux == false) {
-            return response()->json(['No tienes permiso de crear una incidencia']);
+            return response()->json(['No tienes permuso de crear una incidencia']);
         }
         $maxINC = Incidence::max('internal_code_incidence');
         $idinc = null;
@@ -161,8 +159,6 @@ class IncidenceController extends Controller
             $idinc++;
         }
         $response = null;
-
-
 
         $incidencia = Incidence::create([
             "code_incidence" => 'No Definido',
@@ -200,9 +196,11 @@ class IncidenceController extends Controller
         foreach ($request->incidence_products as $incidence_product) {
             $incidence_product = (object)$incidence_product;
 
-            $productOrder = OrderPurchaseProduct::where("odoo_product_id", $incidence_product->odoo_product_id)->first();
+            $productOrder = OrderPurchaseProduct::find( $incidence_product->odoo_product_id);
 
             $orderpurchase_id = $productOrder->order_purchase_id;
+            $orderpurchase = OrderPurchase::find($orderpurchase_id);
+
             $productOdoo = [
                 "pro_name" => '',
                 "pro_product_id" => $productOrder->product,
@@ -237,10 +235,7 @@ class IncidenceController extends Controller
                 return response()->json(['msg' => 'No se pudo asignar el key para enviar la incidencia a Odoo correctamente'], response::HTTP_BAD_REQUEST); //400
                 break;
         }
-        $orderpurchase = OrderPurchase::find($orderpurchase_id);
-        if (!$orderpurchase) {
-            return response()->json(["msg" => "No se ha encontrado el OT/OC"], response::HTTP_NOT_FOUND);
-        };
+
         try {
             $url = config('key_odoo.endpoint_incidence');
             $data =  [
@@ -292,18 +287,85 @@ class IncidenceController extends Controller
                         }
                     }
                 } else {
-
                     $errors = true;
                     $message = "Error de Conexion a odoo";
                 }
+            }
+            if ($aux == false) {
+                return response()->json(['No tienes permuso de crear una incidencia']);
+            }
+            $maxINC = Incidence::max('internal_code_incidence');
+            $idinc = null;
+            if (!$maxINC) {
+                $idinc = 1;
             } else {
-                $errors = true;
-                $message = "Error al enviar el lead a odoo";
+                $idinc = (int) explode('-', $maxINC)[1];
+                $idinc++;
+            }
+            $response = null;
+
+
+            $incidencia = Incidence::create([
+                "code_incidence" => 'No Definido',
+                "code_sale" => $sale->code_sale,
+                "client" => $sale->moreInformation->client_name,
+                "requested_by" => '',
+                "description" => $request->comentarios_generales,
+                "date_request" => $request->fecha_creacion,
+                "company" => $sale->moreInformation->warehouse_company,
+                "odoo_status" => 'Confirmado', // TODO: Cambiarlo a odoo_status
+
+                'internal_code_incidence' => "INCD-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
+                'area' => $request->area,
+                'reason' => $request->motivo,
+                'product_type' => $request->tipo_de_producto,
+                'type_of_technique' => $request->tipo_de_tecnica,
+                'responsible' => $request->responsable,
+                'creation_date' => $request->fecha_creacion,
+                'bpm_status' => "Creada",
+                'evidence' => $request->evidencia,
+                'commitment_date' => $request->fecha_compromiso,
+                'solution' => $request->solucion,
+                'solution_date' => null,
+                'user_id' => $request->id_user,
+                'elaborated' => $request->elaboro,
+                'signature_elaborated' => $request->firma_elaboro,
+                'reviewed' => $request->reviso,
+                'signature_reviewed' => $request->firma_reviso,
+                'sale_id' => $sale->id
+            ]);
+            $response = null;
+
+            $dataProducts = [];
+            $orderpurchase_id = null;
+            foreach ($request->incidence_products as $incidence_product) {
+                $incidence_product = (object)$incidence_product;
+                //  return $incidence_product;
+                $productOrder = OrderPurchaseProduct::where("odoo_product_id", $incidence_product->odoo_product_id)->first();
+
+                $orderpurchase_id = $productOrder->order_purchase_id;
+                $productOdoo = [
+                    "pro_name" => '',
+                    "pro_product_id" => $productOrder->product,
+                    "pro_qty" => $incidence_product->quantity_selected,
+                    "pro_currency_id" => "MXN",
+                    "pro_price" => $productOrder->unit_price
+                ];
+
+                $incidencia->productsIncidence()->create([
+                    'order_purchase_product_id' =>  $productOrder->id,
+                    'quantity_selected' => $incidence_product->quantity_selected,
+                    'request' => '',
+                    'notes' => '',
+                    'product' => $productOrder->product,
+                    'cost' => $productOrder->unit_price,
+                ]);
+                array_push($dataProducts, $productOdoo);
             }
 
             if ($errors) {
                 return response()->json([
-                    'msg' => 'No se pudo crear la incidencia correctamente',
+                    'msg' => 'No se pudo crear la incidencia correctamente en odoo ',
                     'data' =>
                     [
                         "messageOdoo" => $message,
@@ -311,19 +373,98 @@ class IncidenceController extends Controller
                     ]
                 ], response::HTTP_BAD_REQUEST);
             }
-        } catch (Exception $exception) {
-            $message = $exception->getMessage();
-            $errors = true;
-            return response()->json(
-                [
-                    'msg' => 'No se pudo crear la incidencia correctamente',
-                    'data' => ["message" => $message]
-                ],
-                response::HTTP_BAD_REQUEST
-            );
+            $orderpurchase = OrderPurchase::find($orderpurchase_id);
+            if (!$orderpurchase) {
+                return response()->json(["msg" => "No se ha encontrado el OT/OC"], response::HTTP_NOT_FOUND);
+            };
+            try {
+                $url = 'https://api-promolife.vde-suite.com:5030/custom/Promolife/V2/incidences/create';
+                $data =  [
+                    'incidencias' => [
+                        [
+                            "name" => false,
+                            "sale_id" => $sale->code_sale,
+                            "description" => $incidencia->description,
+                            "date_incidence" => $incidencia->date_request,
+                            "supplier_id" => $orderpurchase->provider_name,
+                            "line_ids" => $dataProducts,
+                            "po_ids" => [
+                                [
+                                    "com_id" => $orderpurchase->code_order
+                                ]
+                            ],
+                        ]
+                    ]
+                ];
+                $curl = curl_init($url);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($curl, CURLOPT_POST, true);
+                curl_setopt($curl, CURLOPT_POSTFIELDS,  json_encode($data));
+                curl_setopt($curl, CURLOPT_HTTPHEADER, [
+                    'Content-Type: application/json',
+                    'X-VDE-APIKEY: ' . $keyOdoo,
+                    'X-VDE-TYPE: Ambos',
+                ]);
+                $response = curl_exec($curl);
+                $responseOdoo = $response;
+                $errors = false;
+                $message = '';
+                if ($response !== false) {
+                    $dataResponse = json_decode($response);
+                    if ($dataResponse) {
+                        if (isset($dataResponse->error)) {
+                            $message = $dataResponse->detail;
+                            $errors = true;
+                        }
+                        if (!$errors && $dataResponse[0]->success) {
+                            if ($dataResponse[0]->success) {
+                                $folio = $dataResponse[0]->Folio;
+                                //Actualizar Folio de la Incidencia
+                                $incidencia->code_incidence = $folio;
+                                $incidencia->save();
+                            } else {
+                                $errors = true;
+                                $message = $dataResponse[0]->message;
+                            }
+                        }
+                    } else {
+
+                        $errors = true;
+                        $message = "Error de Conexion a odoo";
+                    }
+                } else {
+                    $errors = true;
+                    $message = "Error al enviar el lead a odoo";
+                }
+
+                if ($errors) {
+                    return response()->json([
+                        'msg' => 'No se pudo crear la incidencia correctamente',
+                        'data' =>
+                        ["messageOdoo" => $message]
+                    ], response::HTTP_BAD_REQUEST);
+                }
+            } catch (Exception $exception) {
+                $message = $exception->getMessage();
+                $errors = true;
+                return response()->json(
+                    [
+                        'msg' => 'No se pudo crear la incidencia correctamente',
+                        'data' => ["message" => $message]
+                    ],
+                    response::HTTP_BAD_REQUEST
+                );
+            }
+
+            return response()->json([
+                "msg" => 'No tienes permiso para generar una incidencia'
+            ]);
         }
 
 
+        return response()->json([
+            "msg" => 'No hay remisiones'
+        ]);
 
         return response()->json([
             "msg" => 'Incidencia creada exitosamente',
