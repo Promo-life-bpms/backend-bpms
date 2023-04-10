@@ -78,12 +78,6 @@ class AuthController extends Controller
 
         return response()->json(['Correos enviados correctamente']);
     }
-    public function Acces()
-    {
-        $usersAccess = User::select('users.email', 'users.password')->get();
-
-        return $usersAccess;
-    }
     public function login(Request $request)
     {
 
