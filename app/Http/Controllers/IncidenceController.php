@@ -104,6 +104,7 @@ class IncidenceController extends Controller
             ], response::HTTP_UNPROCESSABLE_ENTITY);
         }
         $sale = Sale::with('moreInformation')->where('code_sale', $sale_id)->first();
+        //return $sale;
         if (!$sale) {
             return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
         }
@@ -112,9 +113,9 @@ class IncidenceController extends Controller
             ->join('remisiones', 'remisiones.delivery_route_id', 'delivery_routes.id')
             ->where('sales.code_sale', $sale_id)
             ->get();
-        //return $remision;
 
-        if (count($remision) > 0) {
+
+        if (count($remision) < 0) {
             return response()->json([
                 "msg" => 'No hay remisiones'
             ]);
