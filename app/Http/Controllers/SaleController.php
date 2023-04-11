@@ -222,7 +222,7 @@ class SaleController extends Controller
                     $ped = $sale->where('planned_date', $fechaActual)->count();
                     $inc = $incidenciaPer->where('creation_date', $fechaActual)->count();
                     $tiempoInicio += $dia;
-                    $datos[] = ['Fecha_dentro_del_periodo:' => $fechaActual, 'Pedidos' => $ped, "Incidencias" => $inc];
+                    $datos[] = ['Fecha_dentro_del_periodo' => $fechaActual, 'Pedidos' => $ped, "Incidencias" => $inc];
                     break;
                 case ($diasDiferencia > 7 && $diasDiferencia <= 31):
                     $fechaActual = date("Y-m-d", $tiempoInicio);
@@ -230,7 +230,7 @@ class SaleController extends Controller
                     $ped = $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count();
                     $inc = $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count();
                     $tiempoInicio += $dos_dias;
-                    $datos[] = ['Fecha_dentro_del_periodo:' => $fechaActual, 'Pedidos' => $ped, "Incidencias" => $inc];
+                    $datos[] = ['Fecha_dentro_del_periodo' => $fechaActual, 'Pedidos' => $ped, "Incidencias" => $inc];
                     break;
                 case ($diasDiferencia > 31 && $diasDiferencia <= 182):
 
@@ -239,7 +239,7 @@ class SaleController extends Controller
                     $ped = $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count();
                     $inc = $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count();
                     $tiempoInicio += $semana;
-                    $datos[] = ['Fecha_dentro_del_periodo:' => $fechaActual, 'Pedidos' => $ped, "Incidencias" => $inc];
+                    $datos[] = ['Fecha_dentro_del_periodo' => $fechaActual, 'Pedidos' => $ped, "Incidencias" => $inc];
                     break;
                 case ($diasDiferencia > 182 && $diasDiferencia <= 365):
                     $fechaActual = date("Y-m-d", $tiempoInicio);
@@ -247,7 +247,7 @@ class SaleController extends Controller
                     $ped = $sale->whereBetween('planned_date', [$fechaActual, $fechaSiguiente])->count();
                     $inc = $incidenciaPer->whereBetween('creation_date', [$fechaActual, $fechaSiguiente])->count();
                     $tiempoInicio += $mes;
-                    $datos[] = ['Fecha_dentro_del_periodo:' => $fechaActual, 'Pedidos' => $ped, "Incidencias" => $inc];
+                    $datos[] = ['Fecha_dentro_del_periodo' => $fechaActual, 'Pedidos' => $ped, "Incidencias" => $inc];
                     break;
 
 
