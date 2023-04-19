@@ -127,6 +127,10 @@ class IncidenceController extends Controller
             ->select('remisiones.*')
             ->first();
 
+        if (!$rem) {
+            return response()->json(["msg" => "No se han encontrado remisiones del pedido"], response::HTTP_NOT_FOUND);
+        }
+
         $diasDiferencia = $rem->created_at->diffInDays(now());
 
         //return $date;
@@ -318,7 +322,7 @@ class IncidenceController extends Controller
             return response()->json(
                 [
                     'msg' => 'No se pudo crear la incidencia correctamente',
-                    'data' => ["message" => $message]
+                    'data' => ["message" => $message,  "incidencia" => $incidencia]
                 ],
                 response::HTTP_BAD_REQUEST
             );
