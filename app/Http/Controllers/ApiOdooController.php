@@ -13,8 +13,6 @@ use App\Models\Tracking;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 class ApiOdooController extends Controller
 {
