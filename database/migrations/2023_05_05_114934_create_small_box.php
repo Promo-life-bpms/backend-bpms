@@ -55,7 +55,7 @@ class CreateSmallBox extends Migration
             $table->id();
             $table->string('concept');
             $table->foreignId('center_id')->references('id')->on('centers');
-            $table->string('outgo_types'); 
+            $table->string('outgo_type'); 
             $table->string('expense_type');
             $table->timestamps();
         });
@@ -65,9 +65,9 @@ class CreateSmallBox extends Migration
             $table->foreignId('user_id')->references('id')->on('users');
             $table->foreignId('company_id')->references('id')->on('companies');
             $table->foreignId('spent_id')->references('id')->on('spents');
-            $table->string('description'); 
-            $table->string('file');
-            $table->string('commentary');
+            $table->string('description')->nullable(); 
+            $table->string('file')->nullable();
+            $table->string('commentary')->nullable();
             $table->foreignId('purchase_status_id')->references('id')->on('purchase_status');
             $table->foreignId('payment_method_id')->references('id')->on('payment_methods');
             $table->decimal('total', 16,2);
