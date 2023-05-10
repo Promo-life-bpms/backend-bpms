@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Center;
+use App\Models\Company;
 use App\Models\Spent;
 use Illuminate\Database\Seeder;
 
@@ -556,5 +557,19 @@ class SmallBox extends Seeder
                 'expense_type' => $spent->expense_type,
             ]);  
         } 
+
+        $companies = [
+            'Promo life',
+            "BH Trademarket",
+        ];
+
+        foreach ($companies as $company) {
+            Company::create([
+                'name' => $company,
+                'description' => $company,
+            ]);  
+        } 
+
+        
     }
 }

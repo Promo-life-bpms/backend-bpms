@@ -10,6 +10,7 @@ use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
+use App\Http\Controllers\SmallBoxUserController;
 use App\Http\Controllers\UploadImageController;
 use App\Notifications\Acces;
 use App\Models\User;
@@ -119,4 +120,13 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::post('/image/upload', [UploadImageController::class, 'uploadImage']);
     Route::post('/image/delete', [UploadImageController::class, 'deleteImage']);
+
+
+    //CAJA CHICA
+
+    //Ordenes
+    Route::post('caja-chica/mis-ordenes/', [SmallBoxUserController::class, 'showUserRequests']);
+
+
 });
+

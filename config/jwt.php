@@ -274,8 +274,8 @@ return [
         | Specify the provider that is used to create and decode the tokens.
         |
         */
-
-        'jwt' => Tymon\JWTAuth\Providers\JWT\Lcobucci::class,
+        'jwt' => Tymon\JWTAuth\Providers\JWT\Namshi::class, 
+        /*   'jwt' => Tymon\JWTAuth\Providers\JWT\Lcobucci::class, */
 
         /*
         |--------------------------------------------------------------------------
