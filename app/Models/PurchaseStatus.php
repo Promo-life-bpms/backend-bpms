@@ -16,7 +16,7 @@ class PurchaseStatus extends Model
         'type',
         'position',
         'description',
-        'is_cancelled'
+        'status'
     ];
 
   

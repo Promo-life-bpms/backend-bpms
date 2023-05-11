@@ -17,6 +17,7 @@ class CreateSmallBox extends Migration
             $table->id();
             $table->string('name');
             $table->string('description')->nullable();
+            $table->boolean('status')->nullable();
             $table->timestamps();
         });
 
@@ -33,7 +34,7 @@ class CreateSmallBox extends Migration
             $table->string('type');
             $table->tinyInteger('position');
             $table->string('description')->nullable();
-            $table->boolean('is_cancelled');
+            $table->boolean('status');
             $table->timestamps();
         });
 
@@ -57,6 +58,7 @@ class CreateSmallBox extends Migration
             $table->foreignId('center_id')->references('id')->on('centers');
             $table->string('outgo_type'); 
             $table->string('expense_type');
+            $table->string('status');
             $table->timestamps();
         });
 

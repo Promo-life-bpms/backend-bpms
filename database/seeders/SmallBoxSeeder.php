@@ -7,7 +7,7 @@ use App\Models\Company;
 use App\Models\Spent;
 use Illuminate\Database\Seeder;
 
-class SmallBox extends Seeder
+class SmallBoxSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -555,6 +555,7 @@ class SmallBox extends Seeder
                 'center_id' => $spent->center_id,
                 'outgo_type' => $spent->outgo_type,
                 'expense_type' => $spent->expense_type,
+                'status' =>1
             ]);  
         } 
 

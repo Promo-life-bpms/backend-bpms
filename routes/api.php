@@ -11,6 +11,7 @@ use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
 use App\Http\Controllers\SmallBoxUserController;
+use App\Http\Controllers\SpentController;
 use App\Http\Controllers\UploadImageController;
 use App\Notifications\Acces;
 use App\Models\User;
@@ -127,6 +128,12 @@ Route::group(['middleware' => 'auth'], function () {
     //Ordenes
     Route::post('caja-chica/mis-ordenes/', [SmallBoxUserController::class, 'showUserRequests']);
 
+    //Spent
+    Route::get('caja-chica/gastos/ver/', [SpentController::class, 'show']);
+    Route::post('caja-chica/gastos/crear/', [SpentController::class, 'store']);
+    Route::post('caja-chica/gastos/editar/', [SpentController::class, 'update']);
+    Route::post('caja-chica/gastos/borrar/', [SpentController::class, 'delete']);
+  
 
 });
 
