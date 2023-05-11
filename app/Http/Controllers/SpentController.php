@@ -11,7 +11,7 @@ class SpentController extends Controller
     public function show()
     {
        
-        $spents = Spent::all();
+        $spents = Spent::where('status',1)->get();
 
         return $spents;
     }

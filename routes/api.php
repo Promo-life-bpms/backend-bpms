@@ -7,6 +7,7 @@ use App\Http\Controllers\DeliveryRouteController;
 use App\Http\Controllers\IncidenceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
+use App\Http\Controllers\CenterController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
@@ -134,6 +135,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/gastos/editar/', [SpentController::class, 'update']);
     Route::post('caja-chica/gastos/borrar/', [SpentController::class, 'delete']);
   
-
+    //Center
+    Route::get('caja-chica/centros-de-costos/ver/', [CenterController::class, 'show']);
+    Route::post('caja-chica/centros-de-costos/crear/', [CenterController::class, 'store']);
+    Route::post('caja-chica/centros-de-costos/editar/', [CenterController::class, 'update']);
+    Route::post('caja-chica/centros-de-costos/borrar/', [CenterController::class, 'delete']);
 });
 

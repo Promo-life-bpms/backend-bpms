@@ -41,7 +41,8 @@ class SmallBoxSeeder extends Seeder
         foreach ($centers as $center) {
             Center::create([
                 'name' => $center,
-                'description' => null
+                'description' => null,
+                'status' =>1
             ]);
         }
 
