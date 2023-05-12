@@ -4,6 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\Center;
 use App\Models\Company;
+use App\Models\PaymentMethod;
+use App\Models\PurchaseRequest;
+use App\Models\PurchaseStatus;
 use App\Models\Spent;
 use App\Models\UserCenter;
 use Illuminate\Database\Seeder;
@@ -573,6 +576,22 @@ class SmallBoxSeeder extends Seeder
             ]);  
         } 
 
+
+        PaymentMethod::create([
+            'name' => 'EFECTIVO',
+            'description' => 'Pagon en efectivo',
+        ]);
+        
+        PaymentMethod::create([
+            'name' => 'AME EXPRESS',
+            'description' => 'Pago con American Express',
+        ]);  
+
+        PaymentMethod::create([
+            'name' => 'TRANSFERENCIA',
+            'description' => 'Pagon con transferencia',
+        ]); 
+
         
 
         //Seeders temporales
@@ -609,6 +628,96 @@ class SmallBoxSeeder extends Seeder
             'user_id' => 4,
             'center_id' => 7,
         ]);
+
+        PurchaseStatus::create([
+            'name' => 'En proceso',
+            'type' => 'producto',
+            'position' => 1,
+            'description' => 'normal'
+        ]);
+
+        PurchaseStatus::create([
+            'name' => 'Compra',
+            'type' => 'producto',
+            'position' => 2,
+            'description' => 'normal'
+        ]);
+
+        PurchaseStatus::create([
+            'name' => 'Entregada',
+            'type' => 'producto',
+            'position' => 3,
+            'description' => 'normal'
+        ]);
+
+
+        PurchaseStatus::create([
+            'name' => 'En proceso',
+            'type' => 'producto',
+            'position' => 1,
+            'description' => 'cancelado'
+        ]);
+
+        PurchaseStatus::create([
+            'name' => 'Compra',
+            'type' => 'producto',
+            'position' => 2,
+            'description' => 'cancelado'
+        ]);
+
+        PurchaseStatus::create([
+            'name' => 'Pagado',
+            'type' => 'producto',
+            'position' => 1,
+            'description' => 'cancelado'
+        ]);
+
+
+        PurchaseStatus::create([
+            'name' => 'Em proceso',
+            'type' => 'servicio',
+            'position' => 1,
+            'description' => 'normal'
+        ]);
+
+        
+        PurchaseStatus::create([
+            'name' => 'Pagado',
+            'type' => 'servicio',
+            'position' => 2,
+            'description' => 'normal'
+        ]);
+
+        PurchaseStatus::create([
+            'name' => 'Em proceso',
+            'type' => 'servicio',
+            'position' => 1,
+            'description' => 'cancelado'
+        ]);
+
+        
+        PurchaseStatus::create([
+            'name' => 'Pagado',
+            'type' => 'servicio',
+            'position' => 2,
+            'description' => 'cancelado'
+        ]);
+
+
+        PurchaseRequest::create([
+            'user_id' => 1,
+            'company_id' => 1,
+            'spent_id' => 1,
+            'description' => 'descripcion de prueba',
+            'file' => null,
+            'commentary' => 'Comentario de prueba',
+            'purchase_status_id' => 1,
+            'payment_method_id' => 1,
+            'total' => 500.50,
+            'status' => 1,
+   
+        ]);
+
 
     }
 }

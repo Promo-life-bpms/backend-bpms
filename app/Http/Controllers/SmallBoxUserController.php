@@ -8,16 +8,14 @@ use Illuminate\Http\Request;
 
 class SmallBoxUserController extends Controller
 {
-    public function showUserRequests(Request $request)
+    public function showUserRequests()
     {
-        $user_id = auth()->user()->id;
+        $user= auth()->user();
 
-        if($user_id !=null){
-            $data = [];
-            $purchases = PurchaseRequest::where('user_id', $user_id)->get();
-            array_push($data, $purchases);
+        if($user !=null){
+            
     
-            return $purchases;
+            return $user->;
         }else{
             return response()->json(['Usuario no encontrado']);
         }
