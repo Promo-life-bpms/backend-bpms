@@ -8,9 +8,11 @@ use App\Http\Controllers\IncidenceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\CenterController;
+use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
+use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SmallBoxUserController;
 use App\Http\Controllers\SpentController;
 use App\Http\Controllers\UploadImageController;
@@ -135,6 +137,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/gastos/crear/', [SpentController::class, 'store']);
     Route::post('caja-chica/gastos/editar/', [SpentController::class, 'update']);
     Route::post('caja-chica/gastos/borrar/', [SpentController::class, 'delete']);
+
+    //PurchaseRequest
+    Route::get('caja-chica/solicitudes-de-compra/ver/', [PurchaseRequestController::class, 'show']);
+    Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
+    Route::post('caja-chica/solicitudes-de-compra/editar/', [PurchaseRequestController::class, 'update']);
+    Route::post('caja-chica/solicitudes-de-compra/borrar/', [PurchaseRequestController::class, 'delete']);
   
     //Center
     Route::get('caja-chica/centros-de-costos/ver/', [CenterController::class, 'show']);
@@ -142,13 +150,16 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/centros-de-costos/editar/', [CenterController::class, 'update']);
     Route::post('caja-chica/centros-de-costos/borrar/', [CenterController::class, 'delete']);
 
-    //Admin - gestion de centros de costos por usuario
-    Route::get('caja-chica/centro-de-costos-usuarios/ver/', [UserCenterController::class, 'show']);
-    Route::get('caja-chica/centro-de-costos-usuarios/crear/', [UserCenterController::class, 'store']);
-    Route::get('caja-chica/centro-de-costos-usuarios/eliminar/', [UserCenterController::class, 'delete']);
+    //UserCenter 
+    Route::get('caja-chica/usuarios-centro-de-costos/ver/', [UserCenterController::class, 'show']);
+    Route::get('caja-chica/usuarios-ccentro-de-costos/crear/', [UserCenterController::class, 'store']);
+    Route::get('caja-chica/usuarios-ccentro-de-costos/eliminar/', [UserCenterController::class, 'delete']);
 
-    
-
+    //Companies
+    Route::get('caja-chica/centros-de-costos/ver/', [CompaniesController::class, 'show']);
+    Route::post('caja-chica/centros-de-costos/crear/', [CompaniesController::class, 'store']);
+    Route::post('caja-chica/centros-de-costos/editar/', [CompaniesController::class, 'update']);
+    Route::post('caja-chica/centros-de-costos/borrar/', [CompaniesController::class, 'delete']);
 
 
 });

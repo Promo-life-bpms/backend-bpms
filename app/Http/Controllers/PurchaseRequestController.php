@@ -12,8 +12,7 @@ class PurchaseRequestController extends Controller
 {
     public function show()
     {
-       
-        $spents = PurchaseRequest::where('status','<>',1)->get();
+        $spents = PurchaseRequest::where('status','<>',0)->get();
 
         return $spents;
     }
