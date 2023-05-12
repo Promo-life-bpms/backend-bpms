@@ -14,6 +14,7 @@ use App\Http\Controllers\OrderPurchaseController;
 use App\Http\Controllers\SmallBoxUserController;
 use App\Http\Controllers\SpentController;
 use App\Http\Controllers\UploadImageController;
+use App\Http\Controllers\UserCenterController;
 use App\Notifications\Acces;
 use App\Models\User;
 
@@ -140,5 +141,15 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/centros-de-costos/crear/', [CenterController::class, 'store']);
     Route::post('caja-chica/centros-de-costos/editar/', [CenterController::class, 'update']);
     Route::post('caja-chica/centros-de-costos/borrar/', [CenterController::class, 'delete']);
+
+    //Admin - gestion de centros de costos por usuario
+    Route::get('caja-chica/centro-de-costos-usuarios/ver/', [UserCenterController::class, 'show']);
+    Route::get('caja-chica/centro-de-costos-usuarios/crear/', [UserCenterController::class, 'store']);
+    Route::get('caja-chica/centro-de-costos-usuarios/eliminar/', [UserCenterController::class, 'delete']);
+
+    
+
+
+
 });
 

@@ -16,7 +16,6 @@ class PurchaseStatus extends Model
         'type',
         'position',
         'description',
-        'status'
     ];
 
   

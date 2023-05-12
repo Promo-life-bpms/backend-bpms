@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Center;
 use App\Models\Company;
 use App\Models\Spent;
+use App\Models\UserCenter;
 use Illuminate\Database\Seeder;
 
 class SmallBoxSeeder extends Seeder
@@ -573,5 +574,41 @@ class SmallBoxSeeder extends Seeder
         } 
 
         
+
+        //Seeders temporales
+
+        UserCenter::create([
+            'user_id' => 1,
+            'center_id' => 1,
+        ]);
+        UserCenter::create([
+            'user_id' => 1,
+            'center_id' => 2,
+        ]);
+        UserCenter::create([
+            'user_id' => 1,
+            'center_id' => 3,
+        ]);
+        UserCenter::create([
+            'user_id' => 1,
+            'center_id' => 4,
+        ]);
+        UserCenter::create([
+            'user_id' => 2,
+            'center_id' => 1,
+        ]);
+        UserCenter::create([
+            'user_id' => 3,
+            'center_id' => 1,
+        ]);
+        UserCenter::create([
+            'user_id' => 4,
+            'center_id' => 6,
+        ]);
+        UserCenter::create([
+            'user_id' => 4,
+            'center_id' => 7,
+        ]);
+
     }
 }

@@ -34,7 +34,6 @@ class CreateSmallBox extends Migration
             $table->string('type');
             $table->tinyInteger('position');
             $table->string('description')->nullable();
-            $table->boolean('status');
             $table->timestamps();
         });
 
@@ -73,6 +72,7 @@ class CreateSmallBox extends Migration
             $table->foreignId('purchase_status_id')->references('id')->on('purchase_status');
             $table->foreignId('payment_method_id')->references('id')->on('payment_methods');
             $table->decimal('total', 16,2);
+            $table->tinyInteger('status');
             $table->timestamps();
         });
     }

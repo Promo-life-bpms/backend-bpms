@@ -20,7 +20,8 @@ class PurchaseRequest extends Model
         'commentary',
         'purchase_status_id',
         'payment_method_id',
-        'total'
+        'total',
+        'status'
     ];
 
 
