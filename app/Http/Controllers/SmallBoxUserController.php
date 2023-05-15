@@ -11,11 +11,9 @@ class SmallBoxUserController extends Controller
     public function showUserRequests()
     {
         $user= auth()->user();
-
+        
         if($user !=null){
-            
-    
-            return $user->;
+            return $user->purchaseRequest;
         }else{
             return response()->json(['Usuario no encontrado']);
         }

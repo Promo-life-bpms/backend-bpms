@@ -714,10 +714,36 @@ class SmallBoxSeeder extends Seeder
             'purchase_status_id' => 1,
             'payment_method_id' => 1,
             'total' => 500.50,
-            'status' => 1,
+            'status' => 0,
    
         ]);
 
+        PurchaseRequest::create([
+            'user_id' => 1,
+            'company_id' => 1,
+            'spent_id' => 2,
+            'description' => 'descripcion de prueba 2',
+            'file' => null,
+            'commentary' => 'Comentario de prueba 2',
+            'purchase_status_id' => 1,
+            'payment_method_id' => 1,
+            'total' => 700.50,
+            'status' => 0,
+   
+        ]);
+
+        PurchaseRequest::create([
+            'user_id' => 1,
+            'company_id' => 1,
+            'spent_id' => 3,
+            'description' => 'descripcion de prueba 3',
+            'file' => null,
+            'commentary' => 'Comentario de prueba 2',
+            'purchase_status_id' => 1,
+            'payment_method_id' => 1,
+            'total' => 1200.50,
+            'status' => 0,
+        ]);
 
     }
 }

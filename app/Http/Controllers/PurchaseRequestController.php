@@ -12,7 +12,12 @@ class PurchaseRequestController extends Controller
 {
     public function show()
     {
-        $spents = PurchaseRequest::where('status','<>',0)->get();
+        //Status
+        //0: PENDIENTE
+        //1: APROBADA
+        //2: RECHAZADA
+        //3: ELIMINADA
+        $spents = PurchaseRequest::where('status','<>',3)->get();
 
         return $spents;
     }
@@ -106,9 +111,28 @@ class PurchaseRequestController extends Controller
         ]);
 
         DB::table('spents')->where('id',$request->id)->update([
-            'status' => 0,
+            'status' => 4,
         ]);
 
         return response()->json(['msg' => "Registro eliminado satisfactoriamente"]);
+    }
+
+    public function approved(Request $request)
+    {
+        DB::table('purchase_requests')->where('id',$request->id)->update([
+            'status' => 1,
+        ]);
+
+        return response()->json(['msg' => "Solicitud aprobada satisfactoriamente"]);
+    }
+
+    public function rejected(Request $request)
+    {
+        DB::table('purchase_requests')->where('id',$request->id)->update([
+            'status' => 1,
+        ]);
+
+        return response()->json(['msg' => "Solicitud rechazada satisfactoriamente"]);
+
     }
 }

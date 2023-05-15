@@ -130,7 +130,7 @@ Route::group(['middleware' => 'auth'], function () {
     //CAJA CHICA
 
     //Ordenes
-    Route::post('caja-chica/mis-ordenes/', [SmallBoxUserController::class, 'showUserRequests']);
+    Route::get('caja-chica/mis-ordenes/', [SmallBoxUserController::class, 'showUserRequests']);
 
     //Spent
     Route::get('caja-chica/gastos/ver/', [SpentController::class, 'show']);
@@ -143,7 +143,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
     Route::post('caja-chica/solicitudes-de-compra/editar/', [PurchaseRequestController::class, 'update']);
     Route::post('caja-chica/solicitudes-de-compra/borrar/', [PurchaseRequestController::class, 'delete']);
-  
+    Route::post('caja-chica/aprobar-solicitud/', [PurchaseRequestController::class, 'approved']);
+    Route::post('caja-chica/rechazar-solicitud/', [PurchaseRequestController::class, 'rejected']);
+
     //Center
     Route::get('caja-chica/centros-de-costos/ver/', [CenterController::class, 'show']);
     Route::post('caja-chica/centros-de-costos/crear/', [CenterController::class, 'store']);
