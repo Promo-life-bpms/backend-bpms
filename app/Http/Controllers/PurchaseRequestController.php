@@ -29,7 +29,6 @@ class PurchaseRequestController extends Controller
             'company_id' => 'required',
             'spent_id' => 'required',
             'description' => 'required',
-            'commentary' => 'required',
             'payment_method_id' => 'required',
             'total' => 'required',
         ]);
@@ -51,7 +50,7 @@ class PurchaseRequestController extends Controller
         $create_spent->spent_id = $request->spent_id;
         $create_spent->description = $request->description;
         $create_spent->file = $path;
-        $create_spent->commentary = $request->commentary;
+        $create_spent->commentary = '';
         $create_spent->purchase_status_id = $request->purchase_status_id;
         $create_spent->payment_method_id = $request->payment_method_id;
         $create_spent->total = $request->total;
