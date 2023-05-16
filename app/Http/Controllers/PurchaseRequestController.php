@@ -42,7 +42,6 @@ class PurchaseRequestController extends Controller
             $fileNameToStore = time(). $filename . '.' . $extension;
             $path= $request->file('file')->move('storage/smallbox/files/', $fileNameToStore);
         }
-        
 
         $create_spent = new PurchaseRequest();
         $create_spent->user_id = $request->user_id;
@@ -51,7 +50,7 @@ class PurchaseRequestController extends Controller
         $create_spent->description = $request->description;
         $create_spent->file = $path;
         $create_spent->commentary = '';
-        $create_spent->purchase_status_id = $request->purchase_status_id;
+        $create_spent->purchase_status_id = 1;
         $create_spent->payment_method_id = $request->payment_method_id;
         $create_spent->total = $request->total;
         $create_spent->status = 1;
@@ -118,6 +117,11 @@ class PurchaseRequestController extends Controller
 
     public function approved(Request $request)
     {
+        $request->validate([
+            'id' => 'required',
+        ]);
+
+    
         DB::table('purchase_requests')->where('id',$request->id)->update([
             'status' => 1,
         ]);
@@ -127,8 +131,18 @@ class PurchaseRequestController extends Controller
 
     public function rejected(Request $request)
     {
+        $request->validate([
+            'id' => 'required',
+        ]);
+
+        $commentary = "";
+
+        if($request->commentary <> null){
+            $commentary = $request->commentary;
+        }
         DB::table('purchase_requests')->where('id',$request->id)->update([
-            'status' => 1,
+            'status' => 2,
+            'commentary' => $commentary
         ]);
 
         return response()->json(['msg' => "Solicitud rechazada satisfactoriamente"]);

@@ -674,7 +674,7 @@ class SmallBoxSeeder extends Seeder
 
 
         PurchaseStatus::create([
-            'name' => 'Em proceso',
+            'name' => 'En proceso',
             'type' => 'servicio',
             'position' => 1,
             'description' => 'normal'
@@ -689,7 +689,7 @@ class SmallBoxSeeder extends Seeder
         ]);
 
         PurchaseStatus::create([
-            'name' => 'Em proceso',
+            'name' => 'En proceso',
             'type' => 'servicio',
             'position' => 1,
             'description' => 'cancelado'
