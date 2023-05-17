@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PurchaseRequest;
+use App\Models\PurchaseStatus;
 use App\Models\Spent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -146,6 +147,21 @@ class PurchaseRequestController extends Controller
         ]);
 
         return response()->json(['msg' => "Solicitud rechazada satisfactoriamente"]);
+
+    }
+
+
+    public function confirmDelivered(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+        ]);
+
+        $purchase_request = PurchaseRequest::where('id',$request->id)->get();
+        
+        $status = PurchaseStatus::where('id',$request->id)->get()->last();
+       
+        if($status == )
 
     }
 }

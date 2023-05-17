@@ -145,6 +145,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/solicitudes-de-compra/borrar/', [PurchaseRequestController::class, 'delete']);
     Route::post('caja-chica/aprobar-solicitud/', [PurchaseRequestController::class, 'approved']);
     Route::post('caja-chica/rechazar-solicitud/', [PurchaseRequestController::class, 'rejected']);
+    Route::post('caja-chica/confirmar-entrega/', [PurchaseRequestController::class, 'confirmDelivered']);
 
     //Center
     Route::get('caja-chica/centros-de-costos/ver/', [CenterController::class, 'show']);
