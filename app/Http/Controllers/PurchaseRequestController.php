@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseStatus;
 use App\Models\Spent;
+use Faker\Provider\ar_EG\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -157,11 +158,36 @@ class PurchaseRequestController extends Controller
             'id' => 'required',
         ]);
 
-        $purchase_request = PurchaseRequest::where('id',$request->id)->get();
+        $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
+
+        if( $purchase_request == null){
+            return response()->json(['msg' => "Producto no encontrado"]);
+        }
         
-        $status = PurchaseStatus::where('id',$request->id)->get()->last();
+        $status = PurchaseStatus::where('id',$purchase_request->purchase_status_id)->get()->last();
        
-        if($status == )
+        if($status->type == 'producto'){
+            $payment_status = PurchaseStatus::where('name','Recibido')->where('type','producto')->where('description', 'normal')->get()->last(); 
+            
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'purchase_status_id' => $payment_status->id,
+            ]);
+
+            return response()->json(['msg' => "Producto actualizado satisfactoriamente"]);
+
+        }
+
+
+        if($status->type == 'servicio'){
+            $payment_status = PurchaseStatus::where('name','Pagado')->where('type','servicio')->where('description', 'normal')->get()->last();
+
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'purchase_status_id' => $payment_status->id,
+            ]);
+
+            return response()->json(['msg' => "Servicio actualizado satisfactoriamente"]);
+
+        }
 
     }
 }
