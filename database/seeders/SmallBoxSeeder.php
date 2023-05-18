@@ -686,6 +686,21 @@ class SmallBoxSeeder extends Seeder
             'description' => 'cancelado'
         ]);
 
+
+        PurchaseStatus::create([
+            'name' => 'Entregado',
+            'type' => 'producto',
+            'position' => 3,
+            'description' => 'devolucion'
+        ]);
+
+        PurchaseStatus::create([
+            'name' => 'Recibido',
+            'type' => 'producto',
+            'position' => 4,
+            'description' => 'devolucion'
+        ]);
+
         PurchaseStatus::create([
             'name' => 'En proceso',
             'type' => 'servicio',
@@ -714,6 +729,13 @@ class SmallBoxSeeder extends Seeder
             'type' => 'servicio',
             'position' => 2,
             'description' => 'cancelado'
+        ]);
+
+        PurchaseStatus::create([
+            'name' => 'Pagado',
+            'type' => 'servicio',
+            'position' => 2,
+            'description' => 'devolucion'
         ]);
 
 

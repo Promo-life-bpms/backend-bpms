@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PurchaseDevolution;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseStatus;
 use App\Models\Spent;
@@ -188,6 +189,63 @@ class PurchaseRequestController extends Controller
             return response()->json(['msg' => "Servicio actualizado satisfactoriamente"]);
 
         }
+
+    }
+
+    public function createDevolution(Request $request)
+    {   
+        $request->validate([
+            'id' => 'required',
+            'motive' => 'required',
+            'payment_method_id' => 'required',
+        ]);
+
+        $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
+
+        if( $purchase_request == null){
+            return response()->json(['msg' => "Producto no encontrado"]);
+        }
+        
+        $status = PurchaseStatus::where('id',$purchase_request->purchase_status_id)->get()->last();
+        
+        if($status->name == 'En proceso' || $status->name == 'Compra' || $status->name == 'En proceso' ){
+            return response()->json(['msg' => "Solo se puede hacer devoluciones en pedidos cuyo status sea 'Entregado', 'Recibido' o 'Pagado'."]);
+        }
+       
+        if($status->type == 'producto'){
+            $payment_status = PurchaseStatus::where('name','Recibido')->where('type','producto')->where('description', 'devolucion')->get()->last(); 
+            
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'purchase_status_id' => $payment_status->id,
+            ]);
+            
+        }
+
+        if($status->type == 'servicio'){
+            $payment_status = PurchaseStatus::where('name','Pagado')->where('type','servicio')->where('description', 'devolucion')->get()->last();
+
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'purchase_status_id' => $payment_status->id,
+            ]);
+
+        }
+
+
+        if(isset($purchase_request->purchase_devolution)){
+            DB::table('purchase_devolution')->where('purchase_request_id',$request->id)->update([
+                'motive' => $request->motive,
+                'payment_method_id' => $request->payment_method_id,
+            ]);
+        }else{
+            $create_purchase_devolution = new PurchaseDevolution();
+            $create_purchase_devolution->purchase_request_id = $purchase_request->id;
+            $create_purchase_devolution->motive = $request->motive;
+            $create_purchase_devolution->payment_method_id = $request->payment_method_id;
+            $create_purchase_devolution->description = $request->description;
+            $create_purchase_devolution->save();
+        }
+
+        return response()->json(['msg' => "Devolucion realizada"]);
 
     }
 }

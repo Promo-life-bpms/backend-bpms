@@ -49,4 +49,9 @@ class PurchaseRequest extends Model
     {
         return $this->hasOne(PaymentMethod::class);
     }
+
+    public function purchase_devolution()
+    {
+        return $this->hasOne(PurchaseDevolution::class);
+    }
 }
