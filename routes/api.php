@@ -165,6 +165,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/centros-de-costos/editar/', [CompaniesController::class, 'update']);
     Route::post('caja-chica/centros-de-costos/borrar/', [CompaniesController::class, 'delete']);
 
+    //Exportar
+    Route::post('caja-chica/generar-reporte/', [SmallBoxUserController::class, 'report']);
 
 });
 

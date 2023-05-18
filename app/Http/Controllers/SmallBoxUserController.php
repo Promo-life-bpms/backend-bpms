@@ -48,4 +48,11 @@ class SmallBoxUserController extends Controller
         }
       
     }
+
+    public function report(Request $request)
+    {
+       
+        $reporte = new SmallBoxReport();
+        $reporte->smallBoxReport();
+    }
 }

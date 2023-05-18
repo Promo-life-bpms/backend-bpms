@@ -12,6 +12,7 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laraveles/spanish": "^1.5",
+        "phpoffice/phpspreadsheet": "^1.28",
         "santigarcor/laratrust": "^7.1",
         "tymon/jwt-auth": "^1.0"
     },
