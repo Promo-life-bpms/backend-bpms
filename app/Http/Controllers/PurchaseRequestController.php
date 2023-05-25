@@ -9,6 +9,7 @@ use App\Models\Spent;
 use App\Models\User;
 use Faker\Provider\ar_EG\Payment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
@@ -74,6 +75,7 @@ class PurchaseRequestController extends Controller
             'user_id' => 'required',
             'company_id' => 'required',
             'spent_id' => 'required',
+            'center_id' => 'required',
             'description' => 'required',
             'payment_method_id' => 'required',
             'total' => 'required',
@@ -89,16 +91,19 @@ class PurchaseRequestController extends Controller
             $path= $request->file('file')->move('storage/smallbox/files/', $fileNameToStore);
         }
 
+      
         $create_spent = new PurchaseRequest();
         $create_spent->user_id = $request->user_id;
         $create_spent->company_id = $request->company_id;
         $create_spent->spent_id = $request->spent_id;
+        $create_spent->center_id = $request->center_id;
         $create_spent->description = $request->description;
         $create_spent->file = $path;
         $create_spent->commentary = '';
         $create_spent->purchase_status_id = 1;
         $create_spent->payment_method_id = $request->payment_method_id;
         $create_spent->total = $request->total;
+        $create_spent->approved_by = null;
         $create_spent->status = 1;
         $create_spent->save();
 
@@ -112,10 +117,10 @@ class PurchaseRequestController extends Controller
             'user_id' => 'required',
             'company_id' => 'required',
             'spent_id' => 'required',
+            'center_id' => 'required',
             'description' => 'required',
             'file	' => 'required',
             'commentary' => 'required',
-
             'purchase_status_id' => 'required',
             'payment_method_id' => 'required',
             'total' => 'required',
@@ -137,6 +142,7 @@ class PurchaseRequestController extends Controller
         DB::table('spents')->where('id',$request->id)->update([
             'company_id' => $request->company_id,
             'spent_id' => $request->spent_id,
+            'center_id' => $request->center_id,
             'description' => $request->description,
             'file' => $path,
             'commentary' => $request->commentary,
@@ -167,9 +173,11 @@ class PurchaseRequestController extends Controller
             'id' => 'required',
         ]);
 
+        $user = Auth::user();
     
         DB::table('purchase_requests')->where('id',$request->id)->update([
             'status' => 1,
+            'approved_by' => $user->id
         ]);
 
         return response()->json(['msg' => "Solicitud aprobada satisfactoriamente"]);
@@ -186,9 +194,13 @@ class PurchaseRequestController extends Controller
         if($request->commentary <> null){
             $commentary = $request->commentary;
         }
+
+        $user = Auth::user();
+
         DB::table('purchase_requests')->where('id',$request->id)->update([
             'status' => 2,
-            'commentary' => $commentary
+            'commentary' => $commentary,
+            'approved_by' => $user->id
         ]);
 
         return response()->json(['msg' => "Solicitud rechazada satisfactoriamente"]);
