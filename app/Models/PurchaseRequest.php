@@ -32,17 +32,17 @@ class PurchaseRequest extends Model
 
     public function company()
     {
-        return $this->hasOne(Company::class);
+        return $this->belongsTo(Company::class);
     }
 
     public function spent()
     {
-        return $this->hasOne(Spent::class);
+        return $this->belongsTo(Spent::class);
     }
 
     public function purchase_status()
     {
-        return $this->hasOne(PurchaseStatus::class);
+        return $this->belongsTo(PurchaseStatus::class);
     }
     
     public function payment_method()
@@ -54,4 +54,5 @@ class PurchaseRequest extends Model
     {
         return $this->hasOne(PurchaseDevolution::class);
     }
+
 }

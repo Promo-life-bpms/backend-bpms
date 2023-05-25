@@ -20,9 +20,30 @@ class PurchaseRequestController extends Controller
         //1: APROBADA
         //2: RECHAZADA
         //3: ELIMINADA
+
+        $data = [];
         $spents = PurchaseRequest::where('status','<>',3)->get();
 
-        return $spents;
+        foreach($spents as $spent){
+
+            array_push($data, (object)[
+                'id' => $spent->id,
+                'user_id' => $spent->user_id,
+                'company_id' =>  $spent->company_id,
+                'company_name' => $spent->company->name,
+                'spent_id' => $spent->spent_id,
+                'spent_name' => $spent->spent->concept,
+                'description' => $spent->description,
+                'file' => $spent->file,
+                'commentary' => $spent->commentary,
+                'purchase_status_id' => $spent->purchase_status_id,
+                'purchase_status_name' => $spent->purchase_status->name,
+                'purchase_status_position' => $spent->purchase_status->position,
+                'purchase_status_status' => $spent->purchase_status->description,
+            ]);
+        }
+
+        return $data;
     }
 
     public function store(Request $request)
