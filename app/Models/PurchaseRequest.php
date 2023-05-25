@@ -15,13 +15,15 @@ class PurchaseRequest extends Model
         'user_id',
         'company_id',
         'spent_id',
+        'center_id',
         'description',
         'file',
         'commentary',
         'purchase_status_id',
         'payment_method_id',
         'total',
-        'status'
+        'status',
+        'approved_by'
     ];
 
 
@@ -38,6 +40,11 @@ class PurchaseRequest extends Model
     public function spent()
     {
         return $this->belongsTo(Spent::class);
+    }
+
+    public function center()
+    {
+        return $this->belongsTo(Center::class);
     }
 
     public function purchase_status()

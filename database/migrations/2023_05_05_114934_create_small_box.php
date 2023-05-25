@@ -66,6 +66,7 @@ class CreateSmallBox extends Migration
             $table->foreignId('user_id')->references('id')->on('users');
             $table->foreignId('company_id')->references('id')->on('companies');
             $table->foreignId('spent_id')->references('id')->on('spents');
+            $table->foreignId('center_id')->references('id')->on('centers');
             $table->string('description')->nullable(); 
             $table->string('file')->nullable();
             $table->string('commentary')->nullable();
@@ -73,6 +74,7 @@ class CreateSmallBox extends Migration
             $table->foreignId('payment_method_id')->references('id')->on('payment_methods');
             $table->decimal('total', 16,2);
             $table->tinyInteger('status');
+            $table->string('approved_by')->nullable();
             $table->timestamps();
         });
 

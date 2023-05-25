@@ -6,6 +6,7 @@ use App\Models\PurchaseDevolution;
 use App\Models\PurchaseRequest;
 use App\Models\PurchaseStatus;
 use App\Models\Spent;
+use App\Models\User;
 use Faker\Provider\ar_EG\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,14 +26,32 @@ class PurchaseRequestController extends Controller
         $spents = PurchaseRequest::where('status','<>',3)->get();
 
         foreach($spents as $spent){
+            $company_data = [];
+            $spent_data = [];
+            $center_data = [];
+            array_push($company_data ,(object) [
+                'company_id' =>  $spent->company_id,
+                'company_name' =>  $spent->company->name
+            ]);
 
+            array_push($spent_data ,(object) [
+                'spent_id' =>  $spent->spent_id,
+                'spent_name' =>  $spent->spent->concept,
+                'spent_outgo_type' =>  $spent->spent->outgo_type,
+                'spent_expense_type' =>  $spent->spent->expense_type,
+            ]);
+            array_push($center_data ,(object) [
+                'center_id' => $spent->center_id,
+                'center_name' =>  $spent->center->name,
+            ]);
+
+            $approved_user = User::where('id', intval($spent->approved_by))->get()->last();
             array_push($data, (object)[
                 'id' => $spent->id,
                 'user_id' => $spent->user_id,
-                'company_id' =>  $spent->company_id,
-                'company_name' => $spent->company->name,
-                'spent_id' => $spent->spent_id,
-                'spent_name' => $spent->spent->concept,
+                'company' =>  $company_data,
+                'spent' => $spent_data,
+                'center'  =>  $center_data,
                 'description' => $spent->description,
                 'file' => $spent->file,
                 'commentary' => $spent->commentary,
@@ -40,7 +59,9 @@ class PurchaseRequestController extends Controller
                 'purchase_status_name' => $spent->purchase_status->name,
                 'purchase_status_position' => $spent->purchase_status->position,
                 'purchase_status_status' => $spent->purchase_status->description,
-                'total' => $spent->total
+                'approved_by' => $approved_user->name,
+                'total' => $spent->total,
+                'created_at' => $spent->created_at
             ]);
         }
 
