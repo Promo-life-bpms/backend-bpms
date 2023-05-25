@@ -40,6 +40,7 @@ class PurchaseRequestController extends Controller
                 'purchase_status_name' => $spent->purchase_status->name,
                 'purchase_status_position' => $spent->purchase_status->position,
                 'purchase_status_status' => $spent->purchase_status->description,
+                'total' => $spent->total
             ]);
         }
 
