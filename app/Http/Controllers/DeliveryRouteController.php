@@ -131,6 +131,7 @@ class DeliveryRouteController extends Controller
                     );
                     break;
             }
+        }
             //switch con casos de true para logistica, administrador y compras
 
 
@@ -277,7 +278,7 @@ class DeliveryRouteController extends Controller
                     }
                 }
             }
-        }
+
 
         return response()->json([
             'msg' => 'Ruta Creada Existosamente',

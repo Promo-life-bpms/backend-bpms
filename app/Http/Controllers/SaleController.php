@@ -264,11 +264,10 @@ class SaleController extends Controller
             ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
             ->count();
 
-
         $completado = OrderPurchase::join('status_o_t_s', 'status_o_t_s.id_order_purchases', 'order_purchases.id')
             ->where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
             ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
-            ->whereIn('status_o_t_s.status', ["Listo para recoger", "RIP", "Recepcion inventario Completo"])
+            ->whereIn('status_o_t_s.status', ["Listo para recoger", "Recepcion inventario parcial", "Recepcion inventario Completo"])
             ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
             //->select('order_purchases.status')
             ->count();
