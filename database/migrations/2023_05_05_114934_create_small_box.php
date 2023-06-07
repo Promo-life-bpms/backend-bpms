@@ -31,9 +31,10 @@ class CreateSmallBox extends Migration
         Schema::create('purchase_status', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('table_name');
             $table->string('type');
+            $table->string('status');
             $table->tinyInteger('position');
-            $table->string('description')->nullable();
             $table->timestamps();
         });
 

@@ -13,9 +13,10 @@ class PurchaseStatus extends Model
 
     protected $fillable = [
         'name',
+        'table_name',
         'type',
-        'position',
-        'description',
+        'status',
+        'position'
     ];
 
   
