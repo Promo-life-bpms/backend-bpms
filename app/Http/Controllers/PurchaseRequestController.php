@@ -30,6 +30,7 @@ class PurchaseRequestController extends Controller
             $company_data = [];
             $spent_data = [];
             $center_data = [];
+            $status_data = [];
             array_push($company_data ,(object) [
                 'company_id' =>  $spent->company_id,
                 'company_name' =>  $spent->company->name
@@ -46,7 +47,19 @@ class PurchaseRequestController extends Controller
                 'center_name' =>  $spent->center->name,
             ]);
 
-            $approved_user = User::where('id', intval($spent->approved_by))->get()->last();
+            array_push($status_data ,(object) [
+                'id' => $spent->purchase_status->id,
+                'name' =>  $spent->purchase_status->name,
+                'table_name' =>  $spent->purchase_status->table_name,
+            ]);
+
+            $approved_by = 'Pendiente por aprobar';
+          
+            if($spent->approved_by != null || $spent->approved_by != '' ){
+                $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
+
+                $approved_by =  $user_approved->name;
+            }
             array_push($data, (object)[
                 'id' => $spent->id,
                 'user_id' => $spent->user_id,
@@ -56,11 +69,8 @@ class PurchaseRequestController extends Controller
                 'description' => $spent->description,
                 'file' => $spent->file,
                 'commentary' => $spent->commentary,
-                'purchase_status_id' => $spent->purchase_status_id,
-                'purchase_status_name' => $spent->purchase_status->name,
-                'purchase_status_position' => $spent->purchase_status->position,
-                'purchase_status_status' => $spent->purchase_status->description,
-                'approved_by' => $approved_user->name,
+                'status' => $status_data,
+                'approved_by' => $approved_by,
                 'total' => $spent->total,
                 'created_at' => $spent->created_at
             ]);
