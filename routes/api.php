@@ -168,5 +168,9 @@ Route::group(['middleware' => 'auth'], function () {
     //Exportar
     Route::post('caja-chica/generar-reporte/', [SmallBoxUserController::class, 'report']);
 
+    //Datos para solicitud
+
+
 });
+Route::get('caja-chica/datos-solicitud/', [SmallBoxUserController::class, 'dataRequest']);
 

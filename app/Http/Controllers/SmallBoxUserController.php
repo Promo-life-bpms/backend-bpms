@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Center;
 use App\Models\Company;
 use App\Models\PaymentMethod;
 use App\Models\PurchaseRequest;
+use App\Models\Role;
+use App\Models\Spent;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -87,5 +90,71 @@ class SmallBoxUserController extends Controller
 
         $reporte = new SmallBoxReport();
         $reporte->smallBoxReport($purchases, $filter_data);
+    }
+
+    public function dataRequest()
+    {
+        $data = [];
+
+        $companies_data = [];
+        $spents_data = [];
+        $centers_data = [];
+        $roles_data = [];
+        $payments_data = [];
+
+        $companies = Company::all();
+        $centers = Center::all();
+        $spents = Spent::all();
+        $roles = Role::all();
+        $payments = PaymentMethod::all();
+
+        foreach($companies as $company){
+
+            array_push($companies_data, (object)[
+                'id' => $company->id,
+                'name' => $company->name,
+            ]);
+        }
+
+        foreach($spents as $spent){
+            array_push($spents_data, (object)[
+                'id' => $spent->id,
+                'concept' => $spent->concept,
+                'center' => $spent->center->name,
+                'outgo_type' => $spent->outgo_type,
+                'expense_type' => $spent->expense_type,
+            ]);
+        }
+
+        foreach($centers as $center){
+            array_push($centers_data, (object)[
+                'id' => $center->id,
+                'name' => $center->name,
+            ]);
+        }
+
+        foreach($roles as $role){
+            array_push($roles_data, (object)[
+                'id' => $role->id,
+                'name' => $role->display_name,
+            ]);
+        }
+
+        foreach($payments as $payment){
+            array_push($payments_data, (object)[
+                'id' => $payment->id,
+                'name' => $payment->name,
+            ]);
+        }
+
+        $data = [
+            'companies' => $companies_data,
+            'centers' => $centers_data,
+            'spents' => $spents_data,
+            'payments' => $payments_data, 
+            'roles' => $roles_data,
+        ];
+        
+        return $data;
     }
 }

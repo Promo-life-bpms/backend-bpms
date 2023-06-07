@@ -20,6 +20,6 @@ class Spent extends Model
 
     public function center()
     {
-        return $this->hasOne(Center::class);
+        return $this->belongsTo(Center::class);
     }
 }
