@@ -355,7 +355,7 @@ class PurchaseRequestController extends Controller
     
     public function showPage($page)
     {
-         //Status
+        //Status
         //0: PENDIENTE
         //1: APROBADA
         //2: RECHAZADA

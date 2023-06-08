@@ -131,6 +131,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     //Ordenes
     Route::get('caja-chica/mis-ordenes/', [SmallBoxUserController::class, 'showUserRequests']);
+    Route::get('caja-chica/mis-ordenes/{page}', [SmallBoxUserController::class, 'showUserPageRequests']);
+
 
     //Spent
     Route::get('caja-chica/gastos/ver/', [SpentController::class, 'show']);
