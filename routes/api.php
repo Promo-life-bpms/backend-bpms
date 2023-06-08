@@ -140,6 +140,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     //PurchaseRequest
     Route::get('caja-chica/solicitudes-de-compra/ver/', [PurchaseRequestController::class, 'show']);
+    Route::get('caja-chica/solicitudes-de-compra/ver/{page}', [PurchaseRequestController::class, 'showPage']);
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
     Route::post('caja-chica/solicitudes-de-compra/editar/', [PurchaseRequestController::class, 'update']);
     Route::post('caja-chica/solicitudes-de-compra/borrar/', [PurchaseRequestController::class, 'delete']);
@@ -169,8 +170,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/generar-reporte/', [SmallBoxUserController::class, 'report']);
 
     //Datos para solicitud
+    Route::get('caja-chica/datos-solicitud/', [SmallBoxUserController::class, 'dataRequest']);
 
 
 });
-Route::get('caja-chica/datos-solicitud/', [SmallBoxUserController::class, 'dataRequest']);
 

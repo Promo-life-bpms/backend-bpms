@@ -54,7 +54,7 @@ class PurchaseRequest extends Model
     
     public function payment_method()
     {
-        return $this->hasOne(PaymentMethod::class);
+        return $this->belongsTo(PaymentMethod::class);
     }
 
     public function purchase_devolution()
