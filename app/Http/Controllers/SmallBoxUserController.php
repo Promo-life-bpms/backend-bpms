@@ -18,7 +18,7 @@ class SmallBoxUserController extends Controller
         $user= auth()->user();
         
         if($user !=null){
-            //Status
+        //Status
         //0: PENDIENTE
         //1: APROBADA
         //2: RECHAZADA
@@ -82,13 +82,28 @@ class SmallBoxUserController extends Controller
                     'status' =>  $spents[$i]->purchase_status->status,
                 ]);
     
-                $approved_by = 'Pendiente por aprobar';
+                $approved_by = '';
               
                 if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
                     $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
     
                     $approved_by =  $user_approved->name;
                 }
+                
+                $approved_status = '';
+
+                if($spents[$i]->status == 0){
+                    $approved_status = 'pendiente';
+                }
+
+                if($spents[$i]->status == 1){
+                    $approved_status = 'aprobada';
+                }
+
+                if($spents[$i]->status == 2){
+                    $approved_status = 'rechazada';
+                }
+
                 array_push($data, (object)[
                     'id' => $spents[$i]->id,
                     'user_id' => $spents[$i]->user_id,
@@ -99,6 +114,7 @@ class SmallBoxUserController extends Controller
                     'file' => $spents[$i]->file,
                     'commentary' => $spents[$i]->commentary,
                     'status' => $status_data,
+                    'approved_status' => $approved_status,
                     'approved_by' => $approved_by,
                     'payment_method' =>$spents[$i]->payment_method->name, 
                     'total' => $spents[$i]->total,
@@ -197,13 +213,27 @@ class SmallBoxUserController extends Controller
                         'status' =>  $spents[$i]->purchase_status->status,
                     ]);
         
-                    $approved_by = 'Pendiente por aprobar';
+                    $approved_by = '';
                 
                     if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
                         $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
         
                         $approved_by =  $user_approved->name;
                     }
+                    $approved_status = '';
+
+                    if($spents[$i]->status == 0){
+                        $approved_status = 'pendiente';
+                    }
+
+                    if($spents[$i]->status == 1){
+                        $approved_status = 'aprobada';
+                    }
+
+                    if($spents[$i]->status == 2){
+                        $approved_status = 'rechazada';
+                    }
+
                     array_push($data, (object)[
                         'id' => $spents[$i]->id,
                         'user_id' => $spents[$i]->user_id,
@@ -214,13 +244,13 @@ class SmallBoxUserController extends Controller
                         'file' => $spents[$i]->file,
                         'commentary' => $spents[$i]->commentary,
                         'status' => $status_data,
+                        'approved_status' => $approved_status,
                         'approved_by' => $approved_by,
                         'payment_method' =>$spents[$i]->payment_method->name, 
                         'total' => $spents[$i]->total,
                         'created_at' => $spents[$i]->created_at,
                     ]);
-                }
-                
+                }  
             }
 
             return array(

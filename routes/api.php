@@ -146,6 +146,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
     Route::post('caja-chica/solicitudes-de-compra/editar/', [PurchaseRequestController::class, 'update']);
     Route::post('caja-chica/solicitudes-de-compra/borrar/', [PurchaseRequestController::class, 'delete']);
+    
     Route::post('caja-chica/aprobar-solicitud/', [PurchaseRequestController::class, 'approved']);
     Route::post('caja-chica/rechazar-solicitud/', [PurchaseRequestController::class, 'rejected']);
     Route::post('caja-chica/confirmar-entrega/', [PurchaseRequestController::class, 'confirmDelivered']);
@@ -159,14 +160,14 @@ Route::group(['middleware' => 'auth'], function () {
 
     //UserCenter 
     Route::get('caja-chica/usuarios-centro-de-costos/ver/', [UserCenterController::class, 'show']);
-    Route::get('caja-chica/usuarios-ccentro-de-costos/crear/', [UserCenterController::class, 'store']);
-    Route::get('caja-chica/usuarios-ccentro-de-costos/eliminar/', [UserCenterController::class, 'delete']);
+    Route::get('caja-chica/usuarios-centro-de-costos/crear/', [UserCenterController::class, 'store']);
+    Route::get('caja-chica/usuarios-centro-de-costos/eliminar/', [UserCenterController::class, 'delete']);
 
     //Companies
-    Route::get('caja-chica/centros-de-costos/ver/', [CompaniesController::class, 'show']);
-    Route::post('caja-chica/centros-de-costos/crear/', [CompaniesController::class, 'store']);
-    Route::post('caja-chica/centros-de-costos/editar/', [CompaniesController::class, 'update']);
-    Route::post('caja-chica/centros-de-costos/borrar/', [CompaniesController::class, 'delete']);
+    Route::get('caja-chica/companias/ver/', [CompaniesController::class, 'show']);
+    Route::post('caja-chica/companias/crear/', [CompaniesController::class, 'store']);
+    Route::post('caja-chica/companias/editar/', [CompaniesController::class, 'update']);
+    Route::post('caja-chica/companias/borrar/', [CompaniesController::class, 'delete']);
 
     //Exportar
     Route::post('caja-chica/generar-reporte/', [SmallBoxUserController::class, 'report']);

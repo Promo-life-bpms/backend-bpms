@@ -81,13 +81,28 @@ class PurchaseRequestController extends Controller
                     'status' =>  $spents[$i]->purchase_status->status,
                 ]);
     
-                $approved_by = 'Pendiente por aprobar';
+                $approved_by = '';
               
                 if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
                     $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
     
                     $approved_by =  $user_approved->name;
                 }
+
+                $approved_status = '';
+
+                if($spents[$i]->status == 0){
+                    $approved_status = 'pendiente';
+                }
+
+                if($spents[$i]->status == 1){
+                    $approved_status = 'aprobada';
+                }
+
+                if($spents[$i]->status == 2){
+                    $approved_status = 'rechazada';
+                }
+
                 array_push($data, (object)[
                     'id' => $spents[$i]->id,
                     'user_id' => $spents[$i]->user_id,
@@ -98,6 +113,7 @@ class PurchaseRequestController extends Controller
                     'file' => $spents[$i]->file,
                     'commentary' => $spents[$i]->commentary,
                     'status' => $status_data,
+                    'approved_status' => $approved_status,
                     'approved_by' => $approved_by,
                     'payment_method' =>$spents[$i]->payment_method->name, 
                     'total' => $spents[$i]->total,
@@ -140,7 +156,6 @@ class PurchaseRequestController extends Controller
             $path= $request->file('file')->move('storage/smallbox/files/', $fileNameToStore);
         }
 
-      
         $create_spent = new PurchaseRequest();
         $create_spent->user_id = $request->user_id;
         $create_spent->company_id = $request->company_id;
@@ -168,14 +183,12 @@ class PurchaseRequestController extends Controller
             'spent_id' => 'required',
             'center_id' => 'required',
             'description' => 'required',
-            'file	' => 'required',
-            'commentary' => 'required',
-            'purchase_status_id' => 'required',
             'payment_method_id' => 'required',
             'total' => 'required',
+            'purchase_status_id'=> 'required',
         ]);
 
-        $spent = Spent::where('id',$request->id)->last()->get();
+        $spent = PurchaseRequest::where('id',$request->id)->get()->last();
 
         $path = $spent->file;
 
@@ -188,7 +201,7 @@ class PurchaseRequestController extends Controller
             $path= $request->file('file')->move('storage/smallbox/files/', $fileNameToStore);
         }
 
-        DB::table('spents')->where('id',$request->id)->update([
+        DB::table('purchase_requests')->where('id',$request->id)->update([
             'company_id' => $request->company_id,
             'spent_id' => $request->spent_id,
             'center_id' => $request->center_id,
@@ -209,10 +222,12 @@ class PurchaseRequestController extends Controller
             'id' => 'required',
         ]);
 
-        DB::table('spents')->where('id',$request->id)->update([
-            'status' => 4,
-        ]);
+        $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
+        File::delete($purchase_request->file);
+
+        $purchase_request->delete();
+        
         return response()->json(['msg' => "Registro eliminado satisfactoriamente"]);
     }
 
@@ -422,13 +437,28 @@ class PurchaseRequestController extends Controller
                     'status' =>  $spents[$i]->purchase_status->status,
                 ]);
     
-                $approved_by = 'Pendiente por aprobar';
+                $approved_by = '';
               
                 if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
                     $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
     
                     $approved_by =  $user_approved->name;
                 }
+
+                $approved_status = '';
+
+                if($spents[$i]->status == 0){
+                    $approved_status = 'pendiente';
+                }
+
+                if($spents[$i]->status == 1){
+                    $approved_status = 'aprobada';
+                }
+
+                if($spents[$i]->status == 2){
+                    $approved_status = 'rechazada';
+                }
+
                 array_push($data, (object)[
                     'id' => $spents[$i]->id,
                     'user_id' => $spents[$i]->user_id,
@@ -439,6 +469,7 @@ class PurchaseRequestController extends Controller
                     'file' => $spents[$i]->file,
                     'commentary' => $spents[$i]->commentary,
                     'status' => $status_data,
+                    'approved_status' => $approved_status,
                     'approved_by' => $approved_by,
                     'payment_method' =>$spents[$i]->payment_method->name, 
                     'total' => $spents[$i]->total,
