@@ -18,12 +18,7 @@ class SmallBoxUserController extends Controller
         $user= auth()->user();
         
         if($user !=null){
-        //Status
-        //0: PENDIENTE
-        //1: APROBADA
-        //2: RECHAZADA
-        //3: ELIMINADA
-
+     
         $total_page = 15;
         $data = [];
         $spents =  $user->purchaseRequest;
@@ -90,19 +85,13 @@ class SmallBoxUserController extends Controller
                     $approved_by =  $user_approved->name;
                 }
                 
-                $approved_status = '';
-
-                if($spents[$i]->status == 0){
-                    $approved_status = 'pendiente';
-                }
-
-                if($spents[$i]->status == 1){
-                    $approved_status = 'aprobada';
-                }
-
-                if($spents[$i]->status == 2){
-                    $approved_status = 'rechazada';
-                }
+                $approved_by = '';
+              
+                if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
+                    $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
+    
+                    $approved_by =  $user_approved->name;
+                }                
 
                 array_push($data, (object)[
                     'id' => $spents[$i]->id,
@@ -113,11 +102,13 @@ class SmallBoxUserController extends Controller
                     'description' => $spents[$i]->description,
                     'file' => $spents[$i]->file,
                     'commentary' => $spents[$i]->commentary,
-                    'status' => $status_data,
-                    'approved_status' => $approved_status,
+                    'purchase_status' => $spents[$i]->purchase_status->name,
+                    'type' => $spents[$i]->type,
+                    'type_status' => $spents[$i]->type_status,
+                    'payment_method' => $spents[$i]->payment_method->name,
+                    'total' =>$spents[$i]->total, 
+                    'approved_status' => $spents[$i]->approved_status,
                     'approved_by' => $approved_by,
-                    'payment_method' =>$spents[$i]->payment_method->name, 
-                    'total' => $spents[$i]->total,
                     'created_at' => $spents[$i]->created_at,
                 ]);
             }
@@ -143,12 +134,6 @@ class SmallBoxUserController extends Controller
 
     public function showUserPageRequests($page)
     {
-        //Status
-        //0: PENDIENTE
-        //1: APROBADA
-        //2: RECHAZADA
-        //3: ELIMINADA
-
         $user= auth()->user();
 
         if($user != null){
@@ -220,19 +205,13 @@ class SmallBoxUserController extends Controller
         
                         $approved_by =  $user_approved->name;
                     }
-                    $approved_status = '';
-
-                    if($spents[$i]->status == 0){
-                        $approved_status = 'pendiente';
-                    }
-
-                    if($spents[$i]->status == 1){
-                        $approved_status = 'aprobada';
-                    }
-
-                    if($spents[$i]->status == 2){
-                        $approved_status = 'rechazada';
-                    }
+                    $approved_by = '';
+              
+                    if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
+                        $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
+        
+                        $approved_by =  $user_approved->name;
+                    }                
 
                     array_push($data, (object)[
                         'id' => $spents[$i]->id,
@@ -243,11 +222,13 @@ class SmallBoxUserController extends Controller
                         'description' => $spents[$i]->description,
                         'file' => $spents[$i]->file,
                         'commentary' => $spents[$i]->commentary,
-                        'status' => $status_data,
-                        'approved_status' => $approved_status,
+                        'purchase_status' => $spents[$i]->purchase_status->name,
+                        'type' => $spents[$i]->type,
+                        'type_status' => $spents[$i]->type_status,
+                        'payment_method' => $spents[$i]->payment_method->name,
+                        'total' =>$spents[$i]->total, 
+                        'approved_status' => $spents[$i]->approved_status,
                         'approved_by' => $approved_by,
-                        'payment_method' =>$spents[$i]->payment_method->name, 
-                        'total' => $spents[$i]->total,
                         'created_at' => $spents[$i]->created_at,
                     ]);
                 }  

@@ -629,200 +629,25 @@ class SmallBoxSeeder extends Seeder
             'center_id' => 7,
         ]);
 
-
-
+        
         PurchaseStatus::create([
             'name' => 'En proceso',
             'table_name' => 'en-proceso',
-            'type' => 'producto',
-            'status' => 'normal',
-            'position' => 1
         ]);
 
         PurchaseStatus::create([
             'name' => 'Compra',
             'table_name' => 'compra',
-            'type' => 'producto',
-            'status' => 'normal',
-            'position' => 2
         ]);
 
         PurchaseStatus::create([
             'name' => 'Entregado',
             'table_name' => 'entregado',
-            'type' => 'producto',
-            'status' => 'normal',
-            'position' => 3
         ]);
 
         PurchaseStatus::create([
             'name' => 'Recibido',
             'table_name' => 'recibido',
-            'type' => 'producto',
-            'status' => 'normal',
-            'position' => 4
-        ]);
-
-
-
-        PurchaseStatus::create([
-            'name' => 'En proceso',
-            'table_name' => 'en-proceso',
-            'type' => 'producto',
-            'status' => 'cancelado',
-            'position' => 1
-        ]);
-
-        PurchaseStatus::create([
-            'name' => 'Compra',
-            'table_name' => 'compra',
-            'type' => 'producto',
-            'status' => 'cancelado',
-            'position' => 2
-        ]);
-
-        PurchaseStatus::create([
-            'name' => 'Entregado',
-            'table_name' => 'entregado',
-            'type' => 'producto',
-            'status' => 'cancelado',
-            'position' => 3
-        ]);
-
-        PurchaseStatus::create([
-            'name' => 'Recibido',
-            'table_name' => 'recibido',
-            'type' => 'producto',
-            'status' => 'cancelado',
-            'position' => 4
-        ]);
-
-
-        PurchaseStatus::create([
-            'name' => 'En proceso',
-            'table_name' => 'en-proceso',
-            'type' => 'producto',
-            'status' => 'devolucion',
-            'position' => 1
-        ]);
-
-        PurchaseStatus::create([
-            'name' => 'Compra',
-            'table_name' => 'compra',
-            'type' => 'producto',
-            'status' => 'devolucion',
-            'position' => 2
-        ]);
-
-        PurchaseStatus::create([
-            'name' => 'Entregado',
-            'table_name' => 'entregado',
-            'type' => 'producto',
-            'status' => 'devolucion',
-            'position' => 3
-        ]);
-
-        PurchaseStatus::create([
-            'name' => 'Recibido',
-            'table_name' => 'recibido',
-            'type' => 'producto',
-            'status' => 'devolucion',
-            'position' => 4
-        ]);
-
-        
-
-
-        PurchaseStatus::create([
-            'name' => 'En proceso',
-            'table_name' => 'en-proceso',
-            'type' => 'servicio',
-            'status' => 'normal',
-            'position' => 1
-        ]);
-
-        PurchaseStatus::create([
-            'name' => 'Pagado',
-            'table_name' => 'pagado',
-            'type' => 'servicio',
-            'status' => 'normal',
-            'position' => 2
-        ]);
-        
-
-        
-        PurchaseStatus::create([
-            'name' => 'En proceso',
-            'table_name' => 'en-proceso',
-            'type' => 'servicio',
-            'status' => 'cancelado',
-            'position' => 1
-        ]);
-
-        PurchaseStatus::create([
-            'name' => 'Pagado',
-            'table_name' => 'pagado',
-            'type' => 'servicio',
-            'status' => 'cancelado',
-            'position' => 2
-        ]);
-
-        PurchaseStatus::create([
-            'name' => 'En proceso',
-            'table_name' => 'en-proceso',
-            'type' => 'servicio',
-            'status' => 'devolucion',
-            'position' => 1
-        ]);
-
-        PurchaseStatus::create([
-            'name' => 'Pagado',
-            'table_name' => 'pagado',
-            'type' => 'servicio',
-            'status' => 'devolucion',
-            'position' => 2
-        ]);
-
-        PurchaseRequest::create([
-            'user_id' => 1,
-            'company_id' => 1,
-            'spent_id' => 1,
-            'center_id' => 4,  
-            'description' => 'descripcion de prueba',
-            'file' => null,
-            'commentary' => 'Comentario de prueba',
-            'purchase_status_id' => 1,
-            'payment_method_id' => 1,
-            'total' => 500.50,
-            'status' => 0,
-        ]);
-
-        PurchaseRequest::create([
-            'user_id' => 1,
-            'company_id' => 1,
-            'spent_id' => 2,
-            'center_id' => 1,            
-            'description' => 'descripcion de prueba 2',
-            'file' => null,
-            'commentary' => 'Comentario de prueba 2',
-            'purchase_status_id' => 1,
-            'payment_method_id' => 1,
-            'total' => 700.50,
-            'status' => 0,
-        ]);
-
-        PurchaseRequest::create([
-            'user_id' => 1,
-            'company_id' => 1,
-            'spent_id' => 3,
-            'center_id' => 2,  
-            'description' => 'descripcion de prueba 3',
-            'file' => null,
-            'commentary' => 'Comentario de prueba 2',
-            'purchase_status_id' => 1,
-            'payment_method_id' => 1,
-            'total' => 1200.50,
-            'status' => 0,
         ]);
 
     }

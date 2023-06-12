@@ -20,10 +20,13 @@ class PurchaseRequest extends Model
         'file',
         'commentary',
         'purchase_status_id',
+        'type',
+        'type_status',
         'payment_method_id',
         'total',
-        'status',
-        'approved_by'
+        'sign',
+        'approved_status',
+        'approved_by',
     ];
 
 
@@ -61,5 +64,6 @@ class PurchaseRequest extends Model
     {
         return $this->hasOne(PurchaseDevolution::class);
     }
+
 
 }

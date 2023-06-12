@@ -32,10 +32,7 @@ class CreateSmallBox extends Migration
             $table->id();
             $table->string('name');
             $table->string('table_name');
-            $table->string('type');
-            $table->string('status');
-            $table->tinyInteger('position');
-            $table->timestamps();
+            $table->timestamps();   
         });
 
         Schema::create('payment_methods', function (Blueprint $table) {
@@ -72,10 +69,13 @@ class CreateSmallBox extends Migration
             $table->string('file')->nullable();
             $table->string('commentary')->nullable();
             $table->foreignId('purchase_status_id')->references('id')->on('purchase_status');
+            $table->string('type');
+            $table->string('type_status');
             $table->foreignId('payment_method_id')->references('id')->on('payment_methods');
             $table->decimal('total', 16,2);
-            $table->tinyInteger('status');
-            $table->string('approved_by')->nullable();
+            $table->string('sign')->nullable();
+            $table->string('approved_status');
+            $table->integer('approved_by')->nullable();
             $table->timestamps();
         });
 
