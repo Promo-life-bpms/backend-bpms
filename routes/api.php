@@ -129,10 +129,12 @@ Route::group(['middleware' => 'auth'], function () {
 
     //CAJA CHICA
 
-    //Ordenes
+    //Ordenes Usuario
     Route::get('caja-chica/mis-ordenes/', [SmallBoxUserController::class, 'showUserRequests']);
     Route::get('caja-chica/mis-ordenes/{page}', [SmallBoxUserController::class, 'showUserPageRequests']);
-
+    //Ordenes Comprador
+    Route::get('caja-chica/ordenes-comprador/', [SmallBoxUserController::class, 'showBuyerRequests']);
+    Route::get('caja-chica/ordenes-comprador/{page}', [SmallBoxUserController::class, 'showBuyerPageRequests']);
 
     //Spent
     Route::get('caja-chica/gastos/ver/', [SpentController::class, 'show']);

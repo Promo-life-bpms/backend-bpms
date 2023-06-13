@@ -19,113 +19,112 @@ class SmallBoxUserController extends Controller
         
         if($user !=null){
      
-        $total_page = 15;
-        $data = [];
-        $spents =  $user->purchaseRequest;
+            $total_page = 15;
+            $data = [];
+            $spents =  $user->purchaseRequest;
+            
+
+            $total_elements = count($spents);
+
+            $total_pages =intval($total_elements / $total_page);   
+            $module =  intval($total_elements % $total_page);  
         
+            $max_pages = 0;
+            $next_page = 0;
+            $previus_page = 1;
+            $actual_page = 1;
 
-        $total_elements = count($spents);
+            $contador = 0;
+            $last_contador = 15;
 
-        $total_pages =intval($total_elements / $total_page);   
-        $module =  intval($total_elements % $total_page);  
-       
-        $max_pages = 0;
-        $next_page = 0;
-        $previus_page = 1;
-        $actual_page = 1;
+            if($total_pages == 0){
+                $max_pages = 1;
+                $next_page = 1;
+            }else{
+                $max_pages = $module == 0? $total_pages: ($total_pages +1);
+                $next_page = 2;
+            }
 
-        $contador = 0;
-        $last_contador = 15;
+            for($i = $contador; $i <= $last_contador ; $i ++ ){ 
 
-        if($total_pages == 0){
-            $max_pages = 1;
-            $next_page = 1;
-        }else{
-            $max_pages = $module == 0? $total_pages: ($total_pages +1);
-            $next_page = 2;
-        }
+                if(isset($spents[$i]->spent_id )){
 
-        for($i = $contador; $i <= $last_contador ; $i ++ ){ 
+                    $company_data = [];
+                    $spent_data = [];
+                    $center_data = [];
+                    $status_data = [];
+                    array_push($company_data ,(object) [
+                        'company_id' =>  $spents[$i]->company_id,
+                        'company_name' =>  $spents[$i]->company->name
+                    ]);
+        
+                    array_push($spent_data ,(object) [
+                        'spent_id' =>  $spents[$i]->spent_id,
+                        'spent_name' =>  $spents[$i]->spent->concept,
+                        'spent_outgo_type' =>  $spents[$i]->spent->outgo_type,
+                        'spent_expense_type' =>  $spents[$i]->spent->expense_type,
+                    ]);
+                    array_push($center_data ,(object) [
+                        'center_id' => $spents[$i]->center_id,
+                        'center_name' =>  $spents[$i]->center->name,
+                    ]);
+        
+                    array_push($status_data ,(object) [
+                        'id' => $spents[$i]->purchase_status->id,
+                        'name' =>  $spents[$i]->purchase_status->name,
+                        'table_name' =>  $spents[$i]->purchase_status->table_name,
+                        'type' =>  $spents[$i]->purchase_status->type,
+                        'status' =>  $spents[$i]->purchase_status->status,
+                    ]);
+        
+                    $approved_by = '';
+                
+                    if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
+                        $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
+        
+                        $approved_by =  $user_approved->name;
+                    }
+                    
+                    $approved_by = '';
+                
+                    if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
+                        $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
+        
+                        $approved_by =  $user_approved->name;
+                    }                
 
-            if(isset($spents[$i]->spent_id )){
-
-                $company_data = [];
-                $spent_data = [];
-                $center_data = [];
-                $status_data = [];
-                array_push($company_data ,(object) [
-                    'company_id' =>  $spents[$i]->company_id,
-                    'company_name' =>  $spents[$i]->company->name
-                ]);
-    
-                array_push($spent_data ,(object) [
-                    'spent_id' =>  $spents[$i]->spent_id,
-                    'spent_name' =>  $spents[$i]->spent->concept,
-                    'spent_outgo_type' =>  $spents[$i]->spent->outgo_type,
-                    'spent_expense_type' =>  $spents[$i]->spent->expense_type,
-                ]);
-                array_push($center_data ,(object) [
-                    'center_id' => $spents[$i]->center_id,
-                    'center_name' =>  $spents[$i]->center->name,
-                ]);
-    
-                array_push($status_data ,(object) [
-                    'id' => $spents[$i]->purchase_status->id,
-                    'name' =>  $spents[$i]->purchase_status->name,
-                    'table_name' =>  $spents[$i]->purchase_status->table_name,
-                    'type' =>  $spents[$i]->purchase_status->type,
-                    'status' =>  $spents[$i]->purchase_status->status,
-                ]);
-    
-                $approved_by = '';
-              
-                if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
-                    $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
-    
-                    $approved_by =  $user_approved->name;
+                    array_push($data, (object)[
+                        'id' => $spents[$i]->id,
+                        'user_id' => $spents[$i]->user_id,
+                        'company' =>  $company_data,
+                        'spent' => $spent_data,
+                        'center'  =>  $center_data,
+                        'description' => $spents[$i]->description,
+                        'file' => $spents[$i]->file,
+                        'commentary' => $spents[$i]->commentary,
+                        'purchase_status' => $spents[$i]->purchase_status->name,
+                        'purchase_table_name' => $spents[$i]->purchase_status->table_name,
+                        'type' => $spents[$i]->type,
+                        'type_status' => $spents[$i]->type_status,
+                        'payment_method' => $spents[$i]->payment_method->name,  
+                        'total' =>$spents[$i]->total, 
+                        'approved_status' => $spents[$i]->approved_status,
+                        'approved_by' => $approved_by,
+                        'created_at' => $spents[$i]->created_at,
+                    ]);
                 }
                 
-                $approved_by = '';
-              
-                if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
-                    $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
-    
-                    $approved_by =  $user_approved->name;
-                }                
-
-                array_push($data, (object)[
-                    'id' => $spents[$i]->id,
-                    'user_id' => $spents[$i]->user_id,
-                    'company' =>  $company_data,
-                    'spent' => $spent_data,
-                    'center'  =>  $center_data,
-                    'description' => $spents[$i]->description,
-                    'file' => $spents[$i]->file,
-                    'commentary' => $spents[$i]->commentary,
-                    'purchase_status' => $spents[$i]->purchase_status->name,
-                    'purchase_table_name' => $spents[$i]->purchase_status->table_name,
-                    'type' => $spents[$i]->type,
-                    'type_status' => $spents[$i]->type_status,
-                    'payment_method' => $spents[$i]->payment_method->name,  
-                    'total' =>$spents[$i]->total, 
-                    'approved_status' => $spents[$i]->approved_status,
-                    'approved_by' => $approved_by,
-                    'created_at' => $spents[$i]->created_at,
-                ]);
             }
-            
-        }
 
-        return array(
-            'spents' => $data, 
-            'pages' => [
-                'actual_page' => $actual_page,
-                'max_pages' => $max_pages,
-                'next_page' => 'caja-chica/solicitudes-de-compra/ver/'. $next_page,
-                'previus_page'  =>  'caja-chica/solicitudes-de-compra/ver/'. $previus_page,
-            ]
-        );
-
+            return array(
+                'spents' => $data, 
+                'pages' => [
+                    'actual_page' => $actual_page,
+                    'max_pages' => $max_pages,
+                    'next_page' => 'caja-chica/mis-ordenes/'. $next_page,
+                    'previus_page'  =>  'caja-chica/mis-ordenes/'. $previus_page,
+                ]
+            );
 
         }else{
             return response()->json(['Usuario no encontrado']);
@@ -241,8 +240,8 @@ class SmallBoxUserController extends Controller
                 'pages' => [
                     'actual_page' => $actual_page,
                     'max_pages' => $max_pages,
-                    'next_page' => 'caja-chica/solicitudes-de-compra/ver/'. $next_page,
-                    'previus_page'  =>  'caja-chica/solicitudes-de-compra/ver/'. $previus_page,
+                    'next_page' => 'caja-chica/mis-ordenes/'. $next_page,
+                    'previus_page'  =>  'caja-chica/mis-ordenes/'. $previus_page,
                 ]
             );
 
@@ -382,5 +381,242 @@ class SmallBoxUserController extends Controller
         ];
         
         return $data;
+    }
+
+    public function showBuyerRequests()
+    {
+        $user= auth()->user();
+        
+        if($user !=null){
+     
+            $total_page = 15;
+            $data = [];
+
+            $spents =  PurchaseRequest::where('purchase_status_id', '<>', 1)->get();
+            
+            $total_elements = count($spents);
+
+            $total_pages =intval($total_elements / $total_page);   
+            $module =  intval($total_elements % $total_page);  
+        
+            $max_pages = 0;
+            $next_page = 0;
+            $previus_page = 1;
+            $actual_page = 1;
+
+            $contador = 0;
+            $last_contador = 15;
+
+            if($total_pages == 0){
+                $max_pages = 1;
+                $next_page = 1;
+            }else{
+                $max_pages = $module == 0? $total_pages: ($total_pages +1);
+                $next_page = 2;
+            }
+
+            for($i = $contador; $i <= $last_contador ; $i ++ ){ 
+
+                if(isset($spents[$i]->spent_id )){
+
+                    $company_data = [];
+                    $spent_data = [];
+                    $center_data = [];
+                    $status_data = [];
+                    array_push($company_data ,(object) [
+                        'company_id' =>  $spents[$i]->company_id,
+                        'company_name' =>  $spents[$i]->company->name
+                    ]);
+        
+                    array_push($spent_data ,(object) [
+                        'spent_id' =>  $spents[$i]->spent_id,
+                        'spent_name' =>  $spents[$i]->spent->concept,
+                        'spent_outgo_type' =>  $spents[$i]->spent->outgo_type,
+                        'spent_expense_type' =>  $spents[$i]->spent->expense_type,
+                    ]);
+                    array_push($center_data ,(object) [
+                        'center_id' => $spents[$i]->center_id,
+                        'center_name' =>  $spents[$i]->center->name,
+                    ]);
+        
+                    array_push($status_data ,(object) [
+                        'id' => $spents[$i]->purchase_status->id,
+                        'name' =>  $spents[$i]->purchase_status->name,
+                        'table_name' =>  $spents[$i]->purchase_status->table_name,
+                        'type' =>  $spents[$i]->purchase_status->type,
+                        'status' =>  $spents[$i]->purchase_status->status,
+                    ]);
+        
+                    $approved_by = '';
+                
+                    if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
+                        $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
+        
+                        $approved_by =  $user_approved->name;
+                    }
+                    
+                    $approved_by = '';
+                
+                    if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
+                        $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
+        
+                        $approved_by =  $user_approved->name;
+                    }                
+
+                    array_push($data, (object)[
+                        'id' => $spents[$i]->id,
+                        'user_id' => $spents[$i]->user_id,
+                        'company' =>  $company_data,
+                        'spent' => $spent_data,
+                        'center'  =>  $center_data,
+                        'description' => $spents[$i]->description,
+                        'file' => $spents[$i]->file,
+                        'commentary' => $spents[$i]->commentary,
+                        'purchase_status' => $spents[$i]->purchase_status->name,
+                        'purchase_table_name' => $spents[$i]->purchase_status->table_name,
+                        'type' => $spents[$i]->type,
+                        'type_status' => $spents[$i]->type_status,
+                        'payment_method' => $spents[$i]->payment_method->name,  
+                        'total' =>$spents[$i]->total, 
+                        'approved_status' => $spents[$i]->approved_status,
+                        'approved_by' => $approved_by,
+                        'created_at' => $spents[$i]->created_at,
+                    ]);
+                }
+                
+            }
+
+            return array(
+                'spents' => $data, 
+                'pages' => [
+                    'actual_page' => $actual_page,
+                    'max_pages' => $max_pages,
+                    'next_page' => 'caja-chica/ordenes-comprador/'. $next_page,
+                    'previus_page'  =>  'caja-chica/ordenes-comprador/'. $previus_page,
+                ]
+            );
+
+        }else{
+            return response()->json(['Usuario no encontrado']);
+        }
+    }
+
+    public function showBuyerPageRequests($page)
+    {        
+        $user= auth()->user();
+
+        if($user != null){
+            $total_page = 15;
+            $data = [];
+            $spents = PurchaseRequest::where('purchase_status_id', '<>', 1)->get();
+
+            $total_elements = count($spents);
+
+            $total_pages =intval($total_elements / $total_page);      
+            $module =  intval($total_elements % $total_page);  
+
+            $max_pages = 0;
+            $next_page = 0;
+            $previus_page = 1;
+            $actual_page = 1;
+
+            $contador = 0;
+            $last_contador = 15;
+
+            if($total_pages == 0){
+                $max_pages = 1;
+                $next_page = 1;
+            }else{
+                $max_pages = $module == 0? $total_pages: ($total_pages +1);
+                $next_page = $max_pages > $page? intval($page)+1 : $page;
+                $contador = (intval($page) *15 )-15;
+                $last_contador = (intval($page) *15 );
+                $actual_page = intval($page);
+                $previus_page = intval($page) == 1? 1 : (intval($page)-1);
+            }
+
+            for($i = $contador; $i <= $last_contador ; $i ++ ){ 
+
+                if(isset($spents[$i]->spent_id )){
+
+                    $company_data = [];
+                    $spent_data = [];
+                    $center_data = [];
+                    $status_data = [];
+                    array_push($company_data ,(object) [
+                        'company_id' =>  $spents[$i]->company_id,
+                        'company_name' =>  $spents[$i]->company->name
+                    ]);
+        
+                    array_push($spent_data ,(object) [
+                        'spent_id' =>  $spents[$i]->spent_id,
+                        'spent_name' =>  $spents[$i]->spent->concept,
+                        'spent_outgo_type' =>  $spents[$i]->spent->outgo_type,
+                        'spent_expense_type' =>  $spents[$i]->spent->expense_type,
+                    ]);
+                    array_push($center_data ,(object) [
+                        'center_id' => $spents[$i]->center_id,
+                        'center_name' =>  $spents[$i]->center->name,
+                    ]);
+        
+                    array_push($status_data ,(object) [
+                        'id' => $spents[$i]->purchase_status->id,
+                        'name' =>  $spents[$i]->purchase_status->name,
+                        'table_name' =>  $spents[$i]->purchase_status->table_name,
+                        'type' =>  $spents[$i]->purchase_status->type,
+                        'status' =>  $spents[$i]->purchase_status->status,
+                    ]);
+        
+                    $approved_by = '';
+                
+                    if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
+                        $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
+        
+                        $approved_by =  $user_approved->name;
+                    }
+                    $approved_by = '';
+              
+                    if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
+                        $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
+        
+                        $approved_by =  $user_approved->name;
+                    }                
+
+                    array_push($data, (object)[
+                        'id' => $spents[$i]->id,
+                        'user_id' => $spents[$i]->user_id,
+                        'company' =>  $company_data,
+                        'spent' => $spent_data,
+                        'center'  =>  $center_data,
+                        'description' => $spents[$i]->description,
+                        'file' => $spents[$i]->file,
+                        'commentary' => $spents[$i]->commentary,
+                        'purchase_status' => $spents[$i]->purchase_status->name,
+                        'purchase_table_name' => $spents[$i]->purchase_status->table_name,
+                        'type' => $spents[$i]->type,
+                        'type_status' => $spents[$i]->type_status,
+                        'payment_method' => $spents[$i]->payment_method->name,
+                        'total' =>$spents[$i]->total, 
+                        'approved_status' => $spents[$i]->approved_status,
+                        'approved_by' => $approved_by,
+                        'created_at' => $spents[$i]->created_at,
+                    ]);
+                }  
+            }
+
+            return array(
+                'spents' => $data, 
+                'pages' => [
+                    'actual_page' => $actual_page,
+                    'max_pages' => $max_pages,
+                    'next_page' => 'caja-chica/ordenes-comprador/'. $next_page,
+                    'previus_page'  =>  'caja-chica/ordenes-comprador/'. $previus_page,
+                ]
+            );
+
+        }else{
+            return response()->json(['Usuario no encontrado']);
+        }
+
     }
 }
