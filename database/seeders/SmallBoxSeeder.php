@@ -632,22 +632,22 @@ class SmallBoxSeeder extends Seeder
         
         PurchaseStatus::create([
             'name' => 'En proceso',
-            'table_name' => 'en-proceso',
+            'table_name' => 'pedido-en-proceso',
         ]);
 
         PurchaseStatus::create([
             'name' => 'Compra',
-            'table_name' => 'compra',
+            'table_name' => 'pedio-en-compra',
         ]);
 
         PurchaseStatus::create([
             'name' => 'Entregado',
-            'table_name' => 'entregado',
+            'table_name' => 'pedido-entregado',
         ]);
 
         PurchaseStatus::create([
             'name' => 'Recibido',
-            'table_name' => 'recibido',
+            'table_name' => 'pedido-recibido',
         ]);
 
     }

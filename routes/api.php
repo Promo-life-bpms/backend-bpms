@@ -150,7 +150,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/aprobar-solicitud/', [PurchaseRequestController::class, 'approved']);
     Route::post('caja-chica/rechazar-solicitud/', [PurchaseRequestController::class, 'rejected']);
     Route::post('caja-chica/confirmar-entrega/', [PurchaseRequestController::class, 'confirmDelivered']);
+    Route::post('caja-chica/confirmar-recibido/', [PurchaseRequestController::class, 'confirmReceived']);
     Route::post('caja-chica/realizar-devolucion/', [PurchaseRequestController::class, 'createDevolution']);
+    Route::post('caja-chica/realizar-cancelacion/', [PurchaseRequestController::class, 'createCancellation']);
 
     //Center
     Route::get('caja-chica/centros-de-costos/ver/', [CenterController::class, 'show']);

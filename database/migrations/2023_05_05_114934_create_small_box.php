@@ -78,15 +78,6 @@ class CreateSmallBox extends Migration
             $table->integer('approved_by')->nullable();
             $table->timestamps();
         });
-
-        Schema::create('purchase_devolution', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('purchase_request_id')->references('id')->on('purchase_requests');
-            $table->string('motive')->nullable();
-            $table->foreignId('payment_method_id')->references('id')->on('payment_methods');
-            $table->string('description')->nullable(); 
-            $table->timestamps();
-        });
     }
 
     /**
@@ -96,7 +87,6 @@ class CreateSmallBox extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('purchase_devolution');
         Schema::dropIfExists('purchase_requests');
         Schema::dropIfExists('spents');
         Schema::dropIfExists('user_has_center');

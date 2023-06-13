@@ -17,6 +17,14 @@ class PurchaseRequestController extends Controller
 {
     public function show()
     {
+        $user = auth()->user();
+
+        if($user == null){
+            return response()->json([
+                'msg' => "Sesión de usuario expirada"
+            ]);
+        }
+
         $total_page = 15;
         $data = [];
         $spents = PurchaseRequest::all();
@@ -92,6 +100,7 @@ class PurchaseRequestController extends Controller
                     'file' => $spents[$i]->file,
                     'commentary' => $spents[$i]->commentary,
                     'purchase_status' => $spents[$i]->purchase_status->name,
+                    'purchase_table_name' => $spents[$i]->purchase_status->table_name,
                     'type' => $spents[$i]->type,
                     'type_status' => $spents[$i]->type_status,
                     'payment_method' => $spents[$i]->payment_method->name,
@@ -117,12 +126,18 @@ class PurchaseRequestController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth()->user();
+
+        if($user == null){
+            return response()->json([
+                'msg' => "Sesión de usuario expirada"
+            ]);
+        }
         $request->validate([
-            'user_id' => 'required',
             'company_id' => 'required',
             'spent_id' => 'required',
             'center_id' => 'required',
-            'description' => 'required',
+            'type'=> 'required',
             'payment_method_id' => 'required',
             'total' => 'required',
         ]);
@@ -138,7 +153,7 @@ class PurchaseRequestController extends Controller
         }
 
         $create_spent = new PurchaseRequest();
-        $create_spent->user_id = $request->user_id;
+        $create_spent->user_id = $user->id;
         $create_spent->company_id = $request->company_id;
         $create_spent->spent_id = $request->spent_id;
         $create_spent->center_id = $request->center_id;
@@ -146,10 +161,13 @@ class PurchaseRequestController extends Controller
         $create_spent->file = $path;
         $create_spent->commentary = '';
         $create_spent->purchase_status_id = 1;
+        $create_spent->type = $request->type;
+        $create_spent->type_status = 'normal';
         $create_spent->payment_method_id = $request->payment_method_id;
         $create_spent->total = $request->total;
+        $create_spent->sign= null;
+        $create_spent->approved_status = 'pendiente';
         $create_spent->approved_by = null;
-        $create_spent->status = 1;
         $create_spent->save();
 
         return response()->json(['msg' => "Registro guardado satisfactoriamente"]);
@@ -157,16 +175,23 @@ class PurchaseRequestController extends Controller
 
     public function update(Request $request)
     {
+        $user = auth()->user();
+
+        if($user == null){
+            return response()->json([
+                'msg' => "Sesión de usuario expirada"
+            ]);
+        }
+
         $request->validate([
             'id' => 'required',
-            'user_id' => 'required',
             'company_id' => 'required',
             'spent_id' => 'required',
             'center_id' => 'required',
             'description' => 'required',
             'payment_method_id' => 'required',
+            'type' => 'required',
             'total' => 'required',
-            'purchase_status_id'=> 'required',
         ]);
 
         $spent = PurchaseRequest::where('id',$request->id)->get()->last();
@@ -189,7 +214,7 @@ class PurchaseRequestController extends Controller
             'description' => $request->description,
             'file' => $path,
             'commentary' => $request->commentary,
-            'purchase_status_id' => $request->purchase_status_id,
+            'type' => $request->type,
             'payment_method_id' => $request->payment_method_id,
             'total' => $request->total,
         ]);
@@ -205,11 +230,20 @@ class PurchaseRequestController extends Controller
 
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
-        File::delete($purchase_request->file);
+        if( $purchase_request == null){
+            return response()->json(['msg' => "Producto no encontrado"]);
+        }
 
-        $purchase_request->delete();
-        
-        return response()->json(['msg' => "Registro eliminado satisfactoriamente"]);
+        if($purchase_request->approved_status == 'pendiente' && $purchase_request->approved_by == null){
+           
+            File::delete($purchase_request->file);
+
+            $purchase_request->delete();
+            
+            return response()->json(['msg' => "Registro eliminado satisfactoriamente"]);
+        }else{
+            return response()->json(['msg' => "No ha sido posible eliminar el registro"]);
+        }
     }
 
     public function approved(Request $request)
@@ -219,13 +253,21 @@ class PurchaseRequestController extends Controller
         ]);
 
         $user = Auth::user();
-    
-        DB::table('purchase_requests')->where('id',$request->id)->update([
-            'status' => 1,
-            'approved_by' => $user->id
-        ]);
 
-        return response()->json(['msg' => "Solicitud aprobada satisfactoriamente"]);
+        $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
+
+        if($purchase_request->approved_status == 'pendiente' && $purchase_request->approved_by == null){ 
+
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'approved_status' => 'aprobada',
+                'approved_by' => $user->id,
+                'purchase_status_id' => 2
+            ]);
+    
+            return response()->json(['msg' => "Solicitud aprobada satisfactoriamente"]);
+        }else{
+            return response()->json(['msg' => "No es posible aprobar solicitudes que previamente han sido aprobadas o rechazadas, en caso de requerirlo, cancela la solicitud e intenta nuevamente"]);
+        }
     }
 
     public function rejected(Request $request)
@@ -234,24 +276,23 @@ class PurchaseRequestController extends Controller
             'id' => 'required',
         ]);
 
-        $commentary = "";
-
-        if($request->commentary <> null){
-            $commentary = $request->commentary;
-        }
-
         $user = Auth::user();
 
-        DB::table('purchase_requests')->where('id',$request->id)->update([
-            'status' => 2,
-            'commentary' => $commentary,
-            'approved_by' => $user->id
-        ]);
+        $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
-        return response()->json(['msg' => "Solicitud rechazada satisfactoriamente"]);
+        if($purchase_request->approved_status == 'pendiente' && $purchase_request->purchase_status_id == 1){
+
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'approved_status' => 'rechazada',
+                'approved_by' => $user->id
+            ]);
+    
+            return response()->json(['msg' => "Solicitud rechazada satisfactoriamente"]);
+        }else{
+            return response()->json(['msg' => "No es posible rechazar solicitudes que previamente han sido aprobadas o rechazadas, en caso de requerirlo, cancela la solicitud e intenta nuevamente"]);
+        }
 
     }
-
 
     public function confirmDelivered(Request $request)
     {
@@ -261,43 +302,74 @@ class PurchaseRequestController extends Controller
 
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
-        if( $purchase_request == null){
+        if( $purchase_request == null ){
             return response()->json(['msg' => "Producto no encontrado"]);
         }
-        
-        $status = PurchaseStatus::where('id',$purchase_request->purchase_status_id)->get()->last();
-       
-        if($status->type == 'producto'){
-            $payment_status = PurchaseStatus::where('name','Recibido')->where('type','producto')->where('description', 'normal')->get()->last(); 
+
+        if($purchase_request->purchase_status_id == 2){
+           
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'purchase_status_id' => 3,
+            ]);
             
-            DB::table('purchase_requests')->where('id',$request->id)->update([
-                'purchase_status_id' => $payment_status->id,
-            ]);
+            return response()->json(['msg' => "Pedido confirmado"]);
+        }else{
+            return response()->json(['msg' => "No se ha podido confirmar el pedido, verfica que haya sido aprobado para compra o no ha sido entregado"]);
+        }
+        
+    }
 
-            return response()->json(['msg' => "Producto actualizado satisfactoriamente"]);
 
+    public function confirmReceived(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+        ]);
+
+        $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
+
+        if($purchase_request == null){
+            return response()->json(['msg' => "Orden no encontrada"]);
         }
 
-
-        if($status->type == 'servicio'){
-            $payment_status = PurchaseStatus::where('name','Pagado')->where('type','servicio')->where('description', 'normal')->get()->last();
-
+        if($purchase_request->purchase_status_id == 3 &&  $purchase_request->approved_status == 'aprobada'){
             DB::table('purchase_requests')->where('id',$request->id)->update([
-                'purchase_status_id' => $payment_status->id,
+                'purchase_status_id' => 4,
             ]);
-
-            return response()->json(['msg' => "Servicio actualizado satisfactoriamente"]);
-
-        }
-
+    
+            return response()->json(['msg' => "Se ha confirmado que el pedido fue recibido"]);
+        }else{
+            return response()->json(['msg' => "Nose ha podido realizar la confirmacion del pedido, verifica que la orden haya sido aprobada y confirmada de entrega"]);
+        }       
     }
 
     public function createDevolution(Request $request)
     {   
         $request->validate([
             'id' => 'required',
-            'motive' => 'required',
-            'payment_method_id' => 'required',
+        ]);
+
+        $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
+
+        if( $purchase_request == null){
+            return response()->json(['msg' => "Orden no encontrada"]);
+        }
+
+        if($purchase_request->purchase_status_id == 3 || $purchase_request->purchase_status_id == 4){
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'approved_status' => 'devolucion',
+            ]);
+    
+            return response()->json(['msg' => "Devolucion realizada"]);
+        }else{
+            return response()->json(['msg' => "No ha sido posible realizar la devolucion, verifica que la solicitud haya sido aprobada"]);
+        } 
+    }
+
+    public function createCancellation(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
         ]);
 
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
@@ -306,47 +378,15 @@ class PurchaseRequestController extends Controller
             return response()->json(['msg' => "Producto no encontrado"]);
         }
         
-        $status = PurchaseStatus::where('id',$purchase_request->purchase_status_id)->get()->last();
-        
-        if($status->name == 'En proceso' || $status->name == 'Compra' || $status->name == 'En proceso' ){
-            return response()->json(['msg' => "Solo se puede hacer devoluciones en pedidos cuyo status sea 'Entregado', 'Recibido' o 'Pagado'."]);
-        }
-       
-        if($status->type == 'producto'){
-            $payment_status = PurchaseStatus::where('name','Recibido')->where('type','producto')->where('description', 'devolucion')->get()->last(); 
-            
+        if($purchase_request->purchase_status_id == 2){
             DB::table('purchase_requests')->where('id',$request->id)->update([
-                'purchase_status_id' => $payment_status->id,
-            ]);
-            
-        }
-
-        if($status->type == 'servicio'){
-            $payment_status = PurchaseStatus::where('name','Pagado')->where('type','servicio')->where('description', 'devolucion')->get()->last();
-
-            DB::table('purchase_requests')->where('id',$request->id)->update([
-                'purchase_status_id' => $payment_status->id,
+                'approved_status' => 'cancelado',
             ]);
 
-        }
-
-
-        if(isset($purchase_request->purchase_devolution)){
-            DB::table('purchase_devolution')->where('purchase_request_id',$request->id)->update([
-                'motive' => $request->motive,
-                'payment_method_id' => $request->payment_method_id,
-            ]);
+            return response()->json(['msg' => "Cancelacion realizada"]);
         }else{
-            $create_purchase_devolution = new PurchaseDevolution();
-            $create_purchase_devolution->purchase_request_id = $purchase_request->id;
-            $create_purchase_devolution->motive = $request->motive;
-            $create_purchase_devolution->payment_method_id = $request->payment_method_id;
-            $create_purchase_devolution->description = $request->description;
-            $create_purchase_devolution->save();
+            return response()->json(['msg' => "No es posible realizar una cancelacion una vez recibas el producto, se debe realizar una devolucion"]);
         }
-
-        return response()->json(['msg' => "Devolucion realizada"]);
-
     }
     
     public function showPage($page)
@@ -438,6 +478,7 @@ class PurchaseRequestController extends Controller
                     'file' => $spents[$i]->file,
                     'commentary' => $spents[$i]->commentary,
                     'purchase_status' => $spents[$i]->purchase_status->name,
+                    'purchase_table_name' => $spents[$i]->purchase_status->table_name,
                     'type' => $spents[$i]->type,
                     'type_status' => $spents[$i]->type_status,
                     'payment_method' => $spents[$i]->payment_method->name,
