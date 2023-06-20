@@ -589,9 +589,13 @@ class SmallBoxSeeder extends Seeder
 
         PaymentMethod::create([
             'name' => 'TRANSFERENCIA',
-            'description' => 'Pagon con transferencia',
+            'description' => 'Pago con transferencia',
         ]); 
 
+        PaymentMethod::create([
+            'name' => 'SIN METODO DE PAGO',
+            'description' => 'Sin metodo de pago definido',
+        ]);
         
 
         //Seeders temporales

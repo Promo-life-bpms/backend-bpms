@@ -96,6 +96,7 @@ class SmallBoxUserController extends Controller
                     array_push($data, (object)[
                         'id' => $spents[$i]->id,
                         'user_id' => $spents[$i]->user_id,
+                        'user_name' => $spents[$i]->user->name,
                         'company' =>  $company_data,
                         'spent' => $spent_data,
                         'center'  =>  $center_data,
@@ -216,6 +217,7 @@ class SmallBoxUserController extends Controller
                     array_push($data, (object)[
                         'id' => $spents[$i]->id,
                         'user_id' => $spents[$i]->user_id,
+                        'user_name' => $spents[$i]->user->name,
                         'company' =>  $company_data,
                         'spent' => $spent_data,
                         'center'  =>  $center_data,
@@ -466,6 +468,7 @@ class SmallBoxUserController extends Controller
                     array_push($data, (object)[
                         'id' => $spents[$i]->id,
                         'user_id' => $spents[$i]->user_id,
+                        'user_name' => $spents[$i]->user->name,
                         'company' =>  $company_data,
                         'spent' => $spent_data,
                         'center'  =>  $center_data,
@@ -585,6 +588,7 @@ class SmallBoxUserController extends Controller
                     array_push($data, (object)[
                         'id' => $spents[$i]->id,
                         'user_id' => $spents[$i]->user_id,
+                        'user_name' => $spents[$i]->user->name,
                         'company' =>  $company_data,
                         'spent' => $spent_data,
                         'center'  =>  $center_data,

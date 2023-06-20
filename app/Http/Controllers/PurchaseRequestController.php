@@ -93,6 +93,7 @@ class PurchaseRequestController extends Controller
                 array_push($data, (object)[
                     'id' => $spents[$i]->id,
                     'user_id' => $spents[$i]->user_id,
+                    'user_name' => $spents[$i]->user->name,
                     'company' =>  $company_data,
                     'spent' => $spent_data,
                     'center'  =>  $center_data,
@@ -136,14 +137,17 @@ class PurchaseRequestController extends Controller
         $request->validate([
             'company_id' => 'required',
             'spent_id' => 'required',
-            'center_id' => 'required',
             'type'=> 'required',
-            'payment_method_id' => 'required',
             'total' => 'required',
         ]);
 
-        $path = "";
-
+        $spent = Spent::where('id',$request->spent_id)->get()->last();
+        if($spent == null){
+            $center_id = 1;
+        }else{
+            $center_id = $spent->center_id;
+        }
+        $path = '';
         if ($request->hasFile('file')) {
             $filenameWithExt = $request->file('file')->getClientOriginalName();
             $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
@@ -156,14 +160,14 @@ class PurchaseRequestController extends Controller
         $create_spent->user_id = $user->id;
         $create_spent->company_id = $request->company_id;
         $create_spent->spent_id = $request->spent_id;
-        $create_spent->center_id = $request->center_id;
+        $create_spent->center_id = $center_id;
         $create_spent->description = $request->description;
         $create_spent->file = $path;
         $create_spent->commentary = '';
         $create_spent->purchase_status_id = 1;
         $create_spent->type = $request->type;
         $create_spent->type_status = 'normal';
-        $create_spent->payment_method_id = $request->payment_method_id;
+        $create_spent->payment_method_id = 4;
         $create_spent->total = $request->total;
         $create_spent->sign= null;
         $create_spent->approved_status = 'pendiente';
@@ -471,6 +475,7 @@ class PurchaseRequestController extends Controller
                 array_push($data, (object)[
                     'id' => $spents[$i]->id,
                     'user_id' => $spents[$i]->user_id,
+                    'user_name' => $spents[$i]->user->name,
                     'company' =>  $company_data,
                     'spent' => $spent_data,
                     'center'  =>  $center_data,
