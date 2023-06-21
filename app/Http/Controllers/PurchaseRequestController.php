@@ -2,12 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PurchaseDevolution;
 use App\Models\PurchaseRequest;
-use App\Models\PurchaseStatus;
 use App\Models\Spent;
 use App\Models\User;
-use Faker\Provider\ar_EG\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,103 +22,70 @@ class PurchaseRequestController extends Controller
             ]);
         }
 
-        $total_page = 15;
         $data = [];
         $spents = PurchaseRequest::all();
 
-        $total_elements = count($spents);
+        foreach($spents as $spent){
+            $company_data = [];
+            $spent_data = [];
+            $center_data = [];
+            $status_data = [];
+            array_push($company_data ,(object) [
+                'company_id' =>  $spent->company_id,
+                'company_name' =>  $spent->company->name
+            ]);
 
-        $total_pages =intval($total_elements / $total_page);   
-        $module =  intval($total_elements % $total_page);  
-       
-        $max_pages = 0;
-        $next_page = 0;
-        $previus_page = 1;
-        $actual_page = 1;
+            array_push($spent_data ,(object) [
+                'spent_id' =>  $spent->spent_id,
+                'spent_name' =>  $spent->spent->concept,
+                'spent_outgo_type' =>  $spent->spent->outgo_type,
+                'spent_expense_type' =>  $spent->spent->expense_type,
+            ]);
+            array_push($center_data ,(object) [
+                'center_id' => $spent->center_id,
+                'center_name' =>  $spent->center->name,
+            ]);
 
-        $contador = 0;
-        $last_contador = 15;
+            array_push($status_data ,(object) [
+                'id' => $spent->purchase_status->id,
+                'name' =>  $spent->purchase_status->name,
+                'table_name' =>  $spent->purchase_status->table_name,
+                'type' =>  $spent->purchase_status->type,
+                'status' =>  $spent->purchase_status->status,
+            ]);
 
-        if($total_pages == 0){
-            $max_pages = 1;
-            $next_page = 1;
-        }else{
-            $max_pages = $module == 0? $total_pages: ($total_pages +1);
-            $next_page = 2;
-        }
+            $approved_by = '';
+          
+            if($spent->approved_by != null || $spent->approved_by != '' ){
+                $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
 
-        for($i = $contador; $i <= $last_contador ; $i ++ ){ 
+                $approved_by =  $user_approved->name;
+            }                
 
-            if(isset($spents[$i]->spent_id )){
-
-                $company_data = [];
-                $spent_data = [];
-                $center_data = [];
-                $status_data = [];
-                array_push($company_data ,(object) [
-                    'company_id' =>  $spents[$i]->company_id,
-                    'company_name' =>  $spents[$i]->company->name
-                ]);
-    
-                array_push($spent_data ,(object) [
-                    'spent_id' =>  $spents[$i]->spent_id,
-                    'spent_name' =>  $spents[$i]->spent->concept,
-                    'spent_outgo_type' =>  $spents[$i]->spent->outgo_type,
-                    'spent_expense_type' =>  $spents[$i]->spent->expense_type,
-                ]);
-                array_push($center_data ,(object) [
-                    'center_id' => $spents[$i]->center_id,
-                    'center_name' =>  $spents[$i]->center->name,
-                ]);
-    
-                array_push($status_data ,(object) [
-                    'id' => $spents[$i]->purchase_status->id,
-                    'name' =>  $spents[$i]->purchase_status->name,
-                    'table_name' =>  $spents[$i]->purchase_status->table_name,
-                    'type' =>  $spents[$i]->purchase_status->type,
-                    'status' =>  $spents[$i]->purchase_status->status,
-                ]);
-    
-                $approved_by = '';
-              
-                if($spents[$i]->approved_by != null || $spents[$i]->approved_by != '' ){
-                    $user_approved = User::where('id', intval($spents[$i]->approved_by))->get()->last();
-    
-                    $approved_by =  $user_approved->name;
-                }                
-
-                array_push($data, (object)[
-                    'id' => $spents[$i]->id,
-                    'user_id' => $spents[$i]->user_id,
-                    'user_name' => $spents[$i]->user->name,
-                    'company' =>  $company_data,
-                    'spent' => $spent_data,
-                    'center'  =>  $center_data,
-                    'description' => $spents[$i]->description,
-                    'file' => $spents[$i]->file,
-                    'commentary' => $spents[$i]->commentary,
-                    'purchase_status' => $spents[$i]->purchase_status->name,
-                    'purchase_table_name' => $spents[$i]->purchase_status->table_name,
-                    'type' => $spents[$i]->type,
-                    'type_status' => $spents[$i]->type_status,
-                    'payment_method' => $spents[$i]->payment_method->name,
-                    'total' =>$spents[$i]->total, 
-                    'approved_status' => $spents[$i]->approved_status,
-                    'approved_by' => $approved_by,
-                    'created_at' => $spents[$i]->created_at,
-                ]);
-            }
-            
+            array_push($data, (object)[
+                'id' => $spent->id,
+                'user_id' => $spent->user_id,
+                'user_name' => $spent->user->name,
+                'company' =>  $company_data,
+                'spent' => $spent_data,
+                'center'  =>  $center_data,
+                'description' => $spent->description,
+                'file' => $spent->file,
+                'commentary' => $spent->commentary,
+                'purchase_status' => $spent->purchase_status->name,
+                'purchase_table_name' => $spent->purchase_status->table_name,
+                'type' => $spent->type,
+                'type_status' => $spent->type_status,
+                'payment_method' => $spent->payment_method->name,
+                'total' =>$spent->total, 
+                'approved_status' => $spent->approved_status,
+                'approved_by' => $approved_by,
+                'created_at' => $spent->created_at,
+            ]);
         }
 
         return array(
             'spents' => $data, 
-            'pages' => [
-                'actual_page' => $actual_page,
-                'max_pages' => $max_pages,
-                'next_page' => 'caja-chica/solicitudes-de-compra/ver/'. $next_page,
-                'previus_page'  =>  'caja-chica/solicitudes-de-compra/ver/'. $previus_page,
-            ]
         );
     }
 
