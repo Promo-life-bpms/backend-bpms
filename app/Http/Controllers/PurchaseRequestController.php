@@ -470,4 +470,26 @@ class PurchaseRequestController extends Controller
             ]
         );
     }
+    
+    public function updatePaymentMethod(Request $request)
+    {
+        $user = auth()->user();
+
+        if($user == null){
+            return response()->json([
+                'msg' => "Sesión de usuario expirada"
+            ]);
+        }
+
+        $request->validate([
+            'id' => 'required',
+            'payment_method_id' => 'required',
+        ]);
+
+        DB::table('purchase_requests')->where('id',$request->id)->update([
+            'payment_method_id' => $request->payment_method_id,
+        ]);
+
+        return response()->json(['msg' => "Método de pago actualizado correctamente"]);
+    }
 }
