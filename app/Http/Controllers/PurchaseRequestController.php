@@ -324,8 +324,8 @@ class PurchaseRequestController extends Controller
         }
 
         if($purchase_request->purchase_status_id == 3 || $purchase_request->purchase_status_id == 4){
-            DB::table('type_status')->where('id',$request->id)->update([
-                'approved_status' => 'devolucion',
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'type_status' => 'devolucion',
             ]);
     
             return response()->json(['msg' => "Devolucion realizada"]);
