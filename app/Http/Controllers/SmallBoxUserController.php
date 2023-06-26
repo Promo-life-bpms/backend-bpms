@@ -358,7 +358,7 @@ class SmallBoxUserController extends Controller
         if($user !=null){
      
             $data = [];
-            $spents =  PurchaseRequest::where('purchase_status_id', '<>', 1)->get();
+            $spents = PurchaseRequest::where('purchase_status_id', '<>', 1)->where('approved_status', 'aprobada')->get();
             
             foreach($spents as $spent){
                 $company_data = [];
@@ -443,7 +443,7 @@ class SmallBoxUserController extends Controller
         if($user != null){
             $total_page = 15;
             $data = [];
-            $spents = PurchaseRequest::where('purchase_status_id', '<>', 1)->get();
+            $spents = PurchaseRequest::where('purchase_status_id', '<>', 1)->where('approved_status', 'aprobada')->get();
 
             $total_elements = count($spents);
 

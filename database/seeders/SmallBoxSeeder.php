@@ -31,6 +31,7 @@ class SmallBoxSeeder extends Seeder
             "COMUNICACION",
             "ALMACEN",
             "SERV GENERALES",
+            "SISTEMAS",
             "DESARROLLO",
             "RH",
             "LOGISTICA",
@@ -39,7 +40,7 @@ class SmallBoxSeeder extends Seeder
             "LEGAL",
             "GABRADO LASER",
             "NOMINA BANCO",
-            "NOMINA CASH"
+            "NOMINA CASH",
         ];
 
         foreach ($centers as $center) {
@@ -139,13 +140,6 @@ class SmallBoxSeeder extends Seeder
                 'outgo_type' => "FIJO" ,
                 'expense_type' => "GASTO" ,
             ],
-            (object)[
-                'concept' => "COMISION BANCARIA",
-                'center_id' => 4 ,
-                'outgo_type' => "FIJO" ,
-                'expense_type' => "GASTO" ,
-            ],
-
             (object)[
                 'concept' => "LUZ Y AGUA",
                 'center_id' => 5 ,
@@ -641,7 +635,7 @@ class SmallBoxSeeder extends Seeder
 
         PurchaseStatus::create([
             'name' => 'Compra',
-            'table_name' => 'pedio-en-compra',
+            'table_name' => 'pedido-en-compra',
         ]);
 
         PurchaseStatus::create([
