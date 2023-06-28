@@ -3,19 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\PurchaseRequest;
+use App\Models\Role;
 use App\Models\Spent;
 use App\Models\User;
+use App\Models\UserCenter;
+use App\Models\UserRole;
+use App\Notifications\BuyersRequestNotification;
+use App\Notifications\CreateRequestNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Notification;
 
 class PurchaseRequestController extends Controller
 {
+    //Solicitudes de Jefe directo
     public function show()
     {
         $user = auth()->user();
 
+        $user_center =  UserCenter::where('user_id', $user->id)->get('center_id');
+        
         if($user == null){
             return response()->json([
                 'msg' => "Sesión de usuario expirada"
@@ -23,7 +32,7 @@ class PurchaseRequestController extends Controller
         }
 
         $data = [];
-        $spents = PurchaseRequest::all();
+        $spents = PurchaseRequest::whereIn('center_id', $user_center)->get();
 
         foreach($spents as $spent){
             $company_data = [];
@@ -138,6 +147,24 @@ class PurchaseRequestController extends Controller
         $create_spent->approved_by = null;
         $create_spent->save();
 
+        $users_to_send_mail = UserCenter::where('center_id',$center_id)->get();
+
+        if(count($users_to_send_mail) != 0){
+            $spent = Spent::where('id',$request->spent_id)->get()->first();
+
+            foreach($users_to_send_mail as $user_mail){
+                $user = User::where('id', $user_mail->user_id)->get()->last();
+
+                try {
+                    Notification::route('mail', $user->email)
+                    ->notify(new CreateRequestNotification($spent->concept, $spent->center->name, $request->total));
+                } catch (\Exception $e) {
+                  return $e;
+                }
+            }
+        
+        }
+
         return response()->json(['msg' => "Registro guardado satisfactoriamente"]);
     }
 
@@ -231,7 +258,26 @@ class PurchaseRequestController extends Controller
                 'approved_by' => $user->id,
                 'purchase_status_id' => 2
             ]);
+            
+            $role_buyer = Role::where('name', 'compras')->get()->last();
+
+            $user_role = UserRole::where('role_id', $role_buyer->id)->get();
+            $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
+
+            foreach($user_role as $role){
+                $users_to_send_mail = User::where('id',$role->user_id)->get()->last();
+
+                $title = 'Nueva solicitud de compra';
+                $message = 'Haz recibido una nueva solicitud de compras.';
     
+                try {
+                    Notification::route('mail', $users_to_send_mail->email)
+                    ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
+                } catch (\Exception $e) {
+                    return $e;
+                }
+            }
+
             return response()->json(['msg' => "Solicitud aprobada satisfactoriamente"]);
         }else{
             return response()->json(['msg' => "No es posible aprobar solicitudes que previamente han sido aprobadas o rechazadas, en caso de requerirlo, cancela la solicitud e intenta nuevamente"]);
@@ -254,7 +300,23 @@ class PurchaseRequestController extends Controller
                 'approved_status' => 'rechazada',
                 'approved_by' => $user->id
             ]);
-    
+        
+            $users_to_send_mail = User::where('id',$purchase_request->user_id)->get()->last();
+
+            $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
+
+            $user = User::where('id', $spent->user_id)->get()->last();
+                
+            $title = 'Solicitud rechazada';
+            $message = 'Tu solicitud ha sido rechazada, revisa la información e intenta enviarla nuevamente.';
+
+            try {
+                Notification::route('mail', $users_to_send_mail->email)
+                ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
+            } catch (\Exception $e) {
+                return $e;
+            }
+      
             return response()->json(['msg' => "Solicitud rechazada satisfactoriamente"]);
         }else{
             return response()->json(['msg' => "No es posible rechazar solicitudes que previamente han sido aprobadas o rechazadas, en caso de requerirlo, cancela la solicitud e intenta nuevamente"]);
@@ -304,6 +366,20 @@ class PurchaseRequestController extends Controller
             DB::table('purchase_requests')->where('id',$request->id)->update([
                 'purchase_status_id' => 4,
             ]);
+
+            $users_to_send_mail = User::where('id',$purchase_request->user_id)->get()->last();
+
+            $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
+                
+            $title = 'Haz recibido el Pedido';
+            $message = 'Se ha confirmado que haz recibido el pedido';
+
+            try {
+                Notification::route('mail', $users_to_send_mail->email)
+                ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
+            } catch (\Exception $e) {
+                return $e;
+            }
     
             return response()->json(['msg' => "Se ha confirmado que el pedido fue recibido"]);
         }else{
@@ -327,6 +403,20 @@ class PurchaseRequestController extends Controller
             DB::table('purchase_requests')->where('id',$request->id)->update([
                 'type_status' => 'devolucion',
             ]);
+        
+            $users_to_send_mail = User::where('id',$purchase_request->user_id)->get()->last();
+
+            $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
+                
+            $title = 'Devolución de Pedido';
+            $message = 'Se ha realizado la devolucion del pedido';
+
+            try {
+                Notification::route('mail', $users_to_send_mail->email)
+                ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
+            } catch (\Exception $e) {
+                return $e;
+            }
     
             return response()->json(['msg' => "Devolucion realizada"]);
         }else{
@@ -351,6 +441,19 @@ class PurchaseRequestController extends Controller
                 'type_status' => 'cancelado',
             ]);
 
+            $users_to_send_mail = User::where('id',$purchase_request->user_id)->get()->last();
+
+            $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
+                
+            $title = 'Cancelación de Pedido';
+            $message = 'Se ha realizado la cancelación del pedido';
+
+            try {
+                Notification::route('mail', $users_to_send_mail->email)
+                ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
+            } catch (\Exception $e) {
+                return $e;
+            }
             return response()->json(['msg' => "Cancelacion realizada"]);
         }else{
             return response()->json(['msg' => "No es posible realizar una cancelacion una vez recibas el producto, se debe realizar una devolucion"]);

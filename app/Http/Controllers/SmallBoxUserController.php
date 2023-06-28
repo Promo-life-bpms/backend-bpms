@@ -9,7 +9,9 @@ use App\Models\PurchaseRequest;
 use App\Models\Role;
 use App\Models\Spent;
 use App\Models\User;
+use App\Notifications\CreateRequestNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class SmallBoxUserController extends Controller
 {
@@ -226,7 +228,6 @@ class SmallBoxUserController extends Controller
             'description' =>'required',
             'file' =>'required',
             'purchase_status_id' =>'required',
-            'payment_method_id' =>'required',
         ]);
 
         $user = auth()->user();

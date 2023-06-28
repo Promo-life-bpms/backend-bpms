@@ -65,9 +65,9 @@ class CreateSmallBox extends Migration
             $table->foreignId('company_id')->references('id')->on('companies');
             $table->foreignId('spent_id')->references('id')->on('spents');
             $table->foreignId('center_id')->references('id')->on('centers');
-            $table->string('description')->nullable(); 
+            $table->longText('description')->nullable(); 
             $table->string('file')->nullable();
-            $table->string('commentary')->nullable();
+            $table->longText('commentary')->nullable();
             $table->foreignId('purchase_status_id')->references('id')->on('purchase_status');
             $table->string('type');
             $table->string('type_status');
