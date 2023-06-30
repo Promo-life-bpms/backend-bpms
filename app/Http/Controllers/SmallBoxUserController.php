@@ -87,7 +87,7 @@ class SmallBoxUserController extends Controller
                     'total' =>$spent->total, 
                     'approved_status' => $spent->approved_status,
                     'approved_by' => $approved_by,
-                    'created_at' => $spent->created_at,
+                    'created_at' => $spent->created_at->format('d-m-Y'),
                 ]);
             }
     
@@ -200,7 +200,7 @@ class SmallBoxUserController extends Controller
                         'total' =>$spents[$i]->total, 
                         'approved_status' => $spents[$i]->approved_status,
                         'approved_by' => $approved_by,
-                        'created_at' => $spents[$i]->created_at,
+                        'created_at' => $spents[$i]->created_at->format('d-m-Y'),
                     ]);
                 }  
             }
@@ -424,7 +424,7 @@ class SmallBoxUserController extends Controller
                     'total' =>$spent->total, 
                     'approved_status' => $spent->approved_status,
                     'approved_by' => $approved_by,
-                    'created_at' => $spent->created_at,
+                    'created_at' => $spent->created_at->format('d-m-Y'),
                 ]);
             }
 
@@ -536,7 +536,7 @@ class SmallBoxUserController extends Controller
                         'total' =>$spents[$i]->total, 
                         'approved_status' => $spents[$i]->approved_status,
                         'approved_by' => $approved_by,
-                        'created_at' => $spents[$i]->created_at,
+                        'created_at' => $spents[$i]->created_at->format('d-m-Y'),
                     ]);
                 }  
             }
