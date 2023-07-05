@@ -132,147 +132,146 @@ class DeliveryRouteController extends Controller
                     break;
             }
         }
-            //switch con casos de true para logistica, administrador y compras
+        //switch con casos de true para logistica, administrador y compras
 
 
-            $validation = Validator::make($request->all(), [
-                'date_of_delivery' => 'required',
-                'code_orders' => 'required|array',
-                'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
-                'code_orders.*.type_of_origin' => 'required',
-                'code_orders.*.origin_address' => 'required',
-                'code_orders.*.type_of_destiny' => 'required',
-                'code_orders.*.destiny_address' => 'required',
-                'code_orders.*.hour' => 'required|date_format:H:i:s',
-                'code_orders.*.attention_to' => 'required',
-                'code_orders.*.action' => 'required',
-                'code_orders.*.observations' => 'required',
-                'code_orders.*.orders' => 'required|array',
-                'code_orders.*.orders.*.code_order' => 'required|exists:order_purchases,code_order',
-                'code_orders.*.orders.*.products' => 'required|array',
-                'code_orders.*.orders.*.products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
-                'code_orders.*.orders.*.products.*.amount' => 'required',
-            ]);
-            if ($validation->fails()) {
-                return response()->json(
-                    [
-                        'msg' => "Error al validar informacion de la ruta de entrega",
-                        'data' => ['errorValidacion' => $validation->getMessageBag()]
-                    ],
-                    response::HTTP_UNPROCESSABLE_ENTITY
-                ); // 422
-            }
+        $validation = Validator::make($request->all(), [
+            'date_of_delivery' => 'required',
+            'code_orders' => 'required|array',
+            'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
+            'code_orders.*.type_of_origin' => 'required',
+            'code_orders.*.origin_address' => 'required',
+            'code_orders.*.type_of_destiny' => 'required',
+            'code_orders.*.destiny_address' => 'required',
+            'code_orders.*.hour' => 'required|date_format:H:i:s',
+            'code_orders.*.attention_to' => 'required',
+            'code_orders.*.action' => 'required',
+            'code_orders.*.observations' => 'required',
+            'code_orders.*.orders' => 'required|array',
+            'code_orders.*.orders.*.code_order' => 'required|exists:order_purchases,code_order',
+            'code_orders.*.orders.*.products' => 'required|array',
+            'code_orders.*.orders.*.products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
+            'code_orders.*.orders.*.products.*.amount' => 'required',
+        ]);
+        if ($validation->fails()) {
+            return response()->json(
+                [
+                    'msg' => "Error al validar informacion de la ruta de entrega",
+                    'data' => ['errorValidacion' => $validation->getMessageBag()]
+                ],
+                response::HTTP_UNPROCESSABLE_ENTITY
+            ); // 422
+        }
 
-            // Validar que la informacion sea la correcta
-            $errores = [];
-            foreach ($request->code_orders as $saleOrder) {
-                $saleOrder = (object)$saleOrder;
-                $saleOrderBD = Sale::where('code_sale', $saleOrder->code_sale)->first();
-                foreach ($saleOrder->orders as $orderRQ) {
-                    $orderRQ = (object) $orderRQ;
-                    $orderDB = OrderPurchase::where('code_sale', $saleOrder->code_sale)->where('code_order', $orderRQ->code_order)->first();
-                    if (!$orderDB) {
-                        array_push($errores, 'La orden de compra ' . $orderRQ->code_order . ' no pertenece al pedido ' . $saleOrder->code_sale);
+        // Validar que la informacion sea la correcta
+        $errores = [];
+        foreach ($request->code_orders as $saleOrder) {
+            $saleOrder = (object)$saleOrder;
+            $saleOrderBD = Sale::where('code_sale', $saleOrder->code_sale)->first();
+            foreach ($saleOrder->orders as $orderRQ) {
+                $orderRQ = (object) $orderRQ;
+                $orderDB = OrderPurchase::where('code_sale', $saleOrder->code_sale)->where('code_order', $orderRQ->code_order)->first();
+                if (!$orderDB) {
+                    array_push($errores, 'La orden de compra ' . $orderRQ->code_order . ' no pertenece al pedido ' . $saleOrder->code_sale);
+                    continue;
+                }
+                foreach ($orderRQ->products as $productRQ) {
+                    $productRQ = (object) $productRQ;
+                    $productDB = OrderPurchaseProduct::where('odoo_product_id', $productRQ->odoo_product_id)->where('order_purchase_id', $orderDB->id)->first();
+                    if (!$productDB) {
+                        array_push($errores, 'El producto ' . $productRQ->odoo_product_id . ' no pertenece a la orden de compra ' . $orderRQ->code_order);
                         continue;
                     }
-                    foreach ($orderRQ->products as $productRQ) {
-                        $productRQ = (object) $productRQ;
-                        $productDB = OrderPurchaseProduct::where('odoo_product_id', $productRQ->odoo_product_id)->where('order_purchase_id', $orderDB->id)->first();
-                        if (!$productDB) {
-                            array_push($errores, 'El producto ' . $productRQ->odoo_product_id . ' no pertenece a la orden de compra ' . $orderRQ->code_order);
-                            continue;
+                }
+                // return $saleOrder->code_sale;
+            }
+        }
+        if (count($errores) > 0) {
+            return response()->json($errores, 400);
+        }
+        // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
+        //codigo de ruta
+        $maxINSP = DeliveryRoute::max('code_route');
+        $idInsp = null;
+        if (!$maxINSP) {
+            $idInsp = 1;
+        } else {
+            $idInsp = (int) explode('-', $maxINSP)[1];
+            $idInsp++;
+        }
+
+        $ruta = DeliveryRoute::create([
+            'code_route' => "RUT-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
+            'date_of_delivery' => $request->date_of_delivery,
+            'status' => 'Pendiente',
+            'is_active' => 1,
+        ]);
+
+        //crear los productos de esa ruta de entrega
+        //  $ruta->productsDeliveryRoute()->create
+        //retornar un mensaje
+        foreach ($request->code_orders as $codeOrder) {
+            $codeOrder = (object)$codeOrder;
+            $dataSale = [
+                'code_sale' => $codeOrder->code_sale,
+                'type_of_origin' => $codeOrder->type_of_origin,
+                'origin_address' => $codeOrder->origin_address,
+                'type_of_destiny' => $codeOrder->type_of_destiny,
+                'destiny_address' => $codeOrder->destiny_address,
+                'user_chofer_id' => null,
+                'type_of_product' => null,
+                'type_of_chofer' => null,
+                'num_guide' => null,
+                'hour' => $codeOrder->hour,
+                'attention_to' => $codeOrder->attention_to,
+                'action' => $codeOrder->action,
+                'observations' => $codeOrder->observations,
+                'status' => 'Pendiente',
+            ];
+
+            // Agendado en ruta de entrega (Material maquilado):
+            //Agendado en ruta de entrega (Material maquilado):
+
+            foreach ($codeOrder->orders as $order) {
+                $saleOrderBD = Sale::where('code_sale', $codeOrder->code_sale)->first();
+                $order = (object) $order;
+                $dataSale['code_order'] = $order->code_order;
+                $codeOrderRoute =  $ruta->codeOrderDeliveryRoute()->create($dataSale);
+                foreach ($order->products as $newProduct) {
+                    $newProduct = (object)$newProduct;
+                    $codeOrderRoute->productDeliveryRoute()->create([
+                        'odoo_product_id' => $newProduct->odoo_product_id,
+                        'amount' => $newProduct->amount,
+                    ]);
+                }
+                $type_of_product = $request->type_of_product;
+                $type_of_destiny =  $codeOrder->type_of_destiny;
+                if ($type_of_destiny == 'Cliente') {
+                    if ($saleOrderBD->lastStatus) {
+                        if ($saleOrderBD->lastStatus->status_id < 10) {
+                            SaleStatusChange::create([
+                                'sale_id' => $saleOrderBD->id,
+                                "status_id" => 10
+                            ]);
                         }
                     }
-                    // return $saleOrder->code_sale;
-                }
-            }
-            if (count($errores) > 0) {
-                return response()->json($errores, 400);
-            }
-            // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
-            //codigo de ruta
-            $maxINSP = DeliveryRoute::max('code_route');
-            $idInsp = null;
-            if (!$maxINSP) {
-                $idInsp = 1;
-            } else {
-                $idInsp = (int) explode('-', $maxINSP)[1];
-                $idInsp++;
-            }
-
-            $ruta = DeliveryRoute::create([
-                'code_route' => "RUT-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
-                'date_of_delivery' => $request->date_of_delivery,
-                'status' => 'Pendiente',
-                'is_active' => 1,
-            ]);
-
-            //crear los productos de esa ruta de entrega
-            //  $ruta->productsDeliveryRoute()->create
-            //retornar un mensaje
-            foreach ($request->code_orders as $codeOrder) {
-                $codeOrder = (object)$codeOrder;
-                $dataSale = [
-                    'code_sale' => $codeOrder->code_sale,
-                    'type_of_origin' => $codeOrder->type_of_origin,
-                    'origin_address' => $codeOrder->origin_address,
-                    'type_of_destiny' => $codeOrder->type_of_destiny,
-                    'destiny_address' => $codeOrder->destiny_address,
-                    'user_chofer_id' => null,
-                    'type_of_product' => null,
-                    'type_of_chofer' => null,
-                    'num_guide' => null,
-                    'hour' => $codeOrder->hour,
-                    'attention_to' => $codeOrder->attention_to,
-                    'action' => $codeOrder->action,
-                    'observations' => $codeOrder->observations,
-                    'status' => 'Pendiente',
-                ];
-
-                // Agendado en ruta de entrega (Material maquilado):
-                //Agendado en ruta de entrega (Material maquilado):
-
-                foreach ($codeOrder->orders as $order) {
-                    $saleOrderBD = Sale::where('code_sale', $codeOrder->code_sale)->first();
-                    $order = (object) $order;
-                    $dataSale['code_order'] = $order->code_order;
-                    $codeOrderRoute =  $ruta->codeOrderDeliveryRoute()->create($dataSale);
-                    foreach ($order->products as $newProduct) {
-                        $newProduct = (object)$newProduct;
-                        $codeOrderRoute->productDeliveryRoute()->create([
-                            'odoo_product_id' => $newProduct->odoo_product_id,
-                            'amount' => $newProduct->amount,
-                        ]);
-                    }
-                    $type_of_product = $request->type_of_product;
-                    $type_of_destiny =  $codeOrder->type_of_destiny;
-                    if ($type_of_destiny == 'Cliente') {
+                } else {
+                    if ($type_of_product == "Limpio") {
                         if ($saleOrderBD->lastStatus) {
-                            if ($saleOrderBD->lastStatus->status_id < 10) {
+                            if ($saleOrderBD->lastStatus->status_id < 3) {
                                 SaleStatusChange::create([
                                     'sale_id' => $saleOrderBD->id,
-                                    "status_id" => 10
+                                    "status_id" => 3
                                 ]);
                             }
                         }
                     } else {
-                        if ($type_of_product == "Limpio") {
-                            if ($saleOrderBD->lastStatus) {
-                                if ($saleOrderBD->lastStatus->status_id < 3) {
-                                    SaleStatusChange::create([
-                                        'sale_id' => $saleOrderBD->id,
-                                        "status_id" => 3
-                                    ]);
-                                }
-                            }
-                        } else {
-                            if ($saleOrderBD->lastStatus) {
-                                if ($saleOrderBD->lastStatus->status_id < 5) {
-                                    SaleStatusChange::create([
-                                        'sale_id' => $saleOrderBD->id,
-                                        "status_id" => 5
-                                    ]);
-                                }
+                        if ($saleOrderBD->lastStatus) {
+                            if ($saleOrderBD->lastStatus->status_id < 5) {
+                                SaleStatusChange::create([
+                                    'sale_id' => $saleOrderBD->id,
+                                    "status_id" => 5
+                                ]);
                             }
                         }
                     }
@@ -280,14 +279,14 @@ class DeliveryRouteController extends Controller
             }
 
 
-        return response()->json([
-            'msg' => 'Ruta Creada Existosamente',
-            'data' => [
-                "ruta" =>  $ruta
-            ]
-        ], Response::HTTP_CREATED);
+            return response()->json([
+                'msg' => 'Ruta Creada Existosamente',
+                'data' => [
+                    "ruta" =>  $ruta
+                ]
+            ], Response::HTTP_CREATED);
+        }
     }
-
     public function updateInfoChofer(Request $request, $ruta, $pedido)
     {
         $validation = Validator::make($request->all(), [
