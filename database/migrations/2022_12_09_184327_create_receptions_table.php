@@ -22,6 +22,8 @@ class CreateReceptionsTable extends Migration
             $table->dateTime('planned_date')->nullable();
             $table->dateTime('effective_date')->nullable();
             $table->string('status');
+            $table->integer('user_id')->nullable();
+            $table->boolean('maquilador');
             $table->timestamps();
         });
     }
