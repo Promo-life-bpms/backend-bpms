@@ -17,10 +17,12 @@ class Reception extends Model
         'planned_date',
         'effective_date',
         'status',
+        'user_id',
+        'maquilador'
     ];
 
     public function productsReception()
     {
-        return $this->hasMany(ReceptionProduct::class);
+        return $this->hasMany(ReceptionProduct::class, "reception_id", "id");
     }
 }

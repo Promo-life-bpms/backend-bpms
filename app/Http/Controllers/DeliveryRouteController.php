@@ -277,16 +277,16 @@ class DeliveryRouteController extends Controller
                     }
                 }
             }
+
+
+            return response()->json([
+                'msg' => 'Ruta Creada Existosamente',
+                'data' => [
+                    "ruta" =>  $ruta
+                ]
+            ], Response::HTTP_CREATED);
         }
-
-        return response()->json([
-            'msg' => 'Ruta Creada Existosamente',
-            'data' => [
-                "ruta" =>  $ruta
-            ]
-        ], Response::HTTP_CREATED);
     }
-
     public function updateInfoChofer(Request $request, $ruta, $pedido)
     {
         $validation = Validator::make($request->all(), [
