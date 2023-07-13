@@ -55,6 +55,7 @@ class CreateSmallBox extends Migration
             $table->foreignId('center_id')->references('id')->on('centers');
             $table->string('outgo_type'); 
             $table->string('expense_type');
+            $table->string('product_type');
             $table->string('status');
             $table->timestamps();
         });

@@ -39,6 +39,7 @@ class SmallBoxUserController extends Controller
                     'spent_name' =>  $spent->spent->concept,
                     'spent_outgo_type' =>  $spent->spent->outgo_type,
                     'spent_expense_type' =>  $spent->spent->expense_type,
+                    'spent_product_type' =>  $spent->spent->product_type,
                 ]);
                 array_push($center_data ,(object) [
                     'center_id' => $spent->center_id,
@@ -153,6 +154,7 @@ class SmallBoxUserController extends Controller
                         'spent_name' =>  $spents[$i]->spent->concept,
                         'spent_outgo_type' =>  $spents[$i]->spent->outgo_type,
                         'spent_expense_type' =>  $spents[$i]->spent->expense_type,
+                        'spent_product_type' =>  $spents[$i]->spent->product_type,
                     ]);
                     array_push($center_data ,(object) [
                         'center_id' => $spents[$i]->center_id,
@@ -317,6 +319,7 @@ class SmallBoxUserController extends Controller
                 'center' => $spent->center->name,
                 'outgo_type' => $spent->outgo_type,
                 'expense_type' => $spent->expense_type,
+                'spent_product_type' =>  $spent->product_type,
             ]);
         }
 
@@ -376,6 +379,7 @@ class SmallBoxUserController extends Controller
                     'spent_name' =>  $spent->spent->concept,
                     'spent_outgo_type' =>  $spent->spent->outgo_type,
                     'spent_expense_type' =>  $spent->spent->expense_type,
+                    'spent_product_type' =>  $spent->spent->product_type,
                 ]);
                 array_push($center_data ,(object) [
                     'center_id' => $spent->center_id,
@@ -489,6 +493,7 @@ class SmallBoxUserController extends Controller
                         'spent_name' =>  $spents[$i]->spent->concept,
                         'spent_outgo_type' =>  $spents[$i]->spent->outgo_type,
                         'spent_expense_type' =>  $spents[$i]->spent->expense_type,
+                        'spent_product_type' =>  $spents[$i]->spent->product_type,
                     ]);
                     array_push($center_data ,(object) [
                         'center_id' => $spents[$i]->center_id,

@@ -49,6 +49,7 @@ class PurchaseRequestController extends Controller
                 'spent_name' =>  $spent->spent->concept,
                 'spent_outgo_type' =>  $spent->spent->outgo_type,
                 'spent_expense_type' =>  $spent->spent->expense_type,
+                'spent_product_type' =>  $spent->spent->product_type,
             ]);
             array_push($center_data ,(object) [
                 'center_id' => $spent->center_id,
@@ -96,6 +97,86 @@ class PurchaseRequestController extends Controller
         return array(
             'spents' => $data, 
         );
+    }
+
+      //Solicitudes de Administrador
+      public function showAdministrador()
+      {
+          $user = auth()->user();
+  
+          
+          if($user == null){
+              return response()->json([
+                  'msg' => "Sesión de usuario expirada"
+              ]);
+          }
+  
+          $data = [];
+          $spents = PurchaseRequest::whereIn('approved_status', 'en aprobacion por administrador')->get();
+  
+          foreach($spents as $spent){
+              $company_data = [];
+              $spent_data = [];
+              $center_data = [];
+              $status_data = [];
+              array_push($company_data ,(object) [
+                  'company_id' =>  $spent->company_id,
+                  'company_name' =>  $spent->company->name
+              ]);
+  
+              array_push($spent_data ,(object) [
+                  'spent_id' =>  $spent->spent_id,
+                  'spent_name' =>  $spent->spent->concept,
+                  'spent_outgo_type' =>  $spent->spent->outgo_type,
+                  'spent_expense_type' =>  $spent->spent->expense_type,
+                  'spent_product_type' =>  $spent->spent->product_type,
+              ]);
+              array_push($center_data ,(object) [
+                  'center_id' => $spent->center_id,
+                  'center_name' =>  $spent->center->name,
+              ]);
+  
+              array_push($status_data ,(object) [
+                  'id' => $spent->purchase_status->id,
+                  'name' =>  $spent->purchase_status->name,
+                  'table_name' =>  $spent->purchase_status->table_name,
+                  'type' =>  $spent->purchase_status->type,
+                  'status' =>  $spent->purchase_status->status,
+              ]);
+  
+              $approved_by = '';
+            
+              if($spent->approved_by != null || $spent->approved_by != '' ){
+                  $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
+  
+                  $approved_by =  $user_approved->name;
+              }                
+  
+              array_push($data, (object)[
+                  'id' => $spent->id,
+                  'user_id' => $spent->user_id,
+                  'user_name' => $spent->user->name,
+                  'company' =>  $company_data,
+                  'spent' => $spent_data,
+                  'center'  =>  $center_data,
+                  'description' => $spent->description,
+                  'file' => $spent->file,
+                  'commentary' => $spent->commentary,
+                  'purchase_status' => $spent->purchase_status->name,
+                  'purchase_table_name' => $spent->purchase_status->table_name,
+                  'type' => $spent->type,
+                  'type_status' => $spent->type_status,
+                  'payment_method' => $spent->payment_method->name,
+                  'total' =>$spent->total, 
+                  'approved_status' => $spent->approved_status,
+                  'approved_by' => $approved_by,
+                  'created_at' => $spent->created_at->format('d-m-Y'),
+              ]);
+          }
+  
+          return array(
+              'spents' => $data, 
+          );
     }
 
     public function store(Request $request)
@@ -212,6 +293,7 @@ class PurchaseRequestController extends Controller
             'type' => $request->type,
             'payment_method_id' => $request->payment_method_id,
             'total' => $request->total,
+            'approved_by' => $user->id
         ]);
 
         return response()->json(['msg' => "Registro actualizado satisfactoriamente"]);
@@ -242,6 +324,49 @@ class PurchaseRequestController extends Controller
     }
 
     public function approved(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+        ]);
+
+        $user = Auth::user();
+
+        $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
+
+        if($purchase_request->approved_status == 'pendiente' && $purchase_request->approved_by == null){ 
+
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'approved_status' => 'en aprobacion por administrador',
+                'approved_by' => $user->id,
+                'purchase_status_id' => 1
+            ]);
+            
+            $role_buyer = Role::where('name', 'compras')->get()->last();
+
+            $user_role = UserRole::where('role_id', $role_buyer->id)->get();
+            $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
+
+            foreach($user_role as $role){
+                $users_to_send_mail = User::where('id',$role->user_id)->get()->last();
+
+                $title = 'Nueva solicitud de compra';
+                $message = 'Haz recibido una nueva solicitud de compras.';
+    
+                try {
+                    Notification::route('mail', $users_to_send_mail->email)
+                    ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
+                } catch (\Exception $e) {
+                    return $e;
+                }
+            }
+
+            return response()->json(['msg' => "Solicitud aprobada satisfactoriamente"]);
+        }else{
+            return response()->json(['msg' => "No es posible aprobar solicitudes que previamente han sido aprobadas o rechazadas, en caso de requerirlo, cancela la solicitud e intenta nuevamente"]);
+        }
+    }
+
+    public function approvedByAdmin(Request $request)
     {
         $request->validate([
             'id' => 'required',
@@ -509,6 +634,8 @@ class PurchaseRequestController extends Controller
                     'spent_name' =>  $spents[$i]->spent->concept,
                     'spent_outgo_type' =>  $spents[$i]->spent->outgo_type,
                     'spent_expense_type' =>  $spents[$i]->spent->expense_type,
+                    'spent_product_type' =>  $spents[$i]->spent->product_type,
+
                 ]);
                 array_push($center_data ,(object) [
                     'center_id' => $spents[$i]->center_id,

@@ -156,6 +156,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/realizar-devolucion/', [PurchaseRequestController::class, 'createDevolution']);
     Route::post('caja-chica/realizar-cancelacion/', [PurchaseRequestController::class, 'createCancellation']);
     Route::post('caja-chica/actualizar-pago/', [PurchaseRequestController::class, 'updatePaymentMethod']);
+
+    //Administrador
+    Route::post('caja-chica/administrador/solicitudes-de-compra/ver', [PurchaseRequestController::class, 'showAdministrador']);
+    Route::post('caja-chica/administrador/solicitudes-de-compra/aprobar', [PurchaseRequestController::class, 'approvedByAdmin']);
+
     
     //Center
     Route::get('caja-chica/centros-de-costos/ver/', [CenterController::class, 'show']);
