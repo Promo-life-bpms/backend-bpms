@@ -10,9 +10,12 @@ use App\Models\Reception;
 use App\Models\Sale;
 use App\Models\SaleStatusChange;
 use App\Models\Tracking;
+use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class ApiOdooController extends Controller
 {
@@ -245,6 +248,29 @@ class ApiOdooController extends Controller
                     if ($orderPurchase->status_bpm == null) {
                         $orderPurchase->status_bpm = "Pendiente";
                         $orderPurchase->save();
+                    }
+                    try {
+                        if (stripos($purchase->code_purchase, "OT") !== false) {
+                            // Buscar si existe un usuario relacionado
+                            $proveedorMaquilador = OrderPurchase::where("provider_name", $purchase->provider_name)
+                                ->whereNotNull('tagger_user_id')->first();
+                            // Si no existe crear un nuevo usuario
+                            if (!$proveedorMaquilador) {
+                                $user = User::create([
+                                    'name' => $purchase->supplier_representative,
+                                    'email' => Str::slug($purchase->supplier_representative). '@promolife.lat',
+                                    'password' => Hash::make($purchase->supplier_representative),
+                                    'role_id' => 2,
+                                ]);
+                                $orderPurchase->tagger_user_id = $user->id;
+                                $orderPurchase->save();
+                            }else{
+                                $orderPurchase->tagger_user_id = $proveedorMaquilador->id;
+                                $orderPurchase->save();
+                            }
+                        }
+                    } catch (Exception $th) {
+                        return $th->getMessage();
                     }
 
                     $sale = Sale::where('code_sale', $orderPurchase->code_sale)->first();

@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('photo')->nullable();
             $table->integer('manager_id')->nullable();
             $table->string('company')->nullable();
-            $table->integer('intranet_id');
+            $table->integer('intranet_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
