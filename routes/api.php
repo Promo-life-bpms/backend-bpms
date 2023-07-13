@@ -158,7 +158,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/actualizar-pago/', [PurchaseRequestController::class, 'updatePaymentMethod']);
 
     //Administrador
-    Route::post('caja-chica/administrador/solicitudes-de-compra/ver', [PurchaseRequestController::class, 'showAdministrador']);
+    Route::get('caja-chica/administrador/solicitudes-de-compra/ver', [PurchaseRequestController::class, 'showAdministrador']);
     Route::post('caja-chica/administrador/solicitudes-de-compra/aprobar', [PurchaseRequestController::class, 'approvedByAdmin']);
 
     

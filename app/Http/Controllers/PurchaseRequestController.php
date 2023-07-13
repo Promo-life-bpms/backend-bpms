@@ -112,7 +112,7 @@ class PurchaseRequestController extends Controller
           }
   
           $data = [];
-          $spents = PurchaseRequest::whereIn('approved_status', 'en aprobacion por administrador')->get();
+          $spents = PurchaseRequest::where('approved_status', 'en aprobacion por administrador')->get();
   
           foreach($spents as $spent){
               $company_data = [];
