@@ -86,6 +86,7 @@ class PurchaseRequestController extends Controller
                 'purchase_table_name' => $spent->purchase_status->table_name,
                 'type' => $spent->type,
                 'type_status' => $spent->type_status,
+                'payment_method_id' => $spent->payment_method->id,
                 'payment_method' => $spent->payment_method->name,
                 'total' =>$spent->total, 
                 'approved_status' => $spent->approved_status,
@@ -166,6 +167,7 @@ class PurchaseRequestController extends Controller
                   'purchase_table_name' => $spent->purchase_status->table_name,
                   'type' => $spent->type,
                   'type_status' => $spent->type_status,
+                  'payment_method_id' => $spent->payment_method->id,
                   'payment_method' => $spent->payment_method->name,
                   'total' =>$spent->total, 
                   'approved_status' => $spent->approved_status,
@@ -388,12 +390,12 @@ class PurchaseRequestController extends Controller
             $title = 'Nueva solicitud de compra';
             $message = 'Haz recibido una nueva solicitud de compras.';
 
-            try {
+            /* try {
                 Notification::route('mail', $users_to_send_mail->email)
                 ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
             } catch (\Exception $e) {
                 return $e;
-            }
+            } */
         }
 
         return response()->json(['msg' => "Solicitud aprobada satisfactoriamente"]);
@@ -413,7 +415,8 @@ class PurchaseRequestController extends Controller
 
         DB::table('purchase_requests')->where('id',$request->id)->update([
             'approved_status' => 'rechazada',
-            'approved_by' => $user->id
+            'approved_by' => $user->id,
+            'type_status' => 'cancelado',
         ]);
     
         $users_to_send_mail = User::where('id',$purchase_request->user_id)->get()->last();
@@ -640,6 +643,7 @@ class PurchaseRequestController extends Controller
                 'purchase_table_name' => $spent->purchase_status->table_name,
                 'type' => $spent->type,
                 'type_status' => $spent->type_status,
+                'payment_method_id' => $spent->payment_method->id,
                 'payment_method' => $spent->payment_method->name,
                 'total' =>$spent->total, 
                 'approved_status' => $spent->approved_status,
