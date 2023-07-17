@@ -21,7 +21,8 @@ class OrderPurchase extends Model
         'status',
         'status_bpm',
         'type_purchase',
-        'total'
+        'total',
+        'tagger_user_id'
     ];
 
     public function sale()

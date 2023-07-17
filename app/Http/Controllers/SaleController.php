@@ -37,7 +37,7 @@ class SaleController extends Controller
 
         $sales = null;
         $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente', 'asistente_de_gerente'])->first();
-
+        $isMaquilador = auth()->user()->whatRoles()->whereIn('name', ['maquilador'])->first();
         // return $isSeller;
         if ($request->ordenes_proximas) {
 
@@ -49,14 +49,17 @@ class SaleController extends Controller
         } else {
             $sales = Sale::with('lastStatus', "detailsOrders")
                 ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+                ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
                 ->when($isSeller !== null, function ($query) {
                     $user =  auth()->user();
-
                     $query->where('additional_sale_information.company', $user->company);
+                })
+                ->when($isMaquilador !== null, function ($query) {
+                    $user =  auth()->user();
+                    $query->where('order_purchases.tagger_user_id', $user->id);
                 })
                 ->paginate($per_page);
         }
-        // return $sales;
         foreach ($sales as $sale) {
             if ($sale->lastStatus) {
                 $sale->lastStatus->slug = $sale->lastStatus->status->slug;
@@ -289,8 +292,8 @@ class SaleController extends Controller
             ],
             "grafica" => $datos,
             "grafica_de_pastel" => $grafica = [
-                "pedidos_pendientes_del_maquilador" => round($porcentajePendiente, 2) ,
-                "pedidos_completados_del_maquilador" => round($porcentajeCompletado, 2) ,
+                "pedidos_pendientes_del_maquilador" => round($porcentajePendiente, 2),
+                "pedidos_completados_del_maquilador" => round($porcentajeCompletado, 2),
                 "total" => $total
             ],
 
