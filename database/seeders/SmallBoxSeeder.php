@@ -553,23 +553,23 @@ class SmallBoxSeeder extends Seeder
         //Seeders temporales
 
         UserCenter::create([
-            'user_id' => 1,
+            'user_id' => 3,
             'center_id' => 1,
         ]);
         UserCenter::create([
-            'user_id' => 1,
+            'user_id' => 3,
             'center_id' => 2,
         ]);
         UserCenter::create([
-            'user_id' => 1,
+            'user_id' => 3,
             'center_id' => 3,
         ]);
         UserCenter::create([
-            'user_id' => 1,
+            'user_id' => 3,
             'center_id' => 4,
         ]);
         UserCenter::create([
-            'user_id' => 2,
+            'user_id' => 3,
             'center_id' => 1,
         ]);
         UserCenter::create([
@@ -577,14 +577,37 @@ class SmallBoxSeeder extends Seeder
             'center_id' => 1,
         ]);
         UserCenter::create([
-            'user_id' => 4,
+            'user_id' => 3,
             'center_id' => 6,
         ]);
         UserCenter::create([
-            'user_id' => 4,
+            'user_id' => 3,
             'center_id' => 7,
         ]);
-
+        UserCenter::create([
+            'user_id' => 3,
+            'center_id' => 8,
+        ]);
+        UserCenter::create([
+            'user_id' => 3,
+            'center_id' => 9,
+        ]);
+        UserCenter::create([
+            'user_id' => 3,
+            'center_id' => 10,
+        ]);
+        UserCenter::create([
+            'user_id' => 3,
+            'center_id' => 11,
+        ]);
+        UserCenter::create([
+            'user_id' => 3,
+            'center_id' => 12,
+        ]);
+        UserCenter::create([
+            'user_id' => 3,
+            'center_id' => 13,
+        ]);
         
         PurchaseStatus::create([
             'name' => 'En proceso',

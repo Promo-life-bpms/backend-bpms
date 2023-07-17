@@ -61,14 +61,15 @@ class SmallBoxUserController extends Controller
 
                     $approved_by =  $user_approved->name;
                 }
+                    
                 
-                $approved_by = '';
-            
-                if($spent->approved_by != null || $spent->approved_by != '' ){
-                    $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
+                $admin_approved = '';
 
-                    $approved_by =  $user_approved->name;
-                }                
+                if($spent->admin_approved != null || $spent->admin_approved != '' ){
+                    $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
+
+                    $admin_approved =  $admin_app->name;
+                }
 
                 array_push($data, (object)[
                     'id' => $spent->id,
@@ -89,6 +90,7 @@ class SmallBoxUserController extends Controller
                     'total' =>$spent->total, 
                     'approved_status' => $spent->approved_status,
                     'approved_by' => $approved_by,
+                    'admin_approved' => $admin_approved,
                     'created_at' => $spent->created_at->format('d-m-Y'),
                 ]);
             }
@@ -404,13 +406,13 @@ class SmallBoxUserController extends Controller
                     $approved_by =  $user_approved->name;
                 }
                 
-                $approved_by = '';
-            
-                if($spent->approved_by != null || $spent->approved_by != '' ){
-                    $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
-    
-                    $approved_by =  $user_approved->name;
-                }                
+                $admin_approved = '';
+
+                if($spent->admin_approved != null || $spent->admin_approved != '' ){
+                    $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
+
+                    $admin_approved =  $admin_app->name;
+                }  
 
                 array_push($data, (object)[
                     'id' => $spent->id,
@@ -431,6 +433,7 @@ class SmallBoxUserController extends Controller
                     'total' =>$spent->total, 
                     'approved_status' => $spent->approved_status,
                     'approved_by' => $approved_by,
+                    'admin_approved' => $admin_approved,
                     'created_at' => $spent->created_at->format('d-m-Y'),
                 ]);
             }

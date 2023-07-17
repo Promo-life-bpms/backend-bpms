@@ -70,8 +70,15 @@ class PurchaseRequestController extends Controller
                 $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
 
                 $approved_by =  $user_approved->name;
-            }                
+            }    
+            
+            $admin_approved = '';
+           
+            if($spent->admin_approved != null || $spent->admin_approved != '' ){
+                $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
 
+                $admin_approved =  $admin_app->name;
+            }    
             array_push($data, (object)[
                 'id' => $spent->id,
                 'user_id' => $spent->user_id,
@@ -91,6 +98,7 @@ class PurchaseRequestController extends Controller
                 'total' =>$spent->total, 
                 'approved_status' => $spent->approved_status,
                 'approved_by' => $approved_by,
+                'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
             ]);
         }
@@ -113,8 +121,8 @@ class PurchaseRequestController extends Controller
           }
   
           $data = [];
-          $spents = PurchaseRequest::where('approved_status', 'en aprobacion por administrador')->get();
-  
+          $spents = PurchaseRequest::where('approved_status', '<>','pendiente')->where('approved_status', '<>','cancelada')->get();
+          
           foreach($spents as $spent){
               $company_data = [];
               $spent_data = [];
@@ -151,8 +159,16 @@ class PurchaseRequestController extends Controller
                   $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
   
                   $approved_by =  $user_approved->name;
-              }                
+              }        
+              
+              $admin_approved = '';
   
+              if($spent->admin_approved != null || $spent->admin_approved != '' ){
+                $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
+
+                $admin_approved =  $admin_app->name;
+            } 
+
               array_push($data, (object)[
                   'id' => $spent->id,
                   'user_id' => $spent->user_id,
@@ -172,6 +188,7 @@ class PurchaseRequestController extends Controller
                   'total' =>$spent->total, 
                   'approved_status' => $spent->approved_status,
                   'approved_by' => $approved_by,
+                  'admin_approved' => $admin_approved,
                   'created_at' => $spent->created_at->format('d-m-Y'),
               ]);
           }
@@ -375,7 +392,7 @@ class PurchaseRequestController extends Controller
 
         DB::table('purchase_requests')->where('id',$request->id)->update([
             'approved_status' => 'aprobada',
-            'approved_by' => $user->id,
+            'admin_approved' => $user->id,
             'purchase_status_id' => 2
         ]);
             
@@ -411,14 +428,22 @@ class PurchaseRequestController extends Controller
         $user = Auth::user();
 
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
+        
+       if($purchase_request->approved_status == 'pendiente'){
 
-
-        DB::table('purchase_requests')->where('id',$request->id)->update([
-            'approved_status' => 'rechazada',
-            'approved_by' => $user->id,
-            'type_status' => 'cancelado',
-        ]);
-    
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'approved_status' => 'rechazada',
+                'approved_by' => $user->id,
+                'type_status' => 'cancelado',
+            ]);
+        }else if($purchase_request->approved_status == 'en aprobacion por administrador'){
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'approved_status' => 'rechazada',
+                'admin_approved' => $user->id,
+                'type_status' => 'cancelado',
+            ]);
+        };
+        
         $users_to_send_mail = User::where('id',$purchase_request->user_id)->get()->last();
 
         $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
@@ -619,15 +644,15 @@ class PurchaseRequestController extends Controller
                 $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
 
                 $approved_by =  $user_approved->name;
-            }
+            }             
 
-            $approved_by = '';
-            
-            if($spent->approved_by != null || $spent->approved_by != '' ){
-                $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
+            $admin_approved = '';
 
-                $approved_by =  $user_approved->name;
-            }                
+            if($spent->admin_approved != null || $spent->admin_approved != '' ){
+                $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
+
+                $admin_approved =  $admin_app->name;
+            } 
 
             array_push($data, (object)[
                 'id' => $spent->id,
@@ -648,6 +673,7 @@ class PurchaseRequestController extends Controller
                 'total' =>$spent->total, 
                 'approved_status' => $spent->approved_status,
                 'approved_by' => $approved_by,
+                'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
             ]);
         }
