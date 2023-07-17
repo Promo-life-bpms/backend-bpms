@@ -52,7 +52,6 @@ class SaleController extends Controller
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
                 ->when($isSeller !== null, function ($query) {
                     $user =  auth()->user();
-
                     $query->where('additional_sale_information.company', $user->company);
                 })
                 ->when($isMaquilador !== null, function ($query) {
@@ -61,7 +60,6 @@ class SaleController extends Controller
                 })
                 ->paginate($per_page);
         }
-        // return $sales;
         foreach ($sales as $sale) {
             if ($sale->lastStatus) {
                 $sale->lastStatus->slug = $sale->lastStatus->status->slug;

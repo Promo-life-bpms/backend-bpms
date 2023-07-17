@@ -719,8 +719,6 @@ class DeliveryRouteController extends Controller
 
     public function setRemisiones(Request $request, $ruta)
     {
-
-
         $validation = Validator::make($request->all(), [
             'comments' => 'required_if:status,Cancelada',
             'satisfaction' => 'required_if:status,Liberada',
@@ -732,10 +730,10 @@ class DeliveryRouteController extends Controller
             'status' => 'required|in:Liberada,Cancelada',
             'evidence' => 'required_if:status,Liberada',
             'product_remission' => 'required_if:status,Liberada|array',
-            // 'product_remission.*.remission_id' => 'required',
             'product_remission.*.delivered_quantity' => 'required_if:status,Liberada',
             'product_remission.*.order_purchase_product_id' => 'required_if:status,Liberada|exists:order_purchase_products,id',
         ]);
+
         if ($validation->fails()) {
 
             return response()->json([
