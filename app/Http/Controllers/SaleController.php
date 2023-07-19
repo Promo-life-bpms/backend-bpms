@@ -120,6 +120,11 @@ class SaleController extends Controller
             unset($sale->lastStatus->sale_id);
             unset($sale->lastStatus->status_id);
             unset($sale->lastStatus->updated_at);
+            foreach ($sale->binnacles as $binnacle) {
+                $binnacle->user_name = $binnacle->user->name;
+                unset($binnacle->user);
+                unset($binnacle->user_id);
+            }
 
             return response()->json(['msg' => 'Detalle del pedido', 'data' => ["sale", $sale]], response::HTTP_OK); //200
         }

@@ -15,4 +15,10 @@ class Binnacle extends Model
         'files',
         'comment'
     ];
+
+    // Relacion con el usuario
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
