@@ -271,7 +271,7 @@ class SaleController extends Controller
         $completado = OrderPurchase::join('status_o_t_s', 'status_o_t_s.id_order_purchases', 'order_purchases.id')
             ->where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
             ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
-            ->whereIn('status_o_t_s.status', ["Listo para recoger", "Recepcion inventario parcial", "Recepcion inventario Completo"])
+            ->whereIn('status_o_t_s.status', ["Listo para recoger", "RIP", "Recepcion inventario Completo"])
             ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
             //->select('order_purchases.status')
             ->count();
@@ -293,8 +293,8 @@ class SaleController extends Controller
             ],
             "grafica" => $datos,
             "grafica_de_pastel" => $grafica = [
-                "pedidos_pendientes_del_maquilador" => round($porcentajePendiente, 2),
-                "pedidos_completados_del_maquilador" => round($porcentajeCompletado, 2),
+                "pedidos_pendientes_del_maquilador" => round($porcentajePendiente, 1),
+                "pedidos_completados_del_maquilador" => round($porcentajeCompletado, 1),
                 "total" => $total
             ],
 

@@ -48,7 +48,7 @@ class IncidenceController extends Controller
                     $productIncidence->quantity_invoiced,
                     $productIncidence->quantity_delivered,
                     $productIncidence->company,
-                    $productIncidence->unit_price,
+                    $productIncidence->unit_price
                 );
             }
         }
@@ -65,6 +65,7 @@ class IncidenceController extends Controller
     public function store(Request $request, $sale_id)
     {
 
+        // Calidad y ventas puede generar incidencias hasta 30 dias de entregado el producto, despues solo calidad.
         //return $sale_id;
         //validar que la informacion este correcta si no no se puede registrar
         // utilizar validator
@@ -119,6 +120,7 @@ class IncidenceController extends Controller
             ->join('delivery_routes', 'delivery_routes.id', 'code_order_delivery_routes.delivery_route_id')
             ->join('remisiones', 'remisiones.delivery_route_id', 'delivery_routes.id')
             ->where('sales.code_sale', $sale_id)
+            ->orderBy("remisiones.created_at", "DESC")
             ->select('remisiones.*')
             ->first();
 
@@ -132,7 +134,7 @@ class IncidenceController extends Controller
         //return $date;
         $user =  auth()->user();
         $aux = false;
-        // return $user;
+        // return [$user->whatRoles, $diasDiferencia];
         foreach ($user->whatRoles as $rol) {
             switch ($rol->name) {
                 case "control_calidad":
@@ -161,8 +163,6 @@ class IncidenceController extends Controller
             $idinc++;
         }
         $response = null;
-
-
 
         $incidencia = Incidence::create([
             "code_incidence" => 'No Definido',
@@ -227,7 +227,7 @@ class IncidenceController extends Controller
         $company = $sale->moreInformation->warehouse_company;
 
         switch ($company) {
-            case 'PROMO LIFE':
+            case 'PROMOLIFE':
                 $keyOdoo = config('key_odoo.key_pl');
                 break;
             case 'BH':
@@ -303,11 +303,12 @@ class IncidenceController extends Controller
 
             if ($errors) {
                 return response()->json([
-                    'msg' => 'No se pudo crear la incidencia correctamente',
+                    'msg' => 'La Incidencia fue creada correctamente, pero no se pudo enviar a odoo',
                     'data' =>
                     [
                         "messageOdoo" => $message,
-                        "incidencia" => $incidencia
+                        "incidencia" => $incidencia,
+                         'responseOdoo' => json_decode($response),
                     ]
                 ], response::HTTP_BAD_REQUEST);
             }
@@ -316,14 +317,12 @@ class IncidenceController extends Controller
             $errors = true;
             return response()->json(
                 [
-                    'msg' => 'No se pudo crear la incidencia correctamente',
-                    'data' => ["message" => $message,  "incidencia" => $incidencia]
+                    'msg' => 'La Incidencia fue creada, pero no se pudo enviar a odoo',
+                    'data' => ["message" => $message,  "incidencia" => $incidencia,  'responseOdoo' => json_decode($response),]
                 ],
                 response::HTTP_BAD_REQUEST
             );
         }
-
-
 
         return response()->json([
             "msg" => 'Incidencia creada exitosamente',

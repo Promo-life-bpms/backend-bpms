@@ -16,6 +16,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class ApiOdooController extends Controller
 {
@@ -270,7 +271,6 @@ class ApiOdooController extends Controller
                             }
                         }
                     } catch (Exception $th) {
-                        return $th->getMessage();
                     }
 
                     $sale = Sale::where('code_sale', $orderPurchase->code_sale)->first();
@@ -344,6 +344,7 @@ class ApiOdooController extends Controller
 
     public function setReception(Request $request)
     {
+        Storage::put('/public/dataRec' .  time() . '.txt', json_encode($request->all()));
         try {
             if ($request->header('token') == config('key_odoo.key_to_odoo')) {
                 /* $validator = Validator::make($request->all(), [
@@ -530,6 +531,7 @@ class ApiOdooController extends Controller
 
     public function setDelivery(Request $request)
     {
+        Storage::put('/public/dataDelc' .  time() . '.txt', json_encode($request->all()));
         try {
             if ($request->header('token') == config('key_odoo.key_to_odoo')) {
                 /* $validator = Validator::make($request->all(), [
