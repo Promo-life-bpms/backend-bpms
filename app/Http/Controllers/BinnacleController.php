@@ -12,7 +12,6 @@ class BinnacleController extends Controller
     public function store(Request $request, $pedido)
     {
         $request->validate([
-            'files' => 'required',
             'comment' => 'required',
         ]);
 
