@@ -7,6 +7,7 @@ use App\Http\Controllers\DeliveryRouteController;
 use App\Http\Controllers\IncidenceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
+use App\Http\Controllers\BinnacleController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
@@ -52,6 +53,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('calendario', [SaleController::class, 'calendario']);
 
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
+    // Crear y actualizar la bitacora
+    Route::post('pedidos/{pedido}/bitacora/create', [BinnacleController::class, 'store']);
 
     Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
     Route::get('inspections/{inspection}', [InspectionController::class, 'show']);

@@ -40,7 +40,6 @@ class SaleController extends Controller
         $isMaquilador = auth()->user()->whatRoles()->whereIn('name', ['maquilador'])->first();
         // return $isSeller;
         if ($request->ordenes_proximas) {
-
             $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")
                 ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
@@ -52,7 +51,8 @@ class SaleController extends Controller
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
                 ->when($isSeller !== null, function ($query) {
                     $user =  auth()->user();
-                    $query->where('additional_sale_information.company', $user->company);
+                    // $query->where('additional_sale_information.company', $user->company);
+                    $query->where('sales.commercial_email', $user->email);
                 })
                 ->when($isMaquilador !== null, function ($query) {
                     $user =  auth()->user();
@@ -104,7 +104,8 @@ class SaleController extends Controller
             'routeDeliveries',
             'inspections',
             'incidences',
-            "ordersDeliveryRoute"
+            "ordersDeliveryRoute",
+            "binnacles"
         ])->where('code_sale', $sale_id)->first();
         //Detalle del pedido seleccionado
         if ($sale) {
@@ -270,7 +271,7 @@ class SaleController extends Controller
         $completado = OrderPurchase::join('status_o_t_s', 'status_o_t_s.id_order_purchases', 'order_purchases.id')
             ->where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
             ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
-            ->whereIn('status_o_t_s.status', ["Listo para recoger", "Recepcion inventario parcial", "Recepcion inventario Completo"])
+            ->whereIn('status_o_t_s.status', ["Listo para recoger", "RIP", "Recepcion inventario Completo"])
             ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
             //->select('order_purchases.status')
             ->count();
@@ -292,8 +293,8 @@ class SaleController extends Controller
             ],
             "grafica" => $datos,
             "grafica_de_pastel" => $grafica = [
-                "pedidos_pendientes_del_maquilador" => round($porcentajePendiente, 2),
-                "pedidos_completados_del_maquilador" => round($porcentajeCompletado, 2),
+                "pedidos_pendientes_del_maquilador" => round($porcentajePendiente, 1),
+                "pedidos_completados_del_maquilador" => round($porcentajeCompletado, 1),
                 "total" => $total
             ],
 

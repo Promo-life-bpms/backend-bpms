@@ -490,13 +490,15 @@ class DeliveryRouteController extends Controller
             foreach ($pedidos as $pedido) {
                 //$pedido->moreInformation;
                 $ordersDeliveryRoute =  $pedido->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
+                // if ($pedido->code_sale == "PED12088") {
                 $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')
                     ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
                     ->where('code_order_delivery_routes.code_sale', $pedido->code_sale)
                     ->select('remisiones.code_remission')
                     ->first();
+                // }
                 array_push($remissions, [$new, $pedido->code_sale, $ruta]);
-                /* if ($pedido->user_chofer_id) {
+                if ($pedido->user_chofer_id) {
                     $pedido->chofer_name = User::find($pedido->user_chofer_id)->name;
                 } else {
                     $pedido->chofer_name = "Sin Chofer Asignado";
@@ -504,9 +506,7 @@ class DeliveryRouteController extends Controller
                 unset($pedido->user_chofer_id);
                 $pedido->remission_id = $new ? $new->code_remission : null;
                 unset($pedido->ordersDeliveryRoute);
-                unset($pedido->status_id); */
-                //return $pedido;
-                //return $pedido->orders;
+                unset($pedido->status_id);
                 DB::statement("SET SQL_MODE=''");
                 $pedido->details_orders = $pedido->orders()
                     ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
@@ -532,7 +532,6 @@ class DeliveryRouteController extends Controller
                         ->get();
                 }
             }
-            return $remissions;
         }
         $ruta->pedidos = $pedidos;
 
