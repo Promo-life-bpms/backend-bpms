@@ -97,4 +97,9 @@ class Sale extends Model
     {
         return $this->hasOne(SaleStatusChange::class)->latestOfMany();
     }
+
+    public function binnacles()
+    {
+        return $this->hasMany(Binnacle::class, 'sale_id');
+    }
 }
