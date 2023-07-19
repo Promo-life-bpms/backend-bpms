@@ -17,7 +17,7 @@ class CreateBinnaclesTable extends Migration
             $table->id();
             $table->integer('user_id');
             $table->integer('sale_id');
-            $table->text('files');
+            $table->text('files')->nullable();
             $table->string('comment');
             $table->timestamps();
         });
