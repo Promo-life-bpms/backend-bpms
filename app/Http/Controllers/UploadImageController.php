@@ -24,7 +24,7 @@ class UploadImageController extends Controller
         $imagenes = $request->file('files');
         $namesImagenes = [];
         foreach ($imagenes as $imagen) {
-            $n = str_replace(' ', '%20', $imagen->getClientOriginalName());
+            $n =  $imagen->getClientOriginalName();
             $nombreImagen = time() . ' ' . str_replace(',', ' ', $n);
             $imagen->move(public_path('storage/images/'), $nombreImagen);
             array_push($namesImagenes, 'storage/images/' . $nombreImagen);

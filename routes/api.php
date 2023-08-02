@@ -12,6 +12,7 @@ use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
 use App\Http\Controllers\UploadImageController;
+use App\Http\Controllers\UserController;
 use App\Notifications\Acces;
 use App\Models\User;
 
@@ -33,7 +34,7 @@ Route::post('setReception/v1', [ApiOdooController::class, 'setReception']);
 Route::post('setDelivery/v1', [ApiOdooController::class, 'setDelivery']);
 Route::post('setTracking/v1', [ApiOdooController::class, 'setTracking']);
 
-Route::get('users', [AuthController::class, 'allUsers']);
+// Route::get('users', [AuthController::class, 'allUsers']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('syncUsers', [AuthController::class, 'syncUsers']);
@@ -41,8 +42,15 @@ Route::post('syncUsers', [AuthController::class, 'syncUsers']);
 Route::get('Acces', [AuthController::class, 'Acces']);
 Route::get('userAccess', [AuthController::class, 'userAccess']);
 
-
 Route::group(['middleware' => 'auth'], function () {
+    // Apis de el userController
+    Route::get('users', [UserController::class, 'index']);
+    Route::post('users', [UserController::class, 'create']);
+    Route::put('users/{id}', [UserController::class, 'update']);
+    Route::delete('users/{id}', [UserController::class, 'delete']);
+    Route::get('users/sendNewAccess/{id}', [UserController::class, 'sendNewAccess']);
+    Route::get('syncUsers', [UserController::class, 'syncUsers']);
+
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('user-profile', [AuthController::class, 'userProfile']);
 
