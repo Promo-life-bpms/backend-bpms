@@ -140,19 +140,21 @@ class IncidenceController extends Controller
                 case "control_calidad":
                     $aux = true;
                     break;
+                case "administrator":
+                    $aux = true;
+                    break;
                 case "ventas":
-                    // return $rol->name;
                     if ($diasDiferencia <= 30) {
                         $aux = true;
                     }
                     break;
                 default:
-                    return response()->json(['No tienes permiso de crear una incidencia']);
+                    return response()->json(['No tienes permiso de crear una incidencia'], 400);
                     break;
             }
         }
         if ($aux == false) {
-            return response()->json(['No tienes permiso de crear una incidencia']);
+            return response()->json(['No tienes permiso de crear una incidencia'], 400);
         }
         $maxINC = Incidence::max('internal_code_incidence');
         $idinc = null;

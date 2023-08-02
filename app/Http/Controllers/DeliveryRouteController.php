@@ -534,6 +534,8 @@ class DeliveryRouteController extends Controller
             }
         }
         $ruta->pedidos = $pedidos;
+        // TODO: Colocar el estatus del pedido.
+
 
 
         // Devolvemos la información encontrada.
