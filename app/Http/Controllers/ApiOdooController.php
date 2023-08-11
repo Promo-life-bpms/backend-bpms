@@ -185,6 +185,8 @@ class ApiOdooController extends Controller
                 } catch (Exception $th) {
                     return  response()->json(["Server Error Insert: " => $th->getMessage()], 400);
                 }
+                // TODO: Notificar al area de compras por correo
+
                 return response()->json(['message' => 'Actualizacion Completa']);
             } else {
                 return response()->json(['message' => 'No Tienes autorizacion']);
