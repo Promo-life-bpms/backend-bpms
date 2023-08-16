@@ -110,21 +110,53 @@ class OrderPurchaseController extends Controller
         }
         $orderPurchase->products;
         $orderPurchase->receptionsWithTheirProducts;
+        // Maquiladores: Mostrar unicamente sus recepciones
+        // Otra area: Mostrar cantidad del maquiador en otro atributo (total_amount_tagger)
+        // Otra area: Colocar el nombre del maquilador en otro atributo (tagger_name)
 
+        $isMaquilador = auth()->user()->whatRoles()->where('id', 2)->get();
+
+        if ($isMaquilador->isEmpty()) {
+            $isMaquilador = false;
+        } else {
+            $isMaquilador = true;
+        }
+
+        if ($isMaquilador) {
+            $recepcions = $orderPurchase->receptionsWithTheirProducts()->where("maquilador", $isMaquilador)->where("user_id", auth()->user()->id)->get();
+        } else {
+            $recepcions = $orderPurchase->receptionsWithTheirProducts;
+        }
         $quantityReceived = [];
-        foreach ($orderPurchase->receptionsWithTheirProducts as $OrderP) {
+        $cantidadRecibidaPorMaquilador = [];
+        foreach ($recepcions as $key => $OrderP) {
             foreach ($OrderP->productsReception as $productRec) {
                 if (array_key_exists($productRec->odoo_product_id, $quantityReceived) == null) {
                     $quantityReceived[$productRec->odoo_product_id] =  $productRec->done;
                 } else {
                     $quantityReceived[$productRec->odoo_product_id] =   $quantityReceived[$productRec->odoo_product_id] + $productRec->done;
                 }
-                $productRec->completeInformation;
+                if (!$isMaquilador) {
+                    // $productRec->tagger_name = $productRec->user->name;
+                    if (array_key_exists($productRec->odoo_product_id, $cantidadRecibidaPorMaquilador) == null) {
+                        $cantidadRecibidaPorMaquilador[$productRec->odoo_product_id] =  $productRec->done;
+                    } else {
+                        $cantidadRecibidaPorMaquilador[$productRec->odoo_product_id] =   $cantidadRecibidaPorMaquilador[$productRec->odoo_product_id] + $productRec->done;
+                    }
+                    $productRec->total_amount_tagger = $cantidadRecibidaPorMaquilador[$productRec->odoo_product_id];
+                }
                 $productRec->total_amount_received = $quantityReceived[$productRec->odoo_product_id];
+
+                $productRec->completeInformation;
                 $productRec->measurement_unit = $productRec->completeInformation->measurement_unit;
                 unset($productRec->completeInformation);
             }
+            if (!$isMaquilador && $OrderP->maquilador)
+                unset($orderPurchase->receptionsWithTheirProducts[$key]);
+            if ($isMaquilador && !$OrderP->maquilador)
+                unset($orderPurchase->receptionsWithTheirProducts[$key]);
         }
+
         $orderPurchase->receptionsWithProducts = array_reverse($orderPurchase->receptionsWithTheirProducts->toArray());
         unset($orderPurchase->receptionsWithTheirProducts);
         //Se crea el campo de last status con el valor de i retornando el mismo
