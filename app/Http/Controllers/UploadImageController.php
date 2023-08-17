@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class UploadImageController extends Controller
 {
@@ -25,7 +26,7 @@ class UploadImageController extends Controller
         $namesImagenes = [];
         foreach ($imagenes as $imagen) {
             $n =  $imagen->getClientOriginalName();
-            $nombreImagen = time() . ' ' . str_replace(',', ' ', $n);
+            $nombreImagen = time() . ' ' . Str::slug($n);
             $imagen->move(public_path('storage/images/'), $nombreImagen);
             array_push($namesImagenes, 'storage/images/' . $nombreImagen);
         }
