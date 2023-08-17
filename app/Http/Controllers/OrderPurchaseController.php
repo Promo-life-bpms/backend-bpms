@@ -121,43 +121,45 @@ class OrderPurchaseController extends Controller
         } else {
             $isMaquilador = true;
         }
+        if (!$isMaquilador) {
+            // Obtener las recepciones del el que no es maquilador
+            $recepcionsAllAreas = $orderPurchase->receptionsWithTheirProducts()->where("maquilador", 0)->get();
+            $quantityReceived = [];
+            foreach ($recepcionsAllAreas as $key => $OrderP) {
+                foreach ($OrderP->productsReception as $productRec) {
+                    if (array_key_exists($productRec->odoo_product_id, $quantityReceived) == null) {
+                        $quantityReceived[$productRec->odoo_product_id] =  $productRec->done;
+                    } else {
+                        $quantityReceived[$productRec->odoo_product_id] =   $quantityReceived[$productRec->odoo_product_id] + $productRec->done;
+                    }
 
-        if ($isMaquilador) {
-            $recepcions = $orderPurchase->receptionsWithTheirProducts()->where("maquilador", $isMaquilador)->where("user_id", auth()->user()->id)->get();
-        } else {
-            $recepcions = $orderPurchase->receptionsWithTheirProducts;
+                    $productRec->total_amount_received = $quantityReceived[$productRec->odoo_product_id];
+
+                    $productRec->completeInformation;
+                    $productRec->measurement_unit = $productRec->completeInformation->measurement_unit;
+                    unset($productRec->completeInformation);
+                }
+            }
+            $orderPurchase->receptionsWithProducts = array_reverse($recepcionsAllAreas->toArray());
+            unset($orderPurchase->receptionsWithTheirProducts);
         }
+        // Obtener las recepciones del maquilador
+        $recepcionsTagger = $orderPurchase->receptionsWithTheirProducts()->where("maquilador", 1)->get();
         $quantityReceived = [];
-        $cantidadRecibidaPorMaquilador = [];
-        foreach ($recepcions as $key => $OrderP) {
+        foreach ($recepcionsTagger as $key => $OrderP) {
             foreach ($OrderP->productsReception as $productRec) {
                 if (array_key_exists($productRec->odoo_product_id, $quantityReceived) == null) {
                     $quantityReceived[$productRec->odoo_product_id] =  $productRec->done;
                 } else {
                     $quantityReceived[$productRec->odoo_product_id] =   $quantityReceived[$productRec->odoo_product_id] + $productRec->done;
                 }
-                if (!$isMaquilador) {
-                    // $productRec->tagger_name = $productRec->user->name;
-                    if (array_key_exists($productRec->odoo_product_id, $cantidadRecibidaPorMaquilador) == null) {
-                        $cantidadRecibidaPorMaquilador[$productRec->odoo_product_id] =  $productRec->done;
-                    } else {
-                        $cantidadRecibidaPorMaquilador[$productRec->odoo_product_id] =   $cantidadRecibidaPorMaquilador[$productRec->odoo_product_id] + $productRec->done;
-                    }
-                    $productRec->total_amount_tagger = $cantidadRecibidaPorMaquilador[$productRec->odoo_product_id];
-                }
                 $productRec->total_amount_received = $quantityReceived[$productRec->odoo_product_id];
-
                 $productRec->completeInformation;
                 $productRec->measurement_unit = $productRec->completeInformation->measurement_unit;
                 unset($productRec->completeInformation);
             }
-            if (!$isMaquilador && $OrderP->maquilador)
-                unset($orderPurchase->receptionsWithTheirProducts[$key]);
-            if ($isMaquilador && !$OrderP->maquilador)
-                unset($orderPurchase->receptionsWithTheirProducts[$key]);
         }
-
-        $orderPurchase->receptionsWithProducts = array_reverse($orderPurchase->receptionsWithTheirProducts->toArray());
+        $orderPurchase->receptionsWithProductsTagger = array_reverse($recepcionsTagger->toArray());
         unset($orderPurchase->receptionsWithTheirProducts);
         //Se crea el campo de last status con el valor de i retornando el mismo
         $orderPurchase->theirHistoryStatus;
@@ -180,42 +182,5 @@ class OrderPurchaseController extends Controller
         $orderPurchase->historyStatus = array_reverse($orderPurchase->theirHistoryStatus->toArray());
         unset($orderPurchase->theirHistoryStatus);
         return response()->json(["msg" => "Orden de compra encontrada", 'data' => ["orderPurchase", $orderPurchase]], response::HTTP_OK);
-    }
-
-
-
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\OrderPurchase  $orderPurchase
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(OrderPurchase $orderPurchase)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\OrderPurchase  $orderPurchase
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, OrderPurchase $orderPurchase)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\OrderPurchase  $orderPurchase
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(OrderPurchase $orderPurchase)
-    {
-        //
     }
 }
