@@ -257,6 +257,8 @@ class ApiOdooController extends Controller
                                         'sale_id' => $sale->id,
                                         "status_id" => 2,
                                     ]);
+                                    $sale->status_id = 2;
+                                    $sale->save();
                                 }
                             }
                         }
