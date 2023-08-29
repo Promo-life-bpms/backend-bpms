@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Incidence;
+use App\Models\IncidenceProduct;
 use App\Models\OrderPurchase;
 use App\Models\OrderPurchaseProduct;
 use App\Models\Sale;
@@ -14,12 +15,6 @@ use Illuminate\Support\Facades\DB;
 
 class IncidenceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
 
     public function show($incidencia)
     {
@@ -56,12 +51,6 @@ class IncidenceController extends Controller
         return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $incidencia]], response::HTTP_OK);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request, $sale_id)
     {
 
@@ -175,6 +164,7 @@ class IncidenceController extends Controller
             "date_request" => $request->fecha_creacion,
             "company" => $sale->moreInformation->warehouse_company,
             "odoo_status" => 'Confirmado',
+            "sync_with_odoo" => false,
 
             'internal_code_incidence' => "INCD-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
             'area' => $request->area,
@@ -287,6 +277,7 @@ class IncidenceController extends Controller
                             $folio = $dataResponse[0]->Folio;
                             //Actualizar Folio de la Incidencia
                             $incidencia->code_incidence = $folio;
+                            $incidencia->sync_with_odoo = true;
                             $incidencia->save();
                         } else {
                             $errors = true;
@@ -310,7 +301,7 @@ class IncidenceController extends Controller
                     [
                         "messageOdoo" => $message,
                         "incidencia" => $incidencia,
-                         'responseOdoo' => json_decode($response),
+                        'responseOdoo' => json_decode($response),
                     ]
                 ], response::HTTP_BAD_REQUEST);
             }
@@ -362,14 +353,128 @@ class IncidenceController extends Controller
         return response()->json(["msg" => "Se actualizo la incidencia"], response::HTTP_ACCEPTED);
     }
 
-    public function destroy(Request $request)
+    public function updateIncidenceComplete(Request $request, Incidence $incidence)
     {
-        $Incidencia = Incidence::destroy($request->id);
+        $incidencia = '';
+        $validation = Validator::make($request->all(), [
+            'area' => 'required',
+            'motivo' => 'required',
+            'tipo_de_producto' => 'required',
+            'tipo_de_tecnica' => 'required',
+            'responsable' => 'required',
+            'fecha_creacion' => 'required',
+            'evidencia' => 'required',
+            'fecha_compromiso' => 'required',
+            'solucion' => 'required',
+            'id_user' => 'required',
+            'elaboro' => 'required',
+            'firma_elaboro' => 'required',
+            'reviso' => 'required',
+            'firma_reviso' => 'required',
+            'comentarios_generales' => 'required',
+
+            'incidence_products' => 'required|array',
+            'incidence_products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
+            'incidence_products.*.quantity_selected' => 'required'
+        ]);
+        if ($validation->fails()) {
+            return response()->json([
+                "msg" => 'No se registro correctamente la informacion',
+                'data' =>
+                ["errorValidacion" => $validation->getMessageBag()]
+            ], response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        // Revisar si exite la incidencia
+        $diasDiferencia = $incidence->created_at->diffInDays(now());
+
+        //return $date;
+        //return $date;
+        $user =  auth()->user();
+        $aux = false;
+        // return [$user->whatRoles, $diasDiferencia];
+        foreach ($user->whatRoles as $rol) {
+            switch ($rol->name) {
+                case "control_calidad":
+                    $aux = true;
+                    break;
+                case "administrator":
+                    $aux = true;
+                    break;
+                case "ventas":
+                    if ($diasDiferencia <= 30) {
+                        $aux = true;
+                    }
+                    break;
+                default:
+                    return response()->json(['No tienes permiso de crear una incidencia'], 400);
+                    break;
+            }
+        }
+        if ($aux == false) {
+            return response()->json(['No tienes permiso de crear una incidencia'], 400);
+        }
+        $incidencia = Incidence::create([
+            "code_incidence" => $incidence->code_incidence,
+            "code_sale" => $incidence->code_sale,
+            "client" => $incidence->client,
+            "requested_by" => $incidence->requested_by,
+            "description" => $request->comentarios_generales ?? $incidence->description,
+            "date_request" => $request->fecha_creacion ?? $incidence->date_request,
+            "company" => $incidence->company,
+            "odoo_status" => $incidence->odoo_status,
+            "sync_with_odoo" => $incidence->sync_with_odoo,
+
+            'internal_code_incidence' => $incidence->internal_code_incidence,
+            'area' => $request->area ?? $incidence->area,
+            'reason' => $request->motivo ?? $incidence->reason,
+            'product_type' => $request->tipo_de_producto ?? $incidence->product_type,
+            'type_of_technique' => $request->tipo_de_tecnica ?? $incidence->type_of_technique,
+            'responsible' => $request->responsable ?? $incidence->responsible,
+            'creation_date' => $request->fecha_creacion ?? $incidence->creation_date,
+            'bpm_status' => $incidence->bpm_status,
+            'evidence' => $request->evidencia ?? $incidence->evidence,
+            'commitment_date' => $request->fecha_compromiso ?? $incidence->commitment_date,
+            'solution' => $request->solucion ?? $incidence->solution,
+            'solution_date' => $incidence->solution_date,
+            'user_id' => $request->id_user ?? $incidence->user_id,
+            'elaborated' => $request->elaboro ?? $incidence->elaborated,
+            'signature_elaborated' => $request->firma_elaboro ?? $incidence->signature_elaborated,
+            'reviewed' => $request->reviso ?? $incidence->reviewed,
+            'signature_reviewed' => $request->firma_reviso ?? $incidence->signature_reviewed,
+            'sale_id' => $incidence->sale_id
+        ]);
+        $response = null;
+
+        $dataProducts = [];
+        $orderpurchase_id = null;
+        foreach ($request->incidence_products as $incidence_product) {
+            $incidence_product = (object)$incidence_product;
+
+            $productOrder = OrderPurchaseProduct::where("odoo_product_id", $incidence_product->odoo_product_id)->first();
+
+            $productOdoo = [
+                "pro_name" => '',
+                "pro_product_id" => $productOrder->product,
+                "pro_qty" => $incidence_product->quantity_selected,
+                "pro_currency_id" => "MXN",
+                "pro_price" => $productOrder->unit_price
+            ];
+
+            // Revisar si exite el atributo id en el objeto incidence_producto
+            if (isset($incidence_product->incidence_product_id)) {
+                $incidenceProduct = IncidenceProduct::find($incidence_product->incidence_product_id);
+                $incidenceProduct->quantity_selected = $incidence_product->quantity_selected ?? $incidenceProduct->quantity_selected;
+                $incidenceProduct->save();
+            }
+            array_push($dataProducts, $productOdoo);
+        }
+
         return response()->json([
-            "msg" => "La incidencia se ha eliminado correctamente",
-            "data" => [
-                'incidencia' => $Incidencia,
-            ],
-        ], response::HTTP_OK); //201
+            "msg" => 'Incidencia editada exitosamente',
+            'data' => [
+                "incidencia" => $incidencia,
+            ]
+        ], response::HTTP_CREATED);
     }
 }

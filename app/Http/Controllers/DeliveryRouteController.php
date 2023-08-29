@@ -31,8 +31,11 @@ class DeliveryRouteController extends Controller
         $isChofer =  auth()->user()->whatRoles()->where('id', 4)->first();
         $rutas = [];
         if ($isChofer) {
+            DB::statement("SET SQL_MODE=''");
             $rutas = DeliveryRoute::join('code_order_delivery_routes', 'code_order_delivery_routes.delivery_route_id', 'delivery_routes.id')->where("delivery_routes.is_active", true)
-                ->where("code_order_delivery_routes.user_chofer_id", auth()->user()->id)->select("delivery_routes.*")->get();
+                ->where("code_order_delivery_routes.user_chofer_id", auth()->user()->id)->select("delivery_routes.*")
+                ->groupBy("delivery_routes.code_route")
+                ->get();
             // return $rutas;
             foreach ($rutas as $ruta) {
                 $ruta->count_sales = count($ruta->codeOrderDeliveryRoute()
@@ -453,6 +456,13 @@ class DeliveryRouteController extends Controller
                         ->groupBy('order_purchase_products.id')
                         ->get();
                 }
+                $pedido->lastStatus->slug = $pedido->lastStatus->status->slug;
+                $pedido->lastStatus->last_status = $pedido->lastStatus->status->status;
+                unset($pedido->lastStatus->status);
+                unset($pedido->lastStatus->id);
+                unset($pedido->lastStatus->sale_id);
+                unset($pedido->lastStatus->status_id);
+                unset($pedido->lastStatus->updated_at);
             }
         } else {
             DB::statement("SET SQL_MODE=''");
@@ -531,6 +541,13 @@ class DeliveryRouteController extends Controller
                         ->groupBy('order_purchase_products.id')
                         ->get();
                 }
+                $pedido->lastStatus->slug = $pedido->lastStatus->status->slug;
+                $pedido->lastStatus->last_status = $pedido->lastStatus->status->status;
+                unset($pedido->lastStatus->status);
+                unset($pedido->lastStatus->id);
+                unset($pedido->lastStatus->sale_id);
+                unset($pedido->lastStatus->status_id);
+                unset($pedido->lastStatus->updated_at);
             }
         }
         $ruta->pedidos = $pedidos;

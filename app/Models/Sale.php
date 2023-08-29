@@ -31,6 +31,7 @@ class Sale extends Model
         'subtotal',
         'taxes',
         'total',
+        'delivery_custom_address',
         'status_id',
     ];
 

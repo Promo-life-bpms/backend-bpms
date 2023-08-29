@@ -17,6 +17,7 @@ class Incidence extends Model
         "description",
         "date_request",
         "company",
+        "sync_with_odoo",
         "odoo_status",
 
         'internal_code_incidence',
