@@ -26,7 +26,7 @@ class UploadImageController extends Controller
         $namesImagenes = [];
         foreach ($imagenes as $imagen) {
             $n =  $imagen->getClientOriginalName();
-            $nombreImagen = time() . ' ' . Str::slug($n);
+            $nombreImagen = time() . ' ' . Str::slug($n) . '.' . $imagen->getClientOriginalExtension();
             $imagen->move(public_path('storage/images/'), $nombreImagen);
             array_push($namesImagenes, 'storage/images/' . $nombreImagen);
         }

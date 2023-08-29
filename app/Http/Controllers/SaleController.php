@@ -8,6 +8,7 @@ use App\Models\Sale;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
 
@@ -43,7 +44,7 @@ class SaleController extends Controller
         $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente', 'asistente_de_gerente'])->first();
         $isMaquilador = auth()->user()->whatRoles()->whereIn('name', ['maquilador'])->first();
         // return $isSeller;
-        //DB::statement("SET SQL_MODE=''");
+        DB::statement("SET SQL_MODE=''");
         if ($request->ordenes_proximas) {
             $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")
                 ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
@@ -64,9 +65,13 @@ class SaleController extends Controller
                 ->where("additional_sale_information.client_name", "LIKE", "%" . $cliente . "%")
                 ->where("sales.commercial_name", "LIKE", "%" . $comercial . "%")
                 ->where("sales.total", "LIKE", $total . "%")
-                //->groupBy('sales.id')
+                ->groupBy('sales.id')
                 ->orderby('order_purchases.planned_date', 'ASC')
-                ->select('sales.*')
+                ->select(
+                    'sales.*',
+                    "additional_sale_information.client_name as client_name",
+                    "additional_sale_information.company as company"
+                )
                 ->paginate($per_page);
         } else {
             $sales = Sale::with('lastStatus', "detailsOrders", "moreInformation")
@@ -88,8 +93,12 @@ class SaleController extends Controller
                 ->where("additional_sale_information.client_name", "LIKE", "%" . $cliente . "%")
                 ->where("sales.commercial_name", "LIKE", "%" . $comercial . "%")
                 ->where("sales.total", "LIKE", $total . "%")
-                //->groupBy('sales.id')
-                ->select('sales.*')
+                ->groupBy('sales.id')
+                ->select(
+                    'sales.*',
+                    "additional_sale_information.client_name as client_name",
+                    "additional_sale_information.company as company"
+                )
                 ->paginate($per_page);
         }
         // TODO: Pedido 153 muestra mal el status
@@ -121,9 +130,9 @@ class SaleController extends Controller
                             ->sum(
                                 "reception_products.done",
                             );
-                            // array_push($quantityTaggerArray, [$product,$quantityTagger, $product->odoo_product_id, $detailOrder->id]);
-                            $product->quantity_delivered = $quantityTagger;
-                            $quantityTagger = 0;
+                        // array_push($quantityTaggerArray, [$product,$quantityTagger, $product->odoo_product_id, $detailOrder->id]);
+                        $product->quantity_delivered = $quantityTagger;
+                        $quantityTagger = 0;
                     }
                 }
             }

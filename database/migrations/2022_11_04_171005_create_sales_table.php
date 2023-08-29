@@ -34,6 +34,7 @@ class CreateSalesTable extends Migration
             $table->decimal('subtotal', 16, 2);
             $table->decimal('taxes', 16, 2);
             $table->decimal('total', 16, 2);
+            $table->text('delivery_custom_address');
             $table->foreignId('status_id')->constrained();
             $table->timestamps();
         });

@@ -61,9 +61,14 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('calendario', [SaleController::class, 'calendario']);
 
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
-    // Crear y actualizar la bitacora
+
+    // Actualizar la ruta de entrega
+    Route::put('pedidos/{pedido}/update_delivery_address_custom', [SaleController::class, 'updateDeliveryAddressCustom']);
+
+    // Crear la bitacora
     Route::post('pedidos/{pedido}/bitacora/create', [BinnacleController::class, 'store']);
 
+    // Crear y actualizar la inspeccion
     Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
     Route::get('inspections/{inspection}', [InspectionController::class, 'show']);
 
@@ -87,6 +92,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Crear una incidencia
     Route::post('pedidos/{pedido}/incidencia', [IncidenceController::class, 'store']);
     Route::patch('incidencias/{incidencia}', [IncidenceController::class, 'update']);
+    Route::put('incidencias/{incidencia}/update', [IncidenceController::class, 'updateIncidenceComplete']);
 
     // Vista de status de incidencia
     Route::post('order/{compra}/updatestatus', [OrderPurchaseController::class, 'store']);

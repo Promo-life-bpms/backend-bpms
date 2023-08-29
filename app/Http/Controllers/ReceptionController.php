@@ -2,18 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DeliveryRoute;
 use App\Models\OrderPurchase;
 use App\Models\Reception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\OrderPurchaseProduct;
-use App\Models\ReceptionProduct;
 use App\Models\Sale;
 use App\Models\SaleStatusChange;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use PhpParser\Node\Stmt\Foreach_;
 use Exception;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -46,17 +41,9 @@ class ReceptionController extends Controller
         }
         $receptionsOfOrderPurchase = $orderPurchase->receptions;
 
-        /*     $user = User::join('role_user', 'role_user.user_id', 'users.id')
-            ->select('role_user.role_id')
-            ->where('users.id', auth()->user()->id)
-            ->get(); */
-        //return $user;
         $maquilador = auth()->user()->whatRoles()->where('id', 2)->get();
-        //$isMaquilador = $maquilador->isEmpty() ? false : true;
-        //$maquilador = null;
 
         if ($maquilador->isEmpty()) {
-
             $maquilador = false;
         } else {
             $maquilador = true;
@@ -73,8 +60,6 @@ class ReceptionController extends Controller
                         "odoo_product_id" => $p->odoo_product_id,
                         "quantity" => 0,
                     ]);
-
-                    //prueba
                 }
 
                 $errors = [];
