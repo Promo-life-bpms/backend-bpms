@@ -414,7 +414,7 @@ class IncidenceController extends Controller
         if ($aux == false) {
             return response()->json(['No tienes permiso de crear una incidencia'], 400);
         }
-        $incidencia = Incidence::create([
+        $incidencia = $incidence->update([
             "code_incidence" => $incidence->code_incidence,
             "code_sale" => $incidence->code_sale,
             "client" => $incidence->client,
@@ -430,7 +430,7 @@ class IncidenceController extends Controller
             'reason' => $request->motivo ?? $incidence->reason,
             'product_type' => $request->tipo_de_producto ?? $incidence->product_type,
             'type_of_technique' => $request->tipo_de_tecnica ?? $incidence->type_of_technique,
-            'responsible' => $request->responsable ?? $incidence->responsible,
+            'responsible' => $request->resssponsable ?? $incidence->responsible,
             'creation_date' => $request->fecha_creacion ?? $incidence->creation_date,
             'bpm_status' => $incidence->bpm_status,
             'evidence' => $request->evidencia ?? $incidence->evidence,
