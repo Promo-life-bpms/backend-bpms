@@ -430,7 +430,7 @@ class IncidenceController extends Controller
             'reason' => $request->motivo ?? $incidence->reason,
             'product_type' => $request->tipo_de_producto ?? $incidence->product_type,
             'type_of_technique' => $request->tipo_de_tecnica ?? $incidence->type_of_technique,
-            'responsible' => $request->resssponsable ?? $incidence->responsible,
+            'responsible' => $request->responsable ?? $incidence->responsible,
             'creation_date' => $request->fecha_creacion ?? $incidence->creation_date,
             'bpm_status' => $incidence->bpm_status,
             'evidence' => $request->evidencia ?? $incidence->evidence,
