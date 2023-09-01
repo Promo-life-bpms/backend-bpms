@@ -293,9 +293,9 @@ class DeliveryRouteController extends Controller
     public function updateInfoChofer(Request $request, $ruta, $pedido)
     {
         $validation = Validator::make($request->all(), [
-            'user_chofer_id' => 'required',
             'type_of_product' => 'required|in:Limpio,Maquilado',
             'type_of_chofer' => 'required',
+            'user_chofer_id' => 'required_if:type_of_chofer,==,Interno',
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -513,7 +513,6 @@ class DeliveryRouteController extends Controller
                 } else {
                     $pedido->chofer_name = "Sin Chofer Asignado";
                 }
-                unset($pedido->user_chofer_id);
                 $pedido->remission_id = $new ? $new->code_remission : null;
                 unset($pedido->ordersDeliveryRoute);
                 unset($pedido->status_id);
