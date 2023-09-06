@@ -80,8 +80,6 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('orders/{order}/receptions/{reception}', [ReceptionController::class, 'getReception']);
 
-
-
     // Seccion para actualizar el estatus de maquila
 
     // Seccion de Incidencias
