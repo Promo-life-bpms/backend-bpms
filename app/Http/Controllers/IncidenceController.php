@@ -78,7 +78,7 @@ class IncidenceController extends Controller
 
             'incidence_products' => 'required|array',
             'incidence_products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
-            'incidence_products.*.order_purchase_product_id' => 'required|exists:order_purchase_products,order_purchase_product_id',
+            'incidence_products.*.order_purchase_product_id' => 'required|exists:order_purchase_products,id',
             'incidence_products.*.quantity_selected' => 'required'
         ]);
 
@@ -193,7 +193,7 @@ class IncidenceController extends Controller
         foreach ($request->incidence_products as $incidence_product) {
             $incidence_product = (object)$incidence_product;
 
-            $productOrder = OrderPurchaseProduct::where("order_purchase_product_id", $incidence_product->order_purchase_product_id)->first();
+            $productOrder = OrderPurchaseProduct::where("id", $incidence_product->order_purchase_product_id)->first();
 
             $orderpurchase_id = $productOrder->order_purchase_id;
             $productOdoo = [
