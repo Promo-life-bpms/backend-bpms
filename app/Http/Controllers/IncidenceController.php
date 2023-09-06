@@ -78,7 +78,6 @@ class IncidenceController extends Controller
 
             'incidence_products' => 'required|array',
             'incidence_products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
-            'incidence_products.*.order_purchase_product_id' => 'required|exists:order_purchase_products,order_purchase_product_id',
             'incidence_products.*.quantity_selected' => 'required'
         ]);
 
@@ -193,7 +192,7 @@ class IncidenceController extends Controller
         foreach ($request->incidence_products as $incidence_product) {
             $incidence_product = (object)$incidence_product;
 
-            $productOrder = OrderPurchaseProduct::where("order_purchase_product_id", $incidence_product->order_purchase_product_id)->first();
+            $productOrder = OrderPurchaseProduct::where("odoo_product_id", $incidence_product->odoo_product_id)->first();
 
             $orderpurchase_id = $productOrder->order_purchase_id;
             $productOdoo = [
@@ -354,8 +353,9 @@ class IncidenceController extends Controller
         return response()->json(["msg" => "Se actualizo la incidencia"], response::HTTP_ACCEPTED);
     }
 
-    public function updateIncidenceComplete(Request $request, Incidence $incidence)
+    public function updateIncidenceComplete(Request $request, $incidencia)
     {
+        $incidence = Incidence::where("code_incidence", $incidencia)->first();
         $incidencia = '';
         $validation = Validator::make($request->all(), [
             'area' => 'required',
@@ -375,7 +375,6 @@ class IncidenceController extends Controller
             'comentarios_generales' => 'required',
 
             'incidence_products' => 'required|array',
-            'incidence_products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
             'incidence_products.*.quantity_selected' => 'required'
         ]);
         if ($validation->fails()) {
@@ -387,7 +386,7 @@ class IncidenceController extends Controller
         }
 
         // Revisar si exite la incidencia
-        $diasDiferencia = $incidence->created_at->diffInDays(now());
+        $diasDiferencia = 1;
 
         //return $date;
         //return $date;
@@ -415,6 +414,7 @@ class IncidenceController extends Controller
         if ($aux == false) {
             return response()->json(['No tienes permiso de crear una incidencia'], 400);
         }
+
         $incidencia = $incidence->update([
             "code_incidence" => $incidence->code_incidence,
             "code_sale" => $incidence->code_sale,
@@ -447,20 +447,10 @@ class IncidenceController extends Controller
         ]);
         $response = null;
 
-        $dataProducts = [];
         $orderpurchase_id = null;
         foreach ($request->incidence_products as $incidence_product) {
             $incidence_product = (object)$incidence_product;
 
-            $productOrder = OrderPurchaseProduct::where("odoo_product_id", $incidence_product->odoo_product_id)->first();
-
-            $productOdoo = [
-                "pro_name" => '',
-                "pro_product_id" => $productOrder->product,
-                "pro_qty" => $incidence_product->quantity_selected,
-                "pro_currency_id" => "MXN",
-                "pro_price" => $productOrder->unit_price
-            ];
 
             // Revisar si exite el atributo id en el objeto incidence_producto
             if (isset($incidence_product->incidence_product_id)) {
@@ -468,7 +458,7 @@ class IncidenceController extends Controller
                 $incidenceProduct->quantity_selected = $incidence_product->quantity_selected ?? $incidenceProduct->quantity_selected;
                 $incidenceProduct->save();
             }
-            array_push($dataProducts, $productOdoo);
+
         }
 
         return response()->json([
