@@ -193,7 +193,7 @@ class InspectionController extends Controller
             foreach ($nuevo->products as $product) {
                 foreach ($inspection->productsSelected as $pInspection) {
                     //  return $pInspection;
-                    if ($product->odoo_product_id == $pInspection->odoo_product_id) {
+                    if ($product->odoo_product_id == $pInspection->odoo_product_id && $pInspection->code_order == $orden->code_order) {
 
                         $product->quantity_selected = $pInspection->quantity_selected;
 
