@@ -8,6 +8,7 @@ use App\Models\Remission;
 use App\Models\Role;
 use App\Models\Sale;
 use App\Models\User;
+use App\Models\ProductDeliveryRoute;
 use Exception;
 use Illuminate\Notifications\Notifiable;
 use Symfony\Component\HttpFoundation\Response;
@@ -280,15 +281,14 @@ class DeliveryRouteController extends Controller
                     }
                 }
             }
-
-
-            return response()->json([
-                'msg' => 'Ruta Creada Existosamente',
-                'data' => [
-                    "ruta" =>  $ruta
-                ]
-            ], Response::HTTP_CREATED);
         }
+
+        return response()->json([
+            'msg' => 'Ruta Creada Existosamente',
+            'data' => [
+                "ruta" =>  $ruta
+            ]
+        ], Response::HTTP_CREATED);
     }
     public function updateInfoChofer(Request $request, $ruta, $pedido)
     {
@@ -385,175 +385,133 @@ class DeliveryRouteController extends Controller
         // $ruta->user_chofer_name = $ruta->user->name;
         // unset($ruta->user);
         $isChofer =  auth()->user()->whatRoles()->where('id', 4)->first();
-        $rutas = [];
-        if ($isChofer) {
-            DB::statement("SET SQL_MODE=''");
-            $pedidos = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
-                //->join('code_order_delivery_routes','code_order_delivery_routes.delivery_route_id','delivery_routes.id')
-                ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
-                ->join("order_purchases", "order_purchases.code_sale", "sales.code_sale")
-                ->join("order_purchase_products", "order_purchase_products.order_purchase_id", "order_purchases.id")
-                ->join("product_delivery_routes", "product_delivery_routes.odoo_product_id", "order_purchase_products.odoo_product_id")
-                ->where("code_order_delivery_routes.delivery_route_id", $ruta->id)
-                ->where("code_order_delivery_routes.user_chofer_id", auth()->user()->id)
-                ->select(
-                    'sales.*',
-                    'code_order_delivery_routes.type_of_origin',
-                    'code_order_delivery_routes.user_chofer_id',
-                    'code_order_delivery_routes.type_of_product',
-                    'code_order_delivery_routes.type_of_chofer',
-                    'code_order_delivery_routes.origin_address',
-                    'code_order_delivery_routes.type_of_destiny',
-                    'code_order_delivery_routes.destiny_address',
-                    'code_order_delivery_routes.hour',
-                    'code_order_delivery_routes.attention_to',
-                    'code_order_delivery_routes.action',
-                    'code_order_delivery_routes.num_guide',
-                    'code_order_delivery_routes.observations',
-                    'code_order_delivery_routes.status',
-                    'additional_sale_information.client_name',
-                    'additional_sale_information.client_contact',
-                    'additional_sale_information.warehouse_company',
-                    'additional_sale_information.planned_date',
-                    'additional_sale_information.company'
-                )
-                ->groupBy('sales.id')
-                ->get();
 
-            foreach ($pedidos as $pedido) {
-                //$pedido->moreInformation;
-                $ordersDeliveryRoute =  $pedido->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
-                $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')
-                    ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
-                    ->select('remisiones.code_remission')
-                    ->first();
-
-                $pedido->remission_id = $new ? $new->code_remission : null;
-                unset($pedido->ordersDeliveryRoute);
-                unset($pedido->status_id);
-                //return $pedido;
-                //return $pedido->orders;
-                DB::statement("SET SQL_MODE=''");
-                $pedido->details_orders = $pedido->orders()
-                    ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
-                    ->join("product_delivery_routes", "product_delivery_routes.odoo_product_id", "order_purchase_products.odoo_product_id")
-                    ->join("code_order_delivery_routes", "code_order_delivery_routes.id", "product_delivery_routes.code_order_route_id")
-                    ->where("code_order_delivery_routes.delivery_route_id", $ruta->id)
-                    ->where("code_order_delivery_routes.user_chofer_id", auth()->user()->id)
-                    ->select("order_purchases.*")
-                    ->groupBy('order_purchases.id')
-                    ->get();
-                // unset($pedido->details_orders);
-                foreach ($pedido->details_orders as $productNew) {
-                    DB::statement("SET SQL_MODE=''");
-                    $productNew->products = $productNew->products()
-                        ->join('product_delivery_routes', 'product_delivery_routes.odoo_product_id', 'order_purchase_products.odoo_product_id')
-                        ->join("code_order_delivery_routes", "code_order_delivery_routes.id", "product_delivery_routes.code_order_route_id")
-                        ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
-                        ->where("code_order_delivery_routes.user_chofer_id", auth()->user()->id)
-                        ->where('order_purchase_products.order_purchase_id', $productNew->id)
-                        ->select('order_purchase_products.*', 'product_delivery_routes.amount')
-                        ->groupBy('order_purchase_products.id')
-                        ->get();
+        // Buscar los productos de esta ruta
+        $products = ProductDeliveryRoute::join('code_order_delivery_routes', 'code_order_delivery_routes.id', 'product_delivery_routes.code_order_route_id')
+            ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
+            ->select('product_delivery_routes.*')
+            ->get();
+        // Obtener las ordenes de compra de estos productos
+        $orders = [];
+        foreach ($products as $product) {
+            $order = $product->codeOrderRoute->orderPurchase;
+            // revisar si la orden ya esta en el array
+            $orderExist = false;
+            foreach ($orders as $orderInArray) {
+                if ($orderInArray->code_order == $order->code_order) {
+                    $orderExist = true;
+                    break;
                 }
-                $pedido->lastStatus->slug = $pedido->lastStatus->status->slug;
-                $pedido->lastStatus->last_status = $pedido->lastStatus->status->status;
-                unset($pedido->lastStatus->status);
-                unset($pedido->lastStatus->id);
-                unset($pedido->lastStatus->sale_id);
-                unset($pedido->lastStatus->status_id);
-                unset($pedido->lastStatus->updated_at);
             }
-        } else {
-            DB::statement("SET SQL_MODE=''");
-            $pedidos = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
-                //->join('code_order_delivery_routes','code_order_delivery_routes.delivery_route_id','delivery_routes.id')
-                ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
-                ->join("order_purchases", "order_purchases.code_sale", "sales.code_sale")
-                ->join("order_purchase_products", "order_purchase_products.order_purchase_id", "order_purchases.id")
-                ->join("product_delivery_routes", "product_delivery_routes.odoo_product_id", "order_purchase_products.odoo_product_id")
-                ->where("code_order_delivery_routes.delivery_route_id", $ruta->id)
-                ->select(
-                    'sales.*',
-                    'code_order_delivery_routes.type_of_origin',
-                    'code_order_delivery_routes.origin_address',
-                    'code_order_delivery_routes.type_of_destiny',
-                    'code_order_delivery_routes.destiny_address',
-                    'code_order_delivery_routes.hour',
-                    'code_order_delivery_routes.attention_to',
-                    'code_order_delivery_routes.action',
-                    'code_order_delivery_routes.user_chofer_id',
-                    'code_order_delivery_routes.type_of_product',
-                    'code_order_delivery_routes.type_of_chofer',
-                    'code_order_delivery_routes.num_guide',
-                    'code_order_delivery_routes.observations',
-                    'code_order_delivery_routes.status',
-                    'additional_sale_information.client_name',
-                    'additional_sale_information.client_contact',
-                    'additional_sale_information.warehouse_company',
-                    'additional_sale_information.planned_date',
-                    'additional_sale_information.company'
-                )
-                ->groupBy('sales.id')
-                ->get();
-            $remissions = [];
-            foreach ($pedidos as $pedido) {
-                //$pedido->moreInformation;
-                $ordersDeliveryRoute =  $pedido->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
-                // if ($pedido->code_sale == "PED12088") {
-                $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')
-                    ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
-                    ->where('code_order_delivery_routes.code_sale', $pedido->code_sale)
-                    ->select('remisiones.code_remission')
-                    ->first();
-                // }
-                array_push($remissions, [$new, $pedido->code_sale, $ruta]);
-                if ($pedido->user_chofer_id) {
-                    $pedido->chofer_name = User::find($pedido->user_chofer_id)->name;
-                } else {
-                    $pedido->chofer_name = "Sin Chofer Asignado";
-                }
-                $pedido->remission_id = $new ? $new->code_remission : null;
-                unset($pedido->ordersDeliveryRoute);
-                unset($pedido->status_id);
-                DB::statement("SET SQL_MODE=''");
-                $pedido->details_orders = $pedido->orders()
-                    ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
-                    ->join("product_delivery_routes", "product_delivery_routes.odoo_product_id", "order_purchase_products.odoo_product_id")
-                    ->join("code_order_delivery_routes", "code_order_delivery_routes.id", "product_delivery_routes.code_order_route_id")
-                    ->where("code_order_delivery_routes.delivery_route_id", $ruta->id)
-                    ->select("order_purchases.*")
-                    ->groupBy('order_purchases.id')
-                    ->get();
-                // unset($pedido->details_orders);
-                foreach ($pedido->details_orders as $productNew) {
-                    DB::statement("SET SQL_MODE=''");
-                    $productNew->products = $productNew->products()
-                        ->join('product_delivery_routes', 'product_delivery_routes.odoo_product_id', 'order_purchase_products.odoo_product_id')
-                        ->join("code_order_delivery_routes", "code_order_delivery_routes.id", "product_delivery_routes.code_order_route_id")
-                        ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
-                        ->where('order_purchase_products.order_purchase_id', $productNew->id)
-                        ->select(
-                            'order_purchase_products.*',
-                            'product_delivery_routes.amount'
-                        )
-                        ->groupBy('order_purchase_products.id')
-                        ->get();
-                }
-                $pedido->lastStatus->slug = $pedido->lastStatus->status->slug;
-                $pedido->lastStatus->last_status = $pedido->lastStatus->status->status;
-                unset($pedido->lastStatus->status);
-                unset($pedido->lastStatus->id);
-                unset($pedido->lastStatus->sale_id);
-                unset($pedido->lastStatus->status_id);
-                unset($pedido->lastStatus->updated_at);
+            if (!$orderExist) {
+                array_push($orders, $order);
             }
         }
-        $ruta->pedidos = $pedidos;
-        // TODO: Colocar el estatus del pedido.
+
+        // Obtener los productos de cada orden de compra
+        $dataOrders = [];
+        foreach ($orders as $order) {
+            $productsInThisOrder = [];
+            foreach ($products as $product) {
+                $orderPurchase = $product->codeOrderRoute->orderPurchase;
+                if ($orderPurchase->code_order == $order->code_order) {
+                    $infoProduct = $product->codeOrderRoute->orderPurchase->products()->where('odoo_product_id', $product->odoo_product_id)->first()->toArray();
+                    $product = $product->toArray();
+                    unset($product['code_order_route']);
+                    $productsInThisOrder[] = array_merge($infoProduct, $product);
+                }
+            }
+            $data = $order->toArray();
+            $data['products'] = $productsInThisOrder;
+            array_push($dataOrders, $data);
+        }
+
+        // Obtener los pedidos de cada orden de compra
+        $sales = [];
+        foreach ($dataOrders as $order) {
+            $sale = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
+                ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+                ->where('sales.code_sale', $order['code_sale'])
+                ->when($isChofer, function ($query) {
+                    $query->where("code_order_delivery_routes.user_chofer_id", auth()->user()->id);
+                })
+                ->select(
+                    'sales.*',
+                    'code_order_delivery_routes.type_of_origin',
+                    'code_order_delivery_routes.origin_address',
+                    'code_order_delivery_routes.type_of_destiny',
+                    'code_order_delivery_routes.destiny_address',
+                    'code_order_delivery_routes.hour',
+                    'code_order_delivery_routes.attention_to',
+                    'code_order_delivery_routes.action',
+                    'code_order_delivery_routes.user_chofer_id',
+                    'code_order_delivery_routes.type_of_product',
+                    'code_order_delivery_routes.type_of_chofer',
+                    'code_order_delivery_routes.num_guide',
+                    'code_order_delivery_routes.observations',
+                    'code_order_delivery_routes.status',
+                    'additional_sale_information.client_name',
+                    'additional_sale_information.client_contact',
+                    'additional_sale_information.warehouse_company',
+                    'additional_sale_information.planned_date',
+                    'additional_sale_information.company'
+                )
+                ->first();
+            // No se encontró el pedido y se continua con la siguiente orden.
+            if (!$sale) {
+                continue;
+            }
+            if ($sale->user_chofer_id) {
+                $sale->chofer_name = User::find($sale->user_chofer_id)->name;
+            } else {
+                $sale->chofer_name = "Sin Chofer Asignado";
+            }
 
 
+            $sale->lastStatus->slug = $sale->lastStatus->status->slug;
+            $sale->lastStatus->last_status = $sale->lastStatus->status->status;
+            unset($sale->lastStatus->status);
+            unset($sale->lastStatus->id);
+            unset($sale->lastStatus->sale_id);
+            unset($sale->lastStatus->status_id);
+            unset($sale->lastStatus->updated_at);
 
+            $ordersDeliveryRoute =  $sale->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
+            $new = $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')
+                ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
+                ->where('code_order_delivery_routes.code_sale', $sale->code_sale)
+                ->select('remisiones.code_remission')
+                ->first();
+            $sale->remission_id = $new ? $new->code_remission : null;
+            unset($sale->ordersDeliveryRoute);
+
+            // revisar si el pedido ya esta en el array
+            $saleExist = false;
+            foreach ($sales as $saleInArray) {
+                if ($saleInArray->code_sale == $sale->code_sale) {
+                    $saleExist = true;
+                    break;
+                }
+            }
+            if (!$saleExist) {
+                array_push($sales, $sale);
+            }
+        }
+
+        $dataSales = [];
+        foreach ($sales as $sale) {
+            $ordersInThisSale = [];
+            foreach ($dataOrders as $order) {
+                if ($order['code_sale'] == $sale->code_sale) {
+                    $ordersInThisSale[] = $order;
+                }
+            }
+            $data = $sale->toArray();
+            unset($data['ordersDeliveryRoute']);
+            $data['details_orders'] = $ordersInThisSale;
+            array_push($dataSales, $data);
+        }
+        $ruta->pedidos = $dataSales;
         // Devolvemos la información encontrada.
         return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['ruta' => $ruta]], response::HTTP_OK);
     }
