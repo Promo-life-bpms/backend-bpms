@@ -61,10 +61,7 @@ class IncidenceController extends Controller
         $userIsTagger = auth()->user()->hasRole('maquilador');
         $incidencia = '';
         $dataValidation = [
-            'area' => 'required',
-            'motivo' => 'required',
             'tipo_de_producto' => 'required',
-            'tipo_de_tecnica' => 'required',
             'fecha_creacion' => 'required',
             'evidencia' => 'required',
             'id_user' => 'required',
@@ -77,6 +74,9 @@ class IncidenceController extends Controller
             'incidence_products.*.quantity_selected' => 'required'
         ];
         if (!$userIsTagger) {
+            $dataValidation['motivo'] = 'required';
+            $dataValidation['area'] = 'required';
+            $dataValidation['tipo_de_tecnica'] = 'required';
             $dataValidation['responsable'] = 'required';
             $dataValidation['fecha_compromiso'] = 'required';
             $dataValidation['solucion'] = 'required';
@@ -365,11 +365,8 @@ class IncidenceController extends Controller
         if (!$incidence) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
-        $validation = Validator::make($request->all(), [
-            'area' => 'required',
-            'motivo' => 'required',
+        $daraValidacion = [
             'tipo_de_producto' => 'required',
-            'tipo_de_tecnica' => 'required',
             'responsable' => 'required',
             'fecha_creacion' => 'required',
             'evidencia' => 'required',
@@ -384,43 +381,27 @@ class IncidenceController extends Controller
 
             'incidence_products' => 'required|array',
             'incidence_products.*.quantity_selected' => 'required'
-        ]);
+        ];
+        $userIsTagger = auth()->user()->hasRole('maquilador');
+        if (!$userIsTagger) {
+            $dataValidation['responsable'] = 'required';
+            $dataValidation['fecha_compromiso'] = 'required';
+            $dataValidation['solucion'] = 'required';
+            $dataValidation['reviso'] = 'required';
+            $dataValidation['firma_reviso'] = 'required';
+            $dataValidation['motivo'] = 'required';
+            $dataValidation['area'] = 'required';
+            $dataValidation['tipo_de_tecnica'] = 'required';
+        }
+
+        $validation = Validator::make($request->all(), $dataValidation);
+
         if ($validation->fails()) {
             return response()->json([
                 "msg" => 'No se registro correctamente la informacion',
                 'data' =>
                 ["errorValidacion" => $validation->getMessageBag()]
             ], response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
-        // Revisar si exite la incidencia
-        $diasDiferencia = 1;
-
-        //return $date;
-        //return $date;
-        $user =  auth()->user();
-        $aux = false;
-        // return [$user->whatRoles, $diasDiferencia];
-        foreach ($user->whatRoles as $rol) {
-            switch ($rol->name) {
-                case "control_calidad":
-                    $aux = true;
-                    break;
-                case "administrator":
-                    $aux = true;
-                    break;
-                case "ventas":
-                    if ($diasDiferencia <= 30) {
-                        $aux = true;
-                    }
-                    break;
-                default:
-                    return response()->json(['No tienes permiso de crear una incidencia'], 400);
-                    break;
-            }
-        }
-        if ($aux == false) {
-            return response()->json(['No tienes permiso de crear una incidencia'], 400);
         }
 
         $incidence->update([
