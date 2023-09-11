@@ -58,29 +58,32 @@ class IncidenceController extends Controller
         //return $sale_id;
         //validar que la informacion este correcta si no no se puede registrar
         // utilizar validator
+        $userIsTagger = auth()->user()->hasRole('maquilador');
         $incidencia = '';
-        $validation = Validator::make($request->all(), [
+        $dataValidation = [
             'area' => 'required',
             'motivo' => 'required',
             'tipo_de_producto' => 'required',
             'tipo_de_tecnica' => 'required',
-            'responsable' => 'required',
             'fecha_creacion' => 'required',
             'evidencia' => 'required',
-            'fecha_compromiso' => 'required',
-            'solucion' => 'required',
             'id_user' => 'required',
             'elaboro' => 'required',
             'firma_elaboro' => 'required',
-            'reviso' => 'required',
-            'firma_reviso' => 'required',
             'comentarios_generales' => 'required',
-
             'incidence_products' => 'required|array',
             'incidence_products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
             'incidence_products.*.order_purchase_product_id' => 'required|exists:order_purchase_products,id',
             'incidence_products.*.quantity_selected' => 'required'
-        ]);
+        ];
+        if (!$userIsTagger) {
+            $dataValidation['responsable'] = 'required';
+            $dataValidation['fecha_compromiso'] = 'required';
+            $dataValidation['solucion'] = 'required';
+            $dataValidation['reviso'] = 'required';
+            $dataValidation['firma_reviso'] = 'required';
+        }
+        $validation = Validator::make($request->all(), $dataValidation);
 
         if ($validation->fails()) {
             return response()->json([
@@ -118,33 +121,35 @@ class IncidenceController extends Controller
             return response()->json(["msg" => "No se han encontrado remisiones del pedido"], response::HTTP_NOT_FOUND);
         }
 
-        $diasDiferencia = $rem->created_at->diffInDays(now());
+        if (!$userIsTagger) {
+            $diasDiferencia = $rem->created_at->diffInDays(now());
 
-        //return $date;
-        //return $date;
-        $user =  auth()->user();
-        $aux = false;
-        // return [$user->whatRoles, $diasDiferencia];
-        foreach ($user->whatRoles as $rol) {
-            switch ($rol->name) {
-                case "control_calidad":
-                    $aux = true;
-                    break;
-                case "administrator":
-                    $aux = true;
-                    break;
-                case "ventas":
-                    if ($diasDiferencia <= 30) {
+            //return $date;
+            //return $date;
+            $user =  auth()->user();
+            $aux = false;
+            // return [$user->whatRoles, $diasDiferencia];
+            foreach ($user->whatRoles as $rol) {
+                switch ($rol->name) {
+                    case "control_calidad":
                         $aux = true;
-                    }
-                    break;
-                default:
-                    return response()->json(['No tienes permiso de crear una incidencia'], 400);
-                    break;
+                        break;
+                    case "administrator":
+                        $aux = true;
+                        break;
+                    case "ventas":
+                        if ($diasDiferencia <= 30) {
+                            $aux = true;
+                        }
+                        break;
+                    default:
+                        return response()->json(['No tienes permiso de crear una incidencia'], 400);
+                        break;
+                }
             }
-        }
-        if ($aux == false) {
-            return response()->json(['No tienes permiso de crear una incidencia'], 400);
+            if ($aux == false) {
+                return response()->json(['No tienes permiso de crear una incidencia'], 400);
+            }
         }
         $maxINC = Incidence::max('internal_code_incidence');
         $idinc = null;
@@ -172,20 +177,21 @@ class IncidenceController extends Controller
             'reason' => $request->motivo,
             'product_type' => $request->tipo_de_producto,
             'type_of_technique' => $request->tipo_de_tecnica,
-            'responsible' => $request->responsable,
+            'responsible' => $request->responsable ?? null,
             'creation_date' => $request->fecha_creacion,
             'bpm_status' => "Creada",
             'evidence' => $request->evidencia,
-            'commitment_date' => $request->fecha_compromiso,
-            'solution' => $request->solucion,
+            'commitment_date' => $request->fecha_compromiso ?? null,
+            'solution' => $request->solucion ?? null,
             'solution_date' => null,
             'user_id' => $request->id_user,
             'elaborated' => $request->elaboro,
             'signature_elaborated' => $request->firma_elaboro,
-            'reviewed' => $request->reviso,
-            'signature_reviewed' => $request->firma_reviso,
+            'reviewed' => $request->reviso ?? null,
+            'signature_reviewed' => $request->firma_reviso ?? null,
             'sale_id' => $sale->id
         ]);
+
         $response = null;
 
         $dataProducts = [];
@@ -331,7 +337,6 @@ class IncidenceController extends Controller
 
     public function update(Request $request, $incidencia)
     {
-        //return $request;
         $validation = Validator::make($request->all(), [
             'status' => 'required|in:Liberada,Cancelada',
             'solution_date' => 'required_if:status,Liberada',
@@ -356,8 +361,10 @@ class IncidenceController extends Controller
 
     public function updateIncidenceComplete(Request $request, $incidencia)
     {
-        $incidence = Incidence::where("code_incidence", $incidencia)->first();
-        $incidencia = '';
+        $incidence = Incidence::where("internal_code_incidence", $incidencia)->first();
+        if (!$incidence) {
+            return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
+        }
         $validation = Validator::make($request->all(), [
             'area' => 'required',
             'motivo' => 'required',
@@ -416,7 +423,7 @@ class IncidenceController extends Controller
             return response()->json(['No tienes permiso de crear una incidencia'], 400);
         }
 
-        $incidencia = $incidence->update([
+        $incidence->update([
             "code_incidence" => $incidence->code_incidence,
             "code_sale" => $incidence->code_sale,
             "client" => $incidence->client,
@@ -446,26 +453,21 @@ class IncidenceController extends Controller
             'signature_reviewed' => $request->firma_reviso ?? $incidence->signature_reviewed,
             'sale_id' => $incidence->sale_id
         ]);
-        $response = null;
+        $incidence->save();
 
-        $orderpurchase_id = null;
         foreach ($request->incidence_products as $incidence_product) {
             $incidence_product = (object)$incidence_product;
-
-
             // Revisar si exite el atributo id en el objeto incidence_producto
             if (isset($incidence_product->incidence_product_id)) {
                 $incidenceProduct = IncidenceProduct::find($incidence_product->incidence_product_id);
                 $incidenceProduct->quantity_selected = $incidence_product->quantity_selected ?? $incidenceProduct->quantity_selected;
                 $incidenceProduct->save();
             }
-
         }
-
         return response()->json([
             "msg" => 'Incidencia editada exitosamente',
             'data' => [
-                "incidencia" => $incidencia,
+                "incidencia" => $incidence,
             ]
         ], response::HTTP_CREATED);
     }
