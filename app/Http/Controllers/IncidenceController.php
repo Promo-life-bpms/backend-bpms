@@ -173,6 +173,7 @@ class IncidenceController extends Controller
             "sync_with_odoo" => false,
 
             'internal_code_incidence' => "INCD-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
+            'rol_creator' => auth()->user()->whatRoles[0]->name,
             'area' => $request->area,
             'reason' => $request->motivo,
             'product_type' => $request->tipo_de_producto,

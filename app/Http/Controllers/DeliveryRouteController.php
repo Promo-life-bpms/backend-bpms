@@ -451,7 +451,11 @@ class DeliveryRouteController extends Controller
             unset($sale->lastStatus->updated_at);
 
             $remission =  $sale->remissions()->where('remisiones.delivery_route_id', $ruta->id)->first();
-            $sale->remission_id = $remission->id;
+            if ($remission) {
+                $sale->remission_id = $remission->code_remission;
+            } else {
+                $sale->remission_id = null;
+            }
             unset($sale->ordersDeliveryRoute);
 
             // revisar si el pedido ya esta en el array

@@ -26,6 +26,7 @@ class CreateIncidencesTable extends Migration
             $table->boolean("sync_with_odoo")->default(true);
 
             $table->string('internal_code_incidence')->nullable();
+            $table->string('rol_creator')->nullable();
             $table->string('area')->nullable();
             $table->string('reason')->nullable();
             $table->string('product_type')->nullable();
