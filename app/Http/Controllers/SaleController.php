@@ -34,11 +34,10 @@ class SaleController extends Controller
         $idPedidos = $request->idPedidos ?? ""; // Sale.code_sale
         $fechaCreacion = $request->fechaCreacion ?? ""; // Pendiente
         $horariodeentrega = $request->horariodeentrega ?? ""; // Pendiente
-        $empresa = $request->empresa ?? ""; // AdditionalSaleInformation.warehouse_company
-        $cliente = $request->cliente ?? ""; // additional_sale_information.client_name
+        $empresa = $request->empresa ?? null; // AdditionalSaleInformation.warehouse_company
+        $cliente = $request->cliente ?? null; // additional_sale_information.client_name
         $comercial = $request->comercial ?? ""; // Sale.commercial_name
-        $total = $request->total ?? ""; // sale.total
-
+        $total = $request->total ?? null; // sale.total
 
         $sales = null;
         $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente', 'asistente_de_gerente'])->first();
@@ -61,10 +60,16 @@ class SaleController extends Controller
                 ->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
                 // ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
                 // ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
-                ->where("additional_sale_information.warehouse_company", "LIKE", "%" . $empresa . "%")
-                ->where("additional_sale_information.client_name", "LIKE", "%" . $cliente . "%")
+                ->when($empresa !== null, function ($query) use ($empresa) {
+                    $query->where("additional_sale_information.warehouse_company", "LIKE", "%" . $empresa . "%");
+                })
+                ->when($cliente !== null, function ($query) use ($cliente) {
+                    $query->where("additional_sale_information.client_name", "LIKE", "%" . $cliente . "%");
+                })
                 ->where("sales.commercial_name", "LIKE", "%" . $comercial . "%")
-                ->where("sales.total", "LIKE", $total . "%")
+                ->when($total !== null, function ($query) use ($total) {
+                    $query->where("sales.total", "LIKE", "%" . $total . "%");
+                })
                 ->groupBy('sales.id')
                 ->orderby('order_purchases.planned_date', 'ASC')
                 ->select(
@@ -74,8 +79,7 @@ class SaleController extends Controller
                 )
                 ->paginate($per_page);
         } else {
-            $sales = Sale::with('lastStatus', "detailsOrders", "moreInformation")
-                ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            $sales = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
                 ->when($isSeller !== null, function ($query) {
                     $user =  auth()->user();
@@ -89,10 +93,16 @@ class SaleController extends Controller
                 ->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
                 // ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
                 // ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
-                ->where("additional_sale_information.warehouse_company", "LIKE", "%" . $empresa . "%")
-                ->where("additional_sale_information.client_name", "LIKE", "%" . $cliente . "%")
+                ->when($empresa !== null, function ($query) use ($empresa) {
+                    $query->where("additional_sale_information.warehouse_company", "LIKE", "%" . $empresa . "%");
+                })
+                ->when($cliente !== null, function ($query) use ($cliente) {
+                    $query->where("additional_sale_information.client_name", "LIKE", "%" . $cliente . "%");
+                })
                 ->where("sales.commercial_name", "LIKE", "%" . $comercial . "%")
-                ->where("sales.total", "LIKE", $total . "%")
+                ->when($total !== null, function ($query) use ($total) {
+                    $query->where("sales.total", "LIKE", "%" . $total . "%");
+                })
                 ->groupBy('sales.id')
                 ->select(
                     'sales.*',
@@ -128,7 +138,7 @@ class SaleController extends Controller
                             ->where("order_purchase_products.order_purchase_id", $detailOrder->id)
                             ->where("receptions.code_order", $detailOrder->code_order)
                             ->sum(
-                                "reception_products.done",
+                                "reception_products.done"
                             );
                         // array_push($quantityTaggerArray, [$product,$quantityTagger, $product->odoo_product_id, $detailOrder->id]);
                         $product->quantity_delivered = $quantityTagger;
@@ -397,6 +407,7 @@ class SaleController extends Controller
 
         ];
     }
+
     public function calendario(Request $request)
     {
 

@@ -1013,9 +1013,6 @@ class DeliveryRouteController extends Controller
             }
         }
 
-
-
-
         // Devolvemos la información encontrada.
 
         $remision->pedidos = $pedidos;
