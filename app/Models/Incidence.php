@@ -21,6 +21,7 @@ class Incidence extends Model
         "odoo_status",
 
         'internal_code_incidence',
+        'rol_creator',
         'area',
         'reason',
         'product_type',
