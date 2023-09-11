@@ -103,4 +103,10 @@ class Sale extends Model
     {
         return $this->hasMany(Binnacle::class, 'sale_id');
     }
+
+    // Ver Remissiones
+    public function remissions()
+    {
+        return $this->hasMany(Remission::class, 'code_sale', 'code_sale');
+    }
 }
