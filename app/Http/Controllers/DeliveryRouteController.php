@@ -107,6 +107,7 @@ class DeliveryRouteController extends Controller
     {
         //validar que la informacion este correcta si no no se puede registrar
         // utilizar validator
+        
         $user =  auth()->user();
 
         foreach ($user->whatRoles as $rol) {
