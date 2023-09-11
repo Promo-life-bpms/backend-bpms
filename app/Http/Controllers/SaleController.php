@@ -79,7 +79,8 @@ class SaleController extends Controller
                 )
                 ->paginate($per_page);
         } else {
-            $sales = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            $sales = Sale::with('lastStatus', "detailsOrders", "moreInformation")
+                ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
                 ->when($isSeller !== null, function ($query) {
                     $user =  auth()->user();

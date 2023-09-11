@@ -306,63 +306,35 @@ class DeliveryRouteController extends Controller
                 response::HTTP_UNPROCESSABLE_ENTITY
             ); // 422
         }
-        $user =  auth()->user();
-        foreach ($user->whatRoles as $rol) {
-            # code...
-            switch ($rol->name) {
+        $isAuthToUpdate =  auth()->user()->hasRole(['logistica-y-mesa-de-control', 'administrator']);
 
-                case ("logistica-y-mesa-de-control" == $rol->name):
-
-                    break;
-                case ("administrator" == $rol->name):
-
-                    break;
-
-                default:
-                    return response()->json(
-                        [
-                            'msg' => "No tienes autorizacion para modificar los choferes",
-                        ],
-
-                    );
-                    break;
-            }
-
-            $rutaDB = DeliveryRoute::where('code_route', $ruta)->first();
-            // Chequeaos si encontró o no la ruta
-            if (!$rutaDB) {
-                // Se devuelve un array errors con los errores detectados y código 404
-                return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
-            }
-            $pedidosRuta = $rutaDB->codeOrderDeliveryRoute()->where('code_sale', $pedido)->get();
-            foreach ($pedidosRuta as $codeOrder) {
-                $codeOrder = (object)$codeOrder;
-                $dataSale = [
-                    'user_chofer_id' => $request->user_chofer_id,
-                    'type_of_product' => $request->type_of_product,
-                    'type_of_chofer' => $request->type_of_chofer,
-                    'num_guide' => $request->num_guide,
-                ];
-                $codeOrder->update($dataSale);
-            }
+        if (!$isAuthToUpdate) {
+            return response()->json(
+                ['msg' => "No tienes autorizacion para modificar los choferes",],
+            );
+        }
+        $rutaDB = DeliveryRoute::where('code_route', $ruta)->first();
+        // Chequeaos si encontró o no la ruta
+        if (!$rutaDB) {
+            // Se devuelve un array errors con los errores detectados y código 404
+            return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
         }
         $pedidosRuta = $rutaDB->codeOrderDeliveryRoute()->where('code_sale', $pedido)->get();
-        if (count($pedidosRuta) > 0) {
-            foreach ($pedidosRuta as $codeOrder) {
-
-                $codeOrder = (object)$codeOrder;
-                $dataSale = [
-                    'user_chofer_id' => $request->user_chofer_id,
-                    'type_of_product' => $request->type_of_product,
-                    'type_of_chofer' => $request->type_of_chofer,
-                    'num_guide' => $request->num_guide,
-                    'observations' => $request->observations,
-                ];
-                $codeOrder->update($dataSale);
-                return response()->json(['msg'  => 'Actualizacion completa.'], response::HTTP_ACCEPTED);;
-            }
+        if ($pedidosRuta->count() <= 0) {
+            return response()->json(['msg'  => 'No se encuentra ese pedido en la ruta.'], response::HTTP_NOT_FOUND); //404
         }
-        return response()->json(['msg'  => 'No se encuentra ese pedido en la ruta.'], response::HTTP_NOT_FOUND); //404
+        foreach ($pedidosRuta as $codeOrder) {
+            $codeOrder = (object)$codeOrder;
+            $dataSale = [
+                'user_chofer_id' => $request->user_chofer_id,
+                'type_of_product' => $request->type_of_product,
+                'type_of_chofer' => $request->type_of_chofer,
+                'num_guide' => $request->num_guide,
+                'observations' => $request->observations,
+            ];
+            $codeOrder->update($dataSale);
+        }
+        return response()->json(['msg'  => 'Actualizacion completa.'], response::HTTP_ACCEPTED);
     }
     /**
      * Display the specified resource.
@@ -418,7 +390,8 @@ class DeliveryRouteController extends Controller
                     $infoProduct = $product->codeOrderRoute->orderPurchase->products()->where('odoo_product_id', $product->odoo_product_id)->first()->toArray();
                     $product = $product->toArray();
                     unset($product['code_order_route']);
-                    $productsInThisOrder[] = array_merge($infoProduct, $product);
+                    $product['id'] = $infoProduct['id'];
+                    $productsInThisOrder[] = array_merge($product, $infoProduct);
                 }
             }
             $data = $order->toArray();
@@ -432,6 +405,7 @@ class DeliveryRouteController extends Controller
             $sale = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
                 ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->where('sales.code_sale', $order['code_sale'])
+                ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
                 ->when($isChofer, function ($query) {
                     $query->where("code_order_delivery_routes.user_chofer_id", auth()->user()->id);
                 })
@@ -476,13 +450,8 @@ class DeliveryRouteController extends Controller
             unset($sale->lastStatus->status_id);
             unset($sale->lastStatus->updated_at);
 
-            $ordersDeliveryRoute =  $sale->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
-            $new = $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')
-                ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
-                ->where('code_order_delivery_routes.code_sale', $sale->code_sale)
-                ->select('remisiones.code_remission')
-                ->first();
-            $sale->remission_id = $new ? $new->code_remission : null;
+            $remission =  $sale->remissions()->where('remisiones.delivery_route_id', $ruta->id)->first();
+            $sale->remission_id = $remission->id;
             unset($sale->ordersDeliveryRoute);
 
             // revisar si el pedido ya esta en el array
@@ -701,9 +670,10 @@ class DeliveryRouteController extends Controller
             'delivery_signature' => 'required_if:status,Liberada',
             'received' => 'required_if:status,Liberada',
             'signature_received' => 'required_if:status,Liberada',
-            'user_chofer_id' => 'required',
+            // 'user_chofer_id' => 'required',
             'status' => 'required|in:Liberada,Cancelada',
             'evidence' => 'required_if:status,Liberada',
+            'code_sale' => 'required',
             'product_remission' => 'required_if:status,Liberada|array',
             'product_remission.*.delivered_quantity' => 'required_if:status,Liberada',
             'product_remission.*.order_purchase_product_id' => 'required_if:status,Liberada|exists:order_purchase_products,id',
@@ -726,10 +696,9 @@ class DeliveryRouteController extends Controller
             $errores = [];
             foreach ($request->product_remission as $productRemision) {
                 $product = OrderPurchaseProduct::find($productRemision["order_purchase_product_id"]);
-
                 if (!$product->orderPurchase->codeOrderDeliveryRoute($deliveryRoute->id)) {
                     // return $deliveryRoute->id;
-                    array_push($errores, "El producto con el order_purchase_id: '" . $productRemision["order_purchase_product_id"] . "' no pertecene a esa ruta de entrega");
+                    array_push($errores, "El producto con el order_purchase_product_id: '" . $productRemision["order_purchase_product_id"] . "' no pertecene a esa ruta de entrega");
                 }
             }
             if (count($errores) > 0) {
@@ -756,9 +725,10 @@ class DeliveryRouteController extends Controller
             'received' => $request->received ?: null,
             'signature_received' => $request->signature_received,
             'delivery_route_id' => $deliveryRoute->id,
-            'user_chofer_id' => $request->user_chofer_id,
+            'user_chofer_id' => $request->user_chofer_id ?? null,
             'status' => $request->status,
             'evidence' => $request->evidence,
+            'code_sale' => $request->code_sale,
         ]);
 
         //crear los productos de esa remision de entrega
