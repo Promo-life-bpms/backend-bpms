@@ -18,4 +18,9 @@ class ProductDeliveryRoute extends Model
     {
         return $this->belongsTo(OrderPurchaseProduct::class, 'odoo_product_id', "odoo_product_id");
     }
+    // code_order_route_id
+    public function codeOrderRoute()
+    {
+        return $this->belongsTo(CodeOrderDeliveryRoute::class, 'code_order_route_id', "id");
+    }
 }

@@ -31,6 +31,7 @@ class Sale extends Model
         'subtotal',
         'taxes',
         'total',
+        'delivery_custom_address',
         'status_id',
     ];
 
@@ -96,5 +97,16 @@ class Sale extends Model
     public function lastStatus()
     {
         return $this->hasOne(SaleStatusChange::class)->latestOfMany();
+    }
+
+    public function binnacles()
+    {
+        return $this->hasMany(Binnacle::class, 'sale_id');
+    }
+
+    // Ver Remissiones
+    public function remissions()
+    {
+        return $this->hasMany(Remission::class, 'code_sale', 'code_sale');
     }
 }

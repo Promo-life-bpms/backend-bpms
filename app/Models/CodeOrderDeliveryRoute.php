@@ -40,4 +40,10 @@ class CodeOrderDeliveryRoute extends Model
     {
         return $this->belongsTo(DeliveryRoute::class, 'delivery_route_id');
     }
+
+    // code_order
+    public function orderPurchase()
+    {
+        return $this->belongsTo(OrderPurchase::class, 'code_order', "code_order");
+    }
 }

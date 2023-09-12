@@ -7,10 +7,12 @@ use App\Http\Controllers\DeliveryRouteController;
 use App\Http\Controllers\IncidenceController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
+use App\Http\Controllers\BinnacleController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
 use App\Http\Controllers\UploadImageController;
+use App\Http\Controllers\UserController;
 use App\Notifications\Acces;
 use App\Models\User;
 
@@ -32,7 +34,7 @@ Route::post('setReception/v1', [ApiOdooController::class, 'setReception']);
 Route::post('setDelivery/v1', [ApiOdooController::class, 'setDelivery']);
 Route::post('setTracking/v1', [ApiOdooController::class, 'setTracking']);
 
-Route::get('users', [AuthController::class, 'allUsers']);
+// Route::get('users', [AuthController::class, 'allUsers']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('syncUsers', [AuthController::class, 'syncUsers']);
@@ -40,8 +42,15 @@ Route::post('syncUsers', [AuthController::class, 'syncUsers']);
 Route::get('Acces', [AuthController::class, 'Acces']);
 Route::get('userAccess', [AuthController::class, 'userAccess']);
 
-
 Route::group(['middleware' => 'auth'], function () {
+    // Apis de el userController
+    Route::get('users', [UserController::class, 'index']);
+    Route::post('users', [UserController::class, 'create']);
+    Route::put('users/{id}', [UserController::class, 'update']);
+    Route::delete('users/{id}', [UserController::class, 'delete']);
+    Route::get('users/sendNewAccess/{id}', [UserController::class, 'sendNewAccess']);
+    Route::get('syncUsers', [UserController::class, 'syncUsers']);
+
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('user-profile', [AuthController::class, 'userProfile']);
 
@@ -53,6 +62,13 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
 
+    // Actualizar la ruta de entrega
+    Route::put('pedidos/{pedido}/update_delivery_address_custom', [SaleController::class, 'updateDeliveryAddressCustom']);
+
+    // Crear la bitacora
+    Route::post('pedidos/{pedido}/bitacora/create', [BinnacleController::class, 'store']);
+
+    // Crear y actualizar la inspeccion
     Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
     Route::get('inspections/{inspection}', [InspectionController::class, 'show']);
 
@@ -64,8 +80,6 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('orders/{order}/receptions/{reception}', [ReceptionController::class, 'getReception']);
 
-
-
     // Seccion para actualizar el estatus de maquila
 
     // Seccion de Incidencias
@@ -76,6 +90,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Crear una incidencia
     Route::post('pedidos/{pedido}/incidencia', [IncidenceController::class, 'store']);
     Route::patch('incidencias/{incidencia}', [IncidenceController::class, 'update']);
+    Route::put('incidencias/{incidencia}/update', [IncidenceController::class, 'updateIncidenceComplete']);
 
     // Vista de status de incidencia
     Route::post('order/{compra}/updatestatus', [OrderPurchaseController::class, 'store']);
