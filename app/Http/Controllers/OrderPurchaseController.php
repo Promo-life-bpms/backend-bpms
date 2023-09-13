@@ -42,6 +42,7 @@ class OrderPurchaseController extends Controller
             'status_purchase_products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
             'status_purchase_products.*.cantidad_seleccionada' => 'required'
         ]);
+
         if ($validation->fails()) {
             return response()->json([
                 'msg' => "Error al ingresar los datos",
@@ -75,6 +76,7 @@ class OrderPurchaseController extends Controller
             "id_order_purchases" => $request->id_order_purchases,
             "status" => $request->status,
         ]);
+
 
         foreach ($request->status_purchase_products as $newProductStatus) {
             $newProductStatus = (object)$newProductStatus;
@@ -163,6 +165,7 @@ class OrderPurchaseController extends Controller
         unset($orderPurchase->receptionsWithTheirProducts);
         //Se crea el campo de last status con el valor de i retornando el mismo
         $orderPurchase->theirHistoryStatus;
+
         for ($i = 0; $i < count($orderPurchase->theirHistoryStatus); $i++) {
             if ($i > 0) {
                 $orderPurchase->theirHistoryStatus[$i]->last_status = $orderPurchase->theirHistoryStatus[$i - 1]->status;
@@ -179,6 +182,7 @@ class OrderPurchaseController extends Controller
                 unset($productStatus->completeInformation);
             }
         }
+
         $orderPurchase->historyStatus = array_reverse($orderPurchase->theirHistoryStatus->toArray());
         unset($orderPurchase->theirHistoryStatus);
         return response()->json(["msg" => "Orden de compra encontrada", 'data' => ["orderPurchase", $orderPurchase]], response::HTTP_OK);

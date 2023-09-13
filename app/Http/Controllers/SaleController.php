@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Sale;
+use App\Models\StatusOT;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Exception;
@@ -246,6 +247,8 @@ class SaleController extends Controller
 
     public function estadisticas(Request $request)
     {
+
+
         $validation = Validator::make($request->all(), [
             'date_end' => 'required|date_format:Y-m-d',
             'date_initial' => 'required|date_format:Y-m-d',
@@ -371,19 +374,19 @@ class SaleController extends Controller
         $pendientes = OrderPurchase::join('status_o_t_s', 'status_o_t_s.id_order_purchases', 'order_purchases.id')
             ->where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
             ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
-            ->whereIn('status_o_t_s.status', ["Pendiente", "Retrasado", "En espera de entrega del maquilador",])
-            //->whereBetween('order_purchases.order_date', [$date_initial, $date_end])
-            ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
+            ->whereIn('status_o_t_s.status', ["Pendiente", "Retrasado", "En espera de entrega de maquilador"])
+            ->whereBetween('status_o_t_s.created_at', [$date_initial, $date_end])
             ->count();
+
 
         $completado = OrderPurchase::join('status_o_t_s', 'status_o_t_s.id_order_purchases', 'order_purchases.id')
             ->where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
             ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
             ->whereIn('status_o_t_s.status', ["Listo para recoger", "RIP", "Recepcion inventario Completo"])
-            ->whereBetween('order_purchases.planned_date', [$date_initial, $date_end])
+            ->whereBetween('status_o_t_s.created_at', [$date_initial, $date_end])
             //->select('order_purchases.status')
             ->count();
-        //return $completado;
+
         $porcentaje = 0;
         $totalMaquilador = $pendientes + $completado;
         if ($totalMaquilador > 0) {
