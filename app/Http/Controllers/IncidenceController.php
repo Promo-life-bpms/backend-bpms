@@ -185,7 +185,7 @@ class IncidenceController extends Controller
             'commitment_date' => $request->fecha_compromiso ?? null,
             'solution' => $request->solucion ?? null,
             'solution_date' => null,
-            'user_id' => $request->id_user,
+            'user_id' => auth()->user()->id,
             'elaborated' => $request->elaboro,
             'signature_elaborated' => $request->firma_elaboro,
             'reviewed' => $request->reviso ?? null,
