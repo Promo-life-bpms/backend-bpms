@@ -58,10 +58,9 @@ class SaleController extends Controller
                     $user =  auth()->user();
                     $query->where('order_purchases.tagger_user_id', $user->id);
                 })
-                ->where("order_purchases.code_order", "NOT LIKE", "%MUE%")
-                ->where("order_purchases.code_order", "NOT LIKE", "%LOG%")
                 ->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
-                ->where("sales.code_sale", "NOT LIKE", "%P-MUE%")
+                ->where("sales.code_sale", "NOT LIKE", "P-MUE%")
+                ->where("sales.code_sale", "NOT LIKE", "MUE%")
                 // ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
                 // ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
                 ->when($empresa !== null, function ($query) use ($empresa) {
@@ -96,9 +95,8 @@ class SaleController extends Controller
                     $query->where('order_purchases.tagger_user_id', $user->id);
                 })
                 ->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
-                ->where("sales.code_sale", "NOT LIKE", "%P-MUE%")
-                ->where("order_purchases.code_order", "NOT LIKE", "%MUE%")
-                ->where("order_purchases.code_order", "NOT LIKE", "%LOG%")
+                ->where("sales.code_sale", "NOT LIKE", "P-MUE%")
+                ->where("sales.code_sale", "NOT LIKE", "MUE%")
                 // ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
                 // ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
                 ->when($empresa !== null, function ($query) use ($empresa) {
@@ -130,6 +128,18 @@ class SaleController extends Controller
                 unset($sale->lastStatus->status_id);
                 unset($sale->lastStatus->updated_at);
             }
+            $detailsOrdersReindex = $sale->detailsOrders->toArray();
+            foreach ($detailsOrdersReindex as $key => $detailOrder) {
+                // Revisar si se encuentra la  palabra OT en el codigo de la orden
+                if (strpos($detailOrder['code_order'], 'MUE') !== false) {
+                    unset($detailsOrdersReindex[$key]);
+                }
+                if (strpos($detailOrder['code_order'], 'LOG') !== false) {
+                    unset($detailsOrdersReindex[$key]);
+                }
+            }
+            unset($sale->detailsOrders);
+            $sale->details_orders = array_values($detailsOrdersReindex);
         }
 
         if ($isMaquilador) {
@@ -219,6 +229,19 @@ class SaleController extends Controller
                 unset($sale->incidences);
                 $sale->incidences = $incidendeTagger;
             }
+
+            $detailsOrdersReindex = $sale->detailsOrders->toArray();
+            foreach ($detailsOrdersReindex as $key => $detailOrder) {
+                // Revisar si se encuentra la  palabra OT en el codigo de la orden
+                if (strpos($detailOrder['code_order'], 'MUE') !== false) {
+                    unset($detailsOrdersReindex[$key]);
+                }
+                if (strpos($detailOrder['code_order'], 'LOG') !== false) {
+                    unset($detailsOrdersReindex[$key]);
+                }
+            }
+            unset($sale->detailsOrders);
+            $sale->details_orders = array_values($detailsOrdersReindex);
 
             return response()->json(['msg' => 'Detalle del pedido', 'data' => ["sale", $sale]], response::HTTP_OK); //200
         }
@@ -433,6 +456,8 @@ class SaleController extends Controller
 
         $fecha = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
             //->orderby('additional_sale_information.planned_date')
+            ->where("sales.code_sale", "NOT LIKE", "P-MUE%")
+            ->where("sales.code_sale", "NOT LIKE", "MUE%")
             ->select(
                 \DB::raw('SUBSTRING_INDEX(additional_sale_information.commitment_date, " ", 1) as planned_date'),
                 'sales.code_sale'
