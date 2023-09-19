@@ -58,7 +58,10 @@ class SaleController extends Controller
                     $user =  auth()->user();
                     $query->where('order_purchases.tagger_user_id', $user->id);
                 })
+                ->where("order_purchases.code_order", "NOT LIKE", "%MUE%")
+                ->where("order_purchases.code_order", "NOT LIKE", "%LOG%")
                 ->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
+                ->where("sales.code_sale", "NOT LIKE", "%P-MUE%")
                 // ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
                 // ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
                 ->when($empresa !== null, function ($query) use ($empresa) {
@@ -93,6 +96,9 @@ class SaleController extends Controller
                     $query->where('order_purchases.tagger_user_id', $user->id);
                 })
                 ->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
+                ->where("sales.code_sale", "NOT LIKE", "%P-MUE%")
+                ->where("order_purchases.code_order", "NOT LIKE", "%MUE%")
+                ->where("order_purchases.code_order", "NOT LIKE", "%LOG%")
                 // ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
                 // ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
                 ->when($empresa !== null, function ($query) use ($empresa) {
@@ -202,6 +208,16 @@ class SaleController extends Controller
                 $binnacle->user_name = $binnacle->user->name;
                 unset($binnacle->user);
                 unset($binnacle->user_id);
+            }
+            if (auth()->user()->hasRole('maquilador')) {
+                $incidendeTagger = [];
+                foreach ($sale->incidences as $key => $value) {
+                    if ($value->user_id == auth()->user()->id) {
+                        array_push($incidendeTagger, $value);
+                    }
+                }
+                unset($sale->incidences);
+                $sale->incidences = $incidendeTagger;
             }
 
             return response()->json(['msg' => 'Detalle del pedido', 'data' => ["sale", $sale]], response::HTTP_OK); //200
@@ -418,7 +434,7 @@ class SaleController extends Controller
         $fecha = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
             //->orderby('additional_sale_information.planned_date')
             ->select(
-                \DB::raw('SUBSTRING_INDEX(additional_sale_information.planned_date, " ", 1) as planned_date'),
+                \DB::raw('SUBSTRING_INDEX(additional_sale_information.commitment_date, " ", 1) as planned_date'),
                 'sales.code_sale'
             )
             ->get();
