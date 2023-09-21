@@ -246,7 +246,7 @@ class ApiOdooController extends Controller
                             }
                         }
                     } catch (Exception $th) {
-                        return response()->json(['message' => 'Error al crear el usuario', 'error' => $th->getMessage()], 200);
+                        // return response()->json(['message' => 'Error al crear el usuario', 'error' => $th->getMessage()], 200);
                     }
                     try {
                         $sale = Sale::where('code_sale', $orderPurchase->code_sale)->first();

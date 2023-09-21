@@ -28,7 +28,7 @@ class CreateIncidencesTable extends Migration
             $table->string('internal_code_incidence')->nullable();
             $table->string('rol_creator')->nullable();
             $table->string('area')->nullable();
-            $table->string('reason')->nullable();
+            $table->text('reason')->nullable();
             $table->string('product_type')->nullable();
             $table->string('type_of_technique')->nullable();
             $table->string('responsible')->nullable();

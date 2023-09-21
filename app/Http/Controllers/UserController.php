@@ -109,7 +109,6 @@ class UserController extends Controller
             ];
             // Enviar email con la contraseña
             $user->notify(new RegisteredUser($dataNotification));
-            return $dataNotification;
         } catch (Exception $th) {
             return response()->json(["usuario" => $user, 'message' => 'Usuario creado correctamente, pero no se pudo enviar el correo']);
         }
