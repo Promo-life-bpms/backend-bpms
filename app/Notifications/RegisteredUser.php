@@ -42,7 +42,7 @@ class RegisteredUser extends Notification
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->markdown('mail.registered.user', ['url' => url('/'), 'data' => $this->data])
+            ->markdown('mail.registered.user', ['data' => $this->data])
             ->subject('Usuario Registrado al BPMS')
             ->from('admin@promo-connect.com.mx', 'BPMS');
     }
