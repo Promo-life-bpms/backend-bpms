@@ -183,6 +183,8 @@ class ApiOdooController extends Controller
                         }
                     }
                 } catch (Exception $th) {
+                    Storage::put('/public/pedidos/dataValues' .  time() . '.txt', ($request->all()));
+                    Storage::put('/public/pedidos/data' .  time() . '.txt', ($th));
                     return  response()->json(["Server Error Insert: " => $th->getMessage()], 400);
                 }
                 // TODO: Notificar al area de compras por correo
@@ -192,6 +194,8 @@ class ApiOdooController extends Controller
                 return response()->json(['message' => 'No Tienes autorizacion']);
             }
         } catch (Exception $th) {
+            Storage::put('/public/pedidos/dataValues' .  time() . '.txt', ($request->all()));
+            Storage::put('/public/pedidos/data' .  time() . '.txt', ($th));
             return  response()->json(["Server Error Validate: " => $th->getMessage()], 400);
         }
     }

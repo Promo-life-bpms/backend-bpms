@@ -7,11 +7,11 @@ Usuario: {{ $data['email'] }}
 <br>
 Password: {{ $data['password'] }}
 <br>
-@component('mail::button', ['url' => $url, 'color' => 'blue'])
+@component('mail::button', ['url' => $data['url'], 'color' => 'blue'])
     Acceder
 @endcomponent
 Gracias,<br>
 {{ config('app.name') }}
 <hr>
-Si tienes problemas para visualizar el boton, puedes hacer click en el siguiente enlace: <a href="{{$data["urlEmail"]}}">{{$data["urlEmail"]}}</a>
+Si tienes problemas para visualizar el boton, puedes hacer click en el siguiente enlace: <a href="{{$data['url']}}">{{$data['url']}}</a>
 @endcomponent
