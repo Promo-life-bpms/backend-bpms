@@ -60,6 +60,7 @@ class SaleController extends Controller
             ->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
             ->where("sales.code_sale", "NOT LIKE", "P-MUE%")
             ->where("sales.code_sale", "NOT LIKE", "MUE%")
+            ->where("sales.code_sale", "NOT LIKE", "CONSUM%")
             // ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
             // ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
             ->when($empresa !== null, function ($query) use ($empresa) {
@@ -429,6 +430,7 @@ class SaleController extends Controller
             //->orderby('additional_sale_information.planned_date')
             ->where("sales.code_sale", "NOT LIKE", "P-MUE%")
             ->where("sales.code_sale", "NOT LIKE", "MUE%")
+            ->where("sales.code_sale", "NOT LIKE", "CONSUM%")
             ->select(
                 \DB::raw('SUBSTRING_INDEX(additional_sale_information.commitment_date, " ", 1) as planned_date'),
                 'sales.code_sale'
