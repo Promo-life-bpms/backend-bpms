@@ -75,7 +75,7 @@ class Sale extends Model
 
     public function incidences()
     {
-        return $this->hasMany(Incidence::class, 'sale_id');
+        return $this->hasMany(Incidence::class, 'code_sale', 'code_sale');
     }
 
     public function inspections()
