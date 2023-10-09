@@ -137,6 +137,9 @@ class IncidenceController extends Controller
                     case "administrator":
                         $aux = true;
                         break;
+                    case "logistica-y-mesa-de-control":
+                        $aux = true;
+                        break;
                     case "ventas":
                         if ($diasDiferencia <= 30) {
                             $aux = true;
@@ -204,11 +207,11 @@ class IncidenceController extends Controller
 
             $orderpurchase_id = $productOrder->order_purchase_id;
             $productOdoo = [
-                "pro_name" => '',
-                "pro_product_id" => $productOrder->product,
-                "pro_qty" => $incidence_product->quantity_selected,
+                "pro_name" => $productOrder->product,
+                "pro_product_id" => (int) $productOrder->odoo_product_id,
+                "pro_qty" => (int) $incidence_product->quantity_selected,
                 "pro_currency_id" => "MXN",
-                "pro_price" => $productOrder->unit_price
+                "pro_price" => floatval($productOrder->unit_price)
             ];
 
             $incidencia->productsIncidence()->create([
@@ -270,6 +273,7 @@ class IncidenceController extends Controller
                 'X-VDE-TYPE: Ambos',
             ]);
             $response = curl_exec($curl);
+
             $responseOdoo = $response;
             $errors = false;
             $message = '';
