@@ -134,6 +134,9 @@ class IncidenceController extends Controller
                     case "control_calidad":
                         $aux = true;
                         break;
+                    case "gerente-operaciones":
+                        $aux = true;
+                        break;
                     case "administrator":
                         $aux = true;
                         break;

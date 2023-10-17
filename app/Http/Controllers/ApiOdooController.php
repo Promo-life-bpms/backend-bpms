@@ -233,18 +233,7 @@ class ApiOdooController extends Controller
                             $proveedorMaquilador = OrderPurchase::where("provider_name", $purchase->provider_name)
                                 ->whereNotNull('tagger_user_id')->first();
                             // Si no existe crear un nuevo usuario
-                            if (!$proveedorMaquilador) {
-                                $user = User::create([
-                                    'name' => $purchase->supplier_representative,
-                                    'email' => Str::slug($purchase->supplier_representative) . '_' . Str::random(5) . '@promolife.lat',
-                                    'password' => Hash::make($purchase->supplier_representative),
-                                ]);
-                                $role = Role::find(2);
-                                $user->attachRole($role);
-
-                                $orderPurchase->tagger_user_id = $user->id;
-                                $orderPurchase->save();
-                            } else {
+                            if ($proveedorMaquilador) {
                                 $orderPurchase->tagger_user_id = $proveedorMaquilador->tagger_user_id;
                                 $orderPurchase->save();
                             }

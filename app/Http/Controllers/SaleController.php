@@ -426,11 +426,22 @@ class SaleController extends Controller
     public function calendario(Request $request)
     {
 
+        $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente', 'asistente_de_gerente'])->first();
+        $isMaquilador = auth()->user()->whatRoles()->whereIn('name', ['maquilador'])->first();
         $fecha = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
             //->orderby('additional_sale_information.planned_date')
             ->where("sales.code_sale", "NOT LIKE", "P-MUE%")
             ->where("sales.code_sale", "NOT LIKE", "MUE%")
             ->where("sales.code_sale", "NOT LIKE", "CONSUM%")
+            ->when($isSeller !== null, function ($query) {
+                $user =  auth()->user();
+                // $query->where('additional_sale_information.company', $user->company);
+                $query->where('sales.commercial_email', $user->email);
+            })
+            ->when($isMaquilador !== null, function ($query) {
+                $user =  auth()->user();
+                $query->where('order_purchases.tagger_user_id', $user->id);
+            })
             ->select(
                 \DB::raw('SUBSTRING_INDEX(additional_sale_information.commitment_date, " ", 1) as planned_date'),
                 'sales.code_sale'
