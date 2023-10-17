@@ -24,6 +24,7 @@ class CreateUsersTable extends Migration
             $table->integer('manager_id')->nullable();
             $table->string('company')->nullable();
             $table->integer('intranet_id')->nullable();
+            $table->dateTime('last_login')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
