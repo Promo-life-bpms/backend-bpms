@@ -42,10 +42,10 @@ Route::post('syncUsers', [AuthController::class, 'syncUsers']);
 //Acceso
 Route::get('Acces', [AuthController::class, 'Acces']);
 Route::get('userAccess', [AuthController::class, 'userAccess']);
-Route::get('users', [UserController::class, 'index']);
+
 Route::group(['middleware' => 'auth'], function () {
     // Apis de el userController
-
+    Route::get('users', [UserController::class, 'index']);
     Route::post('users', [UserController::class, 'create']);
     Route::put('users/{id}', [UserController::class, 'update']);
     Route::delete('users/{id}', [UserController::class, 'delete']);
