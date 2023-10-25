@@ -5,6 +5,7 @@ use App\Http\Controllers\ProductRouteController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\DeliveryRouteController;
 use App\Http\Controllers\IncidenceController;
+use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\BinnacleController;
@@ -134,4 +135,6 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::post('/image/upload', [UploadImageController::class, 'uploadImage']);
     Route::post('/image/delete', [UploadImageController::class, 'deleteImage']);
+    //Video
+    Route::get('video', [VideoController::class, 'storeVideoInfo']);
 });

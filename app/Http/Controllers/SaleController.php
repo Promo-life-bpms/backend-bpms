@@ -265,6 +265,7 @@ class SaleController extends Controller
             'date_initial' => 'required|date_format:Y-m-d',
             'company' => '',
         ]);
+
         if ($validation->fails()) {
             return response()->json(
                 [
@@ -278,6 +279,7 @@ class SaleController extends Controller
         $date_end = date($request->date_end);
         $date_initial = date($request->date_initial);
         $company = $request->company;
+      
         $sales = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
             ->where('additional_sale_information.company', 'LIKE', '%' . $company . '%')
             ->whereBetween('additional_sale_information.planned_date', [$date_initial, $date_end])->get()
