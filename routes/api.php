@@ -5,6 +5,7 @@ use App\Http\Controllers\ProductRouteController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\DeliveryRouteController;
 use App\Http\Controllers\IncidenceController;
+use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\BinnacleController;
@@ -41,10 +42,10 @@ Route::post('syncUsers', [AuthController::class, 'syncUsers']);
 //Acceso
 Route::get('Acces', [AuthController::class, 'Acces']);
 Route::get('userAccess', [AuthController::class, 'userAccess']);
-
+Route::get('users', [UserController::class, 'index']);
 Route::group(['middleware' => 'auth'], function () {
     // Apis de el userController
-    Route::get('users', [UserController::class, 'index']);
+
     Route::post('users', [UserController::class, 'create']);
     Route::put('users/{id}', [UserController::class, 'update']);
     Route::delete('users/{id}', [UserController::class, 'delete']);
@@ -134,4 +135,6 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::post('/image/upload', [UploadImageController::class, 'uploadImage']);
     Route::post('/image/delete', [UploadImageController::class, 'deleteImage']);
+    //Video
+    Route::get('video', [VideoController::class, 'storeVideoInfo']);
 });
