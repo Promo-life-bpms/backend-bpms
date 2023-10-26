@@ -109,6 +109,11 @@ class VideoController extends Controller
                 'url' => 'https://api-bpms.promolife.lat/storage/capacitacion/crearremisionesdeentrega.mp4',
                 'rol' => 'gerente-operaciones, chofer',
             ],
+            [
+                'nombre' => 'Asignar dirección a un pedido',
+                'url' => 'https://api-bpms.promolife.lat/storage/capacitacion/asignardireccionaunpedido.mp4',
+                'rol' => 'ventas,gerente-operaciones,jefe_de_logistica,logistica-y-mesa-de-control',
+            ],
         ];
         return response()->json(["videos" => $videos]);
     }
