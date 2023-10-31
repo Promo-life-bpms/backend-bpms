@@ -307,7 +307,7 @@ class DeliveryRouteController extends Controller
                 response::HTTP_UNPROCESSABLE_ENTITY
             ); // 422
         }
-        $isAuthToUpdate =  auth()->user()->hasRole(['logistica-y-mesa-de-control', 'administrator']);
+        $isAuthToUpdate =  auth()->user()->hasRole(['logistica-y-mesa-de-control', 'administrator', 'jefe-de-logistica', 'gerente-de-operaciones']);
 
         if (!$isAuthToUpdate) {
             return response()->json(
@@ -961,7 +961,7 @@ class DeliveryRouteController extends Controller
             $productOPP = OrderPurchaseProduct::find($product->order_purchase_product_id);
             $order = $productOPP->orderPurchase;
             foreach ($productsToRoute as $productToRoute) {
-                if($productToRoute->code_order == $order->code_order && $productToRoute->odoo_product_id == $productOPP->odoo_product_id){
+                if ($productToRoute->code_order == $order->code_order && $productToRoute->odoo_product_id == $productOPP->odoo_product_id) {
                     $product->expected_delivery_quantity = $productToRoute->amount;
                     break;
                 }
