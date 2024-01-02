@@ -5,16 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\OrderPurchaseProduct;
-use App\Models\Remission;
 use App\Models\Sale;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\DB;
-use PhpParser\Node\Stmt\Return_;
 
 class IncidenceController extends Controller
 {
@@ -69,7 +65,6 @@ class IncidenceController extends Controller
     public function store(Request $request, $sale_id)
     {
 
-        // TODO: Calidad y ventas puede generar incidencias hasta 30 dias de entregado el producto, despues solo calidad.
         //return $sale_id;
         //validar que la informacion este correcta si no no se puede registrar
         // utilizar validator
@@ -177,7 +172,7 @@ class IncidenceController extends Controller
             "description" => $request->comentarios_generales,
             "date_request" => $request->fecha_creacion,
             "company" => $sale->moreInformation->warehouse_company,
-            "odoo_status" => 'Confirmado', // TODO: Cambiarlo a odoo_status
+            "odoo_status" => 'Confirmado',
 
             'internal_code_incidence' => "INCD-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
             'area' => $request->area,

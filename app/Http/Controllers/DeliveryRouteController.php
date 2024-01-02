@@ -277,16 +277,16 @@ class DeliveryRouteController extends Controller
                     }
                 }
             }
+
+
+            return response()->json([
+                'msg' => 'Ruta Creada Existosamente',
+                'data' => [
+                    "ruta" =>  $ruta
+                ]
+            ], Response::HTTP_CREATED);
         }
-
-        return response()->json([
-            'msg' => 'Ruta Creada Existosamente',
-            'data' => [
-                "ruta" =>  $ruta
-            ]
-        ], Response::HTTP_CREATED);
     }
-
     public function updateInfoChofer(Request $request, $ruta, $pedido)
     {
         $validation = Validator::make($request->all(), [
@@ -420,8 +420,10 @@ class DeliveryRouteController extends Controller
             foreach ($pedidos as $pedido) {
                 //$pedido->moreInformation;
                 $ordersDeliveryRoute =  $pedido->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
-                $new =  $ordersDeliveryRoute->deliveryRoute;
-                $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')->where('code_order_delivery_routes.delivery_route_id', $ruta->id)->select('remisiones.code_remission')->first();
+                $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')
+                    ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
+                    ->select('remisiones.code_remission')
+                    ->first();
 
                 $pedido->remission_id = $new ? $new->code_remission : null;
                 unset($pedido->ordersDeliveryRoute);
@@ -447,10 +449,7 @@ class DeliveryRouteController extends Controller
                         ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
                         ->where("code_order_delivery_routes.user_chofer_id", auth()->user()->id)
                         ->where('order_purchase_products.order_purchase_id', $productNew->id)
-                        ->select(
-                            'order_purchase_products.*',
-                            'product_delivery_routes.amount'
-                        )
+                        ->select('order_purchase_products.*', 'product_delivery_routes.amount')
                         ->groupBy('order_purchase_products.id')
                         ->get();
                 }
@@ -487,13 +486,17 @@ class DeliveryRouteController extends Controller
                 )
                 ->groupBy('sales.id')
                 ->get();
-
+            $remissions = [];
             foreach ($pedidos as $pedido) {
                 //$pedido->moreInformation;
                 $ordersDeliveryRoute =  $pedido->ordersDeliveryRoute->where('delivery_route_id', $ruta->id)->first();
-                $new =  $ordersDeliveryRoute->deliveryRoute;
-                $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')->where('code_order_delivery_routes.delivery_route_id', $ruta->id)->select('remisiones.code_remission')->first();
-                if ($pedido->user_chofer_id) {
+                $new =  $ordersDeliveryRoute->join('remisiones', 'remisiones.delivery_route_id', 'code_order_delivery_routes.delivery_route_id')
+                    ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
+                    ->where('code_order_delivery_routes.code_sale', $pedido->code_sale)
+                    ->select('remisiones.code_remission')
+                    ->first();
+                array_push($remissions, [$new, $pedido->code_sale, $ruta]);
+                /* if ($pedido->user_chofer_id) {
                     $pedido->chofer_name = User::find($pedido->user_chofer_id)->name;
                 } else {
                     $pedido->chofer_name = "Sin Chofer Asignado";
@@ -501,7 +504,7 @@ class DeliveryRouteController extends Controller
                 unset($pedido->user_chofer_id);
                 $pedido->remission_id = $new ? $new->code_remission : null;
                 unset($pedido->ordersDeliveryRoute);
-                unset($pedido->status_id);
+                unset($pedido->status_id); */
                 //return $pedido;
                 //return $pedido->orders;
                 DB::statement("SET SQL_MODE=''");
@@ -529,6 +532,7 @@ class DeliveryRouteController extends Controller
                         ->get();
                 }
             }
+            return $remissions;
         }
         $ruta->pedidos = $pedidos;
 
@@ -715,8 +719,6 @@ class DeliveryRouteController extends Controller
 
     public function setRemisiones(Request $request, $ruta)
     {
-
-
         $validation = Validator::make($request->all(), [
             'comments' => 'required_if:status,Cancelada',
             'satisfaction' => 'required_if:status,Liberada',
@@ -728,10 +730,10 @@ class DeliveryRouteController extends Controller
             'status' => 'required|in:Liberada,Cancelada',
             'evidence' => 'required_if:status,Liberada',
             'product_remission' => 'required_if:status,Liberada|array',
-            // 'product_remission.*.remission_id' => 'required',
             'product_remission.*.delivered_quantity' => 'required_if:status,Liberada',
             'product_remission.*.order_purchase_product_id' => 'required_if:status,Liberada|exists:order_purchase_products,id',
         ]);
+
         if ($validation->fails()) {
 
             return response()->json([
@@ -1008,11 +1010,13 @@ class DeliveryRouteController extends Controller
             ->get();
 
         foreach ($pedidos as $pedido) {
+            DB::statement("SET SQL_MODE=''");
             $pedido->ordersProduct = $pedido->orders()
                 ->join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
                 ->join('product_remission', 'product_remission.order_purchase_product_id', 'order_purchase_products.id')
                 ->where("product_remission.remission_id", $remision->id)
                 ->select("order_purchases.*")
+                ->groupBy("order_purchases.code_order")
                 ->get();
 
             foreach ($pedido->ordersProduct as $order) {

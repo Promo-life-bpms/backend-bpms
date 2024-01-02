@@ -17,7 +17,7 @@ class CreateSalesProductsTable extends Migration
             $table->id();
             $table->foreignId('sale_id')->constrained();
             $table->string("odoo_product_id", 20);
-            $table->string("product");
+            $table->text("product");
             $table->text("description");
             $table->string("customization");
             $table->string("provider");
