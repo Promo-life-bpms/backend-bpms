@@ -23,7 +23,7 @@ class SmallBoxSeeder extends Seeder
     {
 
         Role::create([
-            'name' => 'manager',
+            'name' => 'PRUEBA',
             'display_name' => 'Manager', // optional
             'description' => 'Jefe directo', // optional
         ]);
@@ -553,59 +553,59 @@ class SmallBoxSeeder extends Seeder
         //Seeders temporales
 
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 1,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 2,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 3,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 4,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 1,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 1,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 6,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 7,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 8,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 9,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 10,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 11,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 12,
         ]);
         UserCenter::create([
-            'user_id' => 3,
+            'user_id' => 53,
             'center_id' => 13,
         ]);
         
