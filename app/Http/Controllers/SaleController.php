@@ -15,11 +15,11 @@ use Illuminate\Support\Facades\Validator;
 
 class SaleController extends Controller
 {
-
     /**
-     * Display a listing of the resource.
+     * Método para obtener la lista de pedidos.
      *
-     * @return \Illuminate\Http\Response
+     * @param Request $request La solicitud HTTP.
+     * @return JsonResponse La respuesta JSON con la lista de pedidos.
      */
     public function index(Request $request)
     {
@@ -146,22 +146,16 @@ class SaleController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra el detalle de un pedido.
      *
-     * @param  \App\Models\Sale  $sale
-     * @return \Illuminate\Http\Response
+     * @param  int  $sale_id  El ID del pedido a mostrar.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($sale_id)
     {
         // Vista de Detalle de los pedidos
-        /*
-        # Generales
-        # OT, OC relacionadas
-        # //TODO: Incidencias Relacionadas, Datos generales
-        # //TODO: Inspecciones Relacionadas, Datos generales
-        # //TODO: Historial de Cambios BPMS y Odoo
-        # //TODO: Entregas Relacionadas, Datos generales
-        */
+
+        // Obtener el pedido con sus relaciones
         $sale = Sale::with([
             'moreInformation',
             'lastStatus',
@@ -173,12 +167,15 @@ class SaleController extends Controller
             "ordersDeliveryRoute",
             "binnacles"
         ])->where('code_sale', $sale_id)->first();
-        //Detalle del pedido seleccionado
+
+        // Verificar si se encontró el pedido
         if ($sale) {
             /*  foreach ($sale->routeDeliveries as $routeDelivery) {
                 $routeDelivery->deliveryRoute->name_chofer = $routeDelivery->deliveryRoute->user->name;
                 unset($routeDelivery->deliveryRoute->user);
             } */
+
+            // Obtener información del último estado del pedido
             $sale->lastStatus->slug = $sale->lastStatus->status->slug;
             $sale->lastStatus->last_status = $sale->lastStatus->status->status;
             unset($sale->lastStatus->status);
@@ -186,11 +183,15 @@ class SaleController extends Controller
             unset($sale->lastStatus->sale_id);
             unset($sale->lastStatus->status_id);
             unset($sale->lastStatus->updated_at);
+
+            // Obtener información de los registros de bitácora del pedido
             foreach ($sale->binnacles as $binnacle) {
                 $binnacle->user_name = $binnacle->user->name;
                 unset($binnacle->user);
                 unset($binnacle->user_id);
             }
+
+            // Filtrar incidencias si el usuario es maquilador
             if (auth()->user()->hasRole('maquilador')) {
                 $incidendeTagger = [];
                 foreach ($sale->incidences as $key => $value) {
@@ -202,9 +203,10 @@ class SaleController extends Controller
                 $sale->incidences = $incidendeTagger;
             }
 
+            // Filtrar y reindexar los detalles de las órdenes
             $detailsOrdersReindex = $sale->detailsOrders->toArray();
             foreach ($detailsOrdersReindex as $key => $detailOrder) {
-                // Revisar si se encuentra la  palabra OT en el codigo de la orden
+                // Revisar si se encuentra la palabra OT o LOG en el código de la orden
                 if (strpos($detailOrder['code_order'], 'MUE') !== false) {
                     unset($detailsOrdersReindex[$key]);
                 }
@@ -218,10 +220,16 @@ class SaleController extends Controller
             return response()->json(['msg' => 'Detalle del pedido', 'data' => ["sale", $sale]], response::HTTP_OK); //200
         }
 
-        return response()->json(['msg' => "No hay informacion acerca de este pedido"], response::HTTP_OK); //200
+        return response()->json(['msg' => "No hay información acerca de este pedido"], response::HTTP_OK); //200
     }
 
-    //updateDeliveryAddressCustom
+    /**
+     * Actualiza la dirección de entrega personalizada de una venta.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $sale_id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateDeliveryAddressCustom(Request $request, $sale_id)
     {
         // Actualizar la ruta de entrega
@@ -258,8 +266,6 @@ class SaleController extends Controller
 
     public function estadisticas(Request $request)
     {
-
-
         $validation = Validator::make($request->all(), [
             'date_end' => 'required|date_format:Y-m-d',
             'date_initial' => 'required|date_format:Y-m-d',
@@ -279,7 +285,7 @@ class SaleController extends Controller
         $date_end = date($request->date_end);
         $date_initial = date($request->date_initial);
         $company = $request->company;
-      
+
         $sales = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
             ->where('additional_sale_information.company', 'LIKE', '%' . $company . '%')
             ->whereBetween('additional_sale_information.planned_date', [$date_initial, $date_end])->get()
@@ -425,9 +431,14 @@ class SaleController extends Controller
         ];
     }
 
+    /**
+     * Método para obtener el calendario de ventas.
+     *
+     * @param Request $request La solicitud HTTP recibida.
+     * @return \Illuminate\Http\JsonResponse La respuesta JSON con la fecha del calendario de ventas.
+     */
     public function calendario(Request $request)
     {
-
         $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente', 'asistente_de_gerente'])->first();
         $isMaquilador = auth()->user()->whatRoles()->whereIn('name', ['maquilador'])->first();
         $fecha = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')

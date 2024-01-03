@@ -15,12 +15,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class InspectionController extends Controller
 {
-
     /**
-     * Store a newly created resource in storage.
+     * Almacena una nueva inspección de calidad.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request La solicitud HTTP recibida.
+     * @param int $sale_id El ID de venta asociado a la inspección.
+     * @return \Illuminate\Http\JsonResponse La respuesta JSON con el resultado de la operación.
      */
     public function store(Request $request, $sale_id)
     {
@@ -140,6 +140,12 @@ class InspectionController extends Controller
      *
      * @param  \App\Models\Inspection  $inspection
      * @return \Illuminate\Http\Response
+     */
+    /**
+     * Muestra la inspección de calidad.
+     *
+     * @param  int  $inspection_id  El ID de la inspección
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show($inspection_id)
     {

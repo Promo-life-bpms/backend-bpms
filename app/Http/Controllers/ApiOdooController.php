@@ -19,8 +19,18 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 
+/*
+* Clase para el manejo de las peticiones de Odoo
+*/
+
 class ApiOdooController extends Controller
 {
+    /**
+     * Método para obtener un pedido.
+     *
+     * @param Request $request La solicitud HTTP recibida.
+     * @return JsonResponse La respuesta JSON con el resultado de la operación.
+     */
     public function setSale(Request $request)
     {
         try {
@@ -200,6 +210,13 @@ class ApiOdooController extends Controller
         }
     }
 
+    /**
+     * Actualiza la orden de compra con los datos proporcionados en la solicitud.
+     *
+     * @param Request $request La solicitud HTTP que contiene los datos de la orden de compra.
+     * @return JsonResponse La respuesta JSON que indica el resultado de la actualización.
+     */
+
     public function setPurchase(Request $request)
     {
         try {
@@ -314,15 +331,28 @@ class ApiOdooController extends Controller
         }
     }
 
+    /**
+     * Método para establecer la recepcioes de inventario de datos.
+     *
+     * @param Request $request La solicitud HTTP recibida.
+     * @return JsonResponse La respuesta JSON con el resultado de la operación.
+     */
     public function setReception(Request $request)
     {
+        // Guardar los datos de la solicitud en un archivo de texto
         Storage::put('/public/dataRec' .  time() . '.txt', json_encode($request->all()));
+
         try {
+            // Verificar si el token de autorización es válido
             if ($request->header('token') == config('key_odoo.key_to_odoo')) {
                 $receptions = (object)$request->receptions;
                 $errors = [];
+
+                // Procesar cada recepción
                 foreach ($receptions as $reception) {
                     $reception = (object) $reception;
+
+                    // Crear el arreglo de datos de la recepción
                     $dataReception = [
                         'code_reception' => $reception->code_reception ?: " ",
                         'code_order' => $reception->code_order ?: " ",
@@ -332,16 +362,22 @@ class ApiOdooController extends Controller
                         'effective_date' => $reception->effective_date ?: null,
                         'status' => $reception->status ?: " ",
                     ];
+
                     $receptionDB = null;
                     try {
+                        // Actualizar o crear la recepción en la base de datos
                         $receptionDB = Reception::updateOrCreate(['code_reception' => $reception->code_reception], $dataReception);
                     } catch (Exception $th) {
+                        // Capturar errores de inserción de la recepción
                         array_push($errors, ['msg' => "Error al insertar el producto", 'data' => $dataReception, 'error' => $th->getMessage()]);
                     }
 
                     if ($receptionDB) {
+                        // Procesar cada producto de la recepción
                         foreach ($reception->operations as $productRequest) {
                             $productRequest = (object)$productRequest;
+
+                            // Crear el arreglo de datos del producto
                             $dataProduct =  [
                                 "odoo_product_id" => $productRequest->odoo_product_id ?: " ",
                                 "product" => $productRequest->product ?: " ",
@@ -349,7 +385,9 @@ class ApiOdooController extends Controller
                                 "initial_demand" => $productRequest->initial_demand ?: 0,
                                 "done" => $productRequest->done ?: 0,
                             ];
+
                             try {
+                                // Actualizar o crear el producto en la base de datos
                                 $receptionDB->productsReception()->updateOrCreate(
                                     [
                                         "odoo_product_id" => $productRequest->odoo_product_id,
@@ -358,9 +396,12 @@ class ApiOdooController extends Controller
                                     $dataProduct
                                 );
                             } catch (Exception $th) {
+                                // Capturar errores de inserción del producto
                                 array_push($errors, ['msg' => "Error al insertar el producto", 'dataProduct' => $dataProduct, 'error' => $th->getMessage()]);
                             }
                         }
+
+                        // Eliminar productos que no están presentes en la solicitud
                         foreach ($receptionDB->productsReception as $productDB) {
                             $existProduct = false;
                             foreach ($reception->operations as $productRQ) {
@@ -374,22 +415,35 @@ class ApiOdooController extends Controller
                         }
                     }
                 }
+
+                // Devolver respuesta con errores si los hubo
                 if (count($errors) > 0) {
                     return response()->json(['message' => 'Error al insertar los productos', 'error' => json_encode($errors)], 400);
                 }
+
+                // Devolver respuesta exitosa
                 return response()->json(['message' => 'Actualizacion Completa'], 200);
             } else {
+                // Devolver respuesta de falta de autorización
                 return response()->json(['message' => 'No Tienes autorizacion']);
             }
         } catch (Exception $th) {
+            // Devolver respuesta de error del servidor
             return  response()->json(["Server Error Validate: " => $th->getMessage()], 400);
         }
     }
 
+    /**
+     * Actualiza o crea una incidencia en la base de datos.
+     *
+     * @param Request $request La solicitud HTTP que contiene los datos de la incidencia.
+     * @return JsonResponse La respuesta JSON con el resultado de la actualización o creación de la incidencia.
+     */
     public function setIncidence(Request $request)
     {
         try {
             if ($request->header('token') == config('key_odoo.key_to_odoo')) {
+                // Validar los datos de la incidencia
                 /* $validator = Validator::make($request->all(), [
                     'incidence' => 'required|array|bail',
                     'incidence.code_incidence' => 'required',
@@ -480,6 +534,12 @@ class ApiOdooController extends Controller
         }
     }
 
+    /**
+     * Método para ontener una entrega.
+     *
+     * @param Request $request La solicitud HTTP recibida.
+     * @return JsonResponse La respuesta JSON con el resultado de la operación.
+     */
     public function setDelivery(Request $request)
     {
         Storage::put('/public/dataDelc' .  time() . '.txt', json_encode($request->all()));
@@ -573,6 +633,12 @@ class ApiOdooController extends Controller
         }
     }
 
+    /**
+     * Método para establecer el seguimiento de un objeto.
+     *
+     * @param Request $request La solicitud HTTP que contiene los datos del seguimiento.
+     * @return \Illuminate\Http\JsonResponse La respuesta JSON con el resultado de la operación.
+     */
     public function setTracking(Request $request)
     {
         try {

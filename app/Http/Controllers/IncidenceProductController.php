@@ -13,9 +13,9 @@ class IncidenceProductController extends Controller
 {
 
     /**
-     * Display a listing of the resource.
+     * Obtiene todas las incidencias.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -28,21 +28,10 @@ class IncidenceProductController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Crea una nuevos productos de incidencia.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -70,54 +59,18 @@ class IncidenceProductController extends Controller
 
     }
 
-
-
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Elimina una incidencia de producto.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Request $request)
     {
         //
         $ProductIncidence = Incidence::destroy($request->id);
         return response()->json([
-            "msg" => "La incidencia se ha eliminado corectamente",
+            "msg" => "La incidencia se ha eliminado correctamente",
             "data"  =>  ['ProductIncidence', $ProductIncidence],
         ], response::HTTP_OK); //201
     }

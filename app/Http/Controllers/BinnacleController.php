@@ -6,9 +6,20 @@ use App\Models\Binnacle;
 use App\Models\Sale;
 use Illuminate\Http\Request;
 
+/**
+ * Clase BinnacleController
+ *
+ * Controlador para la gestión de la bitácora.
+ */
 class BinnacleController extends Controller
 {
-    // Guardar registro de bitacora con validacion
+    /**
+     * Guarda un registro de la bitácora con validación.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $pedido
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request, $pedido)
     {
         $request->validate([
@@ -25,7 +36,7 @@ class BinnacleController extends Controller
         $binnacle = $sale->binnacles()->create($request->all());
 
         return response()->json([
-            'message' => 'Bitacora creada correctamente',
+            'message' => 'Bitácora creada correctamente',
             'binnacle' => $binnacle
         ], 201);
     }

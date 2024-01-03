@@ -15,6 +15,13 @@ use Symfony\Component\HttpFoundation\Response;
 class ReceptionController extends Controller
 {
     public $CantidadRecibida = array();
+    /**
+     * Guarda la recepción de inventario.
+     *
+     * @param Request $request La solicitud HTTP.
+     * @param string $order El código de la orden de compra.
+     * @return JsonResponse La respuesta JSON con el resultado de la operación.
+     */
     public function saveReception(Request $request, $order)
     {
 
@@ -225,6 +232,13 @@ class ReceptionController extends Controller
         return response()->json(['message' => 'Creacion de la recepcion de inventario', 'data' => $receptionDB], 200);
     }
 
+    /**
+     * Obtiene una recepción específica de una orden de compra.
+     *
+     * @param string $order El código de la orden de compra.
+     * @param string $reception El código de la recepción.
+     * @return \Illuminate\Http\JsonResponse La respuesta JSON con los datos de la recepción o un mensaje de error.
+     */
     public function getReception($order, $reception)
     {
         $orderPurchase = OrderPurchase::where('code_order', $order)->first();

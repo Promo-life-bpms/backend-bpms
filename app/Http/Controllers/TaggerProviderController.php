@@ -11,6 +11,14 @@ use Illuminate\Support\Facades\Hash;
 
 class TaggerProviderController extends Controller
 {
+    /**
+     * Sincroniza los usuarios con las órdenes de compra.
+     *
+     * Obtiene las órdenes de compra que contengan "OT" en el código de orden y que no tengan asignado un usuario etiquetador.
+     * Recorre las órdenes de compra y busca el proveedor en la tabla "tagger_providers".
+     * Si el proveedor existe, crea un nuevo usuario en la tabla "users" o lo busca si ya existe.
+     * Asigna el rol de usuario y guarda el ID del usuario en la orden de compra.
+     */
     public function syncUserToOrderPurchase()
     {
         // Obtener las ordenes de compra que tengan OT en el code_order

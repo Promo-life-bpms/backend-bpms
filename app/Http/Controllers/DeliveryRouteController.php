@@ -18,13 +18,18 @@ use App\Models\OrderPurchaseProduct;
 use App\Models\SaleStatusChange;
 use Illuminate\Support\Facades\DB;
 
+/*
+    Controlador para la gestión de las rutas de entrega.
+ */
+
 class DeliveryRouteController extends Controller
 {
     use Notifiable;
+
     /**
-     * Display a listing of the resource.
+     * Obtiene la lista de rutas de entrega.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
@@ -55,15 +60,14 @@ class DeliveryRouteController extends Controller
             'msg' => "Acceso de rutas correcto",
             'data' => ["rutas" => $rutas],
         ], Response::HTTP_OK); //200
-
-
     }
 
 
     /**
-     * Show the form for creating a new resource.
+     * Prepara la creacion de una ruta de entrega.
      *
-     * @return \Illuminate\Http\Response
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function create(Request $request)
     {
@@ -102,10 +106,10 @@ class DeliveryRouteController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Método para almacenar una nueva ruta de entrega.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request La solicitud HTTP con los datos de la ruta de entrega.
+     * @return JsonResponse La respuesta JSON con el resultado de la operación.
      */
     public function store(Request $request)
     {
@@ -291,6 +295,14 @@ class DeliveryRouteController extends Controller
             ]
         ], Response::HTTP_CREATED);
     }
+
+    /**
+     * Actualiza la información del chofer de una ruta de entrega.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $ruta
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateInfoChofer(Request $request, $ruta, $pedido)
     {
         $validation = Validator::make($request->all(), [
@@ -307,7 +319,13 @@ class DeliveryRouteController extends Controller
                 response::HTTP_UNPROCESSABLE_ENTITY
             ); // 422
         }
-        $isAuthToUpdate =  auth()->user()->hasRole(['logistica-y-mesa-de-control', 'administrator', 'jefe-de-logistica', 'gerente-de-operaciones']);
+        $isAuthToUpdate =  auth()->user()->hasRole([
+            'logistica-y-mesa-de-control',
+            'administrator',
+            'jefe-de-logistica',
+            'gerente-de-operaciones',
+            'almacen'
+        ]);
 
         if (!$isAuthToUpdate) {
             return response()->json(
@@ -337,11 +355,13 @@ class DeliveryRouteController extends Controller
         }
         return response()->json(['msg'  => 'Actualizacion completa.'], response::HTTP_ACCEPTED);
     }
+
+
     /**
-     * Display the specified resource.
+     * Muestra los detalles de una ruta de entrega.
      *
-     * @param  \App\Models\DeliveryRoute  $deliveryRoute
-     * @return \Illuminate\Http\Response
+     * @param int $id El ID de la ruta de entrega.
+     * @return \Illuminate\Http\JsonResponse La respuesta JSON con los detalles de la ruta de entrega.
      */
     public function show($id)
     {
@@ -491,117 +511,14 @@ class DeliveryRouteController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\DeliveryRoute  $deliveryRoute
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(DeliveryRoute $deliveryRoute)
-    {
-        //
-    }
-    /**
-     * Update the specified resource in storage.
+     * Actualiza la información del estado de una ruta de entrega.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\DeliveryRoute  $deliveryRoute
-     * @return \Illuminate\Http\Response
-     */
-    /*   public function update(Request $request,  $id)
-    {
-
-        $ruta = DeliveryRoute::where('code_route', $id)->first();
-
-        if (!$ruta) {
-            // Retornar mensaje
-            return response()->json([
-                'msg' => "ruta no encontrada"
-            ], response::HTTP_NOT_FOUND);
-        }
-        $ruta->date_of_delivery = $request->date_of_delivery;
-        $ruta->user_chofer_id = $request->user_chofer_id;
-        $ruta->type_of_product = $request->type_of_product;
-        $ruta->save();
-
-
-        foreach ($request->code_orders as $codeOrder) {
-            $codeOrderRequest = (object) $codeOrder;
-
-            $codeOrderDB = CodeOrderDeliveryRoute::find($codeOrderRequest->code_sale);
-
-            if ($codeOrderDB) {
-                $codeOrderDB->code_sale = $codeOrderRequest->code_sale;
-                $codeOrderDB->code_order = $codeOrderRequest->code_order;
-                $codeOrderDB->type_of_origin = $codeOrderRequest->type_of_origin;
-                $codeOrderDB->origin_address = $codeOrderRequest->origin_address;
-                $codeOrderDB->type_of_destiny = $codeOrderRequest->type_of_destiny;
-                $codeOrderDB->destiny_address = $codeOrderRequest->destiny_address;
-                $codeOrderDB->hour = $codeOrderRequest->hour;
-                $codeOrderDB->attention_to = $codeOrderRequest->attention_to;
-                $codeOrderDB->action = $codeOrderRequest->action;
-                $codeOrderDB->num_guide = $codeOrderRequest->num_guide;
-                $codeOrderDB->observations = $codeOrderRequest->observations;
-                $codeOrderDB->save();
-
-                foreach ($codeOrderRequest->products as $product) {
-                    $productRequest = (object)$product;
-                    return $product;
-                    // $productsDB = $codeOrderDB->productDeliveryRoute;
-
-
-                    ProductDeliveryRoute::updateOrCreate(
-
-
-
-                        ['code_order_route_id' => $codeOrderDB->id, "product" => $productRequest->product],
-                        ['amount' => $productRequest->amount]
-                    );
-                }
-            }
-
-            if (!$codeOrderDB) {
-                $ruta->codeOrderDeliveryRoute()->create([
-                    'code_sale' => $codeOrderRequest->code_sale,
-                    'code_order' => $codeOrderRequest->code_order,
-                    'type_of_origin' => $codeOrderRequest->type_of_origin,
-                    'origin_address' => $codeOrderRequest->origin_address,
-                    'type_of_destiny' => $codeOrderRequest->type_of_destiny,
-                    'destiny_address' => $codeOrderRequest->destiny_address,
-                    'hour' => $codeOrderRequest->hour,
-                    'attention_to' => $codeOrderRequest->attention_to,
-                    'action' => $codeOrderRequest->action,
-                    'num_guide' => $codeOrderRequest->num_guide,
-                    'observations' => $codeOrderRequest->observations,
-                ]);
-            }
-        }
-        foreach ($ruta->codeOrderDeliveryRoute as $codeOrderDB) {
-
-            $existeEnElRequest = false;
-
-            foreach ($request->code_orders as $codeOrderRequest) {
-                $codeOrderRequest = (object)$codeOrderRequest;
-                if ($codeOrderDB->id == $codeOrderRequest->id) {
-                    $existeEnElRequest = true;
-                }
-            }
-
-            if ($existeEnElRequest == false) {
-                $codeOrderDB->delete();
-            }
-        }
-
-        return response()->json(['msg' => 'Ruta actualizada correctamente!'], response::HTTP_OK);
-    } */
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\DeliveryRoute  $deliveryRoute
-     * @return \Illuminate\Http\Response
+     * @param  string  $id El ID de la ruta de entrega.
+     * @return \Illuminate\Http\JsonResponse
      */
     public function updateStatus(Request $request,  $id)
     {
-
         $validation = Validator::make($request->all(), [
             'status' => 'required|in:Cancelada',
             'elaborated' => 'required',
@@ -640,6 +557,13 @@ class DeliveryRouteController extends Controller
 
         return response()->json(['msg' => 'Solo mesa de control puede modificar el status'], response::HTTP_BAD_REQUEST);
     }
+
+    /**
+     * Elimina una ruta de entrega.
+     *
+     * @param  int  $deliveryRoute  El código de la ruta de entrega a eliminar.
+     * @return \Illuminate\Http\JsonResponse  La respuesta JSON con el resultado de la eliminación.
+     */
     public function destroy($deliveryRoute)
     {
         $ruta = DeliveryRoute::where('code_route', $deliveryRoute)->first();
@@ -666,6 +590,13 @@ class DeliveryRouteController extends Controller
         return response()->json(['msg' => 'Ruta eliminada correctamente!'], response::HTTP_OK); //200
     }
 
+    /**
+     * Método para establecer las remisiones de una ruta de entrega.
+     *
+     * @param Request $request La solicitud HTTP recibida.
+     * @param string $ruta El código de la ruta de entrega.
+     * @return JsonResponse La respuesta JSON con los resultados de la validación y creación de las remisiones.
+     */
     public function setRemisiones(Request $request, $ruta)
     {
         $validation = Validator::make($request->all(), [
@@ -925,6 +856,13 @@ class DeliveryRouteController extends Controller
         // return response()->json(['msg' =>  'Se creo una remsion con status cancelado']);
     }
 
+    /**
+     * Método para ver las remisiones.
+     *
+     * Este método obtiene las remisiones con estado 1 y las devuelve en formato JSON.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function viewRemision()
     {
         $remision = Remission::where("status", 1)->get();
@@ -934,22 +872,37 @@ class DeliveryRouteController extends Controller
         ], response::HTTP_OK); //200
     }
 
+    /**
+     * Muestra la información de una remisión específica en una ruta de entrega.
+     *
+     * @param string $ruta El código de la ruta de entrega.
+     * @param int $id El código de la remisión.
+     * @return \Illuminate\Http\JsonResponse La respuesta JSON con la información de la remisión encontrada.
+     */
     public function showRemision($ruta, $id)
     {
+        // Obtener la ruta de entrega
         $deliveryRoute = DeliveryRoute::where('code_route', $ruta)->first();
 
         if (!$deliveryRoute) {
-            return response()->json(['msg' =>  'Ruta de entrega no encontrada.'], response::HTTP_NOT_FOUND); //404
+            // Si la ruta de entrega no existe, retornar un error 404
+            return response()->json(['msg' =>  'Ruta de entrega no encontrada.'], response::HTTP_NOT_FOUND);
         }
 
+        // Obtener la remisión en la ruta de entrega
         $remision = $deliveryRoute->remissions()->where('code_remission', $id)->first();
-        //return $remision->id;
+
         if (!$remision) {
-            return response()->json(['msg' =>  'Remision no encontrada o no pertenece a esta ruta de entrega.'], response::HTTP_NOT_FOUND); //404
+            // Si la remisión no existe o no pertenece a esta ruta de entrega, retornar un error 404
+            return response()->json(['msg' =>  'Remision no encontrada o no pertenece a esta ruta de entrega.'], response::HTTP_NOT_FOUND);
         }
+
+        // Obtener la venta asociada a la remisión
         $sale = Sale::where('code_sale', $remision->code_sale)->first();
 
+        // Obtener los productos de la remisión
         $products = $remision->productRemission;
+
         // Obtener los productos de esa ruta y de ese pedido
         $productsToRoute = ProductDeliveryRoute::join('code_order_delivery_routes', 'code_order_delivery_routes.id', 'product_delivery_routes.code_order_route_id')
             ->where('code_order_delivery_routes.delivery_route_id', $deliveryRoute->id)
@@ -957,6 +910,7 @@ class DeliveryRouteController extends Controller
             ->select('product_delivery_routes.*', 'code_order_delivery_routes.code_order')
             ->get();
 
+        // Asignar la cantidad de entrega esperada a cada producto de la remisión
         foreach ($products as $product) {
             $productOPP = OrderPurchaseProduct::find($product->order_purchase_product_id);
             $order = $productOPP->orderPurchase;
@@ -968,10 +922,11 @@ class DeliveryRouteController extends Controller
             }
         }
 
+        // Obtener las órdenes de compra únicas de los productos de la remisión
         $orders = [];
         foreach ($products as $product) {
             $order = OrderPurchaseProduct::find($product->order_purchase_product_id)->orderPurchase;
-            // revisar si la orden ya esta en el array
+            // Revisar si la orden ya está en el array
             $orderExist = false;
             foreach ($orders as $orderInArray) {
                 if ($orderInArray->code_order == $order->code_order) {
@@ -984,6 +939,7 @@ class DeliveryRouteController extends Controller
             }
         }
 
+        // Organizar los productos por orden de compra
         $dataOrders = [];
         foreach ($orders as $order) {
             $productsInThisOrder = [];
@@ -1004,14 +960,22 @@ class DeliveryRouteController extends Controller
             array_push($dataOrders, $data);
         }
 
-
+        // Agregar la información de las órdenes de compra a la venta
         $sale = $sale->toArray();
         $sale['ordersProduct'] = $dataOrders;
         $remision->pedidos =  $sale;
 
-        return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision" => $remision]], response::HTTP_OK); //200
+        // Retornar la respuesta JSON con la información de la remisión encontrada
+        return response()->json(['msg' =>  'Remision encontrada.', 'data' => ["remision" => $remision]], response::HTTP_OK);
     }
 
+    /**
+     * Cancela una remisión en una ruta de entrega.
+     *
+     * @param string $ruta El código de la ruta de entrega.
+     * @param int $id El código de la remisión.
+     * @return \Illuminate\Http\JsonResponse La respuesta JSON con el mensaje de éxito o error.
+     */
     public function cancelRemision($ruta, $id)
     {
         $deliveryRoute = DeliveryRoute::where('code_route', $ruta)->first();

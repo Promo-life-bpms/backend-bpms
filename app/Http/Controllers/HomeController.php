@@ -13,14 +13,24 @@ use Symfony\Component\HttpFoundation\Response as ResponseApi;
 use Illuminate\Support\Facades\Auth;
 
 
+/**
+ * Clase HomeController
+ *
+ * Controlador para la página de inicio.
+ */
 class HomeController extends Controller
 {
+    /**
+     * Método para mostrar el panel de control.
+     *
+     * @return mixed
+     */
     public function dashboard()
     {
-        // Obtener el usuario que inicio sesion
+        // Obtener el usuario que inició sesión
         $user = Auth::user();
-        //return $user;
-        // Obtener el rol que tiene ese usuario
+
+        // Obtener el rol que tiene ese usuario y redirigir al controlador correspondiente
         switch ($user->whatRoles[0]->name) {
             case 'ventas':
                 return VentasController::dashboard();

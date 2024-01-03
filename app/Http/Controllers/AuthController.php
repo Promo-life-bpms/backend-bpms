@@ -15,16 +15,29 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 
 
+/**
+ * Controlador para la autenticación y gestión de usuarios.
+ */
 class AuthController extends Controller
 {
+    /**
+     * Constructor de la clase.
+     * Se aplica el middleware de autenticación para todas las rutas, excepto para las siguientes: login, allUsers, syncUsers, userAccess.
+     */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'allUsers', 'syncUsers', "userAccess"]]);
+        $this->middleware('auth:api', ['except' => ['login', 'allUsers', 'syncUsers', 'userAccess']]);
     }
 
+    /**
+     * Registra un nuevo usuario.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function register(Request $request)
     {
-        //validación de los datos
+        // Validación de los datos
         $request->validate([
             'name' => 'required',
             'lastname' => 'required',
@@ -33,31 +46,39 @@ class AuthController extends Controller
             'photo' => 'required',
         ]);
 
+        // Creación del usuario
         $user = User::create([
-            'name' => $request->name . " " . $request->lastname,
+            'name' => $request->name . ' ' . $request->lastname,
             'email' => $request->email,
             'email_verified_at' => now(),
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
-            "photo" => $request->image,
-            "intranet_id" => $request->id,
+            'photo' => $request->image,
+            'intranet_id' => $request->id,
             'remember_token' => Str::random(10),
         ]);
 
-        //alta del usuario
+        // Guardar el usuario
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = Hash::make($request->password);
         $user->save();
+
         return response()->json([
             'msg' => 'Usuario dado de alta correctamente',
             'data' => ['user' => $user]
         ], Response::HTTP_CREATED);
     }
+
+    /**
+     * Envía notificaciones de acceso a los usuarios.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function userAccess()
     {
         $users = User::all();
-        $data =[];
+        $data = [];
         foreach ($users as $user) {
             $email =  $user->email;
             $password = str::random(10);
@@ -65,72 +86,96 @@ class AuthController extends Controller
             $user->save();
             Notification::route('mail', $email)
                 ->notify(new NotificationAccesUser($password, $email));
-           try {
+            try {
                 Notification::route('mail', $email)
                     ->notify(new NotificationAccesUser($password, $email));
             } catch (\Exception $e) {
-                array_push($data, [$email,$e->getMessage()]);
-
+                array_push($data, [$email, $e->getMessage()]);
             }
         }
 
-
-
         return response()->json(['Correos enviados correctamente']);
     }
+
+    /**
+     * Inicia sesión del usuario.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function login(Request $request)
     {
-
         $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
+
         $credentials = request(['email', 'password']);
-        $user = User::where("email", "=", $request->email)->first();
+        $user = User::where('email', '=', $request->email)->first();
+
         if (isset($user->id)) {
             $role = [];
             if (count($user->whatRoles) > 0) {
                 $role = [
-                    "id" => $user->whatRoles[0]->id,
-                    "name" => $user->whatRoles[0]->name
+                    'id' => $user->whatRoles[0]->id,
+                    'name' => $user->whatRoles[0]->name
                 ];
             }
+
             if (!$token = auth()->claims([
                 'role' => $role,
                 'user' => [
-                    "name" => $user->name,
-                    "email" => $user->email,
-                    "photo" => $user->photo ? env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . str_replace(' ', '%20', $user->photo) : null
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'photo' => $user->photo ? env('URL_INTRANET', 'https://intranet.promolife.lat') . '/' . str_replace(' ', '%20', $user->photo) : null
                 ],
             ])->attempt($credentials)) {
-                return response()->json(['msg' => 'No autorizado'], response::HTTP_UNAUTHORIZED); //401
+                return response()->json(['msg' => 'No autorizado'], Response::HTTP_UNAUTHORIZED);
             }
+
             return $this->respondWithToken($token);
         } else {
             return response()->json(
                 [
-                    "msg" => "Correo incorrecto o no registrado"
+                    'msg' => 'Correo incorrecto o no registrado'
                 ],
                 Response::HTTP_UNAUTHORIZED
             );
         }
     }
 
+    /**
+     * Obtiene el perfil del usuario.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function userProfile(Request $request)
     {
         $user = User::find(auth()->user()->id);
         return response()->json([
-            "message" => "Perfil de usuario",
-            "userData" => ['user' => $user]
+            'message' => 'Perfil de usuario',
+            'userData' => ['user' => $user]
         ], Response::HTTP_OK);
     }
 
+    /**
+     * Cierra la sesión del usuario.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function logout()
     {
         auth()->logout();
         return response(["msg" => "Se cerro sesion correctamente"], Response::HTTP_OK);
     }
 
+    /**
+     * Genera la respuesta con el token de acceso.
+     *
+     * @param  string  $token
+     * @return \Illuminate\Http\JsonResponse
+     */
     protected function respondWithToken($token)
     {
         return response()->json([
@@ -140,34 +185,45 @@ class AuthController extends Controller
         ]);
     }
 
+    /**
+     * Obtiene la lista de todos los usuarios.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function allUsers()
     {
         $users = User::with('whatRoles')->where('active', true)->get();
         foreach ($users as $user) {
-            $user->photo = $user->photo ? env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . str_replace(' ', '%20', $user->photo) : null;
+            $user->photo = $user->photo ? env('URL_INTRANET', 'https://intranet.promolife.lat') . '/' . str_replace(' ', '%20', $user->photo) : null;
         }
         return response()->json([
             'msg' => 'Lista de usuarios',
-            'data' => ["users" => $users]
-        ], response::HTTP_OK);
+            'data' => ['users' => $users]
+        ], Response::HTTP_OK);
     }
 
+    /**
+     * Sincroniza los usuarios con la intranet.
+     *
+     * @return \Illuminate\Http\JsonResponse|string
+     */
     public function syncUsers()
     {
         try {
-            $urlIntranet = env("URL_INTRANET", "https://intranet.promolife.lat");
+            $urlIntranet = env('URL_INTRANET', 'https://intranet.promolife.lat');
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $urlIntranet . "/api/getUsers");
+            curl_setopt($ch, CURLOPT_URL, $urlIntranet . '/api/getUsers');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',
                 'token: r8349ru894ruc3ruc39rde3wcdx',
             ]);
             $res = curl_exec($ch);
+
             if (!curl_errno($ch)) {
                 $info = curl_getinfo($ch);
                 if ($info['http_code'] >= 400) {
-                    return response()->json(["msg" => json_decode($res)]);
+                    return response()->json(['msg' => json_decode($res)]);
                 } else {
                     curl_close($ch);
                     $res = json_decode($res);
@@ -175,19 +231,19 @@ class AuthController extends Controller
                         $searchUser = User::where('intranet_id', $user->id)->first();
                         if ($searchUser === null) {
                             User::create([
-                                'name' => $user->name . " " . $user->lastname,
+                                'name' => $user->name . ' ' . $user->lastname,
                                 'email' => $user->email,
                                 'email_verified_at' => now(),
                                 'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
-                                "photo" => $user->image,
-                                "intranet_id" => $user->id,
+                                'photo' => $user->image,
+                                'intranet_id' => $user->id,
                                 'remember_token' => Str::random(10),
                             ]);
                         } else {
                             $searchUser->update([
-                                'name' => $user->name . " " . $user->lastname,
+                                'name' => $user->name . ' ' . $user->lastname,
                                 'email' => $user->email,
-                                "photo" => $user->image,
+                                'photo' => $user->image,
                             ]);
                         }
                     }
@@ -203,7 +259,7 @@ class AuthController extends Controller
                             $user->save();
                         }
                     }
-                    return response()->json(['msg' => 'Actualizacion Completa'], response::HTTP_OK);
+                    return response()->json(['msg' => 'Actualizacion Completa'], Response::HTTP_OK);
                 }
             }
         } catch (Exception $e) {

@@ -4,8 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+/**
+ * Clase VideoController
+ *
+ * Controlador para manejar la lógica relacionada con los videos.
+ */
 class VideoController extends Controller
 {
+    /**
+     * Retorna la información de los videos.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+
     public function storeVideoInfo()
     {
         $videos = [

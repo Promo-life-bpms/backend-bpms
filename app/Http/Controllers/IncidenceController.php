@@ -15,7 +15,12 @@ use Illuminate\Support\Facades\DB;
 
 class IncidenceController extends Controller
 {
-
+    /**
+     * Muestra los detalles de una incidencia.
+     *
+     * @param  int  $incidencia  El código interno de la incidencia.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show($incidencia)
     {
         $incidencia = Incidence::where('internal_code_incidence', $incidencia)->first();
@@ -51,6 +56,13 @@ class IncidenceController extends Controller
         return response()->json(["msg" => "Detalle de la incidencia", 'data' => ["incidencia" => $incidencia]], response::HTTP_OK);
     }
 
+    /**
+     * Método para almacenar una incidencia.
+     *
+     * @param Request $request La solicitud HTTP.
+     * @param int $sale_id El ID de la venta.
+     * @return \Illuminate\Http\JsonResponse La respuesta JSON.
+     */
     public function store(Request $request, $sale_id)
     {
 
@@ -93,7 +105,7 @@ class IncidenceController extends Controller
             ], response::HTTP_UNPROCESSABLE_ENTITY);
         }
         $sale = Sale::with('moreInformation')->where('code_sale', $sale_id)->first();
-        //return $sale;
+        // Si no existe el pedido no se puede registrar la incidencia
         if (!$sale) {
             return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
         }
@@ -102,13 +114,13 @@ class IncidenceController extends Controller
             ->join('remisiones', 'remisiones.delivery_route_id', 'delivery_routes.id')
             ->where('sales.code_sale', $sale_id)
             ->get();
-
-
+        // Si no existe la remision no se puede registrar la incidencia
         if (count($remision) < 0) {
             return response()->json([
                 "msg" => 'No hay remisiones'
             ]);
         }
+        //
         $rem = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
             ->join('delivery_routes', 'delivery_routes.id', 'code_order_delivery_routes.delivery_route_id')
             ->join('remisiones', 'remisiones.delivery_route_id', 'delivery_routes.id')
@@ -117,18 +129,18 @@ class IncidenceController extends Controller
             ->select('remisiones.*')
             ->first();
 
+            // Si no existe la remision no se puede registrar la incidencia
         if (!$rem) {
             return response()->json(["msg" => "No se han encontrado remisiones del pedido"], response::HTTP_NOT_FOUND);
         }
 
+        // Si el usuario no es maquilador, validar que tenga permisos para crear la incidencia
         if (!$userIsTagger) {
             $diasDiferencia = $rem->created_at->diffInDays(now());
-
-            //return $date;
-            //return $date;
             $user =  auth()->user();
             $aux = false;
-            // return [$user->whatRoles, $diasDiferencia];
+
+            // Validar que el usuario tenga permisos para crear la incidencia
             foreach ($user->whatRoles as $rol) {
                 switch ($rol->name) {
                     case "control_calidad":
@@ -157,6 +169,7 @@ class IncidenceController extends Controller
                 return response()->json(['No tienes permiso de crear una incidencia'], 400);
             }
         }
+        // Obtener el ultimo numero de incidencia
         $maxINC = Incidence::max('internal_code_incidence');
         $idinc = null;
         if (!$maxINC) {
@@ -167,6 +180,7 @@ class IncidenceController extends Controller
         }
         $response = null;
 
+        // Crear la incidencia
         $incidencia = Incidence::create([
             "code_incidence" => 'No Definido',
             "code_sale" => $sale->code_sale,
@@ -201,6 +215,7 @@ class IncidenceController extends Controller
 
         $response = null;
 
+        // Enciar la incidencia a Odoo
         $dataProducts = [];
         $orderpurchase_id = null;
         foreach ($request->incidence_products as $incidence_product) {
@@ -343,30 +358,48 @@ class IncidenceController extends Controller
         ], response::HTTP_CREATED);
     }
 
+    /**
+     * Actualiza una incidencia.
+     *
+     * @param Request $request La solicitud HTTP recibida.
+     * @param int $incidencia El código interno de la incidencia a actualizar.
+     * @return \Illuminate\Http\JsonResponse La respuesta JSON con el resultado de la actualización.
+     */
     public function update(Request $request, $incidencia)
     {
         $validation = Validator::make($request->all(), [
             'status' => 'required|in:Liberada,Cancelada',
             'solution_date' => 'required_if:status,Liberada',
         ]);
+
         if ($validation->fails()) {
             return response()->json([
-                "msg" => 'No se registro correctamente la informacion',
+                "msg" => 'No se registró correctamente la información',
                 'data' => ["errorValidacion" => $validation->getMessageBag()]
             ], response::HTTP_UNPROCESSABLE_ENTITY);
         }
+
         $incidencia = Incidence::where('internal_code_incidence', $incidencia)->first();
 
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
+
         $incidencia->bpm_status = $request->status;
         $incidencia->solution_date = $request->solution_date;
         $incidencia->user_solution =  auth()->user()->name;
         $incidencia->save();
-        return response()->json(["msg" => "Se actualizo la incidencia"], response::HTTP_ACCEPTED);
+
+        return response()->json(["msg" => "Se actualizó la incidencia"], response::HTTP_ACCEPTED);
     }
 
+    /**
+     * Actualiza una incidencia completa.
+     *
+     * @param Request $request La solicitud HTTP.
+     * @param int $incidencia El código interno de la incidencia.
+     * @return JsonResponse La respuesta JSON con el resultado de la actualización.
+     */
     public function updateIncidenceComplete(Request $request, $incidencia)
     {
         $incidence = Incidence::where("internal_code_incidence", $incidencia)->first();
