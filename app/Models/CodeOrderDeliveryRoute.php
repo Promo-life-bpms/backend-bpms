@@ -11,6 +11,8 @@ class CodeOrderDeliveryRoute extends Model
     protected $fillable = [
         'delivery_route_id',
         'user_chofer_id',
+        'parcel_id',
+        'parcel_name',
         'type_of_chofer',
         'type_of_product',
         'code_sale',

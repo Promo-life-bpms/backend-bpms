@@ -17,6 +17,8 @@ class CodeOrderDeliveryRoutes extends Migration
             $table->id();
             $table->foreignId('delivery_route_id')->reference('id')->on('delivery_routes');
             $table->foreignId('user_chofer_id')->reference('id')->on('users')->nullable();
+            $table->foreignId('parcel_id')->reference('id')->on('parcels')->nullable();
+            $table->string('parcel_name')->nullable();
             $table->string('type_of_chofer')->nullable();
             $table->string('type_of_product')->nullable();
             $table->string('code_sale');
