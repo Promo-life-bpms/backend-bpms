@@ -11,6 +11,7 @@ class BinnacleController extends Controller
     // Guardar registro de bitacora con validacion
     public function store(Request $request, $pedido)
     {
+      
         $request->validate([
             'comment' => 'required',
         ]);

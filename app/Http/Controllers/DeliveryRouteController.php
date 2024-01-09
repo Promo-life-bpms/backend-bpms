@@ -297,6 +297,7 @@ class DeliveryRouteController extends Controller
             'type_of_product' => 'required|in:Limpio,Maquilado',
             'type_of_chofer' => 'required',
             'user_chofer_id' => 'required_if:type_of_chofer,==,Interno',
+            'parcel' => 'required_if:type_of_chofer,==,Externo'
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -326,13 +327,17 @@ class DeliveryRouteController extends Controller
         }
         foreach ($pedidosRuta as $codeOrder) {
             $codeOrder = (object)$codeOrder;
+
             $dataSale = [
                 'user_chofer_id' => $request->user_chofer_id,
                 'type_of_product' => $request->type_of_product,
                 'type_of_chofer' => $request->type_of_chofer,
                 'num_guide' => $request->num_guide,
                 'observations' => $request->observations,
+                'parcel_name' => $request->parcel
+
             ];
+
             $codeOrder->update($dataSale);
         }
         return response()->json(['msg'  => 'Actualizacion completa.'], response::HTTP_ACCEPTED);
@@ -422,6 +427,7 @@ class DeliveryRouteController extends Controller
                     'code_order_delivery_routes.user_chofer_id',
                     'code_order_delivery_routes.type_of_product',
                     'code_order_delivery_routes.type_of_chofer',
+                    'code_order_delivery_routes.parcel_name',
                     'code_order_delivery_routes.num_guide',
                     'code_order_delivery_routes.observations',
                     'code_order_delivery_routes.status',
@@ -437,7 +443,9 @@ class DeliveryRouteController extends Controller
                 continue;
             }
             if ($sale->user_chofer_id) {
-                $sale->chofer_name = User::find($sale->user_chofer_id)->name;
+
+              $sale->chofer_name = User::find($sale->user_chofer_id)->name;
+
             } else {
                 $sale->chofer_name = "Sin Chofer Asignado";
             }
@@ -961,7 +969,7 @@ class DeliveryRouteController extends Controller
             $productOPP = OrderPurchaseProduct::find($product->order_purchase_product_id);
             $order = $productOPP->orderPurchase;
             foreach ($productsToRoute as $productToRoute) {
-                if($productToRoute->code_order == $order->code_order && $productToRoute->odoo_product_id == $productOPP->odoo_product_id){
+                if ($productToRoute->code_order == $order->code_order && $productToRoute->odoo_product_id == $productOPP->odoo_product_id) {
                     $product->expected_delivery_quantity = $productToRoute->amount;
                     break;
                 }

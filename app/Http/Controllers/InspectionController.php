@@ -82,8 +82,10 @@ class InspectionController extends Controller
             'user_signature_reviewed' => $request->user_signature_reviewed,
             'quantity_revised' => $request->quantity_revised,
             'quantity_denied' => $request->quantity_denied,
+            'files_ins' => $request->features_quantity['files_ins'],
 
         ];
+
         try {
             $inspection = Inspection::create($dataInspection);
             $request->features_quantity = (object) $request->features_quantity;
@@ -109,18 +111,18 @@ class InspectionController extends Controller
                 $inspection->productsSelected()->create($dataProductSelected);
             }
             //Inspección de calidad liberada
-           $quantity_denied = $request->quantity_denied;
-           $total = $request->features_quantity->total;
-           if ($total < $quantity_denied){
-            if ($sale->lastStatus) {
-                if ($sale->lastStatus->status_id < 9) {
-                    SaleStatusChange::create([
-                        'sale_id' => $sale->id,
-                        "status_id" => 9
-                    ]);
+            $quantity_denied = $request->quantity_denied;
+            $total = $request->features_quantity->total;
+            if ($total < $quantity_denied) {
+                if ($sale->lastStatus) {
+                    if ($sale->lastStatus->status_id < 9) {
+                        SaleStatusChange::create([
+                            'sale_id' => $sale->id,
+                            "status_id" => 9
+                        ]);
+                    }
                 }
             }
-           }
 
             return response()->json([
                 "msg" => "Inspeccion Creada Correctamente",
@@ -169,6 +171,7 @@ class InspectionController extends Controller
                 'inspections.user_signature_reviewed',
                 'inspections.quantity_revised',
                 'inspections.quantity_denied',
+                'inspections.files_ins',
                 "additional_sale_information.sale_id"
             )
             ->first();

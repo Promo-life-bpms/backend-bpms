@@ -79,7 +79,7 @@ class IncidenceController extends Controller
             $dataValidation['tipo_de_tecnica'] = 'required';
             $dataValidation['responsable'] = 'required';
             $dataValidation['fecha_compromiso'] = 'required';
-            $dataValidation['solucion'] = 'required';
+          /*   $dataValidation['solucion'] = 'required'; */
             $dataValidation['reviso'] = 'required';
             $dataValidation['firma_reviso'] = 'required';
         }

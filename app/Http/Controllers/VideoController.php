@@ -81,7 +81,7 @@ class VideoController extends Controller
             ],
             [
                 'nombre' => 'Rutas de entrega',
-                'url' => 'https://api-bpms.promolife.lat/storage/capacitacion/rutadeentrega.mp4',
+                'url' => 'https://api-bpms.promolife.lat/storage/capacitacion/ruttadeentrega.mp4',
                 'rol' => 'administrator, almacen, chofer, control_calidad, compras, ventas, logistica-y-mesa-de-control, gerente, asistente_de_gerente, jefe_de_logistica, gerente-operaciones',
             ],
             [
