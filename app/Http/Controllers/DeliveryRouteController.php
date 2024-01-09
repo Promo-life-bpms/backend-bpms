@@ -308,11 +308,17 @@ class DeliveryRouteController extends Controller
                 response::HTTP_UNPROCESSABLE_ENTITY
             ); // 422
         }
-        $isAuthToUpdate =  auth()->user()->hasRole(['logistica-y-mesa-de-control', 'administrator']);
+        $isAuthToUpdate =  auth()->user()->hasRole([
+            'logistica-y-mesa-de-control',
+            'administrator',
+            'jefe-de-logistica',
+            'gerente-de-operaciones',
+            'almacen'
+        ]);
 
         if (!$isAuthToUpdate) {
             return response()->json(
-                ['msg' => "No tienes autorizacion para modificar los choferes",],
+                ['msg' => "No tienes autorizacion para modificar los choferes",]
             );
         }
         $rutaDB = DeliveryRoute::where('code_route', $ruta)->first();
@@ -444,8 +450,7 @@ class DeliveryRouteController extends Controller
             }
             if ($sale->user_chofer_id) {
 
-              $sale->chofer_name = User::find($sale->user_chofer_id)->name;
-
+                $sale->chofer_name = User::find($sale->user_chofer_id)->name;
             } else {
                 $sale->chofer_name = "Sin Chofer Asignado";
             }
