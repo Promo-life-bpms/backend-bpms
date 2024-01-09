@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\CenterController;
 use App\Http\Controllers\CompaniesController;
+use App\Http\Controllers\EstimationSmallBoxController;
+use App\Http\Controllers\EventualesController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
@@ -185,6 +187,13 @@ Route::group(['middleware' => 'auth'], function () {
     //Datos para solicitud
     Route::get('caja-chica/datos-solicitud/', [SmallBoxUserController::class, 'dataRequest']);
 
+
+    //CAJA CHICA PRESUPUESTO//
+    Route::post('caja-chica/estimate/',[EstimationSmallBoxController::class,'create'])->name('estimate');
+    Route::get('caja-chica/information/estimate',[EstimationSmallBoxController::class,'index'])->name('information.estimate');
+
+    //CAJA CHICA EVENTUALES//
+    Route::post('caja-chica/eventuales', [EventualesController::class, 'Eventuales']);
 
 });
 
