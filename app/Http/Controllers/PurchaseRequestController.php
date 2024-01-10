@@ -201,7 +201,6 @@ class PurchaseRequestController extends Controller
 
     public function store(Request $request)
     {
-        dd($request);
         $user = auth()->user();
 
         if($user == null){
@@ -216,13 +215,11 @@ class PurchaseRequestController extends Controller
             'total' => 'required',
         ]);
         
-        if($request->eventuales){
-            $request->validate([
-                'eventuales' => 'required|array',
-                'eventuales.*.name'=>"required",
-                'eventuales.*.pay'=>"required",
-            ]);
-        }
+        $request->validate([
+            'eventuales' => 'nullable|array',
+            'eventuales.*.name' => 'required|string',
+            'eventuales.*.pay' => 'required|numeric',
+        ]);
 
         $spent = Spent::where('id',$request->spent_id)->get()->last();
         if($spent == null){
