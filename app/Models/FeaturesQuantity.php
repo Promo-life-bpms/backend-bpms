@@ -20,8 +20,6 @@ class FeaturesQuantity extends Model
         'damaged_products',
         'product_does_not_perform_its_function',
         "wrong_product_code",
-        'total', 
+        'total',
     ];
-
-   
 }

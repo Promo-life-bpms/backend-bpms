@@ -82,7 +82,7 @@ class InspectionController extends Controller
             'user_signature_reviewed' => $request->user_signature_reviewed,
             'quantity_revised' => $request->quantity_revised,
             'quantity_denied' => $request->quantity_denied,
-            'files_ins' => $request->features_quantity['files_ins'],
+            'files_ins' => $request->files_ins,
 
         ];
 
@@ -100,7 +100,9 @@ class InspectionController extends Controller
                 'product_does_not_perform_its_function' => $request->features_quantity->product_does_not_perform_its_function,
                 'wrong_product_code' => $request->features_quantity->wrong_product_code,
                 'total' => $request->features_quantity->total,
+
             ];
+
             $inspection->featuresQuantity()->create($dataFeaturesQuantity);
             foreach ($request->products_selected as $productSelected) {
                 $dataProductSelected = [
@@ -110,6 +112,7 @@ class InspectionController extends Controller
                 ];
                 $inspection->productsSelected()->create($dataProductSelected);
             }
+
             //Inspección de calidad liberada
             $quantity_denied = $request->quantity_denied;
             $total = $request->features_quantity->total;
@@ -175,6 +178,7 @@ class InspectionController extends Controller
                 "additional_sale_information.sale_id"
             )
             ->first();
+
 
         $ins = $pedidoIns->inspections()->where("code_inspection", $inspection_id)->first();
 
