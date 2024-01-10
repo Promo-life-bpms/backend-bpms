@@ -201,6 +201,7 @@ class PurchaseRequestController extends Controller
 
     public function store(Request $request)
     {
+        dd($request);
         $user = auth()->user();
 
         if($user == null){
