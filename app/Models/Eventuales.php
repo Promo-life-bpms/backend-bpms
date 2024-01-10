@@ -13,11 +13,11 @@ class Eventuales extends Model
 
     protected $fillable = ([
         'eventuales',
-        'id_spents'
+        'purchase_id'
     ]);
 
     public function user()
     {
-        return $this->belongsTo(Spent::class, 'id_spents');
+        return $this->belongsTo(PurchaseRequest::class, 'purchase_id');
     }
 }

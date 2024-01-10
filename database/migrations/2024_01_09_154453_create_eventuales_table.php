@@ -16,7 +16,7 @@ class CreateEventualesTable extends Migration
         Schema::create('eventuales', function (Blueprint $table) {
             $table->id();
             $table->string('eventuales');
-            $table->foreignId('id_spents')->references('id')->on('spents')->onDelete('cascade');
+            $table->foreignId('purchase_id')->references('id')->on('purchase_requests')->onDelete('cascade');
             $table->timestamps();
         });
     }
