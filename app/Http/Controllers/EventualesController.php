@@ -14,8 +14,9 @@ class EventualesController extends Controller
             'eventuales' => 'required',
         ]);
 
-        $eventuales = DB::table('eventuales')->create([
+        $eventuales = Eventuales::create([
             'eventuales' => $request->eventuales,
+            'purchase_id' => $request->purchase_id,
         ]);
 
         if($eventuales)
