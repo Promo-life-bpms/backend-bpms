@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Eventuales;
 use App\Models\PurchaseRequest;
 use App\Models\Role;
 use App\Models\Spent;
@@ -213,6 +214,14 @@ class PurchaseRequestController extends Controller
             'type'=> 'required',
             'total' => 'required',
         ]);
+        
+        if($request->eventuales){
+            $request->validate([
+                'eventuales' => 'required|array',
+                'eventuales.*.name'=>"required",
+                'eventuales.*.pay'=>"required",
+            ]);
+        }
 
         $spent = Spent::where('id',$request->spent_id)->get()->last();
         if($spent == null){
@@ -249,6 +258,16 @@ class PurchaseRequestController extends Controller
         $create_spent->approved_by = null;
         $create_spent->save();
 
+        $id = $create_spent->id;
+
+        if ($request->eventuales) {
+            $eventualesData = [
+                'eventuales' => json_encode($request->eventuales),
+                'purchase_id' => $id,
+            ];
+            Eventuales::create($eventualesData);
+        }
+        
         $users_to_send_mail = UserCenter::where('center_id',$center_id)->get();
 
         if(count($users_to_send_mail) != 0){
