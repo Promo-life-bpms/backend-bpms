@@ -12,11 +12,11 @@ class EstimationSmallBoxController extends Controller
     {
         $information = DB::table('estimation_small_box')
         ->select('estimation_small_box.total', 'estimation_small_box.id_user', 'users.name',
-                  DB::raw('DATE_FORMAT(estimation_small_box.created_at, "%Y-%m-%d") as created_date'))
+                  DB::raw('DATE_FORMAT(estimation_small_box.created_at, "%d-%m-%Y") as created_date'))
         ->join('users', 'estimation_small_box.id_user', '=', 'users.id')
         ->get()
         ->toArray();
-
+        
         $sumatoria = DB::table('estimation_small_box')->sum('total');
 
         return response()->json(['information' => $information, 'sumatoria' => $sumatoria]);
