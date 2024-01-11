@@ -103,10 +103,17 @@ class PurchaseRequestController extends Controller
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
             ]);
+
+            $eventuales = DB::table('eventuales')->pluck('eventuales')->toArray();
+            $event = [];
+            foreach ($eventuales as $eventual) {
+                $event[] = json_decode($eventual);
+            }
         }
 
         return array(
             'spents' => $data, 
+            'event' => $event,
         );
     }
 
