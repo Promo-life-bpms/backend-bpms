@@ -19,7 +19,14 @@ class EstimationSmallBoxController extends Controller
         
         $sumatoria = DB::table('estimation_small_box')->sum('total');
 
-        return response()->json(['information' => $information, 'sumatoria' => $sumatoria]);
+        $eventuales = DB::table('eventuales')->pluck('eventuales')->toArray();
+
+        $event = [];
+        foreach ($eventuales as $eventual) {
+            $event[] = json_decode($eventual);
+        }
+        
+        return response()->json(['information' => $information, 'sumatoria' => $sumatoria, 'event' => $event]);
     }
 
     public function create(Request $request)

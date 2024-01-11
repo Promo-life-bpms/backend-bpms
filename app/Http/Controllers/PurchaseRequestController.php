@@ -33,7 +33,8 @@ class PurchaseRequestController extends Controller
         }
 
         $data = [];
-        $spents = PurchaseRequest::whereIn('center_id', $user_center)->get();
+        //$spents = PurchaseRequest::whereIn('center_id', $user_center)->get();
+        $spents = PurchaseRequest::all();
 
         foreach($spents as $spent){
             $company_data = [];
