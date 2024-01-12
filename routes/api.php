@@ -191,9 +191,5 @@ Route::group(['middleware' => 'auth'], function () {
     //CAJA CHICA PRESUPUESTO//
     Route::post('caja-chica/estimate/',[EstimationSmallBoxController::class,'create'])->name('estimate');
     Route::get('caja-chica/information/estimate',[EstimationSmallBoxController::class,'index'])->name('information.estimate');
-
-    //CAJA CHICA EVENTUALES//
-    Route::post('caja-chica/eventuales', [EventualesController::class, 'Eventuales']);
-
 });
 

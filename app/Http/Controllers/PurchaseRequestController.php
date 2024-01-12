@@ -103,17 +103,10 @@ class PurchaseRequestController extends Controller
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
             ]);
-
-            $eventuales = DB::table('eventuales')->pluck('eventuales')->toArray();
-            $event = [];
-            foreach ($eventuales as $eventual) {
-                $event[] = json_decode($eventual);
-            }
         }
 
         return array(
             'spents' => $data, 
-            'event' => $event,
         );
     }
 
@@ -264,6 +257,7 @@ class PurchaseRequestController extends Controller
         $create_spent->approved_by = null;
         $create_spent->save();
 
+        ///AQUI SE CREAN LOS EVENTUALES///
         $id = $create_spent->id;
 
         if ($request->eventuales) {
@@ -273,6 +267,7 @@ class PurchaseRequestController extends Controller
             ];
             Eventuales::create($eventualesData);
         }
+        ///////////////////////////////////
         
         $users_to_send_mail = UserCenter::where('center_id',$center_id)->get();
 
@@ -701,9 +696,23 @@ class PurchaseRequestController extends Controller
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
             ]);
+
+            ///Obtenemos la información de los eventuales///
+            $eventuales = DB::table('eventuales')->where('purchase_id', $page)->pluck('eventuales')->toArray();
+            // Decodificar el JSON y obtener un array de objetos
+            $event = [];
+            foreach ($eventuales as $jsonString) {
+                $datos = json_decode($jsonString, true);
+                // Agregar cada objeto al resultado
+                foreach ($datos as $item) {
+                    $event[] = $item;
+                }
+            }
+
+            ///dd($result);
         }
             
-        return $data;
+        return response()->json(['data' => $data, 'event' => $event]);
     }
     
     public function updatePaymentMethod(Request $request)
