@@ -674,6 +674,18 @@ class PurchaseRequestController extends Controller
                 $admin_approved =  $admin_app->name;
             } 
 
+            ///Obtenemos la información de los eventuales///
+            $eventuales = DB::table('eventuales')->where('purchase_id', $page)->pluck('eventuales')->toArray();
+            // Decodificar el JSON y obtener un array de objetos
+            $event = [];
+            foreach ($eventuales as $jsonString) {
+                $datos = json_decode($jsonString, true);
+                // Agregar cada objeto al resultado
+                foreach ($datos as $item) {
+                    $event[] = $item;
+                }
+            }
+
             array_push($data, (object)[
                 'id' => $spent->id,
                 'user_id' => $spent->user_id,
@@ -695,24 +707,11 @@ class PurchaseRequestController extends Controller
                 'approved_by' => $approved_by,
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
+                'event' => $event
             ]);
-
-            ///Obtenemos la información de los eventuales///
-            $eventuales = DB::table('eventuales')->where('purchase_id', $page)->pluck('eventuales')->toArray();
-            // Decodificar el JSON y obtener un array de objetos
-            $event = [];
-            foreach ($eventuales as $jsonString) {
-                $datos = json_decode($jsonString, true);
-                // Agregar cada objeto al resultado
-                foreach ($datos as $item) {
-                    $event[] = $item;
-                }
-            }
-
-            ///dd($result);
         }
             
-        return response()->json(['data' => $data, 'event' => $event]);
+        return response()->json(['data' => $data]);
     }
     
     public function updatePaymentMethod(Request $request)

@@ -17,6 +17,7 @@ use App\Http\Controllers\OrderPurchaseController;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SmallBoxUserController;
 use App\Http\Controllers\SpentController;
+use App\Http\Controllers\TemporyCompanyController;
 use App\Http\Controllers\UploadImageController;
 use App\Http\Controllers\UserCenterController;
 use App\Notifications\Acces;
@@ -191,5 +192,11 @@ Route::group(['middleware' => 'auth'], function () {
     //CAJA CHICA PRESUPUESTO//
     Route::post('caja-chica/estimate/',[EstimationSmallBoxController::class,'create'])->name('estimate');
     Route::get('caja-chica/information/estimate',[EstimationSmallBoxController::class,'index'])->name('information.estimate');
+
+    //CAJA CHICA AGREGAR EMPRESA/EVENTUALES //
+    Route::post('caja-chica/newcompany', [TemporyCompanyController::class, 'store'])->name('newcompany');
+    Route::post('caja-chica/delete',[TemporyCompanyController::class, 'delete'])->name('deletecompany');
+    Route::get('caja-chica/company', [TemporyCompanyController::class,'index'])->name('infocompany');
+    
 });
 

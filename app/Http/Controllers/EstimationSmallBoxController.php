@@ -18,8 +18,11 @@ class EstimationSmallBoxController extends Controller
         ->toArray();
         
         $sumatoria = DB::table('estimation_small_box')->sum('total');
+
+        $suma = DB::table('purchase_requests')->where('purchase_status', '=', 'recibido' || 'type_status', '=' , 'normal')->get()->toArray();
+        //dd($suma);
         
-        return response()->json(['information' => $information, 'sumatoria' => $sumatoria]);
+        return response()->json(['information' => $information, 'sumatoria' => $sumatoria]);   
     }
 
     public function create(Request $request)
