@@ -6,13 +6,19 @@ use App\Models\TemporyCompany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Reader\Xls\RC4;
+use Psr\Http\Message\ResponseInterface;
 
 class TemporyCompanyController extends Controller
 {
     public function index()
     {
-        $company = DB::table('tempory_company')->where('status', '=', 1)->get()->toArray();
-        return response()->json(['company' => $company]);
+        $companies = DB::table('tempory_company')->get()->toArray();
+        // Recorrer cada empresa y formatear la fecha
+        foreach ($companies as $company) {
+            $company->created_at = date('d-m-Y', strtotime($company->created_at));
+        }
+
+        return response()->json(['companies' => $companies]);
 
     }
 
@@ -39,9 +45,7 @@ class TemporyCompanyController extends Controller
 
     public function delete(Request $request)
     {
-        $user = auth()->user();
-
-        $deletecompany = DB::table('tempory_company')->where('id', $request->id_comapny)->update(['status' => 0]);
+        $deletecompany = DB::table('tempory_company')->where('id', $request->id_company)->update(['status' => 0]);
 
         if($deletecompany){
             return response()->json(['message' => 'Se elimimo correctamente', 'status' => 200], 200);
@@ -49,5 +53,11 @@ class TemporyCompanyController extends Controller
         else{
             return response()->json(['message' => 'No se pudo eliminar', 'status' => 400], 400);
         }
+    }
+
+    public function restore(Request $request)
+    {
+        DB::table('tempory_company')->where('id', $request->id_company)->update(['status' => 1]);
+        return response()->json(['message' => 'se edito correctamente', 'status' => 200], 200);
     }
 }

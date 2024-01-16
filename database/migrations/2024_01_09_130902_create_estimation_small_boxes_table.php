@@ -15,7 +15,7 @@ class CreateEstimationSmallBoxesTable extends Migration
     {
         Schema::create('estimation_small_box', function (Blueprint $table) {
             $table->id();
-            $table->string('total');
+            $table->decimal('total', 16,2);
             $table->foreignId('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

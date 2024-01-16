@@ -197,6 +197,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/newcompany', [TemporyCompanyController::class, 'store'])->name('newcompany');
     Route::post('caja-chica/delete',[TemporyCompanyController::class, 'delete'])->name('deletecompany');
     Route::get('caja-chica/company', [TemporyCompanyController::class,'index'])->name('infocompany');
+    Route::post('caja-chica/company/restore', [TemporyCompanyController::class, 'restore'])->name('name');
     
 });
 
