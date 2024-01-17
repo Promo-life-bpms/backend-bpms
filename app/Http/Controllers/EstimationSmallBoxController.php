@@ -87,4 +87,9 @@ class EstimationSmallBoxController extends Controller
         else
         return response()->json(['message' => 'error', 'status' => 400], 400);
     }
+
+    public function budgetreturn()
+    {
+        
+    }
 }

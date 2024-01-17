@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Eventuales;
+use App\Models\PaymentMethodInformation;
 use App\Models\PurchaseRequest;
 use App\Models\Role;
 use App\Models\Spent;
@@ -731,6 +732,11 @@ class PurchaseRequestController extends Controller
 
         DB::table('purchase_requests')->where('id',$request->id)->update([
             'payment_method_id' => $request->payment_method_id,
+        ]);
+
+        PaymentMethodInformation::create([
+            'id_user' => $user->id,
+            'id_pursache_request' => $request->id,
         ]);
 
         return response()->json(['msg' => "Método de pago actualizado correctamente"]);
