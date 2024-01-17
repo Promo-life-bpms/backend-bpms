@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Center;
 use App\Models\Company;
 use App\Models\PaymentMethod;
+use App\Models\PaymentMethodInformation;
 use App\Models\PurchaseRequest;
 use App\Models\Role;
 use App\Models\Spent;
@@ -68,7 +69,7 @@ class SmallBoxUserController extends Controller
 
                     $admin_approved =  $admin_app->name;
                 }
-
+                
                 array_push($data, (object)[
                     'id' => $spent->id,
                     'user_id' => $spent->user_id,
@@ -92,7 +93,7 @@ class SmallBoxUserController extends Controller
                     'created_at' => $spent->created_at->format('d-m-Y'),
                 ]);
             }
-    
+
             return array(
                 'spents' => $data, 
             );

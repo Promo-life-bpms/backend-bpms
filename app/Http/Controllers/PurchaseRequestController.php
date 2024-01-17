@@ -125,6 +125,13 @@ class PurchaseRequestController extends Controller
   
           $data = [];
           $spents = PurchaseRequest::where('approved_status', '<>','pendiente')->where('approved_status', '<>','cancelada')->get();
+
+          $prueba = PaymentMethodInformation::all()->pluck('id_user');
+
+          foreach($prueba as $name){
+            $name = DB::table('users')->where('id', $name)->select('name')->get();
+            //dd($name);
+          }
           
           foreach($spents as $spent){
               $company_data = [];
@@ -171,34 +178,33 @@ class PurchaseRequestController extends Controller
 
                 $admin_approved =  $admin_app->name;
             } 
-
-              array_push($data, (object)[
-                  'id' => $spent->id,
-                  'user_id' => $spent->user_id,
-                  'user_name' => $spent->user->name,
-                  'company' =>  $company_data,
-                  'spent' => $spent_data,
-                  'center'  =>  $center_data,
-                  'description' => $spent->description,
-                  'file' => $spent->file,
-                  'commentary' => $spent->commentary,
-                  'purchase_status' => $spent->purchase_status->name,
-                  'purchase_table_name' => $spent->purchase_status->table_name,
-                  'type' => $spent->type,
-                  'type_status' => $spent->type_status,
-                  'payment_method_id' => $spent->payment_method->id,
-                  'payment_method' => $spent->payment_method->name,
-                  'total' =>$spent->total, 
-                  'approved_status' => $spent->approved_status,
-                  'approved_by' => $approved_by,
-                  'admin_approved' => $admin_approved,
-                  'created_at' => $spent->created_at->format('d-m-Y'),
-              ]);
-          }
-  
-          return array(
-              'spents' => $data, 
-          );
+            array_push($data, (object)[
+                'id' => $spent->id,
+                'user_id' => $spent->user_id,
+                'user_name' => $spent->user->name,
+                'company' =>  $company_data,
+                'spent' => $spent_data,
+                'center'  =>  $center_data,
+                'description' => $spent->description,
+                'file' => $spent->file,
+                'commentary' => $spent->commentary,
+                'purchase_status' => $spent->purchase_status->name,
+                'purchase_table_name' => $spent->purchase_status->table_name,
+                'type' => $spent->type,
+                'type_status' => $spent->type_status,
+                'payment_method_id' => $spent->payment_method->id,
+                'payment_method' => $spent->payment_method->name,
+                'total' =>$spent->total, 
+                'approved_status' => $spent->approved_status,
+                'approved_by' => $approved_by,
+                'admin_approved' => $admin_approved,
+                'created_at' => $spent->created_at->format('d-m-Y'),
+            ]);
+        }
+                
+        return array(
+            'spents' => $data, 
+        );
     }
 
     public function store(Request $request)
