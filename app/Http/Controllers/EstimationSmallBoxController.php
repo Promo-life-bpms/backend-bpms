@@ -53,7 +53,7 @@ class EstimationSmallBoxController extends Controller
     }
 
 
-    public function ExpenseHistoryFilter()
+    public function ExpenseHistory()
     {
         $MonthlyExpense = [];
 
