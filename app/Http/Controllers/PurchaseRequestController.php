@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Eventuales;
+use App\Models\EventualesMaquila;
 use App\Models\PaymentMethodInformation;
 use App\Models\PurchaseRequest;
 use App\Models\Role;
@@ -220,7 +221,17 @@ class PurchaseRequestController extends Controller
             'eventuales' => 'nullable|array',
             'eventuales.*.name' => 'required|string',
             'eventuales.*.pay' => 'required|numeric',
+            'eventuales.*.company' => 'required'
         ]);
+
+        if($request->eventualesmaquilaselect == '1'){
+            $request->validate([
+                'eventualesmaquila' => 'nullable|array',
+                'eventualesmaquila.*.name' => 'required|string',
+                'eventualesmaquila.*.pay' => 'required|numeric',
+                'eventualesmaquila.*.company' => 'required'
+            ]);
+        }
 
         $spent = Spent::where('id',$request->spent_id)->get()->last();
         if($spent == null){
@@ -267,6 +278,16 @@ class PurchaseRequestController extends Controller
             ];
             Eventuales::create($eventualesData);
         }
+
+        if ($request->eventualesmaquilaselect == '1'){
+
+            $eventualesInfo = [
+                'eventualesmaquila' => json_encode($request->eventualesmaquila),
+                'purchase_id' => $id,
+            ];
+            EventualesMaquila::create($eventualesInfo);
+        }
+        
         ///////////////////////////////////
         
         $users_to_send_mail = UserCenter::where('center_id',$center_id)->get();
