@@ -125,13 +125,6 @@ class PurchaseRequestController extends Controller
   
           $data = [];
           $spents = PurchaseRequest::where('approved_status', '<>','pendiente')->where('approved_status', '<>','cancelada')->get();
-
-          $prueba = PaymentMethodInformation::all()->pluck('id_user');
-
-          foreach($prueba as $name){
-            $name = DB::table('users')->where('id', $name)->select('name')->get();
-            //dd($name);
-          }
           
           foreach($spents as $spent){
               $company_data = [];

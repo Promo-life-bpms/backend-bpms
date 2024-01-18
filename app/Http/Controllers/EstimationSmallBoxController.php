@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\EstimationSmallBox;
 use App\Models\PaymentMethodInformation;
+use App\Models\RefundOfMoney;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Psr\Http\Message\ResponseInterface;
 
 class EstimationSmallBoxController extends Controller
 {
@@ -102,8 +104,54 @@ class EstimationSmallBoxController extends Controller
         return response()->json(['message' => 'error', 'status' => 400], 400);
     }
 
-    public function budgetreturn()
+    public function BudgetReturn(Request $request)
     {
+        $user = auth()->user();
 
+        $this->validate($request,[
+            'total_returned' => 'required',
+            'total_spent' => 'required', 
+        ]);
+
+        ///OBTENEMOS EL PRIMER DÍA DEL MES Y EL ÚLTIMO///        
+        $primerDiaDelMes = Carbon::now()->startOfMonth();
+        $ultimoDiaDelMes = Carbon::now()->endOfMonth();
+
+       $mes = Carbon::now()->format('F');
+
+        // Verificar si la fecha actual está dentro del mes
+        if (Carbon::now()->between($primerDiaDelMes, $ultimoDiaDelMes)) {
+            // Si estamos en el mes actual, realizar la suma
+            //presupuestomensual == MonthlyBudget
+            $MonthlyBudget = DB::table('estimation_small_box')
+                ->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
+                ->sum('total');
+        }
+        ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
+        //gastosmentuales == monthlyexpenses
+        $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
+                                                        ->where(function ($query) {
+                                                            $query->where(function ($subquery) {
+                                                                $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                                                            })->orWhere(function ($subquery) {
+                                                                $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                                                            });
+                                                        })->sum('total');
+
+        ///presupuestodisponible == AvailableBudget
+        $AvailableBudget =($MonthlyBudget - $MonthlyExpenses);
+        if($AvailableBudget == $request->total_returned){
+            RefundOfMoney::create([
+                'total_returned' => $request->total_returned,
+                'total_spent' => $MonthlyExpenses,
+                'period' => $mes,
+                'id_user' => $user->id
+            ]);
+
+            return response()->json(['message' => 'Se devolvio el dinero']);
+        }
+        else{
+            return response()->json(['message' => 'Debes insertar la cantidad sobrante exacta']);
+        }
     }
 }
