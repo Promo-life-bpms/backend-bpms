@@ -224,15 +224,6 @@ class PurchaseRequestController extends Controller
             'eventuales.*.company' => 'required'
         ]);
 
-        if($request->eventualesmaquilaselect == '1'){
-            $request->validate([
-                'eventualesmaquila' => 'nullable|array',
-                'eventualesmaquila.*.name' => 'required|string',
-                'eventualesmaquila.*.pay' => 'required|numeric',
-                'eventualesmaquila.*.company' => 'required'
-            ]);
-        }
-
         $spent = Spent::where('id',$request->spent_id)->get()->last();
         if($spent == null){
             $center_id = 1;
@@ -277,17 +268,7 @@ class PurchaseRequestController extends Controller
                 'purchase_id' => $id,
             ];
             Eventuales::create($eventualesData);
-        }
-
-        if ($request->eventualesmaquilaselect == '1'){
-
-            $eventualesInfo = [
-                'eventualesmaquila' => json_encode($request->eventualesmaquila),
-                'purchase_id' => $id,
-            ];
-            EventualesMaquila::create($eventualesInfo);
-        }
-        
+        }        
         ///////////////////////////////////
         
         $users_to_send_mail = UserCenter::where('center_id',$center_id)->get();
