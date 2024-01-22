@@ -110,7 +110,7 @@ class EstimationSmallBoxController extends Controller
 
         $this->validate($request,[
             'total_returned' => 'required',
-            'total_spent' => 'required', 
+            'was_returned_to' => 'required',
         ]);
 
         ///OBTENEMOS EL PRIMER DÍA DEL MES Y EL ÚLTIMO///        
@@ -140,18 +140,31 @@ class EstimationSmallBoxController extends Controller
 
         ///presupuestodisponible == AvailableBudget
         $AvailableBudget =($MonthlyBudget - $MonthlyExpenses);
+        //dd($AvailableBudget);
+
+        $path = '';
+        if ($request->hasFile('file')) {
+            $filenameWithExt = $request->file('file')->getClientOriginalName();
+            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+            $extension = $request->file('file')->clientExtension();
+            $fileNameToStore = time(). $filename . '.' . $extension;
+            $path= $request->file('file')->move('storage/smallbox/files/', $fileNameToStore);
+        }
+
         if($AvailableBudget == $request->total_returned){
             RefundOfMoney::create([
                 'total_returned' => $request->total_returned,
                 'total_spent' => $MonthlyExpenses,
                 'period' => $mes,
+                'was_returned_to' => $request->was_returned_to,
+                'file' => $path,
                 'id_user' => $user->id
             ]);
 
-            return response()->json(['message' => 'Se devolvio el dinero']);
+            return response()->json(['message' => 'Se devolvió el dinero', 'status' => 200], 200);
         }
         else{
-            return response()->json(['message' => 'Debes insertar la cantidad sobrante exacta']);
+            return response()->json(['message' => 'Debes insertar la cantidad sobrante exacta', 'status' => 400], 400);
         }
     }
 }

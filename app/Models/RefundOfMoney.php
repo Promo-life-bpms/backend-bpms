@@ -16,6 +16,7 @@ class RefundOfMoney extends Model
         'total_spent',
         'period',
         'was_returned_to',
+        'file',
         'id_user'
     ];
 

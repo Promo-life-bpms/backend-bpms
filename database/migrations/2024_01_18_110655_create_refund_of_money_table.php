@@ -19,6 +19,7 @@ class CreateRefundOfMoneyTable extends Migration
             $table->decimal('total_spent', 16,2);
             $table->string('period');
             $table->string('was_returned_to');
+            $table->string('file')->nullable();
             $table->foreignId('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

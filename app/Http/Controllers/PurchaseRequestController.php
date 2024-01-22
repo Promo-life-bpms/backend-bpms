@@ -676,18 +676,27 @@ class PurchaseRequestController extends Controller
                 $admin_approved =  $admin_app->name;
             } 
 
-            ///Obtenemos la información de los eventuales///
+            // Obtener información de los eventuales
             $eventuales = DB::table('eventuales')->where('purchase_id', $page)->pluck('eventuales')->toArray();
-            // Decodificar el JSON y obtener un array de objetos
+
+            // Inicializar el array resultante
             $event = [];
+
             foreach ($eventuales as $jsonString) {
                 $datos = json_decode($jsonString, true);
-                // Agregar cada objeto al resultado
+
                 foreach ($datos as $item) {
+                    // Obtener el ID de la compañía desde los eventuales
+                    $companyId = $item['company'];
+                    // Buscar el nombre de la compañía en la tabla tempory_company
+                    $companyName = DB::table('tempory_company')->where('id', $companyId)->value('name');
+                    // Agregar el nombre de la compañía al array original
+                    $item['company_name'] = $companyName;
+                    // Agregar cada objeto al resultado
                     $event[] = $item;
                 }
             }
-
+            
             array_push($data, (object)[
                 'id' => $spent->id,
                 'user_id' => $spent->user_id,
