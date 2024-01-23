@@ -48,7 +48,7 @@ class TemporyCompanyController extends Controller
         $deletecompany = DB::table('tempory_company')->where('id', $request->id_company)->update(['status' => 0]);
 
         if($deletecompany){
-            return response()->json(['message' => 'Se elimimo correctamente', 'status' => 200], 200);
+            return response()->json(['message' => 'Se eliminó correctamente.', 'status' => 200], 200);
         }
         else{
             return response()->json(['message' => 'No se pudo eliminar', 'status' => 400], 400);
@@ -58,6 +58,6 @@ class TemporyCompanyController extends Controller
     public function restore(Request $request)
     {
         DB::table('tempory_company')->where('id', $request->id_company)->update(['status' => 1]);
-        return response()->json(['message' => 'se edito correctamente', 'status' => 200], 200);
+        return response()->json(['message' => 'Se restableció correctamente la empresa', 'status' => 200], 200);
     }
 }

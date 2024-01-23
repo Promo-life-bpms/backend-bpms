@@ -292,6 +292,20 @@ class PurchaseRequestController extends Controller
         return response()->json(['msg' => "Registro guardado satisfactoriamente"]);
     }
 
+    public function updatemoney(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'total' => 'required'
+        ]);
+
+        DB::table('purchase_requests')->where('id', $request->id_purchase)->update([
+            'total' => $request->total
+        ]);
+
+        return response()->json(['message' => 'Se actualizó con exito la cantidad', 'status' => 200], 200);
+    }
     public function update(Request $request)
     {
         $user = auth()->user();

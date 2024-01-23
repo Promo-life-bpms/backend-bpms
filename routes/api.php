@@ -20,6 +20,7 @@ use App\Http\Controllers\SpentController;
 use App\Http\Controllers\TemporyCompanyController;
 use App\Http\Controllers\UploadImageController;
 use App\Http\Controllers\UserCenterController;
+use App\Models\EstimationSmallBox;
 use App\Notifications\Acces;
 use App\Models\User;
 
@@ -160,6 +161,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/realizar-cancelacion/', [PurchaseRequestController::class, 'createCancellation']);
     Route::post('caja-chica/actualizar-pago/', [PurchaseRequestController::class, 'updatePaymentMethod']);
 
+    //actualizar el monto del pago//
+    route::post('caja-chica/actualizar-pago-monto',[PurchaseRequestController::class,'updatemoney']);
+
     //Administrador
     Route::get('caja-chica/administrador/solicitudes-de-compra/ver', [PurchaseRequestController::class, 'showAdministrador']);
     Route::post('caja-chica/administrador/solicitudes-de-compra/aprobar', [PurchaseRequestController::class, 'approvedByAdmin']);
@@ -194,6 +198,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('caja-chica/information/estimate',[EstimationSmallBoxController::class,'index'])->name('information.estimate');
     Route::get('caja-chica/information/history',[EstimationSmallBoxController::class,'ExpenseHistory'])->name('information.history');
     Route::post('caja-chica/estimate/return',[EstimationSmallBoxController::class,'budgetreturn'])->name('estimate.return');
+    Route::get('caja-chica/estimate/return/history', [EstimationSmallBoxController::class, 'HistoryOfTheReturnOfMoney'])->name('estimate.return.history');
 
     //CAJA CHICA AGREGAR EMPRESA/EVENTUALES //
     Route::post('caja-chica/newcompany', [TemporyCompanyController::class, 'store'])->name('newcompany');

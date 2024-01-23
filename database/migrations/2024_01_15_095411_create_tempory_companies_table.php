@@ -15,7 +15,7 @@ class CreateTemporyCompaniesTable extends Migration
     {
         Schema::create('tempory_company', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->string('status');
             $table->foreignId('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();

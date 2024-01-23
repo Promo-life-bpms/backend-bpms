@@ -49,9 +49,27 @@ class EstimationSmallBoxController extends Controller
         ///presupuestodisponible == AvailableBudget
         $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
 
+        $restaDelCajaReturn = DB::table('refund_of_money')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
+                                                        ->sum('total_returned');
+        
+        // Restar total_returned al AvailableBudget si hay valores
+        if ($restaDelCajaReturn) {
+            $AvailableBudget -= $restaDelCajaReturn;
+        }
+
         return response()->json(['Information' => $Information, 'MonthlyExpenses' => $MonthlyExpenses, 'AvailableBudget' => $AvailableBudget]);   
     }
 
+    public function HistoryOfTheReturnOfMoney()
+    {
+        $history = DB::table('refund_of_money')->select('total_returned','total_spent', 'period', 'was_returned_to','id_user', 'file', 'created_at')->get()->toArray();
+
+        foreach ($history as $date) {
+            $date->created_at = date('d-m-Y', strtotime($date->created_at));
+        }
+
+        return response()->json(['history' => $history]);
+    }
 
     public function ExpenseHistory()
     {
@@ -80,7 +98,6 @@ class EstimationSmallBoxController extends Controller
                 }
             }
         }
-        
         return response()->json(['MonthlyExpense' => $MonthlyExpense]);
     }
 
@@ -110,23 +127,14 @@ class EstimationSmallBoxController extends Controller
 
         $this->validate($request,[
             'total_returned' => 'required',
-            'was_returned_to' => 'required',
+            'was_returned_to' => 'required', 
         ]);
 
+        $mes = Carbon::now()->format('F');
         ///OBTENEMOS EL PRIMER DÍA DEL MES Y EL ÚLTIMO///        
         $primerDiaDelMes = Carbon::now()->startOfMonth();
         $ultimoDiaDelMes = Carbon::now()->endOfMonth();
 
-       $mes = Carbon::now()->format('F');
-
-        // Verificar si la fecha actual está dentro del mes
-        if (Carbon::now()->between($primerDiaDelMes, $ultimoDiaDelMes)) {
-            // Si estamos en el mes actual, realizar la suma
-            //presupuestomensual == MonthlyBudget
-            $MonthlyBudget = DB::table('estimation_small_box')
-                ->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
-                ->sum('total');
-        }
         ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
         //gastosmentuales == monthlyexpenses
         $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
@@ -138,10 +146,6 @@ class EstimationSmallBoxController extends Controller
                                                             });
                                                         })->sum('total');
 
-        ///presupuestodisponible == AvailableBudget
-        $AvailableBudget =($MonthlyBudget - $MonthlyExpenses);
-        //dd($AvailableBudget);
-
         $path = '';
         if ($request->hasFile('file')) {
             $filenameWithExt = $request->file('file')->getClientOriginalName();
@@ -151,20 +155,20 @@ class EstimationSmallBoxController extends Controller
             $path= $request->file('file')->move('storage/smallbox/files/', $fileNameToStore);
         }
 
-        if($AvailableBudget == $request->total_returned){
-            RefundOfMoney::create([
-                'total_returned' => $request->total_returned,
-                'total_spent' => $MonthlyExpenses,
-                'period' => $mes,
-                'was_returned_to' => $request->was_returned_to,
-                'file' => $path,
-                'id_user' => $user->id
-            ]);
+        $returnmoney =RefundOfMoney::create([
+            'total_returned' => $request->total_returned,
+            'total_spent' => $MonthlyExpenses,
+            'period' => $mes,
+            'was_returned_to' => $request->was_returned_to,
+            'file' => $path,
+            'id_user' => $user->id
+        ]);    
 
-            return response()->json(['message' => 'Se devolvió el dinero', 'status' => 200], 200);
+        if($returnmoney){
+            return response()->json(['message' => 'Se regreso el dinero', 'status' => 200], 200);
         }
         else{
-            return response()->json(['message' => 'Debes insertar la cantidad sobrante exacta', 'status' => 400], 400);
+            return response()->json(['message' => 'Error,', 'status' => 400], 400);
         }
     }
 }
