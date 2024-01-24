@@ -295,7 +295,7 @@ class PurchaseRequestController extends Controller
     public function updatemoney(Request $request)
     {
         $user = auth()->user();
-        dd($request);
+        
         $request->validate([
             'total_update' => 'required'
         ]);
