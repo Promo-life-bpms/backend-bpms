@@ -60,12 +60,16 @@ class EstimationSmallBoxController extends Controller
         return response()->json(['Information' => $Information, 'MonthlyExpenses' => $MonthlyExpenses, 'AvailableBudget' => $AvailableBudget]);   
     }
 
-    public function HistoryOfTheReturnOfMoney()
+    public function historyOfTheReturnOfMoney()
     {
-        $history = DB::table('refund_of_money')->select('total_returned','total_spent', 'period', 'was_returned_to','id_user', 'file', 'created_at')->get()->toArray();
+        $history = DB::table('refund_of_money')->select('total_returned', 'total_spent', 'period', 'was_returned_to', 'id_user', 'file', 'created_at')->get();
+        
+        foreach ($history as $informtaion) {
+            $informtaion->created_at = date('d-m-Y', strtotime($informtaion->created_at));
 
-        foreach ($history as $date) {
-            $date->created_at = date('d-m-Y', strtotime($date->created_at));
+            // Retrieve the user name using the id_user
+            $user = DB::table('users')->where('id', $informtaion->id_user)->select('name')->first();
+            $informtaion->id_user = $user ? $user->name : null;
         }
 
         return response()->json(['history' => $history]);

@@ -295,7 +295,7 @@ class PurchaseRequestController extends Controller
     public function updatemoney(Request $request)
     {
         $user = auth()->user();
-        
+
         $request->validate([
             'total_update' => 'required'
         ]);
@@ -304,7 +304,7 @@ class PurchaseRequestController extends Controller
             'total' => $request->total_update
         ]);
 
-        return response()->json(['message' => 'Se actualizó con exito la cantidad...', 'status' => 200, 'total_update' => $request->total_update, 'id_purchase' =>$request->id_purchase ], 200);
+        return response()->json(['message' => 'Se actualizó con exito la cantidad...', 'status' => 200], 200);
     }
     public function update(Request $request)
     {
