@@ -158,6 +158,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/confirmar-entrega/', [PurchaseRequestController::class, 'confirmDelivered']);
     Route::post('caja-chica/confirmar-recibido/', [PurchaseRequestController::class, 'confirmReceived']);
     Route::post('caja-chica/realizar-devolucion/', [PurchaseRequestController::class, 'createDevolution']);
+    Route::post('caja-chica/realizar-devolucion/confirmada/',[PurchaseRequestController::class, 'confirmationDevolution']);
+    Route::post('caja-chica/realizar-devolucion/cancelation/',[PurchaseRequestController::class, 'cancelationDevolution']);
     Route::post('caja-chica/realizar-cancelacion/', [PurchaseRequestController::class, 'createCancellation']);
     Route::post('caja-chica/actualizar-pago/', [PurchaseRequestController::class, 'updatePaymentMethod']);
 

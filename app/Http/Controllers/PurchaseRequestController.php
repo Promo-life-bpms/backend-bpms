@@ -577,8 +577,10 @@ class PurchaseRequestController extends Controller
 
         if($purchase_request->purchase_status_id == 3 || $purchase_request->purchase_status_id == 4){
             DB::table('purchase_requests')->where('id',$request->id)->update([
-                'type_status' => 'devolucion',
+                'purchase_status_id' => 5,
+                'type_status' => 'en proceso',
             ]);
+            
         
             $users_to_send_mail = User::where('id',$purchase_request->user_id)->get()->last();
 
@@ -594,9 +596,54 @@ class PurchaseRequestController extends Controller
                 return $e;
             }
     
-            return response()->json(['msg' => "Devolucion realizada"]);
+            return response()->json(['msg' => "Devolución en proceso"]);
         }else{
             return response()->json(['msg' => "No ha sido posible realizar la devolucion, verifica que la solicitud haya sido aprobada"]);
+        } 
+    }
+
+    public function confirmationDevolution(Request $request){
+
+        $request->validate([
+            'id' => 'required',
+        ]);
+
+        $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
+
+        if( $purchase_request == null){
+            return response()->json(['msg' => "Orden no encontrada"]);
+        }
+
+        if($purchase_request->purchase_status_id == 5){
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'type_status' => 'normal',
+            ]);
+            
+            return response()->json(['msg' => "Devolución realizada"]);
+        }else{
+            return response()->json(['msg' => "No ha sido posible realizar la devolucion, verifica que la solicitud haya sido aprobada"]);
+        } 
+    }
+
+    public function cancelationDevolution(Request $request){
+        $request->validate([
+            'id' => 'required',
+        ]);
+
+        $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
+
+        if( $purchase_request == null){
+            return response()->json(['msg' => "Orden no encontrada"]);
+        }
+
+        if($purchase_request->purchase_status_id == 5){
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'type_status' => 'rechazada',
+            ]);
+            
+            return response()->json(['msg' => "Devolución rechazada"]);
+        }else{
+            return response()->json(['msg' => "No ha sido posible realizar la devolucin, verifica que la solicitud haya sido aprobada"]);
         } 
     }
 
