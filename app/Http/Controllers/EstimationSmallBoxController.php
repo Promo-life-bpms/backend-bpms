@@ -132,6 +132,7 @@ class EstimationSmallBoxController extends Controller
         $this->validate($request,[
             'total_returned' => 'required',
             'was_returned_to' => 'required', 
+            'file' => 'required'
         ]);
 
         $mes = Carbon::now()->format('F');
