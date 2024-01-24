@@ -304,7 +304,7 @@ class PurchaseRequestController extends Controller
             'total' => $request->total
         ]);
 
-        return response()->json(['message' => 'Se actualizó con exito la cantidad', 'status' => 200], 200);
+        return response()->json(['message' => 'Se actualizó con exito la cantidad...', 'status' => 200], 200);
     }
     public function update(Request $request)
     {
