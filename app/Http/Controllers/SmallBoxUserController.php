@@ -364,8 +364,9 @@ class SmallBoxUserController extends Controller
         if($user !=null){
      
             $data = [];
-            $spents = PurchaseRequest::where('purchase_status_id', '<>', 1)->where('approved_status', 'aprobada')->where('approved_status', 'devolucion')->get();
-            
+            $spents = PurchaseRequest::where('purchase_status_id', '<>', 1)->where(function ($query) {
+                $query->where('approved_status', 'aprobada')->orWhere('approved_status', 'devolucion');
+            })->get();
             foreach($spents as $spent){
                 $company_data = [];
                 $spent_data = [];
@@ -452,7 +453,9 @@ class SmallBoxUserController extends Controller
         if($user != null){
             $total_page = 15;
             $data = [];
-            $spents = PurchaseRequest::where('purchase_status_id', '<>', 1)->where('approved_status', 'aprobada')->where('approved_status', 'devolucion')->get();
+            $spents = PurchaseRequest::where('purchase_status_id', '<>', 1)->where(function ($query) {
+                $query->where('approved_status', 'aprobada')->orWhere('approved_status', 'devolucion');
+            })->get();
 
             $total_elements = count($spents);
 
