@@ -12,6 +12,14 @@ class ProductDeliveryRoute extends Model
         'code_order_route_id',
         'odoo_product_id',
         'amount',
+        'action',
+        'hour',
+        'observations',
+        'provider',
+        'origin_address',
+        'destinity_address',
+        'confirmation_sheet'
+
     ];
 
     public function completeInformation()

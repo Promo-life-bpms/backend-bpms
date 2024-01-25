@@ -2,7 +2,10 @@
     "name": "laravel/laravel",
     "type": "project",
     "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "keywords": [
+        "framework",
+        "laravel"
+    ],
     "license": "MIT",
     "require": {
         "php": "^7.3|^8.0",
@@ -12,8 +15,9 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laraveles/spanish": "^1.5",
+        "phpoffice/phpspreadsheet": "^1.29",
         "santigarcor/laratrust": "^7.1",
-        "tymon/jwt-auth": "^1.0"
+        "tymon/jwt-auth": "^1.0.3"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

@@ -24,15 +24,8 @@ class CodeOrderDeliveryRoutes extends Migration
             $table->string('code_sale');
             $table->string('code_order');
             $table->string('type_of_origin');
-            $table->text('origin_address');
             $table->string('type_of_destiny');
-            $table->text('destiny_address');
-            $table->time('hour');
-            $table->string('attention_to');
-            $table->string('action');
-            $table->string('status');
-            $table->string('num_guide')->nullable();
-            $table->text('observations')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }
