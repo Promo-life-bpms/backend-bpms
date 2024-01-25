@@ -644,7 +644,7 @@ class PurchaseRequestController extends Controller
             
             return response()->json(['msg' => "Devolución rechazada"]);
         }else{
-            return response()->json(['msg' => "No ha sido posible realizar la devolucin, verifica que la solicitud haya sido aprobada"]);
+            return response()->json(['msg' => "No ha sido posible realizar la devolución, verifica que la solicitud haya sido aprobada"]);
         } 
     }
 
