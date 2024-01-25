@@ -18,14 +18,7 @@ class CodeOrderDeliveryRoute extends Model
         'code_sale',
         'code_order',
         'type_of_origin',
-        'origin_address',
         'type_of_destiny',
-        'destiny_address',
-        'hour',
-        'attention_to',
-        'action',
-        'num_guide',
-        'observations',
         'status',
     ];
 

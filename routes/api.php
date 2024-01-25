@@ -9,6 +9,7 @@ use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
 use App\Http\Controllers\BinnacleController;
+use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
@@ -117,6 +118,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::patch('rutas-de-entrega/{ruta}/pedido/{pedido}', [DeliveryRouteController::class, 'updateInfoChofer']);
     // Eliminar ruta de entrega
     Route::delete('rutas-de-entrega/{deliveryRoute}', [DeliveryRouteController::class, 'destroy']);
+    //Eliminar un pedido de una ruta
+    Route::get('rutas-de-entrega/{ruta}/excel', [DeliveryRouteController::class, 'excelCompras']);
 
     // Crear una remision
     Route::post('rutas-de-entrega/{ruta}/remision', [DeliveryRouteController::class, 'setRemisiones']);

@@ -186,11 +186,13 @@ class SaleController extends Controller
             "binnacles"
         ])->where('code_sale', $sale_id)->first();
         //Detalle del pedido seleccionado
+
         if ($sale) {
             /*  foreach ($sale->routeDeliveries as $routeDelivery) {
                 $routeDelivery->deliveryRoute->name_chofer = $routeDelivery->deliveryRoute->user->name;
                 unset($routeDelivery->deliveryRoute->user);
             } */
+
             $sale->lastStatus->slug = $sale->lastStatus->status->slug;
             $sale->lastStatus->last_status = $sale->lastStatus->status->status;
             unset($sale->lastStatus->status);
@@ -268,7 +270,7 @@ class SaleController extends Controller
         $date_end = date($request->date_end);
         $date_initial = date($request->date_initial);
         $company = $request->company;
-      
+
         $sales = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
             ->where('additional_sale_information.company', 'LIKE', '%' . $company . '%')
             ->whereBetween('additional_sale_information.planned_date', [$date_initial, $date_end])->get()

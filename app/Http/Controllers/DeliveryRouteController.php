@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CodeOrderDeliveryRoute;
 use App\Models\DeliveryRoute;
 use App\Models\OrderPurchase;
 use App\Models\Remission;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\OrderPurchaseProduct;
 use App\Models\SaleStatusChange;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class DeliveryRouteController extends Controller
 {
@@ -145,18 +148,15 @@ class DeliveryRouteController extends Controller
             'code_orders' => 'required|array',
             'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
             'code_orders.*.type_of_origin' => 'required',
-            'code_orders.*.origin_address' => 'required',
             'code_orders.*.type_of_destiny' => 'required',
-            'code_orders.*.destiny_address' => 'required',
-            'code_orders.*.hour' => 'required|date_format:H:i:s',
-            'code_orders.*.attention_to' => 'required',
-            'code_orders.*.action' => 'required',
-            'code_orders.*.observations' => 'required',
             'code_orders.*.orders' => 'required|array',
             'code_orders.*.orders.*.code_order' => 'required|exists:order_purchases,code_order',
             'code_orders.*.orders.*.products' => 'required|array',
             'code_orders.*.orders.*.products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
             'code_orders.*.orders.*.products.*.amount' => 'required',
+            'code_orders.*.orders.*.products.*.action' => 'required',
+            'code_orders.*.orders.*.products.*.provider' => 'required',
+            'code_orders.*.orders.*.products.*.destiny_address' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -217,21 +217,15 @@ class DeliveryRouteController extends Controller
         //retornar un mensaje
         foreach ($request->code_orders as $codeOrder) {
             $codeOrder = (object)$codeOrder;
+
             $dataSale = [
                 'code_sale' => $codeOrder->code_sale,
                 'type_of_origin' => $codeOrder->type_of_origin,
-                'origin_address' => $codeOrder->origin_address,
                 'type_of_destiny' => $codeOrder->type_of_destiny,
-                'destiny_address' => $codeOrder->destiny_address,
                 'user_chofer_id' => null,
                 'type_of_product' => null,
                 'type_of_chofer' => null,
-                'num_guide' => null,
-                'hour' => $codeOrder->hour,
-                'attention_to' => $codeOrder->attention_to,
-                'action' => $codeOrder->action,
-                'observations' => $codeOrder->observations,
-                'status' => 'Pendiente',
+                'status' => 'Pendiente'
             ];
 
             // Agendado en ruta de entrega (Material maquilado):
@@ -247,6 +241,12 @@ class DeliveryRouteController extends Controller
                     $codeOrderRoute->productDeliveryRoute()->create([
                         'odoo_product_id' => $newProduct->odoo_product_id,
                         'amount' => $newProduct->amount,
+                        'action' => $newProduct->action,
+                        'hour' => $newProduct->hour,
+                        'observations' => $newProduct->observations,
+                        'provider' => $newProduct->provider,
+                        'destinity_address' => $newProduct->destiny_address,
+                        'confirmation_sheet' => $newProduct->confirmation_sheet,
                     ]);
                 }
                 $type_of_product = $request->type_of_product;
@@ -354,13 +354,59 @@ class DeliveryRouteController extends Controller
      * @param  \App\Models\DeliveryRoute  $deliveryRoute
      * @return \Illuminate\Http\Response
      */
+    public function excelCompras($ruta)
+    {
+
+        // Crea un nuevo objeto Spreadsheet
+        $spreadsheet = new Spreadsheet();
+
+        // Obtiene tu conjunto de datos de la base de datos o de donde sea necesario
+        $code_route = DeliveryRoute::join('code_order_delivery_routes', 'code_order_delivery_routes.delivery_route_id', 'delivery_routes.id')
+            ->where('code_route', $ruta)
+            ->first();
+
+        if ($code_route->type_of_product == 'Limpio') {
+
+
+            $data = [
+                ['id' => $code_route->id],
+                [''],
+
+            ];
+            return $data;
+        } else {
+            $data = [
+                ['Nombre', 'Correo'],
+                ['Ejemplo 1', 'ejemplo1@email.com'],
+                ['Ejemplo 2', 'ejemplo2@email.com'],
+                // ... más datos
+            ];
+        }
+
+        // Selecciona la hoja activa
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Llena la hoja con tus datos
+        $sheet->fromArray($data, NULL, 'A1');
+
+        // Crea un objeto de escritura (Writer) y exporta a formato Xlsx
+        $writer = new Xlsx($spreadsheet);
+
+        // Guarda el archivo en el sistema de archivos o devuelve una respuesta de descarga
+        $filename = 'archivo_excel.xlsx';
+        $writer->save($filename);
+
+        // Puedes devolver una respuesta aquí si lo necesitas
+        return response()->download($filename)->deleteFileAfterSend();
+    }
+
     public function show($id)
     {
 
         // Corresponde con la ruta  rutas-de-entrega
         // Buscamos un study por el ID.
         $ruta = DeliveryRoute::where('code_route', $id)->first();
-        //return $ruta;
+
         // Chequeaos si encontró o no la ruta
         if (!$ruta) {
             // Se devuelve un array errors con los errores detectados y código 404
@@ -375,6 +421,7 @@ class DeliveryRouteController extends Controller
             ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
             ->select('product_delivery_routes.*')
             ->get();
+
         // Obtener las ordenes de compra de estos productos
         $orders = [];
         foreach ($products as $product) {
@@ -420,28 +467,20 @@ class DeliveryRouteController extends Controller
                 ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
                 ->when($isChofer, function ($query) {
                     $query->where("code_order_delivery_routes.user_chofer_id", auth()->user()->id);
-                })
-                ->select(
+                })->select(
                     'sales.*',
                     'code_order_delivery_routes.type_of_origin',
-                    'code_order_delivery_routes.origin_address',
                     'code_order_delivery_routes.type_of_destiny',
-                    'code_order_delivery_routes.destiny_address',
-                    'code_order_delivery_routes.hour',
-                    'code_order_delivery_routes.attention_to',
-                    'code_order_delivery_routes.action',
                     'code_order_delivery_routes.user_chofer_id',
                     'code_order_delivery_routes.type_of_product',
                     'code_order_delivery_routes.type_of_chofer',
                     'code_order_delivery_routes.parcel_name',
-                    'code_order_delivery_routes.num_guide',
-                    'code_order_delivery_routes.observations',
                     'code_order_delivery_routes.status',
                     'additional_sale_information.client_name',
                     'additional_sale_information.client_contact',
                     'additional_sale_information.warehouse_company',
                     'additional_sale_information.planned_date',
-                    'additional_sale_information.company'
+                    'additional_sale_information.company',
                 )
                 ->first();
             // No se encontró el pedido y se continua con la siguiente orden.
@@ -463,7 +502,6 @@ class DeliveryRouteController extends Controller
             unset($sale->lastStatus->sale_id);
             unset($sale->lastStatus->status_id);
             unset($sale->lastStatus->updated_at);
-
             $remission =  $sale->remissions()->where('remisiones.delivery_route_id', $ruta->id)->first();
             if ($remission) {
                 $sale->remission_id = $remission->code_remission;
@@ -484,15 +522,17 @@ class DeliveryRouteController extends Controller
                 array_push($sales, $sale);
             }
         }
-
         $dataSales = [];
         foreach ($sales as $sale) {
-            $ordersInThisSale = [];
+               $ordersInThisSale = [];
             foreach ($dataOrders as $order) {
+
                 if ($order['code_sale'] == $sale->code_sale) {
                     $ordersInThisSale[] = $order;
+
                 }
             }
+
             $data = $sale->toArray();
             unset($data['ordersDeliveryRoute']);
             $data['details_orders'] = $ordersInThisSale;
@@ -678,6 +718,38 @@ class DeliveryRouteController extends Controller
         // Se devuelve un array errors con los errores detectados y código 404
         return response()->json(['msg' => 'Ruta eliminada correctamente!'], response::HTTP_OK); //200
     }
+    /*  public function deleteSaleDelyvery($ruta, $pedido)
+    {
+
+        $delivery = DeliveryRoute::where('code_route', $ruta)->first();
+
+        if (!$delivery) {
+            return response()->json(["message" => "El pedido no existe en la ruta de entrega"], Response::HTTP_NOT_FOUND);
+        }
+        try {
+            foreach ($delivery->codeOrderDeliveryRoute as $codr) {
+                $sale = $codr->orderPurchase;
+            }
+
+            $sale->sale->delete();
+        } catch (Exception $e) {
+            return response()->json([
+                ([
+                    'msg' => 'Error al eliminar esta ruta.', 'data' =>
+                    ['error' => $e->getMessage()]
+                ])
+            ], response::HTTP_NOT_FOUND);
+            //throw $th;
+        }
+    } */
+
+    /*  if (!$user) {
+            return response()->json(["message" => "El usuario no existe"], Response::HTTP_NOT_FOUND);
+        }
+        $user->active = false;
+        $user->email = $user->email . "-" . Str::random(5);
+        $user->save();
+        return response()->json(["usuario" => $user, 'message' => 'Usuario eliminado correctamente']); */
 
     public function setRemisiones(Request $request, $ruta)
     {
