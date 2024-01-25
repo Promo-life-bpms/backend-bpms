@@ -223,11 +223,10 @@ class DeliveryRouteController extends Controller
                 'type_of_origin' => $codeOrder->type_of_origin,
                 'type_of_destiny' => $codeOrder->type_of_destiny,
                 'user_chofer_id' => null,
-                'type_of_product' => null,
+                'type_of_product' => $codeOrder->type_of_product,
                 'type_of_chofer' => null,
                 'status' => 'Pendiente'
             ];
-
             // Agendado en ruta de entrega (Material maquilado):
             //Agendado en ruta de entrega (Material maquilado):
 
@@ -524,12 +523,11 @@ class DeliveryRouteController extends Controller
         }
         $dataSales = [];
         foreach ($sales as $sale) {
-               $ordersInThisSale = [];
+            $ordersInThisSale = [];
             foreach ($dataOrders as $order) {
 
                 if ($order['code_sale'] == $sale->code_sale) {
                     $ordersInThisSale[] = $order;
-
                 }
             }
 
