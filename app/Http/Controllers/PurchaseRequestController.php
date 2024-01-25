@@ -579,6 +579,7 @@ class PurchaseRequestController extends Controller
             DB::table('purchase_requests')->where('id',$request->id)->update([
                 'purchase_status_id' => 5,
                 'type_status' => 'en proceso',
+                'approved_status' => 'devolucion'
             ]);
             
         
