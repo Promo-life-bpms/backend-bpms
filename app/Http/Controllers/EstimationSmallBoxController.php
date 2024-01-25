@@ -75,6 +75,8 @@ class EstimationSmallBoxController extends Controller
         return response()->json(['Information' => $Information, 'MonthlyExpenses' => $MonthlyExpenses, 'AvailableBudget' => $AvailableBudget]);   
     }
 
+
+    //////////////////////////////////////////////////HISTORIAL DE LA DEVOLUCIÓN DEL DINERO/////////////////////////////////////////////////////////////////////////////// 
     public function historyOfTheReturnOfMoney()
     {
         $history = DB::table('refund_of_money')->select('total_returned', 'total_spent', 'period', 'was_returned_to', 'id_user', 'file', 'created_at')->get();
@@ -90,6 +92,22 @@ class EstimationSmallBoxController extends Controller
         return response()->json(['history' => $history]);
     }
 
+    ////////////////////////////////////////////////////////HISTORIAL DE LA DEVOLUCION DE UN PRODUCTO///////////////////////////////////////////////////////////////////////
+    public function DevolutionHistory()
+    {
+        $DevolutionProduct = DB::table('history_devolution')->select('total_return', 'status', 'id_user', 'created_at', 'id_purchase')->get();
+
+        foreach ($DevolutionProduct as $information){
+            $information->created_at = date('d-m-Y', strtotime($information->created_at));
+            // Retrieve the user name using the id_user
+            $user = DB::table('users')->where('id', $information->id_user)->select('name')->first();
+           $information->id_user = $user ? $user->name : null;
+        }
+        return response()->json(['DevolutionProduct' => $DevolutionProduct]);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     public function ExpenseHistory()
     {
         $MonthlyExpense = [];
@@ -99,6 +117,8 @@ class EstimationSmallBoxController extends Controller
                 $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
             })->orWhere(function ($subquery) {
                 $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+            })->orWhere(function ($subquery) {
+                $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
             });
         })->select('id', 'total')->get()->toArray();
     

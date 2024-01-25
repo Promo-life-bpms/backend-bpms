@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Eventuales;
 use App\Models\EventualesMaquila;
+use App\Models\HistoryDevolution;
 use App\Models\PaymentMethodInformation;
 use App\Models\PurchaseRequest;
 use App\Models\Role;
@@ -582,7 +583,6 @@ class PurchaseRequestController extends Controller
                 'approved_status' => 'devolucion'
             ]);
             
-        
             $users_to_send_mail = User::where('id',$purchase_request->user_id)->get()->last();
 
             $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
@@ -605,6 +605,8 @@ class PurchaseRequestController extends Controller
 
     public function confirmationDevolution(Request $request){
 
+        $user = auth()->user();
+
         $request->validate([
             'id' => 'required',
         ]);
@@ -620,6 +622,17 @@ class PurchaseRequestController extends Controller
                 'type_status' => 'normal',
             ]);
             
+
+            ////CREAR HISTORIAL DE LA DEVOLUCIÓN DEL HISTORIAL////
+            $obtener_total = DB::table('purchase_requests')->where('id', $request->id)->select('total')->get();
+            $total_return = $obtener_total->first()->total;
+            HistoryDevolution::create([
+                'total_return' => $total_return,
+                'status' => 'Devolución completada',
+                'id_user' => $user->id,
+                'id_purchase' => $request->id, 
+            ]);
+
             return response()->json(['msg' => "Devolución realizada"]);
         }else{
             return response()->json(['msg' => "No ha sido posible realizar la devolucion, verifica que la solicitud haya sido aprobada"]);
@@ -627,6 +640,8 @@ class PurchaseRequestController extends Controller
     }
 
     public function cancelationDevolution(Request $request){
+        $user = auth()->user();
+
         $request->validate([
             'id' => 'required',
         ]);
@@ -640,6 +655,16 @@ class PurchaseRequestController extends Controller
         if($purchase_request->purchase_status_id == 5){
             DB::table('purchase_requests')->where('id',$request->id)->update([
                 'type_status' => 'rechazada',
+            ]);
+
+            ////CREAR HISTORIAL DE LA DEVOLUCIÓN DEL HISTORIAL////
+            $obtener_total = DB::table('purchase_requests')->where('id', $request->id)->select('total')->get();
+            $total_return = $obtener_total->first()->total;
+            HistoryDevolution::create([
+                'total_return' => $total_return,
+                'status' => 'Devolución rechazada',
+                'id_user' => $user->id,
+                'id_purchase' => $request->id, 
             ]);
             
             return response()->json(['msg' => "Devolución rechazada"]);

@@ -200,6 +200,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('caja-chica/information/estimate',[EstimationSmallBoxController::class,'index'])->name('information.estimate');
     Route::get('caja-chica/information/history',[EstimationSmallBoxController::class,'ExpenseHistory'])->name('information.history');
     Route::post('caja-chica/estimate/return',[EstimationSmallBoxController::class,'BudgetReturn'])->name('estimate.return');
+    Route::get('caja-chica/devolution/product/history', [EstimationSmallBoxController::class,'DevolutionHistory'])->name('devolution.product.history');
     Route::get('caja-chica/estimate/return/history', [EstimationSmallBoxController::class, 'HistoryOfTheReturnOfMoney'])->name('estimate.return.history');
 
     //CAJA CHICA AGREGAR EMPRESA/EVENTUALES //
