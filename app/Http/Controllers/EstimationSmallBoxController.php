@@ -122,16 +122,14 @@ class EstimationSmallBoxController extends Controller
             });
         })->select('id', 'total')->get()->toArray();
 
-        dd($MonthlyExpenseHistory);
-    
         foreach ($MonthlyExpenseHistory as $history) {
-            $paymentInfo = DB::table('paymentmethodinformation')->where('id', $history->id)->first(['id_user', 'created_at']);
+            $paymentInfo = DB::table('paymentmethodinformation')->where('id', $history['id'])->first(['id_user', 'created_at']);
             if ($paymentInfo) {
                 $userInfo = DB::table('users')->where('id', $paymentInfo->id_user)->select('name')->first();
                 if ($userInfo) {
                     $MonthlyExpense[] = [
-                        'id' => $history->id,
-                        'total' => $history->total,
+                        'id' => $history['id'],
+                        'total' => $history['total'],
                         'created_at' => date('d-m-Y', strtotime($paymentInfo->created_at)),
                         'id_user' => $paymentInfo->id_user,
                         'user_name' => $userInfo->name,
@@ -139,6 +137,7 @@ class EstimationSmallBoxController extends Controller
                 }
             }
         }
+        
         return response()->json(['MonthlyExpense' => $MonthlyExpense]);
     }
 
