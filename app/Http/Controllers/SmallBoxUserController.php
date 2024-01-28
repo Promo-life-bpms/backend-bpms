@@ -270,7 +270,7 @@ class SmallBoxUserController extends Controller
         $company = Company::where('id',$request->company_id)->get()->last();
 
         if($payment_method  == null){
-            return response()->json(['msg' => "Metodo de pago no encontrado, verifica la información e intenta nuevamente"]);
+            return response()->json(['msg' => "Método de pago no encontrado, verifica la información e intenta nuevamente."]);
         }
 
         if($company  == null){
@@ -365,7 +365,7 @@ class SmallBoxUserController extends Controller
      
             $data = [];
             $spents = PurchaseRequest::where('purchase_status_id', '<>', 1)->where(function ($query) {
-                $query->where('approved_status', 'aprobada')->orWhere('approved_status', 'devolucion');
+                $query->where('approved_status', 'aprobada')->orWhere('approved_status', 'devolución');
             })->get();
             foreach($spents as $spent){
                 $company_data = [];
@@ -454,7 +454,7 @@ class SmallBoxUserController extends Controller
             $total_page = 15;
             $data = [];
             $spents = PurchaseRequest::where('purchase_status_id', '<>', 1)->where(function ($query) {
-                $query->where('approved_status', 'aprobada')->orWhere('approved_status', 'devolucion');
+                $query->where('approved_status', 'aprobada')->orWhere('approved_status', 'devolución');
             })->get();
 
             $total_elements = count($spents);

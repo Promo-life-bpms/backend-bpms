@@ -14,6 +14,7 @@ use App\Models\UserCenter;
 use App\Models\UserRole;
 use App\Notifications\BuyersRequestNotification;
 use App\Notifications\CreateRequestNotification;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -298,15 +299,65 @@ class PurchaseRequestController extends Controller
         $user = auth()->user();
 
         $request->validate([
+            'id_purchase' => 'required',
             'total_update' => 'required'
         ]);
 
-        DB::table('purchase_requests')->where('id', $request->id_purchase)->update([
-            'total' => $request->total_update
-        ]);
+        $method = DB::table('purchase_requests')->where('id', $request->id_purchase)->select('payment_method_id')->first();
 
-        return response()->json(['message' => 'Se actualizó con exito la cantidad...', 'status' => 200], 200);
+        if ($method->payment_method_id == 1) {
+            ///OBTENEMOS EL PRIMER DÍA DEL MES Y EL ÚLTIMO///        
+            $primerDiaDelMes = Carbon::now()->startOfMonth();
+            $ultimoDiaDelMes = Carbon::now()->endOfMonth();
+    
+            // Verificar si la fecha actual está dentro del mes
+            if (Carbon::now()->between($primerDiaDelMes, $ultimoDiaDelMes)) {
+                // Si estamos en el mes actual, realizar la suma
+                //presupuestomensual == MonthlyBudget
+                $MonthlyBudget = DB::table('estimation_small_box')
+                    ->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
+                    ->sum('total');
+            }
+    
+            ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
+            //gastosmentuales == monthlyexpenses
+            $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
+                                                            ->where(function ($query) {
+                                                                $query->where(function ($subquery) {
+                                                                    $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                                                                })->orWhere(function ($subquery) {
+                                                                    $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                                                                })->orWhere(function ($subquery) {
+                                                                    $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                                                                });
+                                                            })->sum('total');
+            
+            $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
+            
+            $purchase = DB::table('purchase_requests')->where('id', $request->id_purchase)->first();
+            if ($purchase) {
+                // Obtener el total anterior de la compra
+                $total_anterior = $purchase->total;
+                // Calcular la diferencia para llegar al nuevo total
+                $difference = $request->total_update - $total_anterior;
+
+                if($difference > $AvailableBudget){
+                    return response()->json(['message' => 'No tienes fondos suficientes']);
+                }
+                else{
+                    DB::table('purchase_requests')->where('id', $request->id_purchase)->update([
+                        'total' => $request->total_update
+                    ]);
+                }    
+            }
+        }else{
+            DB::table('purchase_requests')->where('id', $request->id_purchase)->update([
+                'total' => $request->total_update
+            ]);
+        }
+        return response()->json(['message' => 'Se actualizó con éxito la cantidad', 'status' => 200], 200);
     }
+
     public function update(Request $request)
     {
         $user = auth()->user();
@@ -390,7 +441,7 @@ class PurchaseRequestController extends Controller
 
 
         DB::table('purchase_requests')->where('id',$request->id)->update([
-            'approved_status' => 'en aprobacion por administrador',
+            'approved_status' => 'en aprobación por administrador',
             'approved_by' => $user->id,
             'purchase_status_id' => 1
         ]);
@@ -427,12 +478,24 @@ class PurchaseRequestController extends Controller
 
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
-        DB::table('purchase_requests')->where('id',$request->id)->update([
-            'approved_status' => 'aprobada',
-            'admin_approved' => $user->id,
-            'purchase_status_id' => 2
-        ]);
-            
+        if($purchase_request->approved_status == 'aprobada'){
+            return response()->json(['message' => 'Solicitud aprobada']);        
+        }
+        elseif($purchase_request->approved_status == 'en aprobación por administrador'){
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'approved_status' => 'aprobada',
+                'admin_approved' => $user->id,
+                'purchase_status_id' => 2
+            ]);
+        }else{
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'approved_status' => 'aprobada',
+                'admin_approved' => $user->id,
+                'approved_by' => $user->id,
+                'purchase_status_id' => 2
+            ]);
+        }
+
         $role_buyer = Role::where('name', 'compras')->get()->last();
 
         $user_role = UserRole::where('role_id', $role_buyer->id)->get();
@@ -473,7 +536,7 @@ class PurchaseRequestController extends Controller
                 'approved_by' => $user->id,
                 'type_status' => 'cancelado',
             ]);
-        }else if($purchase_request->approved_status == 'en aprobacion por administrador'){
+        }else if($purchase_request->approved_status == 'en aprobación por administrador'){
             DB::table('purchase_requests')->where('id',$request->id)->update([
                 'approved_status' => 'rechazada',
                 'admin_approved' => $user->id,
@@ -521,7 +584,7 @@ class PurchaseRequestController extends Controller
             
             return response()->json(['msg' => "Pedido confirmado"]);
         }else{
-            return response()->json(['msg' => "No se ha podido confirmar el pedido, verfica que haya sido aprobado para compra o no ha sido entregado"]);
+            return response()->json(['msg' => "No se ha podido confirmar el pedido, verifica que haya sido aprobado para compra o no ha sido entregado."]);
         }
         
     }
@@ -560,7 +623,7 @@ class PurchaseRequestController extends Controller
     
             return response()->json(['msg' => "Se ha confirmado que el pedido fue recibido"]);
         }else{
-            return response()->json(['msg' => "Nose ha podido realizar la confirmacion del pedido, verifica que la orden haya sido aprobada y confirmada de entrega"]);
+            return response()->json(['msg' => "No se ha podido realizar la confirmación del pedido, verifica que la orden haya sido aprobada y confirmada de entrega"]);
         }       
     }
 
@@ -580,7 +643,7 @@ class PurchaseRequestController extends Controller
             DB::table('purchase_requests')->where('id',$request->id)->update([
                 'purchase_status_id' => 5,
                 'type_status' => 'en proceso',
-                'approved_status' => 'devolucion'
+                'approved_status' => 'devolución'
             ]);
             
             $users_to_send_mail = User::where('id',$purchase_request->user_id)->get()->last();
@@ -588,7 +651,7 @@ class PurchaseRequestController extends Controller
             $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
                 
             $title = 'Devolución de Pedido';
-            $message = 'Se ha realizado la devolucion del pedido';
+            $message = 'Se ha realizado la devolución del pedido';
 
             try {
                 Notification::route('mail', $users_to_send_mail->email)
@@ -598,9 +661,7 @@ class PurchaseRequestController extends Controller
             }
     
             return response()->json(['msg' => "Devolución en proceso"]);
-        }else{
-            return response()->json(['msg' => "No ha sido posible realizar la devolucion, verifica que la solicitud haya sido aprobada"]);
-        } 
+        }
     }
 
     public function confirmationDevolution(Request $request){
@@ -634,9 +695,7 @@ class PurchaseRequestController extends Controller
             ]);
 
             return response()->json(['msg' => "Devolución realizada"]);
-        }else{
-            return response()->json(['msg' => "No ha sido posible realizar la devolucion, verifica que la solicitud haya sido aprobada"]);
-        } 
+        }
     }
 
     public function cancelationDevolution(Request $request){
@@ -668,9 +727,7 @@ class PurchaseRequestController extends Controller
             ]);
             
             return response()->json(['msg' => "Devolución rechazada"]);
-        }else{
-            return response()->json(['msg' => "No ha sido posible realizar la devolución, verifica que la solicitud haya sido aprobada"]);
-        } 
+        }
     }
 
     public function createCancellation(Request $request)
@@ -703,15 +760,14 @@ class PurchaseRequestController extends Controller
             } catch (\Exception $e) {
                 return $e;
             }
-            return response()->json(['msg' => "Cancelacion realizada"]);
+            return response()->json(['msg' => "Cancelación realizada"]);
         }else{
-            return response()->json(['msg' => "No es posible realizar una cancelacion una vez recibas el producto, se debe realizar una devolucion"]);
+            return response()->json(['msg' => "No es posible realizar una cancelación una vez que recibas el producto; se debe realizar una devolución"]);
         }
     }
     
     public function showPage($page)
     {
-        
         $spent = PurchaseRequest::where('id',$page)->get()->last();
 
         $data = [];
@@ -827,10 +883,56 @@ class PurchaseRequestController extends Controller
             'payment_method_id' => 'required',
         ]);
 
-        DB::table('purchase_requests')->where('id',$request->id)->update([
-            'payment_method_id' => $request->payment_method_id,
-        ]);
-
+        ///VERIFICAMOS SI EL METODO DE PAGO QUE SE USUARA ES EFECTIVO///
+        if($request->payment_method_id == 1){
+            $pago = DB::table('purchase_requests')->where('id', $request->id)->select('total')->first();
+        
+            ///OBTENEMOS EL PRIMER DÍA DEL MES Y EL ÚLTIMO///        
+            $primerDiaDelMes = Carbon::now()->startOfMonth();
+            $ultimoDiaDelMes = Carbon::now()->endOfMonth();
+    
+            // Verificar si la fecha actual está dentro del mes
+            if (Carbon::now()->between($primerDiaDelMes, $ultimoDiaDelMes)) {
+                // Si estamos en el mes actual, realizar la suma
+                //presupuestomensual == MonthlyBudget
+                $MonthlyBudget = DB::table('estimation_small_box')
+                    ->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
+                    ->sum('total');
+            }
+    
+            ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
+            //gastosmentuales == monthlyexpenses
+            $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
+                                                            ->where(function ($query) {
+                                                                $query->where(function ($subquery) {
+                                                                    $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                                                                })->orWhere(function ($subquery) {
+                                                                    $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                                                                })->orWhere(function ($subquery) {
+                                                                    $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                                                                });
+                                                            })->sum('total');
+            
+            $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
+    
+            if ($pago) { // Verificamos si se encontró algún resultado
+                if($pago->total > $AvailableBudget){
+                    return response()->json(['message' => 'No tienes fondos suficientes']);
+                }
+                else{
+                    DB::table('purchase_requests')->where('id',$request->id)->update([
+                        'payment_method_id' => $request->payment_method_id,
+                    ]);
+                }
+    
+            } else {
+                return 'No se encontró el pago correspondiente'; 
+            }
+        }else{
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'payment_method_id' => $request->payment_method_id,
+            ]);
+        }
         PaymentMethodInformation::create([
             'id_user' => $user->id,
             'id_pursache_request' => $request->id,

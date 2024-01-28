@@ -155,10 +155,10 @@ class EstimationSmallBoxController extends Controller
         ]);
 
         if($presupuesto){
-            return response()->json(['message' => 'exito', 'status' => 200], 200);
+            return response()->json(['message' => 'Se agregó con éxito el presupuesto', 'status' => 200], 200);
         }
         else
-        return response()->json(['message' => 'error', 'status' => 400], 400);
+        return response()->json(['message' => 'Error. No se agregó el presupuesto', 'status' => 400], 400);
     }
 
     public function BudgetReturn(Request $request)
@@ -206,7 +206,7 @@ class EstimationSmallBoxController extends Controller
         ]);    
 
         if($returnmoney){
-            return response()->json(['message' => 'Se regreso el dinero', 'status' => 200], 200);
+            return response()->json(['message' => 'Se regresó el dinero', 'status' => 200], 200);
         }
         else{
             return response()->json(['message' => 'Error,', 'status' => 400], 400);
