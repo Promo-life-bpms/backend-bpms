@@ -837,7 +837,7 @@ class PurchaseRequestController extends Controller
             }
 
             $returnmoneyexcess = DB::table('exchange_returns')->where('purchase_id', $page)->select('total_return', 'status', 'confirmation_datetime', 
-                                                                                        'confirmation_user_id', 'description','file', 
+                                                                                        'confirmation_user_id', 'description','file_exchange_returns', 
                                                                                         'return_user_id','created_at')->get()->toArray();
             
             $returnmoney = [];
