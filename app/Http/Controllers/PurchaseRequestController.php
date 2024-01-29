@@ -127,7 +127,7 @@ class PurchaseRequestController extends Controller
           }
   
           $data = [];
-          $spents = PurchaseRequest::where('approved_status', '<>','pendiente')->where('approved_status', '<>','cancelada')->get();
+          $spents = PurchaseRequest::where('approved_status', '<>','cancelada')->get();
           
           foreach($spents as $spent){
               $company_data = [];
