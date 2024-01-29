@@ -16,7 +16,7 @@ class Eventuales extends Model
         'purchase_id'
     ]);
 
-    public function user()
+    public function purchase()
     {
         return $this->belongsTo(PurchaseRequest::class, 'purchase_id');
     }

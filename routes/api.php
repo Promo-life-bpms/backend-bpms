@@ -11,6 +11,7 @@ use App\Http\Controllers\CenterController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\EstimationSmallBoxController;
 use App\Http\Controllers\EventualesController;
+use App\Http\Controllers\ExchangeReturnController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
@@ -208,6 +209,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/delete',[TemporyCompanyController::class, 'delete'])->name('deletecompany');
     Route::get('caja-chica/company', [TemporyCompanyController::class,'index'])->name('infocompany');
     Route::post('caja-chica/company/restore', [TemporyCompanyController::class, 'restore'])->name('name');
-    
+
+    ///CAJA CHICA REGRESAR DINERO QUE SOBRO DEL EFECTIVO///
+    Route::post('caja-chica/return/excess/money', [ExchangeReturnController::class, 'ReturnExcessMoney']);
+    Route::post('caja-chica/return/excess/money/confirmation', [ExchangeReturnController::class, 'ConfirmationReturnMoney']);
+
 });
 

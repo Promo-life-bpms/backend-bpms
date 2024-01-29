@@ -117,63 +117,62 @@ class PurchaseRequestController extends Controller
       //Solicitudes de Administrador
       public function showAdministrador()
       {
-          $user = auth()->user();
+        $user = auth()->user();
+        
+        if($user == null){
+            return response()->json([
+                'msg' => "Sesión de usuario expirada"
+            ]);
+        }
   
+        $data = [];
+        $spents = PurchaseRequest::where('approved_status', '<>','cancelada')->get();
           
-          if($user == null){
-              return response()->json([
-                  'msg' => "Sesión de usuario expirada"
-              ]);
-          }
+        foreach($spents as $spent){
+            $company_data = [];
+            $spent_data = [];
+            $center_data = [];
+            $status_data = [];
+            array_push($company_data ,(object) [
+                'company_id' =>  $spent->company_id,
+                'company_name' =>  $spent->company->name
+            ]);
   
-          $data = [];
-          $spents = PurchaseRequest::where('approved_status', '<>','cancelada')->get();
-          
-          foreach($spents as $spent){
-              $company_data = [];
-              $spent_data = [];
-              $center_data = [];
-              $status_data = [];
-              array_push($company_data ,(object) [
-                  'company_id' =>  $spent->company_id,
-                  'company_name' =>  $spent->company->name
-              ]);
-  
-              array_push($spent_data ,(object) [
-                  'spent_id' =>  $spent->spent_id,
-                  'spent_name' =>  $spent->spent->concept,
-                  'spent_outgo_type' =>  $spent->spent->outgo_type,
-                  'spent_expense_type' =>  $spent->spent->expense_type,
-                  'spent_product_type' =>  $spent->spent->product_type,
-              ]);
-              array_push($center_data ,(object) [
-                  'center_id' => $spent->center_id,
-                  'center_name' =>  $spent->center->name,
-              ]);
-  
-              array_push($status_data ,(object) [
-                  'id' => $spent->purchase_status->id,
-                  'name' =>  $spent->purchase_status->name,
-                  'table_name' =>  $spent->purchase_status->table_name,
-                  'type' =>  $spent->purchase_status->type,
-                  'status' =>  $spent->purchase_status->status,
-              ]);
-  
-              $approved_by = '';
-            
-              if($spent->approved_by != null || $spent->approved_by != '' ){
-                  $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
-  
-                  $approved_by =  $user_approved->name;
-              }        
-              
-              $admin_approved = '';
-  
-              if($spent->admin_approved != null || $spent->admin_approved != '' ){
-                $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
+            array_push($spent_data ,(object) [
+                'spent_id' =>  $spent->spent_id,
+                'spent_name' =>  $spent->spent->concept,
+                'spent_outgo_type' =>  $spent->spent->outgo_type,
+                'spent_expense_type' =>  $spent->spent->expense_type,
+                'spent_product_type' =>  $spent->spent->product_type,
+            ]);
 
+            array_push($center_data ,(object) [
+                'center_id' => $spent->center_id,
+                'center_name' =>  $spent->center->name,
+            ]);
+  
+            array_push($status_data ,(object) [
+                'id' => $spent->purchase_status->id,
+                'name' =>  $spent->purchase_status->name,
+                'table_name' =>  $spent->purchase_status->table_name,
+                'type' =>  $spent->purchase_status->type,
+                'status' =>  $spent->purchase_status->status,
+            ]);
+  
+            $approved_by = '';
+            
+            if($spent->approved_by != null || $spent->approved_by != '' ){
+                $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
+                $approved_by =  $user_approved->name;
+            }        
+              
+            $admin_approved = '';
+  
+            if($spent->admin_approved != null || $spent->admin_approved != '' ){
+                $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
                 $admin_approved =  $admin_app->name;
             } 
+
             array_push($data, (object)[
                 'id' => $spent->id,
                 'user_id' => $spent->user_id,
@@ -839,7 +838,24 @@ class PurchaseRequestController extends Controller
                     $event[] = $item;
                 }
             }
+
+            $returnmoneyexcess = DB::table('exchange_returns')->where('purchase_id', $page)->select('total_return', 'status', 'confirmation_datetime', 
+                                                                                        'confirmation_user_id', 'description','file', 
+                                                                                        'return_user_id','created_at')->get()->toArray();
             
+            $returnmoney = [];
+
+            foreach ($returnmoneyexcess as $returnmoney){
+                $returnmoney->created_at = date('d-m-Y', strtotime($returnmoney->created_at));
+                $returnmoney->confirmation_datetime = date('d-m-Y H:i:s', strtotime($returnmoney->confirmation_datetime));
+
+                $user = DB::table('users')->where('id', $returnmoney->confirmation_user_id)->select('name')->first();
+                $returnmoney->confirmation_user_id = $user ? $user->name : null;
+
+                $username = DB::table('users')->where('id', $returnmoney->return_user_id)->select('name')->first();
+                $returnmoney->return_user_id = $username ? $username->name : null;
+            }
+                        
             array_push($data, (object)[
                 'id' => $spent->id,
                 'user_id' => $spent->user_id,
@@ -861,7 +877,8 @@ class PurchaseRequestController extends Controller
                 'approved_by' => $approved_by,
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
-                'event' => $event
+                'event' => $event,
+                'returnmoney' => $returnmoney,
             ]);
         }
             
@@ -870,74 +887,82 @@ class PurchaseRequestController extends Controller
     
     public function updatePaymentMethod(Request $request)
     {
-        $user = auth()->user();
-
-        if($user == null){
-            return response()->json([
-                'msg' => "Sesión de usuario expirada"
-            ]);
-        }
-
-        $request->validate([
-            'id' => 'required',
-            'payment_method_id' => 'required',
-        ]);
-
-        ///VERIFICAMOS SI EL METODO DE PAGO QUE SE USUARA ES EFECTIVO///
-        if($request->payment_method_id == 1){
-            $pago = DB::table('purchase_requests')->where('id', $request->id)->select('total')->first();
-        
-            ///OBTENEMOS EL PRIMER DÍA DEL MES Y EL ÚLTIMO///        
-            $primerDiaDelMes = Carbon::now()->startOfMonth();
-            $ultimoDiaDelMes = Carbon::now()->endOfMonth();
-    
-            // Verificar si la fecha actual está dentro del mes
-            if (Carbon::now()->between($primerDiaDelMes, $ultimoDiaDelMes)) {
-                // Si estamos en el mes actual, realizar la suma
-                //presupuestomensual == MonthlyBudget
-                $MonthlyBudget = DB::table('estimation_small_box')
-                    ->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
-                    ->sum('total');
-            }
-    
-            ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
-            //gastosmentuales == monthlyexpenses
-            $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
-                                                            ->where(function ($query) {
-                                                                $query->where(function ($subquery) {
-                                                                    $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                                })->orWhere(function ($subquery) {
-                                                                    $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                                })->orWhere(function ($subquery) {
-                                                                    $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                                });
-                                                            })->sum('total');
+        try {
+            $user = auth()->user();
             
-            $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
+            if($user == null){
+                return response()->json([
+                    'msg' => "Sesión de usuario expirada"
+                ]);
+            }
+            
+            $request->validate([
+                'id' => 'required',
+                'payment_method_id' => 'required',
+            ]);
+
+            ///VERIFICAMOS SI EL METODO DE PAGO QUE SE USUARA ES EFECTIVO///
+            if($request->payment_method_id == 1){
+                try {
+                    $pago = DB::table('purchase_requests')->where('id', $request->id)->select('total')->first();
     
-            if ($pago) { // Verificamos si se encontró algún resultado
-                if($pago->total > $AvailableBudget){
-                    return response()->json(['message' => 'No tienes fondos suficientes']);
+                    ///OBTENEMOS EL PRIMER DÍA DEL MES Y EL ÚLTIMO///        
+                    $primerDiaDelMes = Carbon::now()->startOfMonth();
+                    $ultimoDiaDelMes = Carbon::now()->endOfMonth();
+    
+
+                    // Verificar si la fecha actual está dentro del mes
+                    if (Carbon::now()->between($primerDiaDelMes, $ultimoDiaDelMes)) {
+                        // Si estamos en el mes actual, realizar la suma
+                        //presupuestomensual == MonthlyBudget
+                        $MonthlyBudget = DB::table('estimation_small_box')
+                                        ->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->sum('total');
+                    }
+                    
+                    ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
+                    //gastosmentuales == monthlyexpenses
+
+                    $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
+                                                                    ->where(function ($query) {
+                                                                        $query->where(function ($subquery) {
+                                                                            $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                                                                        })->orWhere(function ($subquery) {
+                                                                            $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                                                                        })->orWhere(function ($subquery) {
+                                                                            $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                                                                        });
+                                                                    })->sum('total');
+        
+                    $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
+
+                    if ($pago) { // Verificamos si se encontró algún resultado
+                        if($pago->total > $AvailableBudget){
+                            return response()->json(['message' => 'No tienes fondos suficientes']);
+                        }
+                        else{
+                            DB::table('purchase_requests')->where('id',$request->id)->update([
+                                'payment_method_id' => $request->payment_method_id,
+                            ]);
+                        }
+                    } else {
+                        return 'No se encontró el pago correspondiente'; 
+                    }
+                } catch (\Exception $e) {
+                    return response()->json(['message' => 'Error al obtener el pago: ' . $e->getMessage()], 500);
                 }
-                else{
+                }else{
                     DB::table('purchase_requests')->where('id',$request->id)->update([
                         'payment_method_id' => $request->payment_method_id,
                     ]);
                 }
-    
-            } else {
-                return 'No se encontró el pago correspondiente'; 
+                
+                PaymentMethodInformation::create([
+                    'id_user' => $user->id,
+                    'id_pursache_request' => $request->id,
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Error inesperado: ' . $e->getMessage()], 500);
             }
-        }else{
-            DB::table('purchase_requests')->where('id',$request->id)->update([
-                'payment_method_id' => $request->payment_method_id,
-            ]);
+            return response()->json(['msg' => "Método de pago actualizado correctamente"]);
         }
-        PaymentMethodInformation::create([
-            'id_user' => $user->id,
-            'id_pursache_request' => $request->id,
-        ]);
-
-        return response()->json(['msg' => "Método de pago actualizado correctamente"]);
-    }
 }
