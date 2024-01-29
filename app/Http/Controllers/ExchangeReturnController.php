@@ -44,12 +44,12 @@ class ExchangeReturnController extends Controller
         $user = auth()->user();
 
         $this->validate($request,[
-            'id' => 'required',
+            'purchase_id' => 'required',
         ]);
 
         $hora = Carbon::now();
 
-        DB::table('exchange_returns')->where('id', $request->id)->update([
+        DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->update([
             'status' => 'Confirmado',
             'confirmation_datetime' => $hora,
             'confirmation_user_id' => $user->id,
