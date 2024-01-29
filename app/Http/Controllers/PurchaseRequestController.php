@@ -836,7 +836,7 @@ class PurchaseRequestController extends Controller
                 }
             }
 
-            $returnmoneyexcess = DB::table('exchange_returns')->where('purchase_id', $page)->select('total_return', 'status', 'confirmation_datetime', 
+            $returnmoneyexcess = DB::table('exchange_returns')->where('purchase_id', $page)->select('id','total_return', 'status', 'confirmation_datetime', 
                                                                                         'confirmation_user_id', 'description','file_exchange_returns', 
                                                                                         'return_user_id','created_at')->get()->toArray();
             
@@ -848,7 +848,7 @@ class PurchaseRequestController extends Controller
                 if($returnmoney->confirmation_datetime != null){
                     $returnmoney->confirmation_datetime = date('d-m-Y H:i:s', strtotime($returnmoney->confirmation_datetime));
                 }
-                
+
                 $user = DB::table('users')->where('id', $returnmoney->confirmation_user_id)->select('name')->first();
                 $returnmoney->confirmation_user_id = $user ? $user->name : null;
 
