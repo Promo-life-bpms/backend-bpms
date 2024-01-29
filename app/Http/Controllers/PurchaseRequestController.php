@@ -32,8 +32,7 @@ class PurchaseRequestController extends Controller
         
         if($user == null){
             return response()->json([
-                'msg' => "Sesión de usuario expirada"
-            ]);
+                'message' => "Sesión de usuario expirada"],400);
         }
 
         $data = [];
@@ -121,8 +120,8 @@ class PurchaseRequestController extends Controller
         
         if($user == null){
             return response()->json([
-                'msg' => "Sesión de usuario expirada"
-            ]);
+                'message' => "Sesión de usuario expirada"
+            ],400);
         }
   
         $data = [];
@@ -208,8 +207,8 @@ class PurchaseRequestController extends Controller
 
         if($user == null){
             return response()->json([
-                'msg' => "Sesión de usuario expirada"
-            ]);
+                'message' => "Sesión de usuario expirada"
+            ],400);
         }
         $request->validate([
             'company_id' => 'required',
@@ -290,7 +289,7 @@ class PurchaseRequestController extends Controller
         
         }
 
-        return response()->json(['msg' => "Registro guardado satisfactoriamente"]);
+        return response()->json(['message' => "Registro guardado satisfactoriamente"],200);
     }
 
     public function updatemoney(Request $request)
@@ -341,7 +340,7 @@ class PurchaseRequestController extends Controller
                 $difference = $request->total_update - $total_anterior;
 
                 if($difference > $AvailableBudget){
-                    return response()->json(['message' => 'No tienes fondos suficientes']);
+                    return response()->json(['message' => 'No tienes fondos suficientes'], 400);
                 }
                 else{
                     DB::table('purchase_requests')->where('id', $request->id_purchase)->update([
@@ -354,7 +353,7 @@ class PurchaseRequestController extends Controller
                 'total' => $request->total_update
             ]);
         }
-        return response()->json(['message' => 'Se actualizó con éxito la cantidad', 'status' => 200], 200);
+        return response()->json(['message' => 'Se actualizó con éxito la cantidad'], 200);
     }
 
     public function update(Request $request)
@@ -363,8 +362,8 @@ class PurchaseRequestController extends Controller
 
         if($user == null){
             return response()->json([
-                'msg' => "Sesión de usuario expirada"
-            ]);
+                'message' => "Sesión de usuario expirada"
+            ], 400);
         }
 
         $request->validate([
@@ -404,7 +403,7 @@ class PurchaseRequestController extends Controller
             'approved_by' => $user->id
         ]);
 
-        return response()->json(['msg' => "Registro actualizado satisfactoriamente"]);
+        return response()->json(['message' => "Registro actualizado satisfactoriamente"], 200);
     }
 
     public function delete(Request $request)
@@ -416,7 +415,7 @@ class PurchaseRequestController extends Controller
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
         if( $purchase_request == null){
-            return response()->json(['msg' => "Producto no encontrado"]);
+            return response()->json(['message' => "Producto no encontrado"], 400);
         }
 
            
@@ -424,7 +423,7 @@ class PurchaseRequestController extends Controller
 
         $purchase_request->delete();
         
-        return response()->json(['msg' => "Registro eliminado satisfactoriamente"]);
+        return response()->json(['message' => "Registro eliminado satisfactoriamente"], 200);
         
     }
 
@@ -464,7 +463,7 @@ class PurchaseRequestController extends Controller
             }
         }
 
-        return response()->json(['msg' => "Solicitud aprobada satisfactoriamente"]);
+        return response()->json(['message' => "Solicitud aprobada satisfactoriamente"], 200);
     }
 
     public function approvedByAdmin(Request $request)
@@ -514,7 +513,7 @@ class PurchaseRequestController extends Controller
             } */
         }
 
-        return response()->json(['msg' => "Solicitud aprobada satisfactoriamente"]);
+        return response()->json(['message' => "Solicitud aprobada satisfactoriamente"], 200);
        
     }
 
@@ -559,7 +558,7 @@ class PurchaseRequestController extends Controller
             return $e;
         }
     
-        return response()->json(['msg' => "Solicitud rechazada satisfactoriamente"]);
+        return response()->json(['message' => "Solicitud rechazada satisfactoriamente"], 200);
         
     }
 
@@ -572,7 +571,7 @@ class PurchaseRequestController extends Controller
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
         if( $purchase_request == null ){
-            return response()->json(['msg' => "Producto no encontrado"]);
+            return response()->json(['message' => "Producto no encontrado"], 400);
         }
 
         if($purchase_request->purchase_status_id == 2){
@@ -581,13 +580,11 @@ class PurchaseRequestController extends Controller
                 'purchase_status_id' => 3,
             ]);
             
-            return response()->json(['msg' => "Pedido confirmado"]);
+            return response()->json(['message' => "Pedido confirmado"], 200);
         }else{
-            return response()->json(['msg' => "No se ha podido confirmar el pedido, verifica que haya sido aprobado para compra o no ha sido entregado."]);
+            return response()->json(['message' => "No se ha podido confirmar el pedido, verifica que haya sido aprobado para compra o no ha sido entregado."], 400);
         }
-        
     }
-
 
     public function confirmReceived(Request $request)
     {
@@ -598,7 +595,7 @@ class PurchaseRequestController extends Controller
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
         if($purchase_request == null){
-            return response()->json(['msg' => "Orden no encontrada"]);
+            return response()->json(['message' => "Orden no encontrada"], 400);
         }
 
         if($purchase_request->purchase_status_id == 3 &&  $purchase_request->approved_status == 'aprobada'){
@@ -620,9 +617,9 @@ class PurchaseRequestController extends Controller
                 return $e;
             }
     
-            return response()->json(['msg' => "Se ha confirmado que el pedido fue recibido"]);
+            return response()->json(['message' => "Se ha confirmado que el pedido fue recibido"], 200);
         }else{
-            return response()->json(['msg' => "No se ha podido realizar la confirmación del pedido, verifica que la orden haya sido aprobada y confirmada de entrega"]);
+            return response()->json(['message' => "No se ha podido realizar la confirmación del pedido, verifica que la orden haya sido aprobada y confirmada de entrega"], 400);
         }       
     }
 
@@ -635,7 +632,7 @@ class PurchaseRequestController extends Controller
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
         if( $purchase_request == null){
-            return response()->json(['msg' => "Orden no encontrada"]);
+            return response()->json(['message' => "Orden no encontrada"], 400);
         }
 
         if($purchase_request->purchase_status_id == 3 || $purchase_request->purchase_status_id == 4){
@@ -659,7 +656,7 @@ class PurchaseRequestController extends Controller
                 return $e;
             }
     
-            return response()->json(['msg' => "Devolución en proceso"]);
+            return response()->json(['message' => "Devolución en proceso"], 200);
         }
     }
 
@@ -674,7 +671,7 @@ class PurchaseRequestController extends Controller
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
         if( $purchase_request == null){
-            return response()->json(['msg' => "Orden no encontrada"]);
+            return response()->json(['message' => "Orden no encontrada"], 400);
         }
 
         if($purchase_request->purchase_status_id == 5){
@@ -693,7 +690,7 @@ class PurchaseRequestController extends Controller
                 'id_purchase' => $request->id, 
             ]);
 
-            return response()->json(['msg' => "Devolución realizada"]);
+            return response()->json(['message' => "Devolución realizada"], 200);
         }
     }
 
@@ -707,7 +704,7 @@ class PurchaseRequestController extends Controller
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
         if( $purchase_request == null){
-            return response()->json(['msg' => "Orden no encontrada"]);
+            return response()->json(['message' => "Orden no encontrada"], 400);
         }
 
         if($purchase_request->purchase_status_id == 5){
@@ -725,7 +722,7 @@ class PurchaseRequestController extends Controller
                 'id_purchase' => $request->id, 
             ]);
             
-            return response()->json(['msg' => "Devolución rechazada"]);
+            return response()->json(['message' => "Devolución rechazada"], 200);
         }
     }
 
@@ -738,7 +735,7 @@ class PurchaseRequestController extends Controller
         $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
 
         if( $purchase_request == null){
-            return response()->json(['msg' => "Producto no encontrado"]);
+            return response()->json(['message' => "Producto no encontrado"], 400);
         }
         
         if($purchase_request->purchase_status_id == 2){
@@ -759,9 +756,9 @@ class PurchaseRequestController extends Controller
             } catch (\Exception $e) {
                 return $e;
             }
-            return response()->json(['msg' => "Cancelación realizada"]);
+            return response()->json(['message' => "Cancelación realizada"], 200);
         }else{
-            return response()->json(['msg' => "No es posible realizar una cancelación una vez que recibas el producto; se debe realizar una devolución"]);
+            return response()->json(['message' => "No es posible realizar una cancelación una vez que recibas el producto; se debe realizar una devolución"], 400);
         }
     }
     

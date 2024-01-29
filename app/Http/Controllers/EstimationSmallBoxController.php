@@ -72,7 +72,7 @@ class EstimationSmallBoxController extends Controller
             $AvailableBudget += $devolution;
         }
 
-        return response()->json(['Information' => $Information, 'MonthlyExpenses' => $MonthlyExpenses, 'AvailableBudget' => $AvailableBudget]);   
+        return response()->json(['Information' => $Information, 'MonthlyExpenses' => $MonthlyExpenses, 'AvailableBudget' => $AvailableBudget],200);   
     }
 
 
@@ -89,7 +89,7 @@ class EstimationSmallBoxController extends Controller
             $informtaion->id_user = $user ? $user->name : null;
         }
 
-        return response()->json(['history' => $history]);
+        return response()->json(['history' => $history],200);
     }
 
     ////////////////////////////////////////////////////////HISTORIAL DE LA DEVOLUCION DE UN PRODUCTO///////////////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ class EstimationSmallBoxController extends Controller
             $user = DB::table('users')->where('id', $information->id_user)->select('name')->first();
            $information->id_user = $user ? $user->name : null;
         }
-        return response()->json(['DevolutionProduct' => $DevolutionProduct]);
+        return response()->json(['DevolutionProduct' => $DevolutionProduct],200);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,7 +138,7 @@ class EstimationSmallBoxController extends Controller
             }
         }
         
-        return response()->json(['MonthlyExpense' => $MonthlyExpense]);
+        return response()->json(['MonthlyExpense' => $MonthlyExpense],200);
     }
 
     public function create(Request $request)

@@ -52,7 +52,7 @@ class UserCenterController extends Controller
         $create_user_center->center_id = $request->center_id;
         $create_user_center->save();
 
-        return response()->json(['msg' => "Registro guardado satisfactoriamente"]);
+        return response()->json(['message' => "Registro guardado satisfactoriamente"], 200);
     }
 
     public function delete(Request $request)
@@ -65,6 +65,6 @@ class UserCenterController extends Controller
 
         DB::table('user_has_center')->where('id',$request->id)->where('user_id',$request->user_id)->where('center_id',$request->center_id)->delete();
 
-        return response()->json(['msg' => "Registro eliminado satisfactoriamente"]);
+        return response()->json(['message' => "Registro eliminado satisfactoriamente"], 200);
     }
 }

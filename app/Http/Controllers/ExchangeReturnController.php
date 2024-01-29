@@ -27,7 +27,7 @@ class ExchangeReturnController extends Controller
             $fileNameToStore = time(). $filename . '.' . $extension;
             $path= $request->file('file')->move('storage/smallbox/files/', $fileNameToStore);
         }
-        
+
         ExchangeReturn::create([
             'total_return' => $request->total_return,
             'description' => $request->description,
@@ -36,7 +36,7 @@ class ExchangeReturnController extends Controller
             'return_user_id' => $user->id,
         ]);
 
-        return response()->json(['message' => 'Comenzaste el proceso de regresar el sobrante']);
+        return response()->json(['message' => 'Comenzaste el proceso de regresar el sobrante'], 200);
     }
 
     public function ConfirmationReturnMoney(Request $request)
@@ -55,6 +55,6 @@ class ExchangeReturnController extends Controller
             'confirmation_user_id' => $user->id,
         ]);
 
-        return response()->json(['message' => 'Se confirmo el regreso del dinero']);
+        return response()->json(['message' => 'Se confirmo el regreso del dinero'], 200);
     }
 }

@@ -99,7 +99,7 @@ class SmallBoxUserController extends Controller
             );
 
         }else{
-            return response()->json(['Usuario no encontrado']);
+            return response()->json(['Usuario no encontrado'],400);
         }   
     }
 
@@ -220,7 +220,7 @@ class SmallBoxUserController extends Controller
             );
 
         }else{
-            return response()->json(['Usuario no encontrado']);
+            return response()->json(['Usuario no encontrado'],400);
         }
     }
 
@@ -249,6 +249,8 @@ class SmallBoxUserController extends Controller
             $create_request->total = $request->user_id;
             $create_request->save();
         }
+
+        return response()->json(['message' => 'Se creo con éxito la solicitud'],200);
       
     }
 
@@ -270,11 +272,11 @@ class SmallBoxUserController extends Controller
         $company = Company::where('id',$request->company_id)->get()->last();
 
         if($payment_method  == null){
-            return response()->json(['msg' => "Método de pago no encontrado, verifica la información e intenta nuevamente."]);
+            return response()->json(['message' => "Método de pago no encontrado, verifica la información e intenta nuevamente."],400);
         }
 
         if($company  == null){
-            return response()->json(['msg' => "Empresa no encontrada, verifica la información e intenta nuevamente"]);
+            return response()->json(['message' => "Empresa no encontrada, verifica la información e intenta nuevamente"],400);
         }
 
         array_push($filter_data, (object)[
@@ -442,7 +444,7 @@ class SmallBoxUserController extends Controller
             );
 
         }else{
-            return response()->json(['Usuario no encontrado']);
+            return response()->json([ 'message' => 'Usuario no encontrado'],400);
         }
     }
 
@@ -565,7 +567,7 @@ class SmallBoxUserController extends Controller
             );
 
         }else{
-            return response()->json(['Usuario no encontrado']);
+            return response()->json(['message' => 'Usuario no encontrado'],400);
         }
 
     }

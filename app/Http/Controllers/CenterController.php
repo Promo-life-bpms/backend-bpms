@@ -12,7 +12,7 @@ class CenterController extends Controller
     {       
         $spents = Center::where('status',1)->get();
 
-        return $spents;
+        return response()->json(['spents' => $spents], 200);
     }
 
     public function store(Request $request)
@@ -27,7 +27,7 @@ class CenterController extends Controller
         $create_spent->status = 1;
         $create_spent->save();
 
-        return response()->json(['msg' => "Registro guardado satisfactoriamente"]);
+        return response()->json(['message' => "Registro guardado satisfactoriamente"],200);
     }
 
     public function update(Request $request)
@@ -42,7 +42,7 @@ class CenterController extends Controller
             'description' => $request->description,
         ]);
 
-        return response()->json(['msg' => "Registro actualizado satisfactoriamente"]);
+        return response()->json(['message' => "Registro actualizado satisfactoriamente"],200);
     }
 
     public function delete(Request $request)
@@ -55,6 +55,6 @@ class CenterController extends Controller
             'status' => 0,
         ]);
 
-        return response()->json(['msg' => "Registro eliminado satisfactoriamente"]);
+        return response()->json(['message' => "Registro eliminado satisfactoriamente"],200);
     }
 }

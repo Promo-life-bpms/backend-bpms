@@ -33,7 +33,7 @@ class SpentController extends Controller
         $create_spent->status = 1;
         $create_spent->save();
 
-        return response()->json(['msg' => "Registro guardado satisfactoriamente"]);
+        return response()->json(['message' => "Registro guardado satisfactoriamente"],200);
     }
 
     public function update(Request $request)
@@ -53,7 +53,7 @@ class SpentController extends Controller
             'expense_type' => $request->expense_type,
         ]);
 
-        return response()->json(['msg' => "Registro actualizado satisfactoriamente"]);
+        return response()->json(['message' => "Registro actualizado satisfactoriamente"], 200);
     }
 
     public function delete(Request $request)
@@ -66,6 +66,6 @@ class SpentController extends Controller
             'status' => 0,
         ]);
 
-        return response()->json(['msg' => "Registro eliminado satisfactoriamente"]);
+        return response()->json(['message' => "Registro eliminado satisfactoriamente"], 200);
     }
 }

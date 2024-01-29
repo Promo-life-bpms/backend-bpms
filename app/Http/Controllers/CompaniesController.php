@@ -26,7 +26,7 @@ class CompaniesController extends Controller
         $create_company->description = $request->description;
         $create_company->save();
 
-        return response()->json(['msg' => "Registro guardado satisfactoriamente"]);
+        return response()->json(['message' => "Registro guardado satisfactoriamente"],200);
     }
 
     public function update(Request $request)
@@ -41,7 +41,7 @@ class CompaniesController extends Controller
             'description' => $request->description
         ]);
 
-        return response()->json(['msg' => "Registro actualizado satisfactoriamente"]);
+        return response()->json(['message' => "Registro actualizado satisfactoriamente"],200);
     }
 
     public function delete(Request $request)
@@ -52,6 +52,6 @@ class CompaniesController extends Controller
 
         DB::table('companies')->where('id',$request->id)->delete();
 
-        return response()->json(['msg' => "Registro eliminado satisfactoriamente"]);
+        return response()->json(['message' => "Registro eliminado satisfactoriamente"], 200);
     }
 }

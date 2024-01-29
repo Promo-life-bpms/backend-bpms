@@ -18,7 +18,7 @@ class TemporyCompanyController extends Controller
             $company->created_at = date('d-m-Y', strtotime($company->created_at));
         }
 
-        return response()->json(['companies' => $companies]);
+        return response()->json(['companies' => $companies],200);
 
     }
 
