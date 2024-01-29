@@ -227,6 +227,7 @@ class DeliveryRouteController extends Controller
                 'type_of_chofer' => null,
                 'status' => 'Pendiente'
             ];
+            //return $dataSale;
             // Agendado en ruta de entrega (Material maquilado):
             //Agendado en ruta de entrega (Material maquilado):
 
@@ -246,6 +247,7 @@ class DeliveryRouteController extends Controller
                         'provider' => $newProduct->provider,
                         'destinity_address' => $newProduct->destiny_address,
                         'confirmation_sheet' => $newProduct->confirmation_sheet,
+                        'buyer_id' => auth()->user()->id,
                     ]);
                 }
                 $type_of_product = $request->type_of_product;
