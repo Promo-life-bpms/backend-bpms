@@ -891,8 +891,8 @@ class PurchaseRequestController extends Controller
     
         if($user == null){
             return response()->json([
-                'msg' => "Sesión de usuario expirada"
-            ]);
+                'message' => "Sesión de usuario expirada"
+            ],400);
         }
             
         $request->validate([
@@ -933,9 +933,9 @@ class PurchaseRequestController extends Controller
         
             $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
 
-            if ($pago) { // Verificamos si se encontró algún resultado
+            if ($pago) {
                 if($pago->total > $AvailableBudget){
-                    return response()->json(['message' => 'No tienes fondos suficientes']);
+                    return response()->json(['message' => 'No tienes fondos suficientes'], 400);
                 }
                 else{
                     DB::table('purchase_requests')->where('id',$request->id)->update([
@@ -943,7 +943,7 @@ class PurchaseRequestController extends Controller
                     ]);
                 }
             } else {
-                return 'No se encontró el pago correspondiente'; 
+                return response()->json(['message' =>'No se encontró el pago correspondiente'], 400); 
             }
         }else{
             DB::table('purchase_requests')->where('id',$request->id)->update([
@@ -955,6 +955,6 @@ class PurchaseRequestController extends Controller
             'id_user' => $user->id,
             'id_pursache_request' => $request->id,
         ]);
-        return response()->json(['msg' => "Método de pago actualizado correctamente"]);
+        return response()->json(['message' => "Método de pago actualizado correctamente"],200);
     }
 }
