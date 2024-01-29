@@ -844,8 +844,11 @@ class PurchaseRequestController extends Controller
 
             foreach ($returnmoneyexcess as $returnmoney){
                 $returnmoney->created_at = date('d-m-Y H:i:s', strtotime($returnmoney->created_at));
-                $returnmoney->confirmation_datetime = date('d-m-Y H:i:s', strtotime($returnmoney->confirmation_datetime));
 
+                if($returnmoney->confirmation_datetime != null){
+                    $returnmoney->confirmation_datetime = date('d-m-Y H:i:s', strtotime($returnmoney->confirmation_datetime));
+                }
+                
                 $user = DB::table('users')->where('id', $returnmoney->confirmation_user_id)->select('name')->first();
                 $returnmoney->confirmation_user_id = $user ? $user->name : null;
 
