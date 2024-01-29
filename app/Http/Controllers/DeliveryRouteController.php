@@ -247,9 +247,10 @@ class DeliveryRouteController extends Controller
                         'provider' => $newProduct->provider,
                         'destinity_address' => $newProduct->destiny_address,
                         'confirmation_sheet' => $newProduct->confirmation_sheet,
-                        'buyer_id' => auth()->user()->id,
+                        'buyer_id' => auth()->user()->name,
                     ]);
                 }
+                return  $codeOrderRoute->productDeliveryRoute;
                 $type_of_product = $request->type_of_product;
                 $type_of_destiny =  $codeOrder->type_of_destiny;
                 if ($type_of_destiny == 'Cliente') {
