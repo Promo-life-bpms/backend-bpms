@@ -20,7 +20,7 @@ class CreateExchangeReturnsTable extends Migration
             $table->dateTime('confirmation_datetime')->nullable();
             $table->integer('confirmation_user_id')->nullable();
             $table->string('description'); 
-            $table->string('file')->nullable();
+            $table->string('file_exchange_returns')->nullable();
             $table->foreignId('return_user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('purchase_id')->references('id')->on('purchase_requests')->onDelete('cascade');
             $table->timestamps();

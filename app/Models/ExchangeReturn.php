@@ -19,6 +19,7 @@ class ExchangeReturn extends Model
         'description',
         'return_user_id',
         'purchase_id',
+        'file_exchange_returns'
     ]);
 
     public function purchase()

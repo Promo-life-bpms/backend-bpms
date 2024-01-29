@@ -20,19 +20,19 @@ class ExchangeReturnController extends Controller
         ]);
 
         $path = '';
-        if ($request->hasFile('file')) {
-            $filenameWithExt = $request->file('file')->getClientOriginalName();
+        if ($request->hasFile('file_exchange_returns')) {
+            $filenameWithExt = $request->file('file_exchange_returns')->getClientOriginalName();
             $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-            $extension = $request->file('file')->clientExtension();
+            $extension = $request->file('file_exchange_returns')->clientExtension();
             $fileNameToStore = time(). $filename . '.' . $extension;
-            $path= $request->file('file')->move('storage/smallbox/files/', $fileNameToStore);
+            $path= $request->file('file_exchange_returns')->move('storage/smallbox/files/', $fileNameToStore);
         }
 
         ExchangeReturn::create([
             'total_return' => $request->total_return,
             'description' => $request->description,
             'purchase_id' => $request->purchase_id,
-            'file' => $path,
+            'file_exchange_returns' => $path,
             'return_user_id' => $user->id,
         ]);
 
