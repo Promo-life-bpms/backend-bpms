@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\EstimationSmallBox;
 use App\Models\PaymentMethodInformation;
 use App\Models\RefundOfMoney;
-use App\Models\spent_money;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -124,38 +123,37 @@ class EstimationSmallBoxController extends Controller
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function ExpenseHistory()
-{
-    // Obtener el historial de gastos mensuales
-    $MonthlyExpenseHistory = DB::table('purchase_requests')
-        ->where(function ($query) {
-            $query->where('purchase_status_id', '=', 4)
-                ->orWhere('purchase_status_id', '=', 2)
-                ->orWhere('purchase_status_id', '=', 3)
-                ->where('type_status', '=', 'normal')
-                ->where('payment_method_id', '=', 1);
-        })
-        ->select('id', 'total')
-        ->get();
+    {
+        $MonthlyExpense = [];
 
-    // Obtener información adicional de cada gasto mensual
-    $MonthlyExpense = [];
+        $MonthlyExpenseHistory = DB::table('purchase_requests')->where(function ($query) {
+            $query->where(function ($subquery) {
+                $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+            })->orWhere(function ($subquery) {
+                $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+            })->orWhere(function ($subquery) {
+                $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+            });
+        })->select('id', 'total')->get()->toArray();
 
-    foreach ($MonthlyExpenseHistory as $history) {
-        $paymentInfo = spent_money::find($history->id);
-
-        if ($paymentInfo) {
-            $MonthlyExpense[] = [
-                'id' => $history->id,
-                'total' => $history->total,
-                'created_at' => date('d-m-Y', strtotime($paymentInfo->created_at)),
-                'id_user' => $paymentInfo->id_user,
-                'user_name' => $paymentInfo->user->name,
-            ];
+        foreach ($MonthlyExpenseHistory as $history) {
+            $paymentInfo = DB::table('money_spent')->where('id', $history->id)->first(['id_user', 'created_at']);
+            if ($paymentInfo) {
+                $userInfo = DB::table('users')->where('id', $paymentInfo->id_user)->select('name')->first();
+                if ($userInfo) {
+                    $MonthlyExpense[] = [
+                        'id' => $history->id,
+                        'total' => $history->total,
+                        'created_at' => date('d-m-Y', strtotime($paymentInfo->created_at)),
+                        'id_user' => $paymentInfo->id_user,
+                        'user_name' => $userInfo->name,
+                    ];
+                }
+            }
         }
+        
+        return response()->json(['MonthlyExpense' => $MonthlyExpense],200);
     }
-
-    return response()->json(['MonthlyExpense' => $MonthlyExpense], 200);
-}
 
     public function create(Request $request)
     {
