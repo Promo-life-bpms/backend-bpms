@@ -7,6 +7,8 @@ use App\Models\Reception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\OrderPurchaseProduct;
+use App\Models\ProductDeliveryRoute;
+use App\Models\ReceptionConfirmationMaquilado;
 use App\Models\Sale;
 use App\Models\SaleStatusChange;
 use Exception;
@@ -243,5 +245,66 @@ class ReceptionController extends Controller
         $reception->productsReception;
 
         return response()->json(['data' => $reception], 200);
+    }
+
+    public function receptionAccept(Request $request, $order)
+    {
+        $user =  auth()->user();
+
+        foreach ($user->whatRoles as $rol) {
+            switch ($rol->name) {
+
+                case ("compras" == $rol->name):
+
+                    break;
+
+                default:
+                    return response()->json(
+                        [
+                            'msg' => "No tienes autorizacion para generar una ruta de entrega",
+                        ],
+
+                    );
+                    break;
+            }
+        }
+        $validation = Validator::make($request->all(), [
+            'files_reception_accepted' => 'required',
+        ]);
+        if ($validation->fails()) {
+            return response()->json(
+                [
+                    'msg' => "Error al validar informacion de la recepecion entregada",
+                    'data' => ['errorValidacion' => $validation->getMessageBag()]
+                ],
+                response::HTTP_UNPROCESSABLE_ENTITY
+            ); // 422
+        }
+        $dataFiles  = $request->files_reception_accepted;
+    }
+    public function confirmation_manufactured_product(Request $request, $order)
+    {
+        $orderPurchase = OrderPurchase::where('code_order', $order)->first();
+        /*   foreach ($orderPurchase->products as $product) {
+            $odoo_id = $product->odoo_product_id;
+        } */
+        $validation = Validator::make($request->all(), [
+            'quantity_maquilada' => 'required',
+
+        ]);
+        if ($validation->fails()) {
+            return response()->json(['msg' => "Error al crear confirmacion de producto maqulado", 'data' => ["errorValidacion" => $validation->getMessageBag()]], response::HTTP_BAD_REQUEST); //400
+        }
+        $dataConfirmation = [
+            'odoo_product_id' => $request->odoo_product_id,
+            'quantity_maquilada' => $request->quantity_maquilada,
+            'decrease' => $request->decrease,
+            'product_clean' => $request->product_clean,
+            'observations' => $request->observations
+        ];
+        $recepcion_Confirmation = ReceptionConfirmationMaquilado::create($dataConfirmation);
+
+
+        return response()->json(['message' => 'Creacion de la confirmacion de los productos maquilados', 'data' => $recepcion_Confirmation], 200);
     }
 }
