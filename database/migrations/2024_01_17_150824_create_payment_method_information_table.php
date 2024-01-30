@@ -13,7 +13,7 @@ class CreatePaymentMethodInformationTable extends Migration
      */
     public function up()
     {
-        Schema::create('paymentmethodinformation', function (Blueprint $table) {
+        Schema::create('spent_money', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('id_pursache_request')->references('id')->on('purchase_requests')->onDelete('cascade');
@@ -28,6 +28,6 @@ class CreatePaymentMethodInformationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('paymentmethodinformation');
+        Schema::dropIfExists('spent_money');
     }
 }

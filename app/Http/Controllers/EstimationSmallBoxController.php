@@ -28,48 +28,67 @@ class EstimationSmallBoxController extends Controller
 
         // Verificar si la fecha actual está dentro del mes
         if (Carbon::now()->between($primerDiaDelMes, $ultimoDiaDelMes)) {
-            // Si estamos en el mes actual, realizar la suma
             //presupuestomensual == MonthlyBudget
             $MonthlyBudget = DB::table('estimation_small_box')
                 ->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
                 ->sum('total');
         }
 
+        $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])->where(function($query){
+            $query->where(function($subquery){
+                $subquery->where('status', '=', 'Confirmado');
+            });
+        })->sum('total_return');
+
+
         ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
         //gastosmentuales == monthlyexpenses
-        $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
-                                                        ->where(function ($query) {
-                                                            $query->where(function ($subquery) {
-                                                                $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                            })->orWhere(function ($subquery) {
-                                                                $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                            })->orWhere(function ($subquery) {
-                                                                $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                            });
-                                                        })->sum('total');
-        
-        ///presupuestodisponible == AvailableBudget
+        $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+            $query->where(function ($subquery) {
+                $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+            })->orWhere(function ($subquery) {
+                $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+            })->orWhere(function ($subquery) {
+                $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+            });
+        })->sum('total');
 
-        $devolution = DB::table('purchase_requests')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])
+
+       /* $devolution = DB::table('purchase_requests')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])
                                                 ->where(function($query){
                                                     $query->where(function ($subquery){
                                                         $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
                                                     });
-                                                })->sum('total');
-
+                                                })->sum('total');*/
+        
+        
+        
+        ///presupuestodisponible == AvailableBudget                                        
         $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
 
+        //REGRESAR EL DINERO DE LA DEVOLUCIÓN SIEMPRE Y CUANDO SEA EN EFECTIVO//
+       /* if($devolution){
+            $AvailableBudget += $devolution;
+        }*/
+        
         $restaDelCajaReturn = DB::table('refund_of_money')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
                                                         ->sum('total_returned');
         
+        
+    
         // Restar total_returned al AvailableBudget si hay valores
         if ($restaDelCajaReturn) {
             $AvailableBudget -= $restaDelCajaReturn;
         }
 
-        //REGRESAR EL DINERO DE LA DEVOLUCIÓN SIEMPRE Y CUANDO SEA EN EFECTIVO//
-        if($devolution){
-            $AvailableBudget += $devolution;
+        ///REGRESAR  AL PRESUPUESTO EL DINERO///
+        if($devolutionmoney){
+            $AvailableBudget +=$devolutionmoney;
+        }
+
+        ///RESTARLE EL DINERO A LO EGRESADO///                                                
+        if($devolutionmoney){
+            $MonthlyExpenses -= $devolutionmoney;
         }
 
         return response()->json(['Information' => $Information, 'MonthlyExpenses' => $MonthlyExpenses, 'AvailableBudget' => $AvailableBudget],200);   
@@ -123,7 +142,7 @@ class EstimationSmallBoxController extends Controller
         })->select('id', 'total')->get()->toArray();
 
         foreach ($MonthlyExpenseHistory as $history) {
-            $paymentInfo = DB::table('paymentmethodinformation')->where('id', $history->id)->first(['id_user', 'created_at']);
+            $paymentInfo = DB::table('spent_money')->where('id', $history->id)->first(['id_user', 'created_at']);
             if ($paymentInfo) {
                 $userInfo = DB::table('users')->where('id', $paymentInfo->id_user)->select('name')->first();
                 if ($userInfo) {

@@ -564,6 +564,8 @@ class PurchaseRequestController extends Controller
 
     public function confirmDelivered(Request $request)
     {
+        $user = auth()->user();
+
         $request->validate([
             'id' => 'required',
         ]);
@@ -584,6 +586,11 @@ class PurchaseRequestController extends Controller
         }else{
             return response()->json(['message' => "No se ha podido confirmar el pedido, verifica que haya sido aprobado para compra o no ha sido entregado."], 400);
         }
+        ////// aqui se crea///
+        PaymentMethodInformation::create([
+            'id_user' => $user->id,
+            'id_pursache_request' => $request->id,
+        ]);
     }
 
     public function confirmReceived(Request $request)
@@ -950,11 +957,7 @@ class PurchaseRequestController extends Controller
                 'payment_method_id' => $request->payment_method_id,
             ]);
         }
-
-        PaymentMethodInformation::create([
-            'id_user' => $user->id,
-            'id_pursache_request' => $request->id,
-        ]);
+        
         return response()->json(['message' => "Método de pago actualizado correctamente"],200);
     }
 }
