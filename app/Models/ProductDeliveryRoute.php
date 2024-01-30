@@ -19,7 +19,8 @@ class ProductDeliveryRoute extends Model
         'origin_address',
         'destinity_address',
         'confirmation_sheet',
-        'buyer_id'
+        'buyer_id',
+        'files_reception_accepted' 
 
     ];
 

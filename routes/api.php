@@ -82,7 +82,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('orders/{order}/receptions/{reception}', [ReceptionController::class, 'getReception']);
     //confirmar un producto
-    Route::post('orders/{order}/recepctionsacepted', [ReceptionController::class, 'receptionAccept']);
+    Route::post('recepctionsacepted/{code_order_route_id}', [ReceptionController::class, 'receptionAccept']);
     //Confirmar producto maquilado
     Route::post('orders/{order}/recepctionmaquilada', [ReceptionController::class, 'confirmation_manufactured_product']);
     // Seccion para actualizar el estatus de maquila

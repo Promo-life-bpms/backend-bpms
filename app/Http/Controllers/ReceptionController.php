@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CodeOrderDeliveryRoute;
 use App\Models\OrderPurchase;
 use App\Models\Reception;
 use Illuminate\Http\Request;
@@ -247,8 +248,9 @@ class ReceptionController extends Controller
         return response()->json(['data' => $reception], 200);
     }
 
-    public function receptionAccept(Request $request, $order)
+    public function receptionAccept(Request $request, $code_order_route_id)
     {
+
         $user =  auth()->user();
 
         foreach ($user->whatRoles as $rol) {
@@ -281,6 +283,12 @@ class ReceptionController extends Controller
             ); // 422
         }
         $dataFiles  = $request->files_reception_accepted;
+        $productDeliveryRoute = ProductDeliveryRoute::where('code_order_route_id', $code_order_route_id)->first();
+        if ($productDeliveryRoute->files_reception_accepted == null) {
+            $productDeliveryRoute->files_reception_accepted = $dataFiles;
+        }
+        $productDeliveryRoute->save();
+        return response()->json(['message' => 'Se cargo la imagen correctamente', 'data' => $productDeliveryRoute], 200);
     }
     public function confirmation_manufactured_product(Request $request, $order)
     {
