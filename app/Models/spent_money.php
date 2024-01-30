@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PaymentMethodInformation extends Model
+class spent_money extends Model
 {
     use HasFactory;
 
-    public $table = 'spent_money';
+    public $table = 'money_spent';
 
     protected $fillable =[
         'id_user',
@@ -25,5 +25,6 @@ class PaymentMethodInformation extends Model
     {
         return $this->belongsTo(PurchaseRequest::class, 'id_pursache_request');
     }
+
 
 }

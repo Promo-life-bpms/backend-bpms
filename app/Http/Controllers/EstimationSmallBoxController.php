@@ -53,29 +53,24 @@ class EstimationSmallBoxController extends Controller
             });
         })->sum('total');
 
+        ///presupuestodisponible == AvailableBudget                                        
+        $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
 
-       /* $devolution = DB::table('purchase_requests')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])
+        /*$devolution = DB::table('purchase_requests')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])
                                                 ->where(function($query){
                                                     $query->where(function ($subquery){
                                                         $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
                                                     });
                                                 })->sum('total');*/
-        
-        
-        
-        ///presupuestodisponible == AvailableBudget                                        
-        $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
 
         //REGRESAR EL DINERO DE LA DEVOLUCIÓN SIEMPRE Y CUANDO SEA EN EFECTIVO//
-       /* if($devolution){
-            $AvailableBudget += $devolution;
-        }*/
+       
+        //$AvailableBudget += $devolution;
         
+
         $restaDelCajaReturn = DB::table('refund_of_money')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
                                                         ->sum('total_returned');
         
-        
-    
         // Restar total_returned al AvailableBudget si hay valores
         if ($restaDelCajaReturn) {
             $AvailableBudget -= $restaDelCajaReturn;
@@ -142,7 +137,7 @@ class EstimationSmallBoxController extends Controller
         })->select('id', 'total')->get()->toArray();
 
         foreach ($MonthlyExpenseHistory as $history) {
-            $paymentInfo = DB::table('spent_money')->where('id', $history->id)->first(['id_user', 'created_at']);
+            $paymentInfo = DB::table('money_spent')->where('id', $history->id)->first(['id_user', 'created_at']);
             if ($paymentInfo) {
                 $userInfo = DB::table('users')->where('id', $paymentInfo->id_user)->select('name')->first();
                 if ($userInfo) {

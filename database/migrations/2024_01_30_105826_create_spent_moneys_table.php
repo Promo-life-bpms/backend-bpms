@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePaymentMethodInformationTable extends Migration
+class CreateSpentMoneysTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreatePaymentMethodInformationTable extends Migration
      */
     public function up()
     {
-        Schema::create('spent_money', function (Blueprint $table) {
+        Schema::create('money_spent', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_user')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('id_pursache_request')->references('id')->on('purchase_requests')->onDelete('cascade');
@@ -28,6 +28,6 @@ class CreatePaymentMethodInformationTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('spent_money');
+        Schema::dropIfExists('money_spent');
     }
 }

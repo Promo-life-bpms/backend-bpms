@@ -9,6 +9,7 @@ use App\Models\PaymentMethodInformation;
 use App\Models\PurchaseRequest;
 use App\Models\Role;
 use App\Models\Spent;
+use App\Models\spent_money;
 use App\Models\User;
 use App\Models\UserCenter;
 use App\Models\UserRole;
@@ -582,15 +583,16 @@ class PurchaseRequestController extends Controller
                 'purchase_status_id' => 3,
             ]);
             
+            ////// aqui se crea///
+            spent_money::create([
+                'id_user' => $user->id,
+                'id_pursache_request' => $request->id,
+            ]);
+            
             return response()->json(['message' => "Pedido confirmado"], 200);
         }else{
             return response()->json(['message' => "No se ha podido confirmar el pedido, verifica que haya sido aprobado para compra o no ha sido entregado."], 400);
         }
-        ////// aqui se crea///
-        PaymentMethodInformation::create([
-            'id_user' => $user->id,
-            'id_pursache_request' => $request->id,
-        ]);
     }
 
     public function confirmReceived(Request $request)
