@@ -138,6 +138,7 @@ class EstimationSmallBoxController extends Controller
 
         foreach ($MonthlyExpenseHistory as $history) {
             $paymentInfo = DB::table('money_spent')->where('id', $history->id)->first(['id_user', 'created_at']);
+            dd($paymentInfo);
             if ($paymentInfo) {
                 $userInfo = DB::table('users')->where('id', $paymentInfo->id_user)->select('name')->first();
                 if ($userInfo) {
