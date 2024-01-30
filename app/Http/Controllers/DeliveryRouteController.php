@@ -248,6 +248,7 @@ class DeliveryRouteController extends Controller
                         'destinity_address' => $newProduct->destiny_address,
                         'confirmation_sheet' => $newProduct->confirmation_sheet,
                         'buyer_id' => auth()->user()->name,
+                        'files_reception_accepted' => $newProduct->files_reception_accepted,
                     ]);
                 }
                 return  $codeOrderRoute->productDeliveryRoute;
