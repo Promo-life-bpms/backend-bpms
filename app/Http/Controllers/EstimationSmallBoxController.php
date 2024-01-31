@@ -135,7 +135,7 @@ class EstimationSmallBoxController extends Controller
         }
         return response()->json(['MonthlyExpense' => $MonthlyExpense],200);
     }
-    
+
     ////////////////////////////////////AGREGAR UN PRESUPUESTO///////////////////////////////////////////////////////////////
 
     public function create(Request $request)
@@ -158,6 +158,7 @@ class EstimationSmallBoxController extends Controller
         return response()->json(['message' => 'Error. No se agregó el presupuesto', 'status' => 400], 400);
     }
 
+    ///REGRESAR EL PRESUPUESTO//////
     public function BudgetReturn(Request $request)
     {
         $user = auth()->user();

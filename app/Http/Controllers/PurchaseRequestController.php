@@ -835,19 +835,25 @@ class PurchaseRequestController extends Controller
 
             foreach ($eventuales as $jsonString) {
                 $datos = json_decode($jsonString, true);
-
+            
                 foreach ($datos as $item) {
-                    // Obtener el ID de la compañía desde los eventuales
-                    $companyId = $item['company'];
-                    // Buscar el nombre de la compañía en la tabla tempory_company
-                    $companyName = DB::table('tempory_company')->where('id', $companyId)->value('name');
-                    // Agregar el nombre de la compañía al array original
-                    $item['company_name'] = $companyName;
+                    // Verificar si 'company' es "undefined"
+                    if ($item['company'] === "undefined") {
+                        // Si es "undefined", asignar 'hola' a 'company_name'
+                        $item['company_name'] = $spent->company->name;
+                    } else {
+                        // Obtener el ID de la compañía desde los eventuales
+                        $companyId = $item['company'];
+                        // Buscar el nombre de la compañía en la tabla tempory_company
+                        $companyName = DB::table('tempory_company')->where('id', $companyId)->value('name');
+                        // Agregar el nombre de la compañía al array original
+                        $item['company_name'] = $companyName;
+                    }
                     // Agregar cada objeto al resultado
                     $event[] = $item;
                 }
             }
-
+            
             $returnmoneyexcess = DB::table('exchange_returns')->where('purchase_id', $page)->select('id','total_return', 'status', 'confirmation_datetime', 
                                                                                         'confirmation_user_id', 'description','file_exchange_returns', 
                                                                                         'return_user_id','created_at')->get()->toArray();
