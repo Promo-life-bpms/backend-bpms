@@ -839,7 +839,6 @@ class PurchaseRequestController extends Controller
                 foreach ($datos as $item) {
                     // Verificar si 'company' es "undefined"
                     if ($item['company'] === "undefined") {
-                        // Si es "undefined", asignar 'hola' a 'company_name'
                         $item['company_name'] = $spent->company->name;
                     } else {
                         // Obtener el ID de la compañía desde los eventuales
