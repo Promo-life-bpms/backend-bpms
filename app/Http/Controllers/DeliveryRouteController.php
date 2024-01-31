@@ -285,14 +285,15 @@ class DeliveryRouteController extends Controller
                     }
                 }
             }
-        }
 
-        return response()->json([
-            'msg' => 'Ruta Creada Existosamente',
-            'data' => [
-                "ruta" =>  $ruta
-            ]
-        ], Response::HTTP_CREATED);
+
+            return response()->json([
+                'msg' => 'Ruta Creada Existosamente',
+                'data' => [
+                    "ruta" =>  $ruta
+                ]
+            ], Response::HTTP_CREATED);
+        }
     }
     public function updateInfoChofer(Request $request, $ruta, $pedido)
     {
@@ -440,6 +441,7 @@ class DeliveryRouteController extends Controller
             if (!$orderExist) {
                 array_push($orders, $order);
             }
+            return $remissions;
         }
 
         // Obtener los productos de cada orden de compra

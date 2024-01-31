@@ -418,7 +418,6 @@ class SaleController extends Controller
             ->whereBetween('status_o_t_s.created_at', [$date_initial, $date_end])
             ->count();
 
-
         $completado = OrderPurchase::join('status_o_t_s', 'status_o_t_s.id_order_purchases', 'order_purchases.id')
             ->where('order_purchases.code_order', 'LIKE', '%' . 'OT' . '%')
             ->where('order_purchases.company', 'LIKE', '%' . $company . '%')
