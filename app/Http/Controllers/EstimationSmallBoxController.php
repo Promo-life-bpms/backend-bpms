@@ -125,14 +125,10 @@ class EstimationSmallBoxController extends Controller
                 $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
             })->orWhere(function ($subquery) {
                 $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-            })->orWhere(function ($subquery){
-                $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'en proceso')->where('payment_method_id', '=', 1);
-            })->orWhere(function($subquery){
-                $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'rechazada')->where('payment_method_id', '=', 1);
             });
         })->select('id', 'total')->get();
 
-    
+        dd($MonthlyExpenseHistory);
         foreach ($MonthlyExpenseHistory as $history) {
             $paymentInfo = DB::table('money_spent')->where('id', $history->id)->first(['id_user', 'created_at']);
             if ($paymentInfo) {
