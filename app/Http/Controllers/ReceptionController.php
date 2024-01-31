@@ -288,7 +288,7 @@ class ReceptionController extends Controller
             $productDeliveryRoute->files_reception_accepted = $dataFiles;
         }
         $productDeliveryRoute->save();
-        return response()->json(['message' => 'Se cargo la imagen correctamente', 'data' => $productDeliveryRoute], 200);
+        return response()->json(['message' => 'Se confirmo que el pedido llego a almacen', 'data' => $productDeliveryRoute], 200);
     }
     public function confirmation_manufactured_product(Request $request, $order)
     {
