@@ -15,6 +15,7 @@ class CreateReceptionConfirmationMaquiladosTable extends Migration
     {
         Schema::create('reception_confirmation_maquilados', function (Blueprint $table) {
             $table->id();
+            $table->string('code_order');
             $table->integer('odoo_product_id');
             $table->integer('quantity_maquilada');
             $table->integer('decrease')->nullable();

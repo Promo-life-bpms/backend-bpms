@@ -39,6 +39,11 @@ class OrderPurchase extends Model
     {
         return $this->hasMany(Reception::class, "code_order", "code_order");
     }
+    public function receptionsConfirmated()
+    {
+        return $this->hasMany(ReceptionConfirmationMaquilado::class, "code_order", "code_order");
+    }
+
     public function theirHistoryStatus()
     {
         return $this->hasMany(StatusOT::class, "id_order_purchases", "id")->with("StatusProductsOT");

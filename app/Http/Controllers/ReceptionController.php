@@ -304,6 +304,7 @@ class ReceptionController extends Controller
             return response()->json(['msg' => "Error al crear confirmacion de producto maqulado", 'data' => ["errorValidacion" => $validation->getMessageBag()]], response::HTTP_BAD_REQUEST); //400
         }
         $dataConfirmation = [
+            'code_order' => $order,
             'odoo_product_id' => $request->odoo_product_id,
             'quantity_maquilada' => $request->quantity_maquilada,
             'decrease' => $request->decrease,
@@ -314,5 +315,15 @@ class ReceptionController extends Controller
 
 
         return response()->json(['message' => 'Creacion de la confirmacion de los productos maquilados', 'data' => $recepcion_Confirmation], 200);
+    }
+    public function getReceptionConfirmed($order, $odoo_product)
+    {
+        $codeOrder = OrderPurchase::where('code_order', $order)->first();
+
+        if (!$codeOrder) {
+            return response()->json(['errors' => (['msg' => 'Recepcion no encontrada.'])], 404);
+        }
+        $recepciones =  $codeOrder->receptionsConfirmated->where('odoo_product_id', $odoo_product)->first();
+        return response()->json(['Recepcion maquilada confirmada' => $recepciones], 200);
     }
 }
