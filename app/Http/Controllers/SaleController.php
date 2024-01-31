@@ -45,6 +45,7 @@ class SaleController extends Controller
         $isMaquilador = auth()->user()->whatRoles()->whereIn('name', ['maquilador'])->first();
         // return $isSeller;
         DB::statement("SET SQL_MODE=''");
+
         if ($request->ordenes_proximas) {
 
             $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")
@@ -125,6 +126,18 @@ class SaleController extends Controller
                 unset($sale->lastStatus->status_id);
                 unset($sale->lastStatus->updated_at);
             }
+            $detailsOrdersReindex = $sale->detailsOrders->toArray();
+            foreach ($detailsOrdersReindex as $key => $detailOrder) {
+                // Revisar si se encuentra la  palabra OT en el codigo de la orden
+                if (strpos($detailOrder['code_order'], 'MUE') !== false) {
+                    unset($detailsOrdersReindex[$key]);
+                }
+                if (strpos($detailOrder['code_order'], 'LOG') !== false) {
+                    unset($detailsOrdersReindex[$key]);
+                }
+            }
+            unset($sale->detailsOrders);
+            $sale->details_orders = array_values($detailsOrdersReindex);
         }
 
         if ($isMaquilador) {
@@ -205,6 +218,29 @@ class SaleController extends Controller
                 unset($binnacle->user);
                 unset($binnacle->user_id);
             }
+            if (auth()->user()->hasRole('maquilador')) {
+                $incidendeTagger = [];
+                foreach ($sale->incidences as $key => $value) {
+                    if ($value->user_id == auth()->user()->id) {
+                        array_push($incidendeTagger, $value);
+                    }
+                }
+                unset($sale->incidences);
+                $sale->incidences = $incidendeTagger;
+            }
+
+            $detailsOrdersReindex = $sale->detailsOrders->toArray();
+            foreach ($detailsOrdersReindex as $key => $detailOrder) {
+                // Revisar si se encuentra la  palabra OT en el codigo de la orden
+                if (strpos($detailOrder['code_order'], 'MUE') !== false) {
+                    unset($detailsOrdersReindex[$key]);
+                }
+                if (strpos($detailOrder['code_order'], 'LOG') !== false) {
+                    unset($detailsOrdersReindex[$key]);
+                }
+            }
+            unset($sale->detailsOrders);
+            $sale->details_orders = array_values($detailsOrdersReindex);
 
             return response()->json(['msg' => 'Detalle del pedido', 'data' => ["sale", $sale]], response::HTTP_OK); //200
         }
@@ -419,10 +455,24 @@ class SaleController extends Controller
     public function calendario(Request $request)
     {
 
+        $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente', 'asistente_de_gerente'])->first();
+        $isMaquilador = auth()->user()->whatRoles()->whereIn('name', ['maquilador'])->first();
         $fecha = Sale::join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
             //->orderby('additional_sale_information.planned_date')
+            ->where("sales.code_sale", "NOT LIKE", "P-MUE%")
+            ->where("sales.code_sale", "NOT LIKE", "MUE%")
+            ->where("sales.code_sale", "NOT LIKE", "CONSUM%")
+            ->when($isSeller !== null, function ($query) {
+                $user =  auth()->user();
+                // $query->where('additional_sale_information.company', $user->company);
+                $query->where('sales.commercial_email', $user->email);
+            })
+            ->when($isMaquilador !== null, function ($query) {
+                $user =  auth()->user();
+                $query->where('order_purchases.tagger_user_id', $user->id);
+            })
             ->select(
-                \DB::raw('SUBSTRING_INDEX(additional_sale_information.planned_date, " ", 1) as planned_date'),
+                \DB::raw('SUBSTRING_INDEX(additional_sale_information.commitment_date, " ", 1) as planned_date'),
                 'sales.code_sale'
             )
             ->get();

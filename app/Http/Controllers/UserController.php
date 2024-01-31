@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Notifications\RegisteredUser;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -36,8 +37,8 @@ class UserController extends Controller
             ); // 422
         }
 
-        $password = Str::random(8);
-        $password = Hash::make($password);
+        $pass = Str::random(8);
+        $password = Hash::make($pass);
         $user = new User();
         $user->name = $request->name;
         $user->active = 1;
@@ -47,8 +48,14 @@ class UserController extends Controller
         // Asignar roles que vienen en el request en formato de array
         $user->syncRoles($request->roles);
         try {
+            $dataNotification = [
+                'name' => $user->name,
+                'email' => $user->email,
+                'password' => $pass,
+                'url' => env("URL_FRONTEND", "https://bpms.promolife.lat")
+            ];
             // Enviar email con la contraseña
-            // $user->notify(new UserCreated($password));
+            $user->notify(new RegisteredUser($dataNotification));
         } catch (Exception $th) {
             return response()->json(["usuario" => $user, 'message' => 'Usuario creado correctamente, pero no se pudo enviar el correo']);
         }
@@ -90,13 +97,20 @@ class UserController extends Controller
         if (!$user) {
             return response()->json(["message" => "El usuario no existe"], Response::HTTP_NOT_FOUND);
         }
-        $password = Str::random(8);
-        $password = Hash::make($password);
+        $pass = Str::random(8);
+        $password = Hash::make($pass);
         $user->password = $password;
         $user->save();
         try {
             // Enviar email con la contraseña
-            // $user->notify(new UserCreated($password));
+            $dataNotification = [
+                'name' => $user->name,
+                'email' => $user->email,
+                'password' => $pass,
+                'url' => env("URL_FRONTEND", "https://bpms.promolife.lat")
+            ];
+            // Enviar email con la contraseña
+            $user->notify(new RegisteredUser($dataNotification));
         } catch (Exception $th) {
             return response()->json(["usuario" => $user, 'message' => 'Usuario creado correctamente, pero no se pudo enviar el correo']);
         }
@@ -151,7 +165,7 @@ class UserController extends Controller
                             ]);
                         }
                     }
-                    foreach (User::where('active', true)->get() as $user) {
+                    foreach (User::where('active', true)->whereNotNull('intranet_id')->get() as $user) {
                         $active = false;
                         foreach ($res as $userRes) {
                             if ($userRes->email == $user->email) {
@@ -159,8 +173,10 @@ class UserController extends Controller
                             }
                         }
                         if (!$active) {
-                            $user->active = false;
-                            $user->save();
+                            if ($user->intranet_id != null) {
+                                $user->active = false;
+                                $user->save();
+                            }
                         }
                     }
                     return response()->json(['msg' => 'Actualizacion Completa', "errores" => $errores], Response::HTTP_OK);

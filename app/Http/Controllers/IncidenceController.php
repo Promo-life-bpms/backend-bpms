@@ -134,7 +134,13 @@ class IncidenceController extends Controller
                     case "control_calidad":
                         $aux = true;
                         break;
+                    case "gerente-operaciones":
+                        $aux = true;
+                        break;
                     case "administrator":
+                        $aux = true;
+                        break;
+                    case "logistica-y-mesa-de-control":
                         $aux = true;
                         break;
                     case "ventas":
@@ -185,7 +191,7 @@ class IncidenceController extends Controller
             'commitment_date' => $request->fecha_compromiso ?? null,
             'solution' => $request->solucion ?? null,
             'solution_date' => null,
-            'user_id' => $request->id_user,
+            'user_id' => auth()->user()->id,
             'elaborated' => $request->elaboro,
             'signature_elaborated' => $request->firma_elaboro,
             'reviewed' => $request->reviso ?? null,
@@ -204,11 +210,11 @@ class IncidenceController extends Controller
 
             $orderpurchase_id = $productOrder->order_purchase_id;
             $productOdoo = [
-                "pro_name" => '',
-                "pro_product_id" => $productOrder->product,
-                "pro_qty" => $incidence_product->quantity_selected,
+                "pro_name" => $productOrder->product,
+                "pro_product_id" => (int) $productOrder->odoo_product_id,
+                "pro_qty" => (int) $incidence_product->quantity_selected,
                 "pro_currency_id" => "MXN",
-                "pro_price" => $productOrder->unit_price
+                "pro_price" => floatval($productOrder->unit_price)
             ];
 
             $incidencia->productsIncidence()->create([
@@ -270,6 +276,7 @@ class IncidenceController extends Controller
                 'X-VDE-TYPE: Ambos',
             ]);
             $response = curl_exec($curl);
+
             $responseOdoo = $response;
             $errors = false;
             $message = '';

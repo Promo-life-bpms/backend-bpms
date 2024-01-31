@@ -183,6 +183,8 @@ class ApiOdooController extends Controller
                         }
                     }
                 } catch (Exception $th) {
+                    Storage::put('/public/pedidos/dataValues' .  time() . '.txt', ($request->all()));
+                    Storage::put('/public/pedidos/data' .  time() . '.txt', ($th));
                     return  response()->json(["Server Error Insert: " => $th->getMessage()], 400);
                 }
                 // TODO: Notificar al area de compras por correo
@@ -192,6 +194,8 @@ class ApiOdooController extends Controller
                 return response()->json(['message' => 'No Tienes autorizacion']);
             }
         } catch (Exception $th) {
+            Storage::put('/public/pedidos/dataValues' .  time() . '.txt', ($request->all()));
+            Storage::put('/public/pedidos/data' .  time() . '.txt', ($th));
             return  response()->json(["Server Error Validate: " => $th->getMessage()], 400);
         }
     }
@@ -229,24 +233,13 @@ class ApiOdooController extends Controller
                             $proveedorMaquilador = OrderPurchase::where("provider_name", $purchase->provider_name)
                                 ->whereNotNull('tagger_user_id')->first();
                             // Si no existe crear un nuevo usuario
-                            if (!$proveedorMaquilador) {
-                                $user = User::create([
-                                    'name' => $purchase->supplier_representative,
-                                    'email' => Str::slug($purchase->supplier_representative) . '_' . Str::random(5) . '@promolife.lat',
-                                    'password' => Hash::make($purchase->supplier_representative),
-                                ]);
-                                $role = Role::find(2);
-                                $user->attachRole($role);
-
-                                $orderPurchase->tagger_user_id = $user->id;
-                                $orderPurchase->save();
-                            } else {
+                            if ($proveedorMaquilador) {
                                 $orderPurchase->tagger_user_id = $proveedorMaquilador->tagger_user_id;
                                 $orderPurchase->save();
                             }
                         }
                     } catch (Exception $th) {
-                        return response()->json(['message' => 'Error al crear el usuario', 'error' => $th->getMessage()], 200);
+                        // return response()->json(['message' => 'Error al crear el usuario', 'error' => $th->getMessage()], 200);
                     }
                     try {
                         $sale = Sale::where('code_sale', $orderPurchase->code_sale)->first();
