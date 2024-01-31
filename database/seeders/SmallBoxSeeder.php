@@ -84,7 +84,7 @@ class SmallBoxSeeder extends Seeder
                 'product_type' => "SERVICIO",
             ],
             (object)[
-                'concept' => "IMPORTACIONES PAQUETERÍA A LA OFIC",
+                'concept' => "IMPORTACIONES PAQUETERÍA A LA OFICINA",
                 'center_id' => 1,
                 'outgo_type' => "FIJO",
                 'expense_type' => "COSTO",
@@ -154,7 +154,7 @@ class SmallBoxSeeder extends Seeder
                 'product_type' => "SERVICIO",
             ],
             (object)[
-                'concept' => "TC AMEX-ANUALIDAD",
+                'concept' => "TARJETA DE CRÉDITO AMERICAN EXPRESS ANUALIDAD",
                 'center_id' => 4,
                 'outgo_type' => "FIJO",
                 'expense_type' => "GASTO",
@@ -441,7 +441,7 @@ class SmallBoxSeeder extends Seeder
                 'product_type' => "SERVICIO",
             ],
             (object)[
-                'concept' => "FOLIOS P/ FACTURA ELECTR.",
+                'concept' => "FOLIOS PARA FACTURA ELECTRÓNICA",
                 'center_id' => 11,
                 'outgo_type' => "VARIABLE",
                 'expense_type' => "GASTO",
@@ -616,7 +616,7 @@ class SmallBoxSeeder extends Seeder
                 'product_type' => "SERVICIO",
             ],
             (object)[
-                'concept' => "DEPTO DE GRABADO LASER MANTENIMIENTO",
+                'concept' => "DEPARTAMENTO DE GRABADO LASER MANTENIMIENTO",
                 'center_id' => 18,
                 'outgo_type' => "FIJO",
                 'expense_type' => "GASTO",
