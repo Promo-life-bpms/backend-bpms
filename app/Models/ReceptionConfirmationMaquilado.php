@@ -9,6 +9,7 @@ class ReceptionConfirmationMaquilado extends Model
 {
     use HasFactory;
     protected $fillable = [
+        'code_order',
         'odoo_product_id',
         'quantity_maquilada',
         'decrease',

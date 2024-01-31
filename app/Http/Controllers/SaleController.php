@@ -46,6 +46,7 @@ class SaleController extends Controller
         // return $isSeller;
         DB::statement("SET SQL_MODE=''");
         if ($request->ordenes_proximas) {
+
             $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")
                 ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
@@ -149,7 +150,6 @@ class SaleController extends Controller
                 }
             }
         }
-
 
         return response()->json([
             'msg' => 'Lista de pedidos', 'data' => ["sales" => $sales]
