@@ -23,7 +23,7 @@ class SmallBoxSeeder extends Seeder
     {
 
         Role::create([
-            'name' => 'PRUEBA',
+            'name' => 'manager',
             'display_name' => 'Manager', // optional
             'description' => 'Jefe directo', // optional
         ]);

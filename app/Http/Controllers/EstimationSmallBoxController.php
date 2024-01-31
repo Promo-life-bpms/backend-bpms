@@ -34,13 +34,14 @@ class EstimationSmallBoxController extends Controller
                 ->sum('total');
         }
 
+
+        ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
         $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])->where(function($query){
             $query->where(function($subquery){
                 $subquery->where('status', '=', 'Confirmado');
             });
         })->sum('total_return');
-
-
+        
         ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
         //gastosmentuales == monthlyexpenses
         $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
@@ -50,23 +51,14 @@ class EstimationSmallBoxController extends Controller
                 $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
             })->orWhere(function ($subquery) {
                 $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+            
+            })->orWhere(function ($subquery){
+                $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'en proceso')->where('payment_method_id', '=', 1);
             });
         })->sum('total');
 
         ///presupuestodisponible == AvailableBudget                                        
         $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
-
-        /*$devolution = DB::table('purchase_requests')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])
-                                                ->where(function($query){
-                                                    $query->where(function ($subquery){
-                                                        $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                    });
-                                                })->sum('total');*/
-
-        //REGRESAR EL DINERO DE LA DEVOLUCIÓN SIEMPRE Y CUANDO SEA EN EFECTIVO//
-       
-        //$AvailableBudget += $devolution;
-        
 
         $restaDelCajaReturn = DB::table('refund_of_money')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
                                                         ->sum('total_returned');
@@ -88,8 +80,7 @@ class EstimationSmallBoxController extends Controller
 
         return response()->json(['Information' => $Information, 'MonthlyExpenses' => $MonthlyExpenses, 'AvailableBudget' => $AvailableBudget],200);   
     }
-
-
+    
     //////////////////////////////////////////////////HISTORIAL DE LA DEVOLUCIÓN DEL DINERO/////////////////////////////////////////////////////////////////////////////// 
     public function historyOfTheReturnOfMoney()
     {
@@ -134,20 +125,21 @@ class EstimationSmallBoxController extends Controller
             })->orWhere(function ($subquery) {
                 $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
             });
-        })->select('id', 'total')->get()->toArray();
+        })->select('id', 'total')->get();
 
+        //dd($MonthlyExpenseHistory);
         foreach ($MonthlyExpenseHistory as $history) {
             $paymentInfo = DB::table('money_spent')->where('id', $history->id)->first(['id_user', 'created_at']);
             if ($paymentInfo) {
                 $userInfo = DB::table('users')->where('id', $paymentInfo->id_user)->select('name')->first();
                 if ($userInfo) {
-                    $MonthlyExpense[] = [
+                    array_push($MonthlyExpense, (object)[
                         'id' => $history->id,
                         'total' => $history->total,
                         'created_at' => date('d-m-Y', strtotime($paymentInfo->created_at)),
                         'id_user' => $paymentInfo->id_user,
                         'user_name' => $userInfo->name,
-                    ];
+                    ]);
                 }
             }
         }
