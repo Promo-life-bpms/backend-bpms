@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\EstimationSmallBox;
 use App\Models\PaymentMethodInformation;
+use App\Models\PurchaseRequest;
 use App\Models\RefundOfMoney;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -117,35 +118,25 @@ class EstimationSmallBoxController extends Controller
     public function ExpenseHistory()
     {
         $MonthlyExpense = [];
+        $history = DB::table('money_spent')->select('id_user', 'id_pursache_request', 'created_at')->get();
 
-        $MonthlyExpenseHistory = DB::table('purchase_requests')->where(function ($query) {
-            $query->where(function ($subquery) {
-                $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-            })->orWhere(function ($subquery) {
-                $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-            })->orWhere(function ($subquery) {
-                $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-            });
-        })->select('id', 'total')->get();
-
-        //dd($MonthlyExpenseHistory);
-        foreach ($MonthlyExpenseHistory as $history) {
-            $paymentInfo = DB::table('money_spent')->where('id', $history->id)->first(['id_user', 'created_at']);
-            if ($paymentInfo) {
-                $userInfo = DB::table('users')->where('id', $paymentInfo->id_user)->select('name')->first();
-                if ($userInfo) {
+        foreach ($history as $datos) {
+            $userInfo = DB::table('users')->where('id', $datos->id_user)->select('name')->first();
+            if ($userInfo) {
+                $purchaseRequest = DB::table('purchase_requests')->where('id', $datos->id_pursache_request)->first();
+                if ($purchaseRequest) {
                     array_push($MonthlyExpense, (object)[
-                        'id' => $history->id,
-                        'total' => $history->total,
-                        'created_at' => date('d-m-Y', strtotime($paymentInfo->created_at)),
-                        'id_user' => $paymentInfo->id_user,
                         'user_name' => $userInfo->name,
+                        'created_at' => date('d-m-Y', strtotime($datos->created_at)),
+                        'total' => $purchaseRequest->total,
                     ]);
                 }
             }
         }
         return response()->json(['MonthlyExpense' => $MonthlyExpense],200);
     }
+    
+    ////////////////////////////////////AGREGAR UN PRESUPUESTO///////////////////////////////////////////////////////////////
 
     public function create(Request $request)
     {

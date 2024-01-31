@@ -582,13 +582,16 @@ class PurchaseRequestController extends Controller
             DB::table('purchase_requests')->where('id',$request->id)->update([
                 'purchase_status_id' => 3,
             ]);
-            
-            ////// aqui se crea///
-            spent_money::create([
-                'id_user' => $user->id,
-                'id_pursache_request' => $request->id,
-            ]);
-            
+
+            $metododepago = DB::table('purchase_requests')->where('id', $request->id)->select('payment_method_id')->first();
+
+            if($metododepago->payment_method_id == 1){
+                ////// aqui se crea///
+                spent_money::create([
+                    'id_user' => $user->id,
+                    'id_pursache_request' => $request->id,
+                ]);
+            }   
             return response()->json(['message' => "Pedido confirmado"], 200);
         }else{
             return response()->json(['message' => "No se ha podido confirmar el pedido, verifica que haya sido aprobado para compra o no ha sido entregado."], 400);
