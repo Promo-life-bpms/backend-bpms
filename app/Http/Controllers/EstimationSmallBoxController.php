@@ -115,37 +115,52 @@ class EstimationSmallBoxController extends Controller
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function ExpenseHistory()
-    {
-        $MonthlyExpense = [];
+{
+    $MonthlyExpense = [];
+    $notFoundExpenses = [];
 
-        $MonthlyExpenseHistory = DB::table('purchase_requests')->where(function ($query) {
-            $query->where(function ($subquery) {
-                $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-            })->orWhere(function ($subquery) {
-                $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-            })->orWhere(function ($subquery) {
-                $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-            });
-        })->select('id', 'total')->get();
+    $MonthlyExpenseHistory = DB::table('purchase_requests')
+        ->where(function ($query) {
+            $query->where('type_status', '=', 'normal')
+                ->where('payment_method_id', '=', 1)
+                ->whereIn('purchase_status_id', [2, 3, 4]);
+        })
+        ->select('id', 'total')
+        ->get();
 
-        foreach ($MonthlyExpenseHistory as $history) {
-            $date = DB::table('money_spent')->where('id', $history->id)->first(['created_at']);
-            $paymentInfo = DB::table('money_spent')->where('id', $history->id)->first(['id_user']);
-            if ($paymentInfo) {
-                $userInfo = DB::table('users')->where('id', $paymentInfo->id_user)->select('name')->first();
-                if ($userInfo) {
-                    array_push($MonthlyExpense, (object)[
-                        'id' => $history->id,
-                        'total' => $history->total,
-                        'created_at' => date('d-m-Y', strtotime($date->created_at)),
-                        'id_user' => $paymentInfo->id_user,
-                        'user_name' => $userInfo->name,
-                    ]);
-                }
+    foreach ($MonthlyExpenseHistory as $history) {
+        $paymentInfo = DB::table('money_spent')
+            ->where('id', $history->id)
+            ->first(['id_user', 'created_at']);
+
+        if ($paymentInfo) {
+            $userInfo = DB::table('users')
+                ->where('id', $paymentInfo->id_user)
+                ->select('name')
+                ->first();
+
+            if ($userInfo) {
+                $MonthlyExpense[] = (object)[
+                    'id' => $history->id,
+                    'total' => $history->total,
+                    'created_at' => date('d-m-Y', strtotime($paymentInfo->created_at)),
+                    'id_user' => $paymentInfo->id_user,
+                    'user_name' => $userInfo->name,
+                ];
             }
+        } else {
+            // Guardar ID de gastos no encontrados
+            $notFoundExpenses[] = $history->id;
         }
-        return response()->json(['MonthlyExpense' => $MonthlyExpense],200);
     }
+
+    // Puedes hacer algo con los gastos no encontrados, como registrarlos o notificarlos
+
+    return response()->json([
+        'MonthlyExpense' => $MonthlyExpense,
+        'NotFoundExpenses' => $notFoundExpenses,
+    ], 200);
+}
 
     public function create(Request $request)
     {
