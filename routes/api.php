@@ -5,13 +5,17 @@ use App\Http\Controllers\ProductRouteController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\DeliveryRouteController;
 use App\Http\Controllers\IncidenceController;
+use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
+
 use App\Http\Controllers\CenterController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\EstimationSmallBoxController;
 use App\Http\Controllers\EventualesController;
 use App\Http\Controllers\ExchangeReturnController;
+use App\Http\Controllers\BinnacleController;
+use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
@@ -22,6 +26,7 @@ use App\Http\Controllers\TemporyCompanyController;
 use App\Http\Controllers\UploadImageController;
 use App\Http\Controllers\UserCenterController;
 use App\Models\EstimationSmallBox;
+use App\Http\Controllers\UserController;
 use App\Notifications\Acces;
 use App\Models\User;
 
@@ -43,7 +48,7 @@ Route::post('setReception/v1', [ApiOdooController::class, 'setReception']);
 Route::post('setDelivery/v1', [ApiOdooController::class, 'setDelivery']);
 Route::post('setTracking/v1', [ApiOdooController::class, 'setTracking']);
 
-Route::get('users', [AuthController::class, 'allUsers']);
+// Route::get('users', [AuthController::class, 'allUsers']);
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('syncUsers', [AuthController::class, 'syncUsers']);
@@ -51,8 +56,15 @@ Route::post('syncUsers', [AuthController::class, 'syncUsers']);
 Route::get('Acces', [AuthController::class, 'Acces']);
 Route::get('userAccess', [AuthController::class, 'userAccess']);
 
-
 Route::group(['middleware' => 'auth'], function () {
+    // Apis de el userController
+    Route::get('users', [UserController::class, 'index']);
+    Route::post('users', [UserController::class, 'create']);
+    Route::put('users/{id}', [UserController::class, 'update']);
+    Route::delete('users/{id}', [UserController::class, 'delete']);
+    Route::get('users/sendNewAccess/{id}', [UserController::class, 'sendNewAccess']);
+    Route::get('syncUsers', [UserController::class, 'syncUsers']);
+
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('user-profile', [AuthController::class, 'userProfile']);
 
@@ -64,6 +76,13 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
 
+    // Actualizar la ruta de entrega
+    Route::put('pedidos/{pedido}/update_delivery_address_custom', [SaleController::class, 'updateDeliveryAddressCustom']);
+
+    // Crear la bitacora
+    Route::post('pedidos/{pedido}/bitacora/create', [BinnacleController::class, 'store']);
+
+    // Crear y actualizar la inspeccion
     Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
     Route::get('inspections/{inspection}', [InspectionController::class, 'show']);
 
@@ -74,9 +93,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('orders/{order}/receptions', [ReceptionController::class, 'saveReception']);
 
     Route::get('orders/{order}/receptions/{reception}', [ReceptionController::class, 'getReception']);
-
-
-
+    //confirmar un producto
+    Route::post('recepctionsacepted/{code_order_route_id}', [ReceptionController::class, 'receptionAccept']);
+    //Confirmar producto maquilado
+    Route::post('orders/{order}/recepctionmaquilada', [ReceptionController::class, 'confirmation_manufactured_product']);
+    //ver recepcion maquilada
+    Route::get('recepctionsacepted/{order}/product/{odoo_product}', [ReceptionController::class, 'getReceptionConfirmed']);
     // Seccion para actualizar el estatus de maquila
 
     // Seccion de Incidencias
@@ -87,6 +109,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Crear una incidencia
     Route::post('pedidos/{pedido}/incidencia', [IncidenceController::class, 'store']);
     Route::patch('incidencias/{incidencia}', [IncidenceController::class, 'update']);
+    Route::put('incidencias/{incidencia}/update', [IncidenceController::class, 'updateIncidenceComplete']);
 
     // Vista de status de incidencia
     Route::post('order/{compra}/updatestatus', [OrderPurchaseController::class, 'store']);
@@ -112,6 +135,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::patch('rutas-de-entrega/{ruta}/pedido/{pedido}', [DeliveryRouteController::class, 'updateInfoChofer']);
     // Eliminar ruta de entrega
     Route::delete('rutas-de-entrega/{deliveryRoute}', [DeliveryRouteController::class, 'destroy']);
+    //Eliminar un pedido de una ruta
+    Route::get('rutas-de-entrega/{ruta}/excel', [DeliveryRouteController::class, 'excelCompras']);
 
     // Crear una remision
     Route::post('rutas-de-entrega/{ruta}/remision', [DeliveryRouteController::class, 'setRemisiones']);
@@ -214,5 +239,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/return/excess/money', [ExchangeReturnController::class, 'ReturnExcessMoney']);
     Route::post('caja-chica/return/excess/money/confirmation', [ExchangeReturnController::class, 'ConfirmationReturnMoney']);
 
+    //Video
+    Route::get('video', [VideoController::class, 'storeVideoInfo']);
 });
 

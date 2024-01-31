@@ -22,7 +22,8 @@ class Remission extends Model
         'delivery_route_id',
         'user_chofer_id',
         'status',
-        "evidence"
+        "evidence",
+        "code_sale"
     ];
 
     public function productRemission()
