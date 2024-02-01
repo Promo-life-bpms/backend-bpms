@@ -12,6 +12,7 @@ use App\Models\ProductDeliveryRoute;
 use App\Models\ReceptionConfirmationMaquilado;
 use App\Models\Sale;
 use App\Models\SaleStatusChange;
+use Dflydev\DotAccessData\Data;
 use Exception;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -250,7 +251,6 @@ class ReceptionController extends Controller
 
     public function receptionAccept(Request $request, $code_order_route_id)
     {
-
         $user =  auth()->user();
 
         foreach ($user->whatRoles as $rol) {
@@ -282,15 +282,20 @@ class ReceptionController extends Controller
                 response::HTTP_UNPROCESSABLE_ENTITY
             ); // 422
         }
-        $dataFiles  = $request->files_reception_accepted;
+        //$request->files_reception_accepted;
         $productDeliveryRoute = ProductDeliveryRoute::where('code_order_route_id', $code_order_route_id)->first();
-        if ($productDeliveryRoute->files_reception_accepted == null) {
-            $productDeliveryRoute->files_reception_accepted = $dataFiles;
-        }
-        $productDeliveryRoute->save();
+
+        $dataFiles = [
+            'files_reception_accepted' => $request->files_reception_accepted,
+
+        ];
+
+        $productDeliveryRoute->save($dataFiles);
+        /*   $productDeliveryRoute->files_reception_accepted = $dataFiles; */
+        /*    $productDeliveryRoute->save(); */
         return response()->json(['message' => 'Se confirmo que el pedido llego a almacen', 'data' => $productDeliveryRoute], 200);
     }
-    public function confirmation_manufactured_product(Request $request, $order)
+    public function confirmation_manufactured_product(Request $request, $order, $odoo_product)
     {
         $orderPurchase = OrderPurchase::where('code_order', $order)->first();
         /*   foreach ($orderPurchase->products as $product) {
@@ -305,12 +310,13 @@ class ReceptionController extends Controller
         }
         $dataConfirmation = [
             'code_order' => $order,
-            'odoo_product_id' => $request->odoo_product_id,
+            'odoo_product_id' => $odoo_product,
             'quantity_maquilada' => $request->quantity_maquilada,
             'decrease' => $request->decrease,
             'product_clean' => $request->product_clean,
             'observations' => $request->observations
         ];
+
         $recepcion_Confirmation = ReceptionConfirmationMaquilado::create($dataConfirmation);
 
 
@@ -321,9 +327,12 @@ class ReceptionController extends Controller
         $codeOrder = OrderPurchase::where('code_order', $order)->first();
 
         if (!$codeOrder) {
-            return response()->json(['errors' => (['msg' => 'Recepcion no encontrada.'])], 404);
+            return response()->json(['errors' => (['msg' => 'Orden no encontrada.'])], 404);
         }
         $recepciones =  $codeOrder->receptionsConfirmated->where('odoo_product_id', $odoo_product)->first();
+        if (!$recepciones) {
+            return response()->json(['errors' => (['msg' => 'Recepcion no encontrada.'])], 404);
+        }
         return response()->json(['Recepcion maquilada confirmada' => $recepciones], 200);
     }
 }
