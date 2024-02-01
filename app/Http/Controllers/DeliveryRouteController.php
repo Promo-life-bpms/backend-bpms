@@ -506,17 +506,10 @@ class DeliveryRouteController extends Controller
             unset($sale->lastStatus->status_id);
             unset($sale->lastStatus->updated_at);
             $remission =  $sale->remissions()->where('remisiones.delivery_route_id', $ruta->id)->first();
-            /*   if ($remission) {
+            if ($remission) {
                 $sale->remission_id = $remission->code_remission;
             } else {
                 $sale->remission_id = null;
-            }
-            unset($sale->ordersDeliveryRoute); */
-
-            if (empty($remission)) {
-                $remission = null;
-            } else {
-                $sale->remission_id = $remission->code_remission;
             }
             unset($sale->ordersDeliveryRoute);
 
