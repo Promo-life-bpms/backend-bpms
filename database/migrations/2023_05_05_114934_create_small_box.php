@@ -76,6 +76,7 @@ class CreateSmallBox extends Migration
             $table->decimal('total', 16,2);
             $table->string('sign')->nullable();
             $table->string('approved_status');
+            $table->date('creation_date')->nullable();
             $table->integer('approved_by')->nullable();
             $table->string('admin_approved')->nullable();
             $table->timestamps();

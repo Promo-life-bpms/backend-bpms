@@ -176,6 +176,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('caja-chica/solicitudes-de-compra/ver/', [PurchaseRequestController::class, 'show']);
     Route::get('caja-chica/solicitudes-de-compra/ver/{page}', [PurchaseRequestController::class, 'showPage']);
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
+    Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class,'editdate']);
     Route::post('caja-chica/solicitudes-de-compra/editar/', [PurchaseRequestController::class, 'update']);
     Route::post('caja-chica/solicitudes-de-compra/borrar/', [PurchaseRequestController::class, 'delete']);
     

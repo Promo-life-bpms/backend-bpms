@@ -119,22 +119,31 @@ class EstimationSmallBoxController extends Controller
     {
         $MonthlyExpense = [];
         $history = DB::table('money_spent')->select('id_user', 'id_pursache_request', 'created_at')->get();
-
+    
         foreach ($history as $datos) {
             $userInfo = DB::table('users')->where('id', $datos->id_user)->select('name')->first();
             if ($userInfo) {
                 $purchaseRequest = DB::table('purchase_requests')->where('id', $datos->id_pursache_request)->first();
                 if ($purchaseRequest) {
-                    array_push($MonthlyExpense, (object)[
+                    $expense = [
                         'user_name' => $userInfo->name,
                         'created_at' => date('d-m-Y', strtotime($datos->created_at)),
-                        'total' => $purchaseRequest->total,
-                    ]);
+                        'total' => $purchaseRequest->total
+                    ];
+                    if ($purchaseRequest->creation_date != null) {
+                        $expense['creation_date'] = date('d-m-Y', strtotime($purchaseRequest->creation_date));
+                    }
+                    else{
+                        $expense['creation_date'] = "Aún no se ha asignado una fecha de creación.";
+                    } 
+    
+                    array_push($MonthlyExpense, (object)$expense);
                 }
             }
         }
-        return response()->json(['MonthlyExpense' => $MonthlyExpense],200);
+        return response()->json(['MonthlyExpense' => $MonthlyExpense], 200);
     }
+    
 
     ////////////////////////////////////AGREGAR UN PRESUPUESTO///////////////////////////////////////////////////////////////
 
