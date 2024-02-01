@@ -441,7 +441,6 @@ class DeliveryRouteController extends Controller
             if (!$orderExist) {
                 array_push($orders, $order);
             }
-            return $remissions;
         }
 
         // Obtener los productos de cada orden de compra
