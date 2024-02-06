@@ -11,6 +11,7 @@ use App\Models\Role;
 use App\Models\Spent;
 use App\Models\User;
 use App\Notifications\CreateRequestNotification;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 
@@ -91,6 +92,7 @@ class SmallBoxUserController extends Controller
                     'approved_by' => $approved_by,
                     'admin_approved' => $admin_approved,
                     'created_at' => $spent->created_at->format('d-m-Y'),
+                    'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
                 ]);
             }
 
@@ -436,6 +438,7 @@ class SmallBoxUserController extends Controller
                     'approved_by' => $approved_by,
                     'admin_approved' => $admin_approved,
                     'created_at' => $spent->created_at->format('d-m-Y'),
+                    'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
                 ]);
             }
 

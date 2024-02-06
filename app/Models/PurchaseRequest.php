@@ -25,6 +25,7 @@ class PurchaseRequest extends Model
         'payment_method_id',
         'total',
         'sign',
+        'creation_date',
         'approved_status',
         'approved_by',
     ];

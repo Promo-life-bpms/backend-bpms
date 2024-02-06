@@ -106,6 +106,7 @@ class PurchaseRequestController extends Controller
                 'approved_by' => $approved_by,
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
+                'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación."
             ]);
         }
 
@@ -194,6 +195,7 @@ class PurchaseRequestController extends Controller
                 'approved_by' => $approved_by,
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
+                'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
             ]);
         }
                 
@@ -293,6 +295,19 @@ class PurchaseRequestController extends Controller
         return response()->json(['message' => "Registro guardado satisfactoriamente"],200);
     }
 
+    public function editdate(Request $request)
+    {
+        $this->validate($request,[
+            'id' => 'required',
+            'date' => 'required',
+        ]);
+
+        $date = Carbon::parse($request->date)->format('Y-m-d');
+
+        DB::table('purchase_requests')->where('id', $request->id)->update(['creation_date' => $date]);
+        return response(['message' => '¡LISTO!'],200);
+    }
+
     public function updatemoney(Request $request)
     {
         $user = auth()->user();
@@ -317,19 +332,22 @@ class PurchaseRequestController extends Controller
                     ->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
                     ->sum('total');
             }
-    
+            
             ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
             //gastosmentuales == monthlyexpenses
-            $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
-                                                            ->where(function ($query) {
-                                                                $query->where(function ($subquery) {
-                                                                    $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                                })->orWhere(function ($subquery) {
-                                                                    $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                                })->orWhere(function ($subquery) {
-                                                                    $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                                });
-                                                            })->sum('total');
+            $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+                $query->where(function ($subquery) {
+                    $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                })->orWhere(function ($subquery) {
+                    $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                })->orWhere(function ($subquery) {
+                    $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                })->orWhere(function ($subquery){
+                    $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'en proceso')->where('payment_method_id', '=', 1);
+                })->orWhere(function($subquery){
+                    $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'rechazada')->where('payment_method_id', '=', 1);
+                });
+            })->sum('total');
             
             $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
             
@@ -852,7 +870,7 @@ class PurchaseRequestController extends Controller
                     $event[] = $item;
                 }
             }
-            
+
             $returnmoneyexcess = DB::table('exchange_returns')->where('purchase_id', $page)->select('id','total_return', 'status', 'confirmation_datetime', 
                                                                                         'confirmation_user_id', 'description','file_exchange_returns', 
                                                                                         'return_user_id','created_at')->get()->toArray();
@@ -894,6 +912,7 @@ class PurchaseRequestController extends Controller
                 'approved_by' => $approved_by,
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
+                'creation_date' => Carbon::parse($spent->creation_date)->format('d-m-Y'),
                 'event' => $event,
                 'returnmoney' => $returnmoney,
             ]);
