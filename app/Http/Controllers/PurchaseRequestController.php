@@ -299,7 +299,7 @@ class PurchaseRequestController extends Controller
     {
         $this->validate($request,[
             'id' => 'required',
-            'date' => 'required',
+            'creation_date' => 'required',
         ]);
 
         $date = Carbon::parse($request->date)->format('Y-m-d');
