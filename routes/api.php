@@ -8,12 +8,24 @@ use App\Http\Controllers\IncidenceController;
 use App\Http\Controllers\VideoController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiOdooController;
+
+use App\Http\Controllers\CenterController;
+use App\Http\Controllers\CompaniesController;
+use App\Http\Controllers\EstimationSmallBoxController;
+use App\Http\Controllers\EventualesController;
+use App\Http\Controllers\ExchangeReturnController;
 use App\Http\Controllers\BinnacleController;
 use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
+use App\Http\Controllers\PurchaseRequestController;
+use App\Http\Controllers\SmallBoxUserController;
+use App\Http\Controllers\SpentController;
+use App\Http\Controllers\TemporyCompanyController;
 use App\Http\Controllers\UploadImageController;
+use App\Http\Controllers\UserCenterController;
+use App\Models\EstimationSmallBox;
 use App\Http\Controllers\UserController;
 use App\Notifications\Acces;
 use App\Models\User;
@@ -143,6 +155,92 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::post('/image/upload', [UploadImageController::class, 'uploadImage']);
     Route::post('/image/delete', [UploadImageController::class, 'deleteImage']);
+
+
+    //CAJA CHICA
+
+    //Ordenes Usuario
+    Route::get('caja-chica/mis-ordenes/', [SmallBoxUserController::class, 'showUserRequests']);
+    Route::get('caja-chica/mis-ordenes/{page}', [SmallBoxUserController::class, 'showUserPageRequests']);
+    //Ordenes Comprador
+    Route::get('caja-chica/ordenes-comprador/', [SmallBoxUserController::class, 'showBuyerRequests']);
+    Route::get('caja-chica/ordenes-comprador/{page}', [SmallBoxUserController::class, 'showBuyerPageRequests']);
+
+    //Spent
+    Route::get('caja-chica/gastos/ver/', [SpentController::class, 'show']);
+    Route::post('caja-chica/gastos/crear/', [SpentController::class, 'store']);
+    Route::post('caja-chica/gastos/editar/', [SpentController::class, 'update']);
+    Route::post('caja-chica/gastos/borrar/', [SpentController::class, 'delete']);
+
+    //PurchaseRequest
+    Route::get('caja-chica/solicitudes-de-compra/ver/', [PurchaseRequestController::class, 'show']);
+    Route::get('caja-chica/solicitudes-de-compra/ver/{page}', [PurchaseRequestController::class, 'showPage']);
+    Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
+    Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class,'editdate']);
+    Route::post('caja-chica/solicitudes-de-compra/editar/', [PurchaseRequestController::class, 'update']);
+    Route::post('caja-chica/solicitudes-de-compra/borrar/', [PurchaseRequestController::class, 'delete']);
+    
+    Route::post('caja-chica/aprobar-solicitud/', [PurchaseRequestController::class, 'approved']);
+    Route::post('caja-chica/rechazar-solicitud/', [PurchaseRequestController::class, 'rejected']);
+    Route::post('caja-chica/confirmar-entrega/', [PurchaseRequestController::class, 'confirmDelivered']);
+    Route::post('caja-chica/confirmar-recibido/', [PurchaseRequestController::class, 'confirmReceived']);
+    Route::post('caja-chica/realizar-devolucion/', [PurchaseRequestController::class, 'createDevolution']);
+    Route::post('caja-chica/realizar-devolucion/confirmada/',[PurchaseRequestController::class, 'confirmationDevolution']);
+    Route::post('caja-chica/realizar-devolucion/cancelation/',[PurchaseRequestController::class, 'cancelationDevolution']);
+    Route::post('caja-chica/realizar-cancelacion/', [PurchaseRequestController::class, 'createCancellation']);
+    Route::post('caja-chica/actualizar-pago/', [PurchaseRequestController::class, 'updatePaymentMethod']);
+
+    //actualizar el monto del pago//
+    route::post('caja-chica/actualizar-pago-monto',[PurchaseRequestController::class,'updatemoney']);
+
+    //Administrador
+    Route::get('caja-chica/administrador/solicitudes-de-compra/ver', [PurchaseRequestController::class, 'showAdministrador']);
+    Route::post('caja-chica/administrador/solicitudes-de-compra/aprobar', [PurchaseRequestController::class, 'approvedByAdmin']);
+
+    
+    //Center
+    Route::get('caja-chica/centros-de-costos/ver/', [CenterController::class, 'show']);
+    Route::post('caja-chica/centros-de-costos/crear/', [CenterController::class, 'store']);
+    Route::post('caja-chica/centros-de-costos/editar/', [CenterController::class, 'update']);
+    Route::post('caja-chica/centros-de-costos/borrar/', [CenterController::class, 'delete']);
+
+    //UserCenter 
+    Route::get('caja-chica/usuarios-centro-de-costos/ver/', [UserCenterController::class, 'show']);
+    Route::get('caja-chica/usuarios-centro-de-costos/crear/', [UserCenterController::class, 'store']);
+    Route::get('caja-chica/usuarios-centro-de-costos/eliminar/', [UserCenterController::class, 'delete']);
+
+    //Companies
+    Route::get('caja-chica/companias/ver/', [CompaniesController::class, 'show']);
+    Route::post('caja-chica/companias/crear/', [CompaniesController::class, 'store']);
+    Route::post('caja-chica/companias/editar/', [CompaniesController::class, 'update']);
+    Route::post('caja-chica/companias/borrar/', [CompaniesController::class, 'delete']);
+
+    //Exportar
+    Route::post('caja-chica/generar-reporte/', [SmallBoxUserController::class, 'report']);
+
+    //Datos para solicitud
+    Route::get('caja-chica/datos-solicitud/', [SmallBoxUserController::class, 'dataRequest']);
+
+
+    //CAJA CHICA PRESUPUESTO//
+    Route::post('caja-chica/estimate/',[EstimationSmallBoxController::class,'create'])->name('estimate');
+    Route::get('caja-chica/information/estimate',[EstimationSmallBoxController::class,'index'])->name('information.estimate');
+    Route::get('caja-chica/information/history',[EstimationSmallBoxController::class,'ExpenseHistory'])->name('information.history');
+    Route::post('caja-chica/estimate/return',[EstimationSmallBoxController::class,'BudgetReturn'])->name('estimate.return');
+    Route::get('caja-chica/devolution/product/history', [EstimationSmallBoxController::class,'DevolutionHistory'])->name('devolution.product.history');
+    Route::get('caja-chica/estimate/return/history', [EstimationSmallBoxController::class, 'HistoryOfTheReturnOfMoney'])->name('estimate.return.history');
+
+    //CAJA CHICA AGREGAR EMPRESA/EVENTUALES //
+    Route::post('caja-chica/newcompany', [TemporyCompanyController::class, 'store'])->name('newcompany');
+    Route::post('caja-chica/delete',[TemporyCompanyController::class, 'delete'])->name('deletecompany');
+    Route::get('caja-chica/company', [TemporyCompanyController::class,'index'])->name('infocompany');
+    Route::post('caja-chica/company/restore', [TemporyCompanyController::class, 'restore'])->name('name');
+
+    ///CAJA CHICA REGRESAR DINERO QUE SOBRO DEL EFECTIVO///
+    Route::post('caja-chica/return/excess/money', [ExchangeReturnController::class, 'ReturnExcessMoney']);
+    Route::post('caja-chica/return/excess/money/confirmation', [ExchangeReturnController::class, 'ConfirmationReturnMoney']);
+
     //Video
     Route::get('video', [VideoController::class, 'storeVideoInfo']);
 });
+
