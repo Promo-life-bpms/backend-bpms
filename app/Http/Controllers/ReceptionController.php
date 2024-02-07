@@ -259,11 +259,12 @@ class ReceptionController extends Controller
                 case ("compras" == $rol->name):
 
                     break;
-
+                case ("administrador" == $rol->name):
+                    break;
                 default:
                     return response()->json(
                         [
-                            'msg' => "No tienes autorizacion para generar una ruta de entrega",
+                            'msg' => "No tienes autorizacion para subir la evidencia",
                         ],
 
                     );
