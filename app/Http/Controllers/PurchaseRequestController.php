@@ -299,10 +299,10 @@ class PurchaseRequestController extends Controller
     {
         $this->validate($request,[
             'id' => 'required',
-            'date' => 'required',
+            'creation_date' => 'required',
         ]);
 
-        $date = Carbon::parse($request->date)->format('Y-m-d');
+        $date = Carbon::parse($request->creation_date)->format('Y-m-d');
 
         DB::table('purchase_requests')->where('id', $request->id)->update(['creation_date' => $date]);
         return response(['message' => '¡LISTO!'],200);
@@ -912,7 +912,7 @@ class PurchaseRequestController extends Controller
                 'approved_by' => $approved_by,
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
-                'creation_date' => Carbon::parse($spent->creation_date)->format('d-m-Y'),
+                'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
                 'event' => $event,
                 'returnmoney' => $returnmoney,
             ]);
