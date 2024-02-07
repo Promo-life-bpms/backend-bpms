@@ -330,17 +330,20 @@ class ReceptionController extends Controller
 
         $recepcion_Confirmation = ReceptionConfirmationMaquilado::create($dataConfirmation);
 
-
         return response()->json(['message' => 'Creacion de la confirmacion de los productos maquilados', 'data' => $recepcion_Confirmation], 200);
     }
     public function getReceptionConfirmed($order, $odoo_product)
     {
-        $codeOrder = OrderPurchase::where('code_order', $order)->first();
+        $codeOrder = CodeOrderDeliveryRoute::where('code_order', $order)->first();
 
         if (!$codeOrder) {
             return response()->json(['errors' => (['msg' => 'Orden no encontrada.'])], 404);
         }
-        $recepciones =  $codeOrder->receptionsConfirmated->where('odoo_product_id', $odoo_product)->first();
+        $products =  $codeOrder->productDeliveryRoute[0]->odoo_product_id;
+
+        $recepciones = ReceptionConfirmationMaquilado::where('odoo_product_id', $products)->get();
+
+
         if (!$recepciones) {
             return response()->json(['errors' => (['msg' => 'Recepcion no encontrada.'])], 404);
         }
