@@ -423,7 +423,6 @@ class DeliveryRouteController extends Controller
             ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
             ->select('product_delivery_routes.*')
             ->get();
-
         // Obtener las ordenes de compra de estos productos
         $orders = [];
         foreach ($products as $product) {
@@ -463,7 +462,7 @@ class DeliveryRouteController extends Controller
         // Obtener los pedidos de cada orden de compra
         $sales = [];
         foreach ($dataOrders as $order) {
-            $sale = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
+            $sale_ped = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
                 ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->where('sales.code_sale', $order['code_sale'])
                 ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
@@ -486,32 +485,36 @@ class DeliveryRouteController extends Controller
                 )
                 ->get();
             // No se encontró el pedido y se continua con la siguiente orden.
-            if (!$sale) {
-                continue;
+            foreach ($sale_ped as $sale) {
+                # code...
+
+                if (!$sale) {
+                    continue;
+                }
+
+                if ($sale->user_chofer_id) {
+
+                    $sale->chofer_name = User::find($sale->user_chofer_id)->name;
+                } else {
+                    $sale->chofer_name = "Sin Chofer Asignado";
+                }
+
+
+                $sale->lastStatus->slug = $sale->lastStatus->status->slug;
+                $sale->lastStatus->last_status = $sale->lastStatus->status->status;
+                unset($sale->lastStatus->status);
+                unset($sale->lastStatus->id);
+                unset($sale->lastStatus->sale_id);
+                unset($sale->lastStatus->status_id);
+                unset($sale->lastStatus->updated_at);
+                $remission =  $sale->remissions()->where('remisiones.delivery_route_id', $ruta->id)->first();
+                if ($remission) {
+                    $sale->remission_id = $remission->code_remission;
+                } else {
+                    $sale->remission_id = null;
+                }
+                unset($sale->ordersDeliveryRoute);
             }
-            if ($sale->user_chofer_id) {
-
-                $sale->chofer_name = User::find($sale->user_chofer_id)->name;
-            } else {
-                $sale->chofer_name = "Sin Chofer Asignado";
-            }
-
-
-            $sale->lastStatus->slug = $sale->lastStatus->status->slug;
-            $sale->lastStatus->last_status = $sale->lastStatus->status->status;
-            unset($sale->lastStatus->status);
-            unset($sale->lastStatus->id);
-            unset($sale->lastStatus->sale_id);
-            unset($sale->lastStatus->status_id);
-            unset($sale->lastStatus->updated_at);
-            $remission =  $sale->remissions()->where('remisiones.delivery_route_id', $ruta->id)->first();
-            if ($remission) {
-                $sale->remission_id = $remission->code_remission;
-            } else {
-                $sale->remission_id = null;
-            }
-            unset($sale->ordersDeliveryRoute);
-
             // revisar si el pedido ya esta en el array
             $saleExist = false;
             foreach ($sales as $saleInArray) {
@@ -524,6 +527,7 @@ class DeliveryRouteController extends Controller
                 array_push($sales, $sale);
             }
         }
+
         $dataSales = [];
         foreach ($sales as $sale) {
             $ordersInThisSale = [];
