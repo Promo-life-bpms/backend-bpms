@@ -286,6 +286,17 @@ class ReceptionController extends Controller
         $productDeliveryRoute = ProductDeliveryRoute::where('code_order_route_id', $code_order_route_id)->first();
 
         $dataFiles = [
+            'code_order_route_id' => $productDeliveryRoute->code_order_route_id,
+            'odoo_product_id' => $productDeliveryRoute->odoo_product_id,
+            'amount' => $productDeliveryRoute->amount,
+            'action' => $productDeliveryRoute->action,
+            'hour' => $productDeliveryRoute->hour,
+            'observations' => $productDeliveryRoute->observations,
+            'provider' => $productDeliveryRoute->provider,
+            "origin_address" => $productDeliveryRoute->origin_address,
+            "destinity_address" => $productDeliveryRoute->destinity_address,
+            "confirmation_sheet" => $productDeliveryRoute->confirmation_sheet,
+            "buyer_id" => $productDeliveryRoute->buyer_id,
             'files_reception_accepted' => $request->files_reception_accepted,
 
         ];
@@ -333,6 +344,6 @@ class ReceptionController extends Controller
         if (!$recepciones) {
             return response()->json(['errors' => (['msg' => 'Recepcion no encontrada.'])], 404);
         }
-        return response()->json(['Recepcion maquilada confirmada' => $recepciones], 200);
+        return response()->json(['Recepcion_maquilada_confirmada' => $recepciones], 200);
     }
 }
