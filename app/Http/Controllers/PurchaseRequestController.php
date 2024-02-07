@@ -302,7 +302,7 @@ class PurchaseRequestController extends Controller
             'creation_date' => 'required',
         ]);
 
-        $date = Carbon::parse($request->date)->format('Y-m-d');
+        $date = Carbon::parse($request->creation_date)->format('Y-m-d');
 
         DB::table('purchase_requests')->where('id', $request->id)->update(['creation_date' => $date]);
         return response(['message' => '¡LISTO!'],200);
