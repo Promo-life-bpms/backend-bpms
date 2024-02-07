@@ -286,7 +286,6 @@ class DeliveryRouteController extends Controller
                 }
             }
         }
-        return $dataSale;
         return response()->json([
             'msg' => 'Ruta Creada Existosamente',
             'data' => [
@@ -486,7 +485,6 @@ class DeliveryRouteController extends Controller
                     'additional_sale_information.company',
                 )
                 ->get();
-            return $dataOrders;
             // No se encontró el pedido y se continua con la siguiente orden.
             if (!$sale) {
                 continue;
@@ -541,9 +539,9 @@ class DeliveryRouteController extends Controller
             $data['details_orders'] = $ordersInThisSale;
             array_push($dataSales, $data);
         }
-        return $dataSales;
         $ruta->pedidos = $dataSales;
         // Devolvemos la información encontrada.
+
         return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['ruta' => $ruta]], response::HTTP_OK);
     }
 
