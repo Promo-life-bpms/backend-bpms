@@ -912,7 +912,7 @@ class PurchaseRequestController extends Controller
                 'approved_by' => $approved_by,
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
-                'creation_date' => Carbon::parse($spent->creation_date)->format('d-m-Y'),
+                'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
                 'event' => $event,
                 'returnmoney' => $returnmoney,
             ]);
