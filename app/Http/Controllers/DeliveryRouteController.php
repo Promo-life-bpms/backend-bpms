@@ -172,7 +172,7 @@ class DeliveryRouteController extends Controller
         $errores = [];
         foreach ($request->code_orders as $saleOrder) {
             $saleOrder = (object)$saleOrder;
-            $saleOrderBD = Sale::where('code_sale', $saleOrder->code_sale)->first();
+            $saleOrderBD = Sale::where('code_sale', $saleOrder->code_sale)->get();
             foreach ($saleOrder->orders as $orderRQ) {
                 $orderRQ = (object) $orderRQ;
                 $orderDB = OrderPurchase::where('code_sale', $saleOrder->code_sale)->where('code_order', $orderRQ->code_order)->first();
@@ -191,6 +191,8 @@ class DeliveryRouteController extends Controller
                 // return $saleOrder->code_sale;
             }
         }
+
+
         if (count($errores) > 0) {
             return response()->json($errores, 400);
         }
@@ -217,7 +219,6 @@ class DeliveryRouteController extends Controller
         //retornar un mensaje
         foreach ($request->code_orders as $codeOrder) {
             $codeOrder = (object)$codeOrder;
-
             $dataSale = [
                 'code_sale' => $codeOrder->code_sale,
                 'type_of_origin' => $codeOrder->type_of_origin,
@@ -227,7 +228,7 @@ class DeliveryRouteController extends Controller
                 'type_of_chofer' => null,
                 'status' => 'Pendiente'
             ];
-            //return $dataSale;
+
             // Agendado en ruta de entrega (Material maquilado):
             //Agendado en ruta de entrega (Material maquilado):
 
@@ -251,7 +252,6 @@ class DeliveryRouteController extends Controller
                         'files_reception_accepted' => null,
                     ]);
                 }
-                return  $codeOrderRoute->productDeliveryRoute;
                 $type_of_product = $request->type_of_product;
                 $type_of_destiny =  $codeOrder->type_of_destiny;
                 if ($type_of_destiny == 'Cliente') {
@@ -286,7 +286,7 @@ class DeliveryRouteController extends Controller
                 }
             }
         }
-
+        return $dataSale;
         return response()->json([
             'msg' => 'Ruta Creada Existosamente',
             'data' => [
@@ -485,7 +485,8 @@ class DeliveryRouteController extends Controller
                     'additional_sale_information.planned_date',
                     'additional_sale_information.company',
                 )
-                ->first();
+                ->get();
+            return $dataOrders;
             // No se encontró el pedido y se continua con la siguiente orden.
             if (!$sale) {
                 continue;
@@ -540,6 +541,7 @@ class DeliveryRouteController extends Controller
             $data['details_orders'] = $ordersInThisSale;
             array_push($dataSales, $data);
         }
+        return $dataSales;
         $ruta->pedidos = $dataSales;
         // Devolvemos la información encontrada.
         return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['ruta' => $ruta]], response::HTTP_OK);
