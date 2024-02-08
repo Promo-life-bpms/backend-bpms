@@ -170,11 +170,15 @@ class DeliveryRouteController extends Controller
 
         // Validar que la informacion sea la correcta
         $errores = [];
-        foreach ($request->code_orders as $saleOrder) {
+        /*      foreach ($request->code_orders as $saleOrder) {
             $saleOrder = (object)$saleOrder;
+
             $saleOrderBD = Sale::where('code_sale', $saleOrder->code_sale)->get();
+
             foreach ($saleOrder->orders as $orderRQ) {
                 $orderRQ = (object) $orderRQ;
+
+                // return $orderRQ;
                 $orderDB = OrderPurchase::where('code_sale', $saleOrder->code_sale)->where('code_order', $orderRQ->code_order)->first();
                 if (!$orderDB) {
                     array_push($errores, 'La orden de compra ' . $orderRQ->code_order . ' no pertenece al pedido ' . $saleOrder->code_sale);
@@ -188,9 +192,8 @@ class DeliveryRouteController extends Controller
                         continue;
                     }
                 }
-                // return $saleOrder->code_sale;
             }
-        }
+        } */
 
 
         if (count($errores) > 0) {
@@ -215,8 +218,7 @@ class DeliveryRouteController extends Controller
         ]);
 
         //crear los productos de esa ruta de entrega
-        //  $ruta->productsDeliveryRoute()->create
-        //retornar un mensaje
+        $sales_order = [];
         foreach ($request->code_orders as $codeOrder) {
             $codeOrder = (object)$codeOrder;
             $dataSale = [
@@ -285,11 +287,15 @@ class DeliveryRouteController extends Controller
                     }
                 }
             }
+            $sales_order[] = [
+                'order' => $codeOrder,
+            ];
         }
         return response()->json([
             'msg' => 'Ruta Creada Existosamente',
             'data' => [
-                "ruta" =>  $ruta
+                "ruta" =>  $ruta,
+                "pedidos" => $sales_order,
             ]
         ], Response::HTTP_CREATED);
     }
@@ -543,6 +549,7 @@ class DeliveryRouteController extends Controller
             $data['details_orders'] = $ordersInThisSale;
             array_push($dataSales, $data);
         }
+
         $ruta->pedidos = $dataSales;
         // Devolvemos la información encontrada.
 
