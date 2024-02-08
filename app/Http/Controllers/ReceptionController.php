@@ -285,7 +285,6 @@ class ReceptionController extends Controller
         }
         //$request->files_reception_accepted;
         $productDeliveryRoute = ProductDeliveryRoute::where('code_order_route_id', $code_order_route_id)->first();
-        return $productDeliveryRoute;
         if ($productDeliveryRoute->files_reception_accepted == null) {
             $productDeliveryRoute->files_reception_accepted = $request->files_reception_accepted;
         }
