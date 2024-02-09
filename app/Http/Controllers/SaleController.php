@@ -30,7 +30,6 @@ class SaleController extends Controller
             //Asignarle el valor al var per_page
             $per_page = $request->per_page;
         }
-
         // Filtros de buscador
         $idPedidos = $request->idPedidos ?? ""; // Sale.code_sale
         $fechaCreacion = $request->fechaCreacion ?? ""; // Pendiente
@@ -41,6 +40,12 @@ class SaleController extends Controller
         $total = $request->total ?? null; // sale.total
 
         $sales = null;
+      /*   $sales = Sale::with('lastStatus', "detailsOrders", "moreInformation")
+            ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+            ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
+            ->join('code_order_delivery_routes', 'code_order_delivery_routes.delivery_route_id', 'order_purchases.id')
+            ->join('product_delivery_routes', 'product_delivery_routes.code_order_route_id', 'code_order_delivery_routes.id')->first(); */
+        //return $sales;
         $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente', 'asistente_de_gerente'])->first();
         $isMaquilador = auth()->user()->whatRoles()->whereIn('name', ['maquilador'])->first();
         // return $isSeller;
@@ -51,6 +56,8 @@ class SaleController extends Controller
             $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")
                 ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
+                ->join('code_order_delivery_routes', 'code_order_delivery_routes.delivery_route_id', 'order_purchases.id')
+                ->join('product_delivery_routes', 'product_delivery_routes.code_order_route_id', 'code_order_delivery_routes.id')
                 ->when($isSeller !== null, function ($query) {
                     $user =  auth()->user();
                     // $query->where('additional_sale_information.company', $user->company);
@@ -58,7 +65,7 @@ class SaleController extends Controller
                 })
                 ->when($isMaquilador !== null, function ($query) {
                     $user =  auth()->user();
-                    $query->where('order_purchases.tagger_user_id', $user->id);
+                    $query->where('product_delivery_routes.tagger_user_id', $user->id);
                 })
                 ->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
                 // ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
@@ -85,6 +92,8 @@ class SaleController extends Controller
             $sales = Sale::with('lastStatus', "detailsOrders", "moreInformation")
                 ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
+                ->join('code_order_delivery_routes', 'code_order_delivery_routes.delivery_route_id', 'order_purchases.id')
+                ->join('product_delivery_routes', 'product_delivery_routes.code_order_route_id', 'code_order_delivery_routes.id')
                 ->when($isSeller !== null, function ($query) {
                     $user =  auth()->user();
                     // $query->where('additional_sale_information.company', $user->company);
@@ -92,7 +101,7 @@ class SaleController extends Controller
                 })
                 ->when($isMaquilador !== null, function ($query) {
                     $user =  auth()->user();
-                    $query->where('order_purchases.tagger_user_id', $user->id);
+                    $query->where('product_delivery_routes.tagger_user_id', $user->id);
                 })
                 ->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
                 // ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
@@ -115,6 +124,7 @@ class SaleController extends Controller
                 )
                 ->paginate($per_page);
         }
+        return $sales;
         // TODO: Pedido 153 muestra mal el status
         foreach ($sales as $sale) {
             if ($sale->lastStatus !== null) {

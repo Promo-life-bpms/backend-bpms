@@ -20,7 +20,8 @@ class ProductDeliveryRoute extends Model
         'destinity_address',
         'confirmation_sheet',
         'buyer_id',
-        'files_reception_accepted' 
+        'files_reception_accepted' ,
+        'tagger_user_id'
 
     ];
 
