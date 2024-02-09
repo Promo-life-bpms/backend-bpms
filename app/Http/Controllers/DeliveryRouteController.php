@@ -241,7 +241,6 @@ class DeliveryRouteController extends Controller
                 $codeOrderRoute =  $ruta->codeOrderDeliveryRoute()->create($dataSale);
                 foreach ($order->products as $newProduct) {
                     $newProduct = (object)$newProduct;
-                    return $newProduct;
                     $codeOrderRoute->productDeliveryRoute()->create([
                         'odoo_product_id' => $newProduct->odoo_product_id,
                         'amount' => $newProduct->amount,
