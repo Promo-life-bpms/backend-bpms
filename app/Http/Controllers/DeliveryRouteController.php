@@ -241,6 +241,7 @@ class DeliveryRouteController extends Controller
                 $codeOrderRoute =  $ruta->codeOrderDeliveryRoute()->create($dataSale);
                 foreach ($order->products as $newProduct) {
                     $newProduct = (object)$newProduct;
+                    return $newProduct;
                     $codeOrderRoute->productDeliveryRoute()->create([
                         'odoo_product_id' => $newProduct->odoo_product_id,
                         'amount' => $newProduct->amount,
@@ -252,7 +253,6 @@ class DeliveryRouteController extends Controller
                         'confirmation_sheet' => $newProduct->confirmation_sheet,
                         'buyer_id' => auth()->user()->name,
                         'files_reception_accepted' => null,
-                        'tagger_user_id' => $newProduct->tagger_user_id
                     ]);
                 }
                 $type_of_product = $request->type_of_product;
