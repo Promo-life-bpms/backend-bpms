@@ -27,6 +27,7 @@ class CreateProductDeliveryRoutesTable extends Migration
             $table->string('confirmation_sheet')->nullable();
             $table->string('buyer_id')->nullable();
             $table->text('files_reception_accepted')->nullable();
+            $table->integer('tagger_user_id')->nullable();
             $table->timestamps();
         });
     }
