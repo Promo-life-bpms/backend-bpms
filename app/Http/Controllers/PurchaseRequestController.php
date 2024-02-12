@@ -954,19 +954,21 @@ class PurchaseRequestController extends Controller
             }
                     
             ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
-            //gastosmentuales == monthlyexpenses
+            ///gastosmentuales == monthlyexpenses///
+            $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+                $query->where(function ($subquery) {
+                    $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                })->orWhere(function ($subquery) {
+                    $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                })->orWhere(function ($subquery) {
+                    $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                })->orWhere(function ($subquery){
+                    $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'en proceso')->where('payment_method_id', '=', 1);
+                })->orWhere(function($subquery){
+                    $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'rechazada')->where('payment_method_id', '=', 1);
+                });
+            })->sum('total');
 
-            $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
-                                                                ->where(function ($query) {
-                                                                    $query->where(function ($subquery) {
-                                                                        $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                                    })->orWhere(function ($subquery) {
-                                                                        $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                                    })->orWhere(function ($subquery) {
-                                                                        $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                                                                    });
-                                                                })->sum('total');
-        
             $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
 
             if ($pago) {
