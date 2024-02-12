@@ -124,19 +124,27 @@ class EstimationSmallBoxController extends Controller
             $userInfo = DB::table('users')->where('id', $datos->id_user)->select('name')->first();
             if ($userInfo) {
                 $purchaseRequest = DB::table('purchase_requests')->where('id', $datos->id_pursache_request)->first();
-                if ($purchaseRequest) {
+                $expensemoney = DB::table('exchange_returns')->where('purchase_id', $datos->id_pursache_request)->first();
+                if($purchaseRequest){
                     $expense = [
                         'user_name' => $userInfo->name,
                         'created_at' => date('d-m-Y', strtotime($datos->created_at)),
-                        'total' => $purchaseRequest->total
+                        'total' => $purchaseRequest->total,
+                        
                     ];
                     if ($purchaseRequest->creation_date != null) {
                         $expense['creation_date'] = date('d-m-Y', strtotime($purchaseRequest->creation_date));
                     }
                     else{
                         $expense['creation_date'] = "Aún no se ha asignado una fecha de creación.";
-                    } 
-    
+                    }
+
+                    if($expensemoney){
+                        $expense['total_return'] = $expensemoney->total_return;
+                    }
+                    else{
+                        $expense['total_return'] = "Solicitud sin excedente de efectivo";
+                    }
                     array_push($MonthlyExpense, (object)$expense);
                 }
             }
