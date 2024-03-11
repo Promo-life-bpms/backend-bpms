@@ -10,10 +10,13 @@ class SpentController extends Controller
 {
     public function show()
     {
-       
-        $spents = Spent::where('status',1)->get();
+        $spents = DB::table('spents')->get();
+        foreach ($spents as $spent) {
+            $spent->center_id =DB::table('centers')->where('id', $spent->center_id)->select('name')->first();
+            $spent->created_at = date('d-m-Y', strtotime($spent->created_at));
+        }
 
-        return $spents;
+        return response()->json(['spents' => $spents], 200);
     }
 
     public function store(Request $request)
@@ -56,7 +59,7 @@ class SpentController extends Controller
         return response()->json(['message' => "Registro actualizado satisfactoriamente"], 200);
     }
 
-    public function delete(Request $request)
+    public function deactivateSpents(Request $request)
     {
         $request->validate([
             'id' => 'required',
@@ -66,6 +69,20 @@ class SpentController extends Controller
             'status' => 0,
         ]);
 
-        return response()->json(['message' => "Registro eliminado satisfactoriamente"], 200);
+        return response()->json(['message' => "Registro desactivado satisfactoriamente"], 200);
+    }
+
+    public function activateSpents(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+        ]);
+
+        DB::table('spents')->where('id',$request->id)->update([
+            'status' => 1,
+        ]);
+
+        return response()->json(['message' => "Registro activado satisfactoriamente"], 200);
+
     }
 }

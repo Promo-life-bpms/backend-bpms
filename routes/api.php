@@ -170,7 +170,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('caja-chica/gastos/ver/', [SpentController::class, 'show']);
     Route::post('caja-chica/gastos/crear/', [SpentController::class, 'store']);
     Route::post('caja-chica/gastos/editar/', [SpentController::class, 'update']);
-    Route::post('caja-chica/gastos/borrar/', [SpentController::class, 'delete']);
+    Route::post('caja-chica/gastos/borrar/', [SpentController::class, 'deactivateSpents']);
+    Route::post('caja-chica/gastos/activate/', [SpentController::class, 'activateSpents']);
+
 
     //PurchaseRequest
     Route::get('caja-chica/solicitudes-de-compra/ver/', [PurchaseRequestController::class, 'show']);
@@ -202,7 +204,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('caja-chica/centros-de-costos/ver/', [CenterController::class, 'show']);
     Route::post('caja-chica/centros-de-costos/crear/', [CenterController::class, 'store']);
     Route::post('caja-chica/centros-de-costos/editar/', [CenterController::class, 'update']);
-    Route::post('caja-chica/centros-de-costos/borrar/', [CenterController::class, 'delete']);
+    Route::post('caja-chica/centros-de-costos/borrar/', [CenterController::class, 'deactivateCenters']);
+    Route::post('caja-chica/centros-de-costos/activate/', [CenterController::class, 'activateCenters']);
 
     //UserCenter 
     Route::get('caja-chica/usuarios-centro-de-costos/ver/', [UserCenterController::class, 'show']);

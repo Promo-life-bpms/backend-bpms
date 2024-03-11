@@ -10,9 +10,12 @@ class CenterController extends Controller
 {
     public function show()
     {       
-        $spents = Center::where('status',1)->get();
-
-        return response()->json(['spents' => $spents], 200);
+        //$centers = Center::where('status',1)->get();
+        $centers = DB::table('centers')->get();
+        foreach ($centers as $center) {
+            $center->created_at = date('d-m-Y', strtotime($center->created_at));
+        }
+        return response()->json(['centers' => $centers], 200);
     }
 
     public function store(Request $request)
@@ -45,7 +48,7 @@ class CenterController extends Controller
         return response()->json(['message' => "Registro actualizado satisfactoriamente"],200);
     }
 
-    public function delete(Request $request)
+    public function deactivateCenters(Request $request)
     {
         $request->validate([
             'id' => 'required',
@@ -55,6 +58,19 @@ class CenterController extends Controller
             'status' => 0,
         ]);
 
-        return response()->json(['message' => "Registro eliminado satisfactoriamente"],200);
+        return response()->json(['message' => "Registro desactivado satisfactoriamente"],200);
+    }
+
+    public function activateCenters(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+        ]);
+
+        DB::table('centers')->where('id',$request->id)->update([
+            'status' => 1,
+        ]);
+
+        return response()->json(['message' => "Registro activado satisfactoriamente"],200);
     }
 }
