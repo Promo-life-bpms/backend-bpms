@@ -33,6 +33,7 @@ class SpentController extends Controller
         $create_spent->center_id = $request->center_id;
         $create_spent->outgo_type = $request->outgo_type;
         $create_spent->expense_type = $request->expense_type;
+        $create_spent->product_type = $request->product_type;
         $create_spent->status = 1;
         $create_spent->save();
 
