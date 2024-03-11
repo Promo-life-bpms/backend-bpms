@@ -49,6 +49,7 @@ class SmallBoxSeeder extends Seeder
             "GABRADO LÁSER",
             "NÓMINA BANCO",
             "NÓMINA CASH",
+            "CAJA CHICA",
             "OTROS",
         ];
 
