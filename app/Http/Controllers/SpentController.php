@@ -62,6 +62,7 @@ class SpentController extends Controller
 
     public function deactivateSpents(Request $request)
     {
+        dd($request);
         $request->validate([
             'id' => 'required',
         ]);
