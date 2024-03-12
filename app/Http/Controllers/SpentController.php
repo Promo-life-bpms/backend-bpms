@@ -62,12 +62,11 @@ class SpentController extends Controller
 
     public function deactivateSpents(Request $request)
     {
-        dd($request);
-        $request->validate([
-            'id' => 'required',
+        $this->validate($request,[
+            'id_spents' => 'required',
         ]);
 
-        DB::table('spents')->where('id',$request->id)->update([
+        DB::table('spents')->where('id',$request->id_spents)->update([
             'status' => 0,
         ]);
 
@@ -76,11 +75,11 @@ class SpentController extends Controller
 
     public function activateSpents(Request $request)
     {
-        $request->validate([
-            'id' => 'required',
+        $this->validate($request,[
+            'id_spents' => 'required',
         ]);
 
-        DB::table('spents')->where('id',$request->id)->update([
+        DB::table('spents')->where('id',$request->id_spents)->update([
             'status' => 1,
         ]);
 

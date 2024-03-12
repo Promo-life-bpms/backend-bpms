@@ -50,11 +50,11 @@ class CenterController extends Controller
 
     public function deactivateCenters(Request $request)
     {
-        $request->validate([
-            'id' => 'required',
+        $this->validate($request,[
+            'id_centers' => 'required',
         ]);
 
-        DB::table('centers')->where('id',$request->id)->update([
+        DB::table('centers')->where('id',$request->id_centers)->update([
             'status' => 0,
         ]);
 
@@ -63,11 +63,11 @@ class CenterController extends Controller
 
     public function activateCenters(Request $request)
     {
-        $request->validate([
-            'id' => 'required',
+        $this->validate($request,[
+            'id_centers' => 'required',
         ]);
 
-        DB::table('centers')->where('id',$request->id)->update([
+        DB::table('centers')->where('id',$request->id_centers)->update([
             'status' => 1,
         ]);
 
