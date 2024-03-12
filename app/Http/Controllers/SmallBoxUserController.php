@@ -326,6 +326,7 @@ class SmallBoxUserController extends Controller
                 'outgo_type' => $spent->outgo_type,
                 'expense_type' => $spent->expense_type,
                 'spent_product_type' =>  $spent->product_type,
+                'status' => $spent->status,
             ]);
         }
 
