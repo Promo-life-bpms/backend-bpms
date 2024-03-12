@@ -169,7 +169,7 @@ Route::group(['middleware' => 'auth'], function () {
     //Spent
     Route::get('caja-chica/gastos/ver/', [SpentController::class, 'show']);
     Route::post('caja-chica/gastos/crear/', [SpentController::class, 'store']);
-    Route::post('caja-chica/gastos/editar/', [SpentController::class, 'update']);
+    Route::post('caja-chica/gastos/editar', [SpentController::class, 'update']);
     Route::post('caja-chica/gastos/borrar', [SpentController::class, 'deactivateSpents']);
     Route::post('caja-chica/gastos/activate', [SpentController::class, 'activateSpents']);
 
