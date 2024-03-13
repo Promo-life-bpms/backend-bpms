@@ -24,8 +24,11 @@ class CreateRemisionesTable extends Migration
             $table->text('signature_received')->nullable();
             $table->foreignId('delivery_route_id')->reference('id')->on('delivery_routes');
             $table->foreignId('user_chofer_id')->reference('id')->on('users');
+            // Nullable
+            $table->foreignId('sale_id')->reference('id')->on('sales')->nullable();
             $table->string('status')->default(1)->nullable();
             $table->text('evidence')->nullable();
+            $table->string('code_sale')->nullable();
             $table->timestamps();
         });
     }

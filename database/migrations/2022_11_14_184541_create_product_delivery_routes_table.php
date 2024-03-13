@@ -18,6 +18,16 @@ class CreateProductDeliveryRoutesTable extends Migration
             $table->foreignId('code_order_route_id')->reference('id')->on('code_order_delivery_routes');
             $table->string("odoo_product_id", 20);
             $table->string('amount');
+            $table->string('action');
+            $table->dateTime('hour')->nullable();
+            $table->text('observations')->nullable();
+            $table->string('provider');
+            $table->string('origin_address');
+            $table->string('destinity_address');
+            $table->string('confirmation_sheet')->nullable();
+            $table->string('buyer_id')->nullable();
+            $table->text('files_reception_accepted')->nullable();
+            $table->integer('tagger_user_id')->nullable();
             $table->timestamps();
         });
     }

@@ -82,8 +82,10 @@ class InspectionController extends Controller
             'user_signature_reviewed' => $request->user_signature_reviewed,
             'quantity_revised' => $request->quantity_revised,
             'quantity_denied' => $request->quantity_denied,
+            'files_ins' => $request->files_ins,
 
         ];
+
         try {
             $inspection = Inspection::create($dataInspection);
             $request->features_quantity = (object) $request->features_quantity;
@@ -98,7 +100,9 @@ class InspectionController extends Controller
                 'product_does_not_perform_its_function' => $request->features_quantity->product_does_not_perform_its_function,
                 'wrong_product_code' => $request->features_quantity->wrong_product_code,
                 'total' => $request->features_quantity->total,
+
             ];
+
             $inspection->featuresQuantity()->create($dataFeaturesQuantity);
             foreach ($request->products_selected as $productSelected) {
                 $dataProductSelected = [
@@ -108,19 +112,20 @@ class InspectionController extends Controller
                 ];
                 $inspection->productsSelected()->create($dataProductSelected);
             }
+
             //Inspección de calidad liberada
-           $quantity_denied = $request->quantity_denied;
-           $total = $request->features_quantity->total;
-           if ($total < $quantity_denied){
-            if ($sale->lastStatus) {
-                if ($sale->lastStatus->status_id < 9) {
-                    SaleStatusChange::create([
-                        'sale_id' => $sale->id,
-                        "status_id" => 9
-                    ]);
+            $quantity_denied = $request->quantity_denied;
+            $total = $request->features_quantity->total;
+            if ($total < $quantity_denied) {
+                if ($sale->lastStatus) {
+                    if ($sale->lastStatus->status_id < 9) {
+                        SaleStatusChange::create([
+                            'sale_id' => $sale->id,
+                            "status_id" => 9
+                        ]);
+                    }
                 }
             }
-           }
 
             return response()->json([
                 "msg" => "Inspeccion Creada Correctamente",
@@ -169,9 +174,11 @@ class InspectionController extends Controller
                 'inspections.user_signature_reviewed',
                 'inspections.quantity_revised',
                 'inspections.quantity_denied',
+                'inspections.files_ins',
                 "additional_sale_information.sale_id"
             )
             ->first();
+
 
         $ins = $pedidoIns->inspections()->where("code_inspection", $inspection_id)->first();
 
@@ -193,7 +200,7 @@ class InspectionController extends Controller
             foreach ($nuevo->products as $product) {
                 foreach ($inspection->productsSelected as $pInspection) {
                     //  return $pInspection;
-                    if ($product->odoo_product_id == $pInspection->odoo_product_id) {
+                    if ($product->odoo_product_id == $pInspection->odoo_product_id && $pInspection->code_order == $orden->code_order) {
 
                         $product->quantity_selected = $pInspection->quantity_selected;
 

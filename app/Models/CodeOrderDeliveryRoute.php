@@ -11,19 +11,14 @@ class CodeOrderDeliveryRoute extends Model
     protected $fillable = [
         'delivery_route_id',
         'user_chofer_id',
+        'parcel_id',
+        'parcel_name',
         'type_of_chofer',
         'type_of_product',
         'code_sale',
         'code_order',
         'type_of_origin',
-        'origin_address',
         'type_of_destiny',
-        'destiny_address',
-        'hour',
-        'attention_to',
-        'action',
-        'num_guide',
-        'observations',
         'status',
     ];
 
@@ -39,5 +34,11 @@ class CodeOrderDeliveryRoute extends Model
     public function deliveryRoute()
     {
         return $this->belongsTo(DeliveryRoute::class, 'delivery_route_id');
+    }
+
+    // code_order
+    public function orderPurchase()
+    {
+        return $this->belongsTo(OrderPurchase::class, 'code_order', "code_order");
     }
 }

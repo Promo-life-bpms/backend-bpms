@@ -17,20 +17,15 @@ class CodeOrderDeliveryRoutes extends Migration
             $table->id();
             $table->foreignId('delivery_route_id')->reference('id')->on('delivery_routes');
             $table->foreignId('user_chofer_id')->reference('id')->on('users')->nullable();
+            $table->foreignId('parcel_id')->reference('id')->on('parcels')->nullable();
+            $table->string('parcel_name')->nullable();
             $table->string('type_of_chofer')->nullable();
             $table->string('type_of_product')->nullable();
             $table->string('code_sale');
             $table->string('code_order');
             $table->string('type_of_origin');
-            $table->text('origin_address');
             $table->string('type_of_destiny');
-            $table->text('destiny_address');
-            $table->time('hour');
-            $table->string('attention_to');
-            $table->string('action');
-            $table->string('status');
-            $table->string('num_guide')->nullable();
-            $table->text('observations')->nullable();
+            $table->string('status')->nullable();
             $table->timestamps();
         });
     }

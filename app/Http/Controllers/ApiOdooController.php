@@ -7,6 +7,7 @@ use App\Models\Delivery;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Reception;
+use App\Models\Role;
 use App\Models\Sale;
 use App\Models\SaleStatusChange;
 use App\Models\Tracking;
@@ -16,6 +17,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class ApiOdooController extends Controller
 {
@@ -181,13 +183,19 @@ class ApiOdooController extends Controller
                         }
                     }
                 } catch (Exception $th) {
+                    Storage::put('/public/pedidos/dataValues' .  time() . '.txt', ($request->all()));
+                    Storage::put('/public/pedidos/data' .  time() . '.txt', ($th));
                     return  response()->json(["Server Error Insert: " => $th->getMessage()], 400);
                 }
+                // TODO: Notificar al area de compras por correo
+
                 return response()->json(['message' => 'Actualizacion Completa']);
             } else {
                 return response()->json(['message' => 'No Tienes autorizacion']);
             }
         } catch (Exception $th) {
+            Storage::put('/public/pedidos/dataValues' .  time() . '.txt', ($request->all()));
+            Storage::put('/public/pedidos/data' .  time() . '.txt', ($th));
             return  response()->json(["Server Error Validate: " => $th->getMessage()], 400);
         }
     }
@@ -196,36 +204,6 @@ class ApiOdooController extends Controller
     {
         try {
             if ($request->header('token') == config('key_odoo.key_to_odoo')) {
-                /*  $validator = Validator::make($request->all(), [
-                    'purchase' => 'required|array|bail',
-                    'purchase.code_sale' => 'required',
-                    'purchase.code_purchase' => 'required',
-                    'purchase.type_purchase' => 'required',
-                    'purchase.sequence' => 'required',
-                    'purchase.company' => 'required',
-                    'purchase.order_date' => 'required|date:d-m-Y h:i:s',
-                    'purchase.planned_date' => 'required|date:d-m-Y h:i:s',
-                    'purchase.provider_address' => 'required',
-                    'purchase.provider_name' => 'required',
-                    'purchase.supplier_representative' => 'required',
-                    'purchase.total' => 'required|numeric',
-                    'purchase.status' => 'required',
-                    'purchase.products' => 'required|array|bail',
-                    'purchase.products.*.odoo_product_id' => 'required',
-                    'purchase.products.*.product' => 'required',
-                    'purchase.products.*.description' => 'required',
-                    'purchase.products.*.planned_date' => 'required|date:d-m-Y h:i:s',
-                    'purchase.products.*.company' => 'required',
-                    'purchase.products.*.quantity' => 'required|numeric',
-                    'purchase.products.*.quantity_delivered' => 'required|numeric',
-                    'purchase.products.*.quantity_invoiced' => 'required|numeric',
-                    'purchase.products.*.unit_price' => 'required|numeric',
-                    'purchase.products.*.subtotal' => 'required|numeric',
-                ]);
-
-                if ($validator->fails()) {
-                    return response()->json(($validator->getMessageBag()));
-                } */
                 $purchase = (object)$request->purchase;
                 $dataPurchase = [
                     'code_order' => $purchase->code_purchase ?: " ",
@@ -255,37 +233,31 @@ class ApiOdooController extends Controller
                             $proveedorMaquilador = OrderPurchase::where("provider_name", $purchase->provider_name)
                                 ->whereNotNull('tagger_user_id')->first();
                             // Si no existe crear un nuevo usuario
-                            if (!$proveedorMaquilador) {
-                                $user = User::create([
-                                    'name' => $purchase->supplier_representative,
-                                    'email' => Str::slug($purchase->supplier_representative). '@promolife.lat',
-                                    'password' => Hash::make($purchase->supplier_representative),
-                                    'role_id' => 2,
-                                ]);
-                                $orderPurchase->tagger_user_id = $user->id;
-                                $orderPurchase->save();
-                            }else{
-                                $orderPurchase->tagger_user_id = $proveedorMaquilador->id;
+                            if ($proveedorMaquilador) {
+                                $orderPurchase->tagger_user_id = $proveedorMaquilador->tagger_user_id;
                                 $orderPurchase->save();
                             }
                         }
                     } catch (Exception $th) {
-                        return $th->getMessage();
+                        // return response()->json(['message' => 'Error al crear el usuario', 'error' => $th->getMessage()], 200);
                     }
-
-                    $sale = Sale::where('code_sale', $orderPurchase->code_sale)->first();
-                    if ($sale) {
-                        if ($sale->lastStatus) {
-                            if ($sale->lastStatus->status_id < 2) {
-                                SaleStatusChange::create([
-                                    'sale_id' => $sale->id,
-                                    "status_id" => 2,
-                                ]);
+                    try {
+                        $sale = Sale::where('code_sale', $orderPurchase->code_sale)->first();
+                        if ($sale) {
+                            if ($sale->lastStatus) {
+                                if ($sale->lastStatus->status_id < 2) {
+                                    SaleStatusChange::create([
+                                        'sale_id' => $sale->id,
+                                        "status_id" => 2,
+                                    ]);
+                                    $sale->status_id = 2;
+                                    $sale->save();
+                                }
                             }
                         }
+                    } catch (Exception $e) {
                     }
                 } catch (Exception $th) {
-                    //throw $th;
                     return response()->json(['message' => 'Error al crear la orden de compra', 'error' => $th->getMessage()], 400);
                 }
 
@@ -344,29 +316,9 @@ class ApiOdooController extends Controller
 
     public function setReception(Request $request)
     {
+        Storage::put('/public/dataRec' .  time() . '.txt', json_encode($request->all()));
         try {
             if ($request->header('token') == config('key_odoo.key_to_odoo')) {
-                /* $validator = Validator::make($request->all(), [
-                    'reception' => 'required|array|bail',
-                    'reception.code_reception' => 'required',
-                    'reception.code_sale' => 'required',
-                    'reception.company' => 'required',
-                    'reception.type_operation' => 'required',
-                    'reception.planned_date' => 'required|date:d-m-Y h:i:s',
-                    'reception.effective_date' => 'required|date:d-m-Y h:i:s',
-                    'reception.operations' => 'required|array|bail',
-                    'reception.operations.*.code_reception' => 'required',
-                    'reception.operations.*.odoo_product_id' => 'required',
-                    'reception.operations.*.product' => 'required',
-                    'reception.operations.*.initial_demand' => 'required|numeric',
-                    'reception.operations.*.done' => 'required|numeric',
-                    'reception.status' => 'required',
-                ]);
-
-                if ($validator->fails()) {
-                    return response()->json(($validator->getMessageBag()));
-                } */
-
                 $receptions = (object)$request->receptions;
                 $errors = [];
                 foreach ($receptions as $reception) {
@@ -530,6 +482,7 @@ class ApiOdooController extends Controller
 
     public function setDelivery(Request $request)
     {
+        Storage::put('/public/dataDelc' .  time() . '.txt', json_encode($request->all()));
         try {
             if ($request->header('token') == config('key_odoo.key_to_odoo')) {
                 /* $validator = Validator::make($request->all(), [

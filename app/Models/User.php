@@ -30,7 +30,8 @@ class User extends Authenticatable implements JWTSubject
         'photo',
         'intranet_id',
         'company',
-        'manager_id'
+        'manager_id',
+        "last_login",
     ];
 
     /**
@@ -42,17 +43,6 @@ class User extends Authenticatable implements JWTSubject
         'password',
     ];
 
-    public function routeNotificationForMail($notification)
-    {
-        // Return email address only...
-        return $this->email_address;
-
-        // Return email address and name...
-        return [$this->email_address => $this->name];
-    }
-    public function notify($instance)
-    {
-    }
     public function whatRoles()
     {
         return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
@@ -82,4 +72,15 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
+
+    public function userCenter()
+    {
+        return $this->hasMany(UserCenter::class, 'user_id');
+    }
+
+    public function purchaseRequest()
+    {
+        return $this->hasMany(PurchaseRequest::class, 'user_id');
+    }
+
 }
