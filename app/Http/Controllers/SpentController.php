@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Spent;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -51,12 +52,15 @@ class SpentController extends Controller
             'product_type' => 'required',
         ]);
 
+        $fecha = Carbon::now()->format('Y-m-d H:i:s');
+
         DB::table('spents')->where('id',$request->id)->update([
             'concept' => $request->concept,
             'center_id' => $request->center_id,
             'outgo_type' => $request->outgo_type,
             'expense_type' => $request->expense_type,
             'product_type' => $request->product_type,
+            'updated_at' => $fecha,
         ]);
 
         return response()->json(['message' => "Registro actualizado satisfactoriamente"], 200);
