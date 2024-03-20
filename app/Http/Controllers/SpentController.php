@@ -13,7 +13,7 @@ class SpentController extends Controller
         $spents = DB::table('spents')->get();
         foreach ($spents as $spent) {
             $spent->center_id =DB::table('centers')->where('id', $spent->center_id)->select('name', 'id')->first();
-            $spent->created_at = date('d-m-Y', strtotime($spent->created_at));
+            $spent->updated_at = date('d-m-Y', strtotime($spent->updated_at));
         }
 
         return response()->json(['spents' => $spents], 200);
