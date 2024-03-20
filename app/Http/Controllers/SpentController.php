@@ -53,7 +53,7 @@ class SpentController extends Controller
         ]);
 
         $fecha = Carbon::now()->format('Y-m-d H:i:s');
-        dd($fecha);
+        //dd($fecha);
 
         DB::table('spents')->where('id',$request->id)->update([
             'concept' => $request->concept,
