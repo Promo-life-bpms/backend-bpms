@@ -45,7 +45,7 @@ class RegisteredUser extends Notification
             ->markdown('mail.registered.user', ['data' => $this->data])
             ->subject('Usuario Registrado al BPMS')
             ->cc(['kevin.garcia@promolife.com.mx', 'antonio.tomas@promolife.com.mx'])
-            ->from('admin@promo-connect.com.mx', 'BPMS');
+            ->from('adminportales@promolife.com.mx', 'BPMS');
     }
 
     /**
