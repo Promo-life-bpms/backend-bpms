@@ -214,7 +214,6 @@ class PurchaseRequestController extends Controller
             ],400);
         }
         $request->validate([
-            'company_id' => 'required',
             'spent_id' => 'required',
             'type'=> 'required',
             'total' => 'required',
@@ -242,11 +241,15 @@ class PurchaseRequestController extends Controller
             $path= $request->file('file')->move('storage/smallbox/files/', $fileNameToStore);
         }
 
+        ///OBTENEMOS LA COMPAÑIA DEL USUARIO LOGUEADO///
+        $company = DB::table('user_details')->where('id_user', $user->id)->first();
+        $id_company = $company->id_company;
+
         $product_type = Spent::where('id', $request->spent_id)->get()->last();
 
         $create_spent = new PurchaseRequest();
         $create_spent->user_id = $user->id;
-        $create_spent->company_id = $request->company_id;
+        $create_spent->company_id = $id_company;
         $create_spent->spent_id = $request->spent_id;
         $create_spent->center_id = $center_id;
         $create_spent->description = $request->description;

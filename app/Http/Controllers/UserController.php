@@ -19,8 +19,24 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with("whatRoles")->where('active', true)->get();
-        return response()->json($users);
+    
+        foreach ($users as $user) {
+            $details = DB::table('user_details')->where('id_user', $user->id)->first();
+    
+            if ($details) {
+                $department = DB::table('departments')->where('id', $details->id_department)->value('name_department');
+                $company = DB::table('companies')->where('id', $details->id_company)->value('name');
+            } else {
+                $department = null;
+                $company = null;
+            }
+            $user->department = $department;
+            $user->company = $company;
+        }
+    
+        return response()->json([$users, 'status' => 200], 200);
     }
+    
 
     // Crear el metodo create con el name, email, active
     public function create(Request $request)
