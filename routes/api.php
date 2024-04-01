@@ -15,6 +15,7 @@ use App\Http\Controllers\EstimationSmallBoxController;
 use App\Http\Controllers\EventualesController;
 use App\Http\Controllers\ExchangeReturnController;
 use App\Http\Controllers\BinnacleController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
@@ -60,7 +61,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Apis de el userController
     Route::get('users', [UserController::class, 'index']);
     Route::post('users', [UserController::class, 'create']);
-    Route::put('users/{id}', [UserController::class, 'update']);
+    Route::post('users/{id}', [UserController::class, 'update']);
     Route::delete('users/{id}', [UserController::class, 'delete']);
     Route::get('users/sendNewAccess/{id}', [UserController::class, 'sendNewAccess']);
     Route::get('syncUsers', [UserController::class, 'syncUsers']);
@@ -243,7 +244,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/return/excess/money', [ExchangeReturnController::class, 'ReturnExcessMoney']);
     Route::post('caja-chica/return/excess/money/confirmation', [ExchangeReturnController::class, 'ConfirmationReturnMoney']);
 
+    /////CAJA CHICA/BPMS /CREAR DEPARTAMENTOS/
+    ///VER DEPARTAMENTOS
+    Route::get('view/departments', [DepartmentController::class, 'AllDepartments'])->name('view.department');
+    Route::post('create/departments', [DepartmentController::class, 'AddDepartment'])->name('create.department');
+    Route::post('updated/departments',[DepartmentController::class, 'UpdatedDepartment'])->name('updated.department');
     //Video
     Route::get('video', [VideoController::class, 'storeVideoInfo']);
 });
-
