@@ -16,6 +16,7 @@ class PurchaseRequest extends Model
         'company_id',
         'spent_id',
         'center_id',
+        'department_id',
         'description',
         'file',
         'commentary',
