@@ -28,6 +28,7 @@ use App\Http\Controllers\UploadImageController;
 use App\Http\Controllers\UserCenterController;
 use App\Models\EstimationSmallBox;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserDetailsController;
 use App\Notifications\Acces;
 use App\Models\User;
 
@@ -249,6 +250,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('view/departments', [DepartmentController::class, 'AllDepartments'])->name('view.department');
     Route::post('create/departments', [DepartmentController::class, 'AddDepartment'])->name('create.department');
     Route::post('updated/departments',[DepartmentController::class, 'UpdatedDepartment'])->name('updated.department');
+
+    ///USERS DETAILS ///
+    Route::get('users/department/{id_department}', [UserDetailsController::class,'UserforDepartment'])->name('users.department');
     //Video
     Route::get('video', [VideoController::class, 'storeVideoInfo']);
 });
