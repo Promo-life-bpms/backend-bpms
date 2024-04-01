@@ -117,7 +117,6 @@ class UserController extends Controller
 
         DB::table('users')->where('id', $id)->update([
             'name' => $request->name,
-            'active' => $request->active,
             'email' => $request->email,
         ]);
 
