@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class UserRole extends Model
 {
     use HasFactory;
+    public $timestamps = false;
     public $table = "role_user";
 
     public function user()
