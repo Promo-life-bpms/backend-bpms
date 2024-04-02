@@ -25,13 +25,18 @@ class UserController extends Controller
     
             if ($details) {
                 $department = DB::table('departments')->where('id', $details->id_department)->value('name_department');
+                $department_id = DB::table('departments')->where('id', $details->id_department)->value('id');
                 $company = DB::table('companies')->where('id', $details->id_company)->value('name');
+                $company_id = DB::table('companies')->where('id', $details->id_company)->value('id');
             } else {
                 $department = null;
                 $company = null;
             }
             $user->department = $department;
             $user->company = $company;
+            $user->department_id = $department_id;
+            $user->company_id = $company_id;
+            
         }
     
         return response()->json([$users, 'status' => 200], 200);

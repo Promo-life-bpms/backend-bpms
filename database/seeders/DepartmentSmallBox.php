@@ -49,8 +49,93 @@ class DepartmentSmallBox extends Seeder
 
         $roles = array(
             (object)[
-                'name' => 'equipo',
-                'display_name' => 'Equipo', // optional
+                'name' => 'equipo administración',
+                'display_name' => 'Equipo administración', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo almacén',
+                'display_name' => 'Equipo almacén', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo auditoría y gestión de calidad',
+                'display_name' => 'Equipo auditoría y gestión de calidad', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo calidad',
+                'display_name' => 'Equipo calidad', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo compras',
+                'display_name' => 'Equipo compras', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo dirección',
+                'display_name' => 'Equipo dirección', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo diseño',
+                'display_name' => 'Equipo diseño', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo importaciones',
+                'display_name' => 'Equipo importaciones', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo logistica',
+                'display_name' => 'Equipo logistica', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo mantenimiento',
+                'display_name' => 'Equipo mantenimiento', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo mesa de control',
+                'display_name' => 'Equipo mesa de control', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo recursos humanos',
+                'display_name' => 'Equipo recursos humanos', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo sistemas',
+                'display_name' => 'Equipo sistemas', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo tecnología e innovación',
+                'display_name' => 'Equipo tecnología e innovación', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo ventas BH',
+                'display_name' => 'Equipo ventas BH', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo ventas PL',
+                'display_name' => 'Equipo ventas PL', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo ventas PMZ',
+                'display_name' => 'Equipo ventas PMZ', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'equipo marketing',
+                'display_name' => 'Equipo marketing', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
@@ -67,7 +152,6 @@ class DepartmentSmallBox extends Seeder
                 'description' => $rol->description,
             ]);  
         }
-
         $managers = array(
             (object)[
                 'id_department' => 1,
