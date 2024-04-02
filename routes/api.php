@@ -179,7 +179,13 @@ Route::group(['middleware' => 'auth'], function () {
     //PurchaseRequest
     Route::get('caja-chica/solicitudes-de-compra/ver/', [PurchaseRequestController::class, 'show']);
     Route::get('caja-chica/solicitudes-de-compra/ver/{page}', [PurchaseRequestController::class, 'showPage']);
-    Route::get('caja-chica/solicitudes-de-compra/ver/department/', [PurchaseRequestController::class, 'DepartmentPurchase']);
+
+    ////APIS DE PRUEBA///
+    Route::get('caja-chica/solicitudes-de-compra/por-departamento/ver', [PurchaseRequestController::class, 'DepartmentPurchase']);
+    Route::get('caja-chica/solicitudes-de-compra/por-departamento/ver/{page}', [PurchaseRequestController::class, 'DepartmentPage']);
+    Route::post('caja-chica/aprobar-solicitud/por-department/', [PurchaseRequestController::class, 'approvedDepartment']);
+
+
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
     Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class,'editdate']);
     Route::post('caja-chica/solicitudes-de-compra/editar/', [PurchaseRequestController::class, 'update']);
