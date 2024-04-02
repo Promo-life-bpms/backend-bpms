@@ -561,8 +561,10 @@ class PurchaseRequestController extends Controller
         }
 
         ///OBTENEMOS LA COMPAÑIA DEL USUARIO LOGUEADO///
-        $company = DB::table('user_details')->where('id_user', $user->id)->first();
-        $id_company = $company->id_company;
+        $info = DB::table('user_details')->where('id_user', $user->id)->first();
+        $id_company = $info->id_company;
+        $id_department = $info->id_department;
+
 
         $product_type = Spent::where('id', $request->spent_id)->get()->last();
 
@@ -571,6 +573,7 @@ class PurchaseRequestController extends Controller
         $create_spent->company_id = $id_company;
         $create_spent->spent_id = $request->spent_id;
         $create_spent->center_id = $center_id;
+        $create_spent->department_id = $id_department;
         $create_spent->description = $request->description;
         $create_spent->file = $path;
         $create_spent->commentary = '';
