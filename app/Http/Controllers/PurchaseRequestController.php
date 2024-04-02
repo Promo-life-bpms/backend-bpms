@@ -139,7 +139,11 @@ class PurchaseRequestController extends Controller
             return response()->json(['message' => 'Solo un manager puede observar las solicitudes', 'status'=>200], 200);
         }
     
-        $spents = PurchaseRequest::whereIn('department_id', $department_ids)->orWhere('user_id', '=', $user->id)->get();
+        $spents = PurchaseRequest::where(function ($query) use ($department_ids, $user) {
+            $query->whereIn('department_id', $department_ids)
+                  ->orWhere('user_id', $user->id);
+        })->get();
+        
         
         $data = [];
 
