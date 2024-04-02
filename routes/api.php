@@ -62,7 +62,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Apis de el userController
     Route::get('users', [UserController::class, 'index']);
     Route::post('users', [UserController::class, 'create']);
-    Route::post('users/{id}', [UserController::class, 'update']);
+    Route::post('users/edit', [UserController::class, 'update']);
     Route::delete('users/{id}', [UserController::class, 'delete']);
     Route::get('users/sendNewAccess/{id}', [UserController::class, 'sendNewAccess']);
     Route::get('syncUsers', [UserController::class, 'syncUsers']);

@@ -135,16 +135,11 @@ class PurchaseRequestController extends Controller
     
         // Verificar si el usuario autenticado es gerente de algún departamento
         if ($department_ids->isEmpty()) {
-            // Si el usuario autenticado no es gerente de ningún departamento, retornar un mensaje de error o algo apropiado
-            return response()->json(['message' => 'Solo un manager puede observar las solicitudes', 'status'=>200], 200);
+            $spents = PurchaseRequest::where('user_id', $user->id)->get();
+
+        }else{
+            $spents = PurchaseRequest::whereIn('department_id', $department_ids)->orWhere('user_id', $user->id)->get();
         }
-    
-        $spents = PurchaseRequest::where(function ($query) use ($department_ids, $user) {
-            $query->whereIn('department_id', $department_ids)
-                  ->orWhere('user_id', $user->id);
-        })->get();
-        
-        
         $data = [];
 
         foreach ($spents as $spent) {
@@ -223,6 +218,7 @@ class PurchaseRequestController extends Controller
                 'department_name' => $department_name,
             ]);
         }
+    
         return ['spents' => $data];    
     }
 

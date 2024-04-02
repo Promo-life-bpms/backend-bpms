@@ -105,14 +105,10 @@ class UserController extends Controller
     }
 
     // Metodo para actualizar el usuario
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $user = User::find($id);
-        if (!$user) {
-            return response()->json(["message" => "El usuario no existe"], Response::HTTP_NOT_FOUND);
-        }
-
         $this->validate($request, [
+            'id_user' => 'required',
             'name' => 'required',
             'email' => 'required|email',
             'id_department' => 'required',
@@ -120,7 +116,12 @@ class UserController extends Controller
             'role_id' => 'required',
         ]);
 
-        DB::table('users')->where('id', $id)->update([
+        $user = User::find($request->id_user);
+        if (!$user) {
+            return response()->json(["message" => "El usuario no existe"], Response::HTTP_NOT_FOUND);
+        }
+
+        DB::table('users')->where('id', $request->id_user)->update([
             'name' => $request->name,
             'email' => $request->email,
         ]);
@@ -131,13 +132,13 @@ class UserController extends Controller
         $user->save();*/
 
         //ACTUALIZAMOS LOS DETALLES DEL USUARIO//
-        DB::table('user_details')->where('id_user', $id)->update([
+        DB::table('user_details')->where('id_user', $request->id_user)->update([
             'id_department' => $request->id_department,
             'id_company' => $request->id_company,
         ]);
 
         ///ACTUALIZAR EL ROL///
-        DB::table('role_user')->where('user_id', $id)->update([
+        DB::table('role_user')->where('user_id', $request->id_user)->update([
             'role_id' => $request->role_id,
         ]);
 
