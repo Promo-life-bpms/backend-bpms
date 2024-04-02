@@ -84,7 +84,13 @@ class PurchaseRequestController extends Controller
                 $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
 
                 $admin_approved =  $admin_app->name;
-            }    
+            } 
+            
+            //Obtenemos el id del departamento///
+            $department_id = DB::table('purchase_requests')->where('id', $spent->id)->value('department_id'); 
+            // Obtener el nombre del departamento
+            $department_name = DB::table('departments')->where('id', $department_id)->value('name_department');
+            
             array_push($data, (object)[
                 'id' => $spent->id,
                 'user_id' => $spent->user_id,
@@ -106,7 +112,9 @@ class PurchaseRequestController extends Controller
                 'approved_by' => $approved_by,
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
-                'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación."
+                'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
+                'department_name' => $department_name,
+                
             ]);
         }
 
@@ -115,6 +123,310 @@ class PurchaseRequestController extends Controller
         );
     }
 
+    public function DepartmentPurchase()
+    {
+        // Obtener el usuario autenticado
+        $user = auth()->user();
+    
+        // Obtener el ID del departamento del usuario autenticado desde la tabla manager_has_departments
+        $department_ids = DB::table('manager_has_departments')
+                            ->where('id_user', $user->id)
+                            ->pluck('id_department');
+    
+        // Verificar si el usuario autenticado es gerente de algún departamento
+        if ($department_ids->isEmpty()) {
+            // Si el usuario autenticado no es gerente de ningún departamento, retornar un mensaje de error o algo apropiado
+            return response()->json(['message' => 'Solo un manager puede observar las solicitudes', 'status'=>200], 200);
+        }
+    
+        $spents = PurchaseRequest::whereIn('department_id', $department_ids)->get();
+        
+        $data = [];
+
+        foreach ($spents as $spent) {
+            $company_data = [];
+            $spent_data = [];
+            $center_data = [];
+            $status_data = [];
+            array_push($company_data ,(object) [
+                'company_id' =>  $spent->company_id,
+                'company_name' =>  $spent->company->name
+            ]);
+
+            array_push($spent_data ,(object) [
+                'spent_id' =>  $spent->spent_id,
+                'spent_name' =>  $spent->spent->concept,
+                'spent_outgo_type' =>  $spent->spent->outgo_type,
+                'spent_expense_type' =>  $spent->spent->expense_type,
+                'spent_product_type' =>  $spent->spent->product_type,
+            ]);
+            array_push($center_data ,(object) [
+                'center_id' => $spent->center_id,
+                'center_name' =>  $spent->center->name,
+            ]);
+
+            array_push($status_data ,(object) [
+                'id' => $spent->purchase_status->id,
+                'name' =>  $spent->purchase_status->name,
+                'table_name' =>  $spent->purchase_status->table_name,
+                'type' =>  $spent->purchase_status->type,
+                'status' =>  $spent->purchase_status->status,
+            ]);
+
+            $approved_by = '';
+          
+            if($spent->approved_by != null || $spent->approved_by != '' ){
+                $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
+
+                $approved_by =  $user_approved->name;
+            }    
+            
+            $admin_approved = '';
+           
+            if($spent->admin_approved != null || $spent->admin_approved != '' ){
+                $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
+
+                $admin_approved =  $admin_app->name;
+            } 
+
+            //Obtenemos el id del departamento///
+            $department_id = DB::table('purchase_requests')->where('id', $spent->id)->value('department_id'); 
+            // Obtener el nombre del departamento
+            $department_name = DB::table('departments')->where('id', $department_id)->value('name_department');
+        
+            array_push($data, (object)[
+                'id' => $spent->id,
+                'user_id' => $spent->user_id,
+                'user_name' => $spent->user->name,
+                'company' =>  $company_data,
+                'spent' => $spent_data,
+                'center'  =>  $center_data,
+                'description' => $spent->description,
+                'file' => $spent->file,
+                'commentary' => $spent->commentary,
+                'purchase_status' => $spent->purchase_status->name,
+                'purchase_table_name' => $spent->purchase_status->table_name,
+                'type' => $spent->type,
+                'type_status' => $spent->type_status,
+                'payment_method_id' => $spent->payment_method->id,
+                'payment_method' => $spent->payment_method->name,
+                'total' =>$spent->total, 
+                'approved_status' => $spent->approved_status,
+                'approved_by' => $approved_by,
+                'admin_approved' => $admin_approved,
+                'created_at' => $spent->created_at->format('d-m-Y'),
+                'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
+                'department_name' => $department_name,
+            ]);
+        }
+        return ['spents' => $data];    
+    }
+
+    public function DepartmentPage($page){
+        // Obtener el usuario autenticado
+        $user = auth()->user();
+    
+        // Obtener el ID del departamento del usuario autenticado desde la tabla manager_has_departments
+        $department_ids = DB::table('manager_has_departments')
+                            ->where('id_user', $user->id)
+                            ->pluck('id_department');
+        
+        //dd($department_ids);
+    
+        // Verificar si el usuario autenticado es gerente de algún departamento
+        if ($department_ids->isEmpty()) {
+            // Si el usuario autenticado no es gerente de ningún departamento, retornar un mensaje de error o algo apropiado
+            return response()->json(['message' => 'Solo un manager puede observar las solicitudes', 'status'=>200], 200);
+        }
+
+        $department_id_solicitud = DB::table('purchase_requests')->where('id', $page)->value('department_id');
+
+        // Obtener el id del usuario manager del departamento asociado con la solicitud
+        $manager_id = DB::table('manager_has_departments')
+            ->where('id_department', $department_id_solicitud)
+            ->value('id_user');
+
+        if($user->id == $manager_id){
+            $spent = PurchaseRequest::where('id',$page)->get()->last();
+            
+            $data = [];
+            
+            if(isset($spent->spent_id )){
+                $company_data = [];
+                $spent_data = [];
+                $center_data = [];
+                $status_data = [];
+            
+                array_push($company_data ,(object) [
+                    'company_id' =>  $spent->company_id,
+                    'company_name' =>  $spent->company->name
+                ]);
+                
+                array_push($spent_data ,(object) [
+                    'spent_id' =>  $spent->spent_id,
+                    'spent_name' =>  $spent->spent->concept,
+                    'spent_outgo_type' =>  $spent->spent->outgo_type,
+                    'spent_expense_type' =>  $spent->spent->expense_type,
+                    'spent_product_type' =>  $spent->spent->product_type,
+                ]);
+                
+                array_push($center_data ,(object) [
+                    'center_id' => $spent->center_id,
+                    'center_name' =>  $spent->center->name,
+                ]);
+                
+                array_push($status_data ,(object) [
+                    'id' => $spent->purchase_status->id,
+                    'name' =>  $spent->purchase_status->name,
+                    'table_name' =>  $spent->purchase_status->table_name,
+                    'type' =>  $spent->purchase_status->type,
+                    'status' =>  $spent->purchase_status->status,
+                ]);
+
+                $approved_by = '';
+            
+                if($spent->approved_by != null || $spent->approved_by != '' ){
+                    $user_approved = User::where('id', intval($spent->approved_by))->get()->last();
+                    $approved_by =  $user_approved->name;
+                }             
+                
+                $admin_approved = '';
+
+                if($spent->admin_approved != null || $spent->admin_approved != '' ){
+                    $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
+                    $admin_approved =  $admin_app->name;
+                } 
+
+                //Obtenemos el id del departamento///
+                $department_id = DB::table('purchase_requests')->where('id', $spent->id)->value('department_id'); 
+                // Obtener el nombre del departamento
+                $department_name = DB::table('departments')->where('id', $department_id)->value('name_department');
+                // Obtener información de los eventuales
+                $eventuales = DB::table('eventuales')->where('purchase_id', $page)->pluck('eventuales')->toArray();
+
+                // Inicializar el array resultante
+                $event = [];
+                
+                foreach ($eventuales as $jsonString) {
+                    $datos = json_decode($jsonString, true);
+                    
+                    foreach ($datos as $item) {
+                        // Verificar si 'company' es "undefined"
+                        if ($item['company'] === "undefined") {
+                            $item['company_name'] = $spent->company->name;
+                        } else {
+                            // Obtener el ID de la compañía desde los eventuales
+                            $companyId = $item['company'];
+                            // Buscar el nombre de la compañía en la tabla tempory_company
+                            $companyName = DB::table('tempory_company')->where('id', $companyId)->value('name');
+                            // Agregar el nombre de la compañía al array original
+                            $item['company_name'] = $companyName;
+                        }
+                        // Agregar cada objeto al resultado
+                        $event[] = $item;
+                    }
+                }
+
+                $returnmoneyexcess = DB::table('exchange_returns')->where('purchase_id', $page)->select('id','total_return', 'status', 'confirmation_datetime', 
+                                                                                        'confirmation_user_id', 'description','file_exchange_returns', 
+                                                                                        'return_user_id','created_at')->get()->toArray();
+                
+                $returnmoney = [];
+
+                foreach ($returnmoneyexcess as $returnmoney){
+                    $returnmoney->created_at = date('d-m-Y H:i:s', strtotime($returnmoney->created_at));
+                    
+                    if($returnmoney->confirmation_datetime != null){
+                        $returnmoney->confirmation_datetime = date('d-m-Y H:i:s', strtotime($returnmoney->confirmation_datetime));
+                    }
+
+                    $user = DB::table('users')->where('id', $returnmoney->confirmation_user_id)->select('name')->first();
+                    $returnmoney->confirmation_user_id = $user ? $user->name : null;
+                    $username = DB::table('users')->where('id', $returnmoney->return_user_id)->select('name')->first();
+                    $returnmoney->return_user_id = $username ? $username->name : null;
+                }
+                        
+                array_push($data, (object)[
+                    'id' => $spent->id,
+                    'user_id' => $spent->user_id,
+                    'user_name' => $spent->user->name,
+                    'company' =>  $company_data,
+                    'spent' => $spent_data,
+                    'center'  =>  $center_data,
+                    'description' => $spent->description,
+                    'file' => $spent->file,
+                    'commentary' => $spent->commentary,
+                    'purchase_status' => $spent->purchase_status->name,
+                    'purchase_table_name' => $spent->purchase_status->table_name,
+                    'type' => $spent->type,
+                    'type_status' => $spent->type_status,
+                    'payment_method_id' => $spent->payment_method->id,
+                    'payment_method' => $spent->payment_method->name,
+                    'total' =>$spent->total, 
+                    'approved_status' => $spent->approved_status,
+                    'approved_by' => $approved_by,
+                    'admin_approved' => $admin_approved,
+                    'created_at' => $spent->created_at->format('d-m-Y'),
+                    'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
+                    'department_name' => $department_name,
+                    'event' => $event,
+                    'returnmoney' => $returnmoney,
+                ]);
+            }
+            
+            return response()->json(['data' => $data]);
+        }else{
+            return response()->json(['message' => 'No eres Manager de este departamento.', 'status' => 404], 404);
+        }
+    }
+
+    public function approvedDepartment(Request $request){
+        $request->validate([
+            'id' => 'required',
+        ]);
+
+        $user = Auth::user();
+        $department_id_solicitud = DB::table('purchase_requests')->where('id', $request->id)->value('department_id');
+
+        // Obtener el id del usuario manager del departamento asociado con la solicitud
+        $manager_id = DB::table('manager_has_departments')
+            ->where('id_department', $department_id_solicitud)
+            ->value('id_user');
+        
+        ///Si el usuario logueado es manager aprueba///
+        if($user->id == $manager_id){
+            $purchase_request = PurchaseRequest::where('id',$request->id)->get()->last();
+            DB::table('purchase_requests')->where('id',$request->id)->update([
+                'approved_status' => 'en aprobación por administrador',
+                'approved_by' => $user->id,
+                'purchase_status_id' => 1
+            ]);
+            
+            $role_buyer = Role::where('name', 'caja chica')->get()->last();
+            $user_role = UserRole::where('role_id', $role_buyer->id)->get();
+            $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
+            
+            foreach($user_role as $role){
+                $users_to_send_mail = User::where('id',$role->user_id)->get()->last();
+                
+                $title = 'Nueva solicitud de compra';
+                $message = 'Haz recibido una nueva solicitud de compras.';
+                
+                try {
+                    Notification::route('mail', $users_to_send_mail->email)
+                    ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
+                } catch (\Exception $e) {
+                    return $e;
+                }
+            }
+            return response()->json(['message' => "Solicitud aprobada satisfactoriamente"], 200);
+        }
+        else{
+            return response()->json(['message' => 'No eres Manager de este departamento, por lo tanto no puedes autorizar la solicitud.', 'status' => 404], 404);
+        }
+
+    }
+    
       //Solicitudes de Administrador
       public function showAdministrador()
       {
@@ -172,7 +484,13 @@ class PurchaseRequestController extends Controller
             if($spent->admin_approved != null || $spent->admin_approved != '' ){
                 $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
                 $admin_approved =  $admin_app->name;
-            } 
+            }
+
+            //Obtenemos el id del departamento///
+            $department_id = DB::table('purchase_requests')->where('id', $spent->id)->value('department_id'); 
+            // Obtener el nombre del departamento
+            $department_name = DB::table('departments')->where('id', $department_id)->value('name_department');
+
 
             array_push($data, (object)[
                 'id' => $spent->id,
@@ -196,6 +514,7 @@ class PurchaseRequestController extends Controller
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
                 'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
+                'department_name' => $department_name,
             ]);
         }
                 
@@ -846,7 +1165,12 @@ class PurchaseRequestController extends Controller
                 $admin_app = User::where('id', intval($spent->admin_approved))->get()->last();
 
                 $admin_approved =  $admin_app->name;
-            } 
+            }
+            
+            //Obtenemos el id del departamento///
+            $department_id = DB::table('purchase_requests')->where('id', $spent->id)->value('department_id'); 
+            // Obtener el nombre del departamento
+            $department_name = DB::table('departments')->where('id', $department_id)->value('name_department');
 
             // Obtener información de los eventuales
             $eventuales = DB::table('eventuales')->where('purchase_id', $page)->pluck('eventuales')->toArray();
@@ -916,11 +1240,12 @@ class PurchaseRequestController extends Controller
                 'admin_approved' => $admin_approved,
                 'created_at' => $spent->created_at->format('d-m-Y'),
                 'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
+                'department_name' => $department_name,
                 'event' => $event,
                 'returnmoney' => $returnmoney,
             ]);
         }
-            
+
         return response()->json(['data' => $data]);
     }
     

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Company;
 use App\Models\Department;
 use App\Models\ManagerHasDepartment;
 use App\Models\Role;
@@ -40,12 +41,32 @@ class DepartmentSmallBox extends Seeder
             ]);
         }
 
-        Role::create([
-            'name' => 'equipo',
-            'display_name' => 'Equipo', // optional
-            'description' => 'Equipo de trabajo', // optional
+        Company::create([
+            'name' => 'Promo Zale',
+            'description' => 'Promo Zale',
+
         ]);
 
+        $roles = array(
+            (object)[
+                'name' => 'equipo',
+                'display_name' => 'Equipo', // optional
+                'description' => 'Equipo de trabajo', // optional
+            ],
+            (object)[
+                'name' => 'caja chica',
+                'display_name' => 'Caja chica', // optional
+                'description' => 'Caja chica', 
+            ],
+        );
+
+        foreach ($roles as $rol) {
+            Role::create([
+                'name' => $rol->name,
+                'display_name' => $rol->display_name,
+                'description' => $rol->description,
+            ]);  
+        }
 
         $managers = array(
             (object)[
