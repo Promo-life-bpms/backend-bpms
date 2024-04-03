@@ -256,9 +256,18 @@ class PurchaseRequestController extends Controller
         else{
             $idDepartment = DB::table('purchase_requests')->where('id', $page)->value('department_id');
             $DepartmentManager = DB::table('manager_has_departments')->where('id_user', $user->id)->pluck('id_department')->toArray();
+            $managerAdmin = DB::table('manager_has_departments')->where('id_user', $user->id)->value('id_department');
+            $rolcajachi = DB::table('roles')->where('id', 32)->value('id');
             if (in_array($idDepartment, $DepartmentManager)) {
                 $spent = PurchaseRequest::where('id', $page)->get()->last();
-            } else {
+            } elseif(($managerAdmin == 1) && $rolcajachi) {
+                $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
+                if($status == "aprobada"){
+                    $spent = PurchaseRequest::where('id', $page)->get()->last();
+                }else{
+                    return response()->json(['message' => 'Esta solicitud no fue aprobada']);
+                }                
+            }else{
                 return response()->json(['message' => 'No eres Manager de este departamento.', 'status' => 404], 404);
             }
         }
