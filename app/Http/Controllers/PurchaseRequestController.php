@@ -232,6 +232,9 @@ class PurchaseRequestController extends Controller
                             ->pluck('id_department');
         
         //dd($department_ids);
+
+        $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
+        $rolcajachi = DB::table('roles')->where('id', 32)->value('id');
     
         // Verificar si el usuario autenticado es gerente de algún departamento
         if ($department_ids->isEmpty()) {
@@ -241,23 +244,38 @@ class PurchaseRequestController extends Controller
 
             $spent = PurchaseRequest::where('id',$page)->get()->last();
 
+            }elseif($rolcajachica == $rolcajachi){
+                $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
+                if($status == "aprobada"){
+                    $spent = PurchaseRequest::where('id', $page)->get()->last();
+                }else{
+                    return response()->json(['message' => 'Esta solicitud no fue aprobada']);
+                }   
             }else{
                 return 0;
             }
-           // return response()->json(['message' => 'Solo un manager puede observar las solicitudes', 'status'=>200], 200);
+        }
+        else{
+            $idDepartment = DB::table('purchase_requests')->where('id', $page)->value('department_id');
+            $DepartmentManager = DB::table('manager_has_departments')->where('id_user', $user->id)->pluck('id_department')->toArray();
+            if (in_array($idDepartment, $DepartmentManager)) {
+                $spent = PurchaseRequest::where('id', $page)->get()->last();
+            } else {
+                return response()->json(['message' => 'No eres Manager de este departamento.', 'status' => 404], 404);
+            }
         }
 
-        $department_id_solicitud = DB::table('purchase_requests')->where('id', $page)->value('department_id');
+        /*$department_id_solicitud = DB::table('purchase_requests')->where('id', $page)->value('department_id');
 
         // Obtener el id del usuario manager del departamento asociado con la solicitud
         $manager_id = DB::table('manager_has_departments')
             ->where('id_department', $department_id_solicitud)
             ->value('id_user');
         
-        $userdetail = DB::table('user_details')->where('id_user', $user->id)->value('id_department');
+        $userdetail = DB::table('user_details')->where('id_user', $user->id)->value('id_department');*/
 
-        if($department_id_solicitud  == $userdetail){
-            $spent = PurchaseRequest::where('id',$page)->get()->last();
+        //if($department_id_solicitud  == $userdetail){
+            
             
             $data = [];
             
@@ -385,9 +403,9 @@ class PurchaseRequestController extends Controller
             }
             
             return response()->json(['data' => $data]);
-        }else{
+        /*}else{
             return response()->json(['message' => 'No eres Manager de este departamento.', 'status' => 404], 404);
-        }
+        }*/
     }
 
     public function approvedDepartment(Request $request){
