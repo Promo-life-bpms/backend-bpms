@@ -126,11 +126,6 @@ class UserController extends Controller
             'email' => $request->email,
         ]);
 
-        /*$user->name = $request->name ?? $user->name;
-        $user->active = $request->active ?? $user->active;
-        $user->email = $request->email ?? $user->email;
-        $user->save();*/
-
         //ACTUALIZAMOS LOS DETALLES DEL USUARIO//
         DB::table('user_details')->where('id_user', $request->id_user)->update([
             'id_department' => $request->id_department,
@@ -141,11 +136,20 @@ class UserController extends Controller
         DB::table('role_user')->where('user_id', $request->id_user)->update([
             'role_id' => $request->role_id,
         ]);
-
-        /*if ($request->roles)
-            $user->syncRoles($request->roles);*/
-
-        return response()->json(['message' => 'Usuario actualizado correctamente', 'status' => 200], 200);
+        $newValues = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'id_department' => $request->id_department,
+            'id_company' => $request->id_company,
+            'role_id' => [$request->role_id], // Convertir el ID del rol en un array para ser consistente con $oldValues
+        ];
+    
+        // Comparar los valores y enviar la respuesta JSON
+        return response()->json([
+            'message' => 'Usuario actualizado correctamente',
+            'status' => 200,
+            'new_values' => $newValues,
+        ], 200);
     }
 
     // Metodo para eliminar el usuario que solo desactiva el usuario
