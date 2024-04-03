@@ -235,21 +235,20 @@ class PurchaseRequestController extends Controller
 
         $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
         $rolcajachi = DB::table('roles')->where('id', 32)->value('id');
-
-        if($rolcajachica == $rolcajachi){
-            $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
-            if($status == "aprobada"){
-                $spent = PurchaseRequest::where('id', $page)->get()->last();
-            }else{
-                return response()->json(['message' => 'Esta solicitud no fue aprobada']);
-            } 
-        }
+    
         // Verificar si el usuario autenticado es gerente de algún departamento
         if ($department_ids->isEmpty()) {
             $id = DB::table('purchase_requests')->where('id', $page)->value('user_id');
             if($id == $user->id){
             $spent = PurchaseRequest::where('id',$page)->get()->last();
 
+            }elseif($rolcajachica == $rolcajachi){
+                $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
+                if($status == "aprobada"){
+                    $spent = PurchaseRequest::where('id', $page)->get()->last();
+                }else{
+                    return response()->json(['message' => 'Esta solicitud no fue aprobada']);
+                }   
             }else{
                 return 0;
             }
