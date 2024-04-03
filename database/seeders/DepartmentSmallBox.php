@@ -49,97 +49,97 @@ class DepartmentSmallBox extends Seeder
 
         $roles = array(
             (object)[
-                'name' => 'equipo administración',
+                'name' => 'equipo_administración',
                 'display_name' => 'Equipo administración', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo almacén',
+                'name' => 'equipo_almacén',
                 'display_name' => 'Equipo almacén', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo auditoría y gestión de calidad',
+                'name' => 'equipo_auditoría_gestión_calidad',
                 'display_name' => 'Equipo auditoría y gestión de calidad', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo calidad',
+                'name' => 'equipo_calidad',
                 'display_name' => 'Equipo calidad', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo compras',
+                'name' => 'equipo_compras',
                 'display_name' => 'Equipo compras', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo dirección',
+                'name' => 'equipo_dirección',
                 'display_name' => 'Equipo dirección', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo diseño',
+                'name' => 'equipo_diseño',
                 'display_name' => 'Equipo diseño', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo importaciones',
+                'name' => 'equipo_importaciones',
                 'display_name' => 'Equipo importaciones', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo logistica',
+                'name' => 'equipo_logistica',
                 'display_name' => 'Equipo logistica', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo mantenimiento',
+                'name' => 'equipo_mantenimiento',
                 'display_name' => 'Equipo mantenimiento', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo mesa de control',
+                'name' => 'equipo_mesa_control',
                 'display_name' => 'Equipo mesa de control', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo recursos humanos',
+                'name' => 'equipo_recursos_humanos',
                 'display_name' => 'Equipo recursos humanos', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo sistemas',
+                'name' => 'equipo_sistemas',
                 'display_name' => 'Equipo sistemas', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo tecnología e innovación',
+                'name' => 'equipo_tecnología_e_innovación',
                 'display_name' => 'Equipo tecnología e innovación', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo ventas BH',
+                'name' => 'equipo_ventas_BH',
                 'display_name' => 'Equipo ventas BH', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo ventas PL',
+                'name' => 'equipo_ventas_PL',
                 'display_name' => 'Equipo ventas PL', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo ventas PMZ',
+                'name' => 'equipo_ventas_PMZ',
                 'display_name' => 'Equipo ventas PMZ', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'equipo marketing',
+                'name' => 'equipo_marketing',
                 'display_name' => 'Equipo marketing', // optional
                 'description' => 'Equipo de trabajo', // optional
             ],
             (object)[
-                'name' => 'caja chica',
+                'name' => 'caja_chica',
                 'display_name' => 'Caja chica', // optional
                 'description' => 'Caja chica', 
             ],

@@ -235,8 +235,16 @@ class PurchaseRequestController extends Controller
     
         // Verificar si el usuario autenticado es gerente de algún departamento
         if ($department_ids->isEmpty()) {
+            $id = DB::table('purchase_requests')->where('id', $page)->value('user_id');
             // Si el usuario autenticado no es gerente de ningún departamento, retornar un mensaje de error o algo apropiado
-            return response()->json(['message' => 'Solo un manager puede observar las solicitudes', 'status'=>200], 200);
+            if($id == $user->id){
+
+            $spent = PurchaseRequest::where('id',$page)->get()->last();
+
+            }else{
+                return 0;
+            }
+           // return response()->json(['message' => 'Solo un manager puede observar las solicitudes', 'status'=>200], 200);
         }
 
         $department_id_solicitud = DB::table('purchase_requests')->where('id', $page)->value('department_id');
@@ -245,8 +253,10 @@ class PurchaseRequestController extends Controller
         $manager_id = DB::table('manager_has_departments')
             ->where('id_department', $department_id_solicitud)
             ->value('id_user');
+        
+        $userdetail = DB::table('user_details')->where('id_user', $user->id)->value('id_department');
 
-        if($user->id == $manager_id){
+        if($department_id_solicitud  == $userdetail){
             $spent = PurchaseRequest::where('id',$page)->get()->last();
             
             $data = [];
@@ -402,7 +412,7 @@ class PurchaseRequestController extends Controller
                 'purchase_status_id' => 1
             ]);
             
-            $role_buyer = Role::where('name', 'caja chica')->get()->last();
+            $role_buyer = Role::where('name', 'caja_chica')->get()->last();
             $user_role = UserRole::where('role_id', $role_buyer->id)->get();
             $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
             
@@ -642,7 +652,11 @@ class PurchaseRequestController extends Controller
             'total_update' => 'required'
         ]);
 
-        $method = DB::table('purchase_requests')->where('id', $request->id_purchase)->select('payment_method_id')->first();
+        $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
+        $rolcajachi = DB::table('roles')->where('id', 32)->value('id');
+        
+        if ($rolcajachica == $rolcajachi) {
+            $method = DB::table('purchase_requests')->where('id', $request->id_purchase)->select('payment_method_id')->first();
 
         if ($method->payment_method_id == 1) {
             ///OBTENEMOS EL PRIMER DÍA DEL MES Y EL ÚLTIMO///        
@@ -698,6 +712,10 @@ class PurchaseRequestController extends Controller
             ]);
         }
         return response()->json(['message' => 'Se actualizó con éxito la cantidad'], 200);
+
+        }else{
+            return response()->json(['message' => "No tienes permiso."],404);
+        }   
     }
 
     public function update(Request $request)
@@ -1267,7 +1285,11 @@ class PurchaseRequestController extends Controller
             'payment_method_id' => 'required',
         ]);
 
-        ///VERIFICAMOS SI EL METODO DE PAGO QUE SE USUARA ES EFECTIVO///
+        $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
+        $rolcajachi = DB::table('roles')->where('id', 32)->value('id');
+        
+        if ($rolcajachica == $rolcajachi) {
+             ///VERIFICAMOS SI EL METODO DE PAGO QUE SE USUARA ES EFECTIVO///
         if($request->payment_method_id == 1){
             $pago = DB::table('purchase_requests')->where('id', $request->id)->select('total')->first();
     
@@ -1319,7 +1341,12 @@ class PurchaseRequestController extends Controller
                 'payment_method_id' => $request->payment_method_id,
             ]);
         }
-        
         return response()->json(['message' => "Método de pago actualizado correctamente"],200);
+        }else{
+            return response()->json(['message' => "No tienes permiso."],404);
+        }
+    
+
+       
     }
 }
