@@ -233,22 +233,23 @@ class PurchaseRequestController extends Controller
         
         //dd($department_ids);
 
-        $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
+        $rol = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
         $rolcajachi = DB::table('roles')->where('id', 32)->value('id');
-    
+        $administrador = DB::table('roles')->where('id', 1)->value('id');
         // Verificar si el usuario autenticado es gerente de algún departamento
         if ($department_ids->isEmpty()) {
             $id = DB::table('purchase_requests')->where('id', $page)->value('user_id');
             if($id == $user->id){
             $spent = PurchaseRequest::where('id',$page)->get()->last();
-
-            }elseif($rolcajachica == $rolcajachi){
+            }elseif($rol == $rolcajachi){
                 $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
                 if($status == "aprobada"){
                     $spent = PurchaseRequest::where('id', $page)->get()->last();
                 }else{
                     return response()->json(['message' => 'Esta solicitud no fue aprobada']);
                 }   
+            }elseif($rol == $administrador){
+                $spent = PurchaseRequest::where('id', $page)->get()->last();
             }else{
                 return 0;
             }
