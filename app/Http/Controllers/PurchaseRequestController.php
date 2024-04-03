@@ -254,9 +254,9 @@ class PurchaseRequestController extends Controller
             ->where('id_department', $department_id_solicitud)
             ->value('id_user');
         
-        $userdetail = DB::table('user_details')->where('id_user', $user->id)->value('id_department');
-
-        if($department_id_solicitud  == $userdetail){
+        $userdetails = DB::table('manager_has_departments')->where('id_user', $user->id)->pluck('id_department')->toArray();
+        
+        if (in_array($department_id_solicitud, $userdetails)) {
             $spent = PurchaseRequest::where('id',$page)->get()->last();
             
             $data = [];
