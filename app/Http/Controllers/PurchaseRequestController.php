@@ -249,6 +249,7 @@ class PurchaseRequestController extends Controller
                     return response()->json(['message' => 'Esta solicitud no fue aprobada']);
                 }   
             }elseif($rol == $administrador){
+                return 0;
                 $spent = PurchaseRequest::where('id', $page)->get()->last();
             }else{
                 return 0;
