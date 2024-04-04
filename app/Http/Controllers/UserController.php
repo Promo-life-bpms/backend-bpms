@@ -127,10 +127,20 @@ class UserController extends Controller
         ]);
 
         //ACTUALIZAMOS LOS DETALLES DEL USUARIO//
-        DB::table('user_details')->where('id_user', $request->id_user)->update([
-            'id_department' => $request->id_department,
-            'id_company' => $request->id_company,
-        ]);
+        $busqueda = DB::table('user_details')->where('id_user', $request->id_user)->get();
+
+        if(!$busqueda){
+            UserDetails::create([
+                'id_user' => $request->id_user,
+                'id_department' => $request->id_department,
+                'id_company' => $request->id_company,
+            ]);
+        }else{
+            DB::table('user_details')->where('id_user', $request->id_user)->update([
+                'id_department' => $request->id_department,
+                'id_company' => $request->id_company,
+            ]);
+        }
 
         ///ACTUALIZAR EL ROL///
         DB::table('role_user')->where('user_id', $request->id_user)->update([
