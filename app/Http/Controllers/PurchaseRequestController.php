@@ -243,7 +243,7 @@ class PurchaseRequestController extends Controller
             $spent = PurchaseRequest::where('id',$page)->get()->last();
             }elseif($rol == $rolcajachi){
                 $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
-                if($status == "aprobada"){
+                if($status == "aprobada" || $status == 'devolución'){
                     $spent = PurchaseRequest::where('id', $page)->get()->last();
                 }else{
                     return response()->json(['message' => 'Esta solicitud no fue aprobada']);
