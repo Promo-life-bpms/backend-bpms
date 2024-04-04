@@ -127,7 +127,8 @@ class UserController extends Controller
         ]);
 
         //ACTUALIZAMOS LOS DETALLES DEL USUARIO//
-        $busqueda = DB::table('user_details')->where('id_user', $request->id_user)->get();
+        $busqueda = DB::table('user_details')->where('id_user', $request->id_user)->value('id_user');
+        //dd($busqueda);
 
         if(!$busqueda){
             UserDetails::create([
