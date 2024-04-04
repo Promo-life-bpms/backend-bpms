@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EstimationSmallBox;
 use App\Models\Eventuales;
 use App\Models\EventualesMaquila;
 use App\Models\HistoryDevolution;
@@ -627,12 +628,21 @@ class PurchaseRequestController extends Controller
         $id = $create_spent->id;
 
         if ($request->eventuales) {
+            $eventuales = $request->eventuales;
+        
+            // Genera un ID único para cada eventual combinando los IDs
+            foreach ($eventuales as &$eventual) {
+                $eventId = uniqid(); // Genera un ID único para el eventual
+                $eventual['id'] = $eventId . '_' . $id; // Combina los IDs
+            }
+        
             $eventualesData = [
-                'eventuales' => json_encode($request->eventuales),
+                'eventuales' => json_encode($eventuales),
                 'purchase_id' => $id,
             ];
+        
             Eventuales::create($eventualesData);
-        }        
+        }       
         ///////////////////////////////////
         
         $users_to_send_mail = UserCenter::where('center_id',$center_id)->get();
@@ -1089,6 +1099,11 @@ class PurchaseRequestController extends Controller
                 'id_purchase' => $request->id, 
             ]);
 
+            EstimationSmallBox::create([
+                'total' => $ $total_return,
+                'id_user' => $user->id,
+            ]);
+
             return response()->json(['message' => "Devolución realizada"], 200);
         }
     }
@@ -1347,7 +1362,8 @@ class PurchaseRequestController extends Controller
                 
                 //dd($MonthlyExpenses);
                 $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
-                //dd($total. '|' .$AvailableBudget);
+                //dd($AvailableBudget);
+                //dd($total>$AvailableBudget);
                 if ($pago) {
                     if($total > $AvailableBudget){
                         return response()->json(['message' => 'No tienes fondos suficientes'], 400);
