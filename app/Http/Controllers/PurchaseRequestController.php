@@ -245,7 +245,9 @@ class PurchaseRequestController extends Controller
                 $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
                 if(trim($status) != "rechazada" && trim($status) != "en proceso"){
                     $spent = PurchaseRequest::where('id', $page)->get()->last();
-                }
+                }else{
+                    return response()->json(['message' => 'Esta solicitud no fue aprobada']);
+                } 
             }elseif($rol == $administrador){
                 $spent = PurchaseRequest::where('id', $page)->get()->last();
             }else{
@@ -1313,64 +1315,59 @@ class PurchaseRequestController extends Controller
         $rolcajachi = DB::table('roles')->where('id', 32)->value('id');
         
         if ($rolcajachica == $rolcajachi) {
-             ///VERIFICAMOS SI EL METODO DE PAGO QUE SE USUARA ES EFECTIVO///
-        if($request->payment_method_id == 1){
-            $pago = DB::table('purchase_requests')->where('id', $request->id)->select('total')->first();
+            ///VERIFICAMOS SI EL METODO DE PAGO QUE SE USUARA ES EFECTIVO///
+            if($request->payment_method_id == 1){
+                $pago = DB::table('purchase_requests')->where('id', $request->id)->select('total')->first();
+                $total = $pago->total;
+                ///OBTENEMOS EL PRIMER DÍA DEL MES Y EL ÚLTIMO///        
+                $primerDiaDelMes = Carbon::now()->startOfMonth();
+                $ultimoDiaDelMes = Carbon::now()->endOfMonth();
     
-            ///OBTENEMOS EL PRIMER DÍA DEL MES Y EL ÚLTIMO///        
-            $primerDiaDelMes = Carbon::now()->startOfMonth();
-            $ultimoDiaDelMes = Carbon::now()->endOfMonth();
-    
-
-            // Verificar si la fecha actual está dentro del mes
-            if (Carbon::now()->between($primerDiaDelMes, $ultimoDiaDelMes)) {
-                // Si estamos en el mes actual, realizar la suma
-                //presupuestomensual == MonthlyBudget
-                $MonthlyBudget = DB::table('estimation_small_box')
-                                    ->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->sum('total');
-            }
-                    
-            ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
-            ///gastosmentuales == monthlyexpenses///
-            $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
-                $query->where(function ($subquery) {
-                    $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                })->orWhere(function ($subquery) {
-                    $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                })->orWhere(function ($subquery) {
-                    $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
-                })->orWhere(function ($subquery){
-                    $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'en proceso')->where('payment_method_id', '=', 1);
-                })->orWhere(function($subquery){
-                    $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'rechazada')->where('payment_method_id', '=', 1);
-                });
-            })->sum('total');
-
-            $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
-
-            if ($pago) {
-                if($pago->total > $AvailableBudget){
-                    return response()->json(['message' => 'No tienes fondos suficientes'], 400);
+                // Verificar si la fecha actual está dentro del mes
+                if (Carbon::now()->between($primerDiaDelMes, $ultimoDiaDelMes)) {
+                    // Si estamos en el mes actual, realizar la suma
+                    //presupuestomensual == MonthlyBudget
+                    $MonthlyBudget = DB::table('estimation_small_box')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->sum('total');
                 }
-                else{
-                    DB::table('purchase_requests')->where('id',$request->id)->update([
-                        'payment_method_id' => $request->payment_method_id,
-                    ]);
+                ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
+                ///gastosmentuales == monthlyexpenses///
+                $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+                    $query->where(function ($subquery) {
+                        $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                    })->orWhere(function ($subquery) {
+                        $subquery->where('purchase_status_id', '=', 2)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                    })->orWhere(function ($subquery) {
+                        $subquery->where('purchase_status_id', '=', 3)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
+                    })->orWhere(function ($subquery){
+                        $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'en proceso')->where('payment_method_id', '=', 1);
+                    })->orWhere(function($subquery){
+                        $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'rechazada')->where('payment_method_id', '=', 1);
+                    });
+                })->sum('total');
+                
+                //dd($MonthlyExpenses);
+                $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
+                //dd($total. '|' .$AvailableBudget);
+                if ($pago) {
+                    if($total > $AvailableBudget){
+                        return response()->json(['message' => 'No tienes fondos suficientes'], 400);
+                    }
+                    else{
+                        DB::table('purchase_requests')->where('id',$request->id)->update([
+                            'payment_method_id' => $request->payment_method_id,
+                        ]);
+                    }
+                } else {
+                    return response()->json(['message' =>'No se encontró el pago correspondiente'], 400); 
                 }
-            } else {
-                return response()->json(['message' =>'No se encontró el pago correspondiente'], 400); 
+            }else{
+                DB::table('purchase_requests')->where('id',$request->id)->update([
+                    'payment_method_id' => $request->payment_method_id,
+                ]);
             }
-        }else{
-            DB::table('purchase_requests')->where('id',$request->id)->update([
-                'payment_method_id' => $request->payment_method_id,
-            ]);
-        }
-        return response()->json(['message' => "Método de pago actualizado correctamente"],200);
+            return response()->json(['message' => "Método de pago actualizado correctamente"],200);
         }else{
             return response()->json(['message' => "No tienes permiso."],404);
         }
-    
-
-       
     }
 }

@@ -42,11 +42,24 @@ class DepartmentSmallBox extends Seeder
             ]);
         }
 
-        Company::create([
-            'name' => 'Promo Zale',
-            'description' => 'Promo Zale',
+    
+        $companies = array(
+            (object)[
+                'name' => 'Promo Zale',
+                'description' => 'Promo Zale', // optional
+            ],
+            (object)[
+                'name' => 'Trade Market 57',
+                'description' => 'Trade Market 57', // optional
+            ],
+        );
 
-        ]);
+        foreach ($companies as $company){
+            Company::create([
+                'name' => $company->name,
+                'description' => $company->description,
+            ]);
+        }
 
         $roles = array(
             (object)[
@@ -148,6 +161,11 @@ class DepartmentSmallBox extends Seeder
                 'name' => 'sin_definir',
                 'display_name' => 'Sin definir', // optional
                 'description' => 'El usuario aún no tiene un rol', 
+            ],
+            (object)[
+                'name' => 'equipo_tm_57',
+                'display_name' => 'Trade Market 57', // optional
+                'description' => 'Trade Market 57', 
             ],
         );
 
