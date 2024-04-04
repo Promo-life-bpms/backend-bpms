@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\ManagerHasDepartment;
 use App\Models\Role;
 use App\Models\UserDetails;
+use App\Models\UserRole;
 use Illuminate\Database\Seeder;
 
 class DepartmentSmallBox extends Seeder
@@ -143,6 +144,11 @@ class DepartmentSmallBox extends Seeder
                 'display_name' => 'Caja chica', // optional
                 'description' => 'Caja chica', 
             ],
+            (object)[
+                'name' => 'sin_definir',
+                'display_name' => 'Sin definir', // optional
+                'description' => 'El usuario aún no tiene un rol', 
+            ],
         );
 
         foreach ($roles as $rol) {
@@ -152,6 +158,283 @@ class DepartmentSmallBox extends Seeder
                 'description' => $rol->description,
             ]);  
         }
+
+        ///33///
+        $asigarroles = array(
+            (object)[
+                'role_id' => '33',
+                'user_id' => '55', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            (object)[
+                'role_id' => '33',
+                'user_id' => '56', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            (object)[
+                'role_id' => '33',
+                'user_id' => '58', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            (object)[
+                'role_id' => '33',
+                'user_id' => '59', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '60', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '61', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '62', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '65', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '68', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '72', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '112', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '114', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '116', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '117', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '118', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '119', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '120', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            (object)[
+                'role_id' => '33',
+                'user_id' => '121', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '123', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '125', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '126', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '127', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '128', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '129', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '132', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '138', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '139', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '140', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '141', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '157', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '159', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '170', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '180', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '181', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '184', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '188', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '232', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '234', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '239', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '240', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '241', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '242', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '243', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '244', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '245', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '246', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '247', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '248', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '249', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '250', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '251', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '252', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '253', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '254', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '255', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '256', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '257', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '258', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '259', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '260', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '261', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '262', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '263', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '264', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => '33',
+                'user_id' => '265', // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+        );
+        foreach ($asigarroles as $asignarrol) {
+            UserRole::create([
+                'role_id' => $asignarrol->role_id,
+                'user_id' => $asignarrol->user_id,
+                'user_type' => $asignarrol->user_type,
+            ]);  
+        }
+        
         $managers = array(
             (object)[
                 'id_department' => 1,
