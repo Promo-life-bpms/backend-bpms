@@ -1099,10 +1099,16 @@ class PurchaseRequestController extends Controller
                 'id_purchase' => $request->id, 
             ]);
 
-            EstimationSmallBox::create([
-                'total' => $ $total_return,
-                'id_user' => $user->id,
-            ]);
+            $mes = Carbon::now()->month;
+            $solicitud = DB::table('purchase_requests')->where('id', $request->id)->first();
+            $fechasoli = Carbon::parse($solicitud->created_at)->month;
+
+            if($mes != $fechasoli){
+                EstimationSmallBox::create([
+                    'total' => $total_return,
+                    'id_user' => $user->id,
+                ]);
+            }
 
             return response()->json(['message' => "Devolución realizada"], 200);
         }
