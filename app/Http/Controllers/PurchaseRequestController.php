@@ -1419,6 +1419,24 @@ class PurchaseRequestController extends Controller
         $updatedEventualJSON = json_encode($eventualArray);
         DB::table('eventuales')->where('purchase_id', $request->purchase_id)->update(['eventuales' => $updatedEventualJSON]);
 
+        ///ACTUALIZAMOS LA SOLICITUD///
+
+        $eventuales = DB::table('eventuales')->where('purchase_id', $request->purchase_id)->get();
+
+        $pays = [];
+        foreach ($eventuales as $eventual) {
+            $eventualArray = json_decode($eventual->eventuales, true);
+            foreach ($eventualArray as $item) {
+                $pays[] = $item['pay'];
+            }
+        }
+        // Sumar todos los valores de 'pay' en $pays
+        $total_pay = array_sum($pays);
+    
+        DB::table('purchase_requests')->where('id', $request->purchase_id)->update([
+            'total' => $total_pay,
+        ]);
+
         return response()->json(['message' => 'Pago actualizado', 'status' => 200], 200);
     }
 }
