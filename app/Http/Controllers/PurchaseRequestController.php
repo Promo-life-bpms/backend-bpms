@@ -1392,4 +1392,33 @@ class PurchaseRequestController extends Controller
             return response()->json(['message' => "No tienes permiso."],404);
         }
     }
+
+    public function updateEventuales(Request $request){
+
+        $this->validate($request,[
+            'purchase_id' => 'required',
+            'id_eventual' => 'required',
+            'new_pay' => 'required'
+        ]);
+
+        ///Obtenemos el eventual///
+        $eventual = DB::table('eventuales')->where('purchase_id', $request->purchase_id)->value('eventuales');
+        $eventualArray = json_decode($eventual, true);
+
+        $id_eventual = $request->id_eventual;
+        $new_pay_amount = $request->new_pay; 
+
+        foreach ($eventualArray as &$item) {
+            $id = $item['id'];
+            if ($id === $id_eventual) {
+                $item['pay'] = $new_pay_amount;
+            }
+        }
+        
+        //GUARDAMOS LOS CAMBIOS///
+        $updatedEventualJSON = json_encode($eventualArray);
+        DB::table('eventuales')->where('purchase_id', $request->purchase_id)->update(['eventuales' => $updatedEventualJSON]);
+
+        return response()->json(['message' => 'Pago actualizado', 'status' => 200], 200);
+    }
 }
