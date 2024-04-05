@@ -1397,32 +1397,36 @@ class PurchaseRequestController extends Controller
 
         $this->validate($request,[
             'purchase_id' => 'required',
-            'id_eventual' => 'required',
-            'new_pay' => 'required'
+            'id_eventual' => 'required|array',
+            'new_pay' => 'required|array'
         ]);
-
-        ///Obtenemos el eventual///
-        $eventual = DB::table('eventuales')->where('purchase_id', $request->purchase_id)->value('eventuales');
-        $eventualArray = json_decode($eventual, true);
-
-        $id_eventual = $request->id_eventual;
-        $new_pay_amount = $request->new_pay; 
-
-        foreach ($eventualArray as &$item) {
-            $id = $item['id'];
-            if ($id === $id_eventual) {
-                $item['pay'] = $new_pay_amount;
+    
+        $purchase_id = $request->purchase_id;
+        $id_eventuales = $request->id_eventual; // Ahora id_eventual es un array
+    
+        //Obtenemos los eventuales
+        $eventuales = DB::table('eventuales')->where('purchase_id', $purchase_id)->first();
+        $eventualArray = json_decode($eventuales->eventuales, true);
+    
+        // Iteramos sobre cada ID proporcionado
+        foreach ($id_eventuales as $key => $id_eventual) {
+            $new_pay_amount = $request->new_pay[$key]; // Obtener el pago correspondiente al ID actual
+            foreach ($eventualArray as &$item) {
+                $id = $item['id'];
+                if ($id === $id_eventual) {
+                    $item['pay'] = $new_pay_amount;
+                    break; // Detener el bucle una vez que se ha actualizado el pago
+                }
             }
         }
         
-        //GUARDAMOS LOS CAMBIOS///
+        // Guardamos los cambios
         $updatedEventualJSON = json_encode($eventualArray);
-        DB::table('eventuales')->where('purchase_id', $request->purchase_id)->update(['eventuales' => $updatedEventualJSON]);
-
-        ///ACTUALIZAMOS LA SOLICITUD///
-
-        $eventuales = DB::table('eventuales')->where('purchase_id', $request->purchase_id)->get();
-
+        DB::table('eventuales')->where('purchase_id', $purchase_id)->update(['eventuales' => $updatedEventualJSON]);
+    
+        // Recalculamos el total de pago
+        $eventuales = DB::table('eventuales')->where('purchase_id', $purchase_id)->get();
+    
         $pays = [];
         foreach ($eventuales as $eventual) {
             $eventualArray = json_decode($eventual->eventuales, true);
@@ -1433,10 +1437,12 @@ class PurchaseRequestController extends Controller
         // Sumar todos los valores de 'pay' en $pays
         $total_pay = array_sum($pays);
     
-        DB::table('purchase_requests')->where('id', $request->purchase_id)->update([
+        // Actualizamos el total de la solicitud de compra
+        DB::table('purchase_requests')->where('id', $purchase_id)->update([
             'total' => $total_pay,
         ]);
-
-        return response()->json(['message' => 'Pago actualizado', 'status' => 200], 200);
+    
+        return response()->json(['message' => 'Pagos actualizados', 'status' => 200], 200);
     }
+    
 }
