@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserDetails;
+use App\Models\UserRole;
 use App\Notifications\RegisteredUser;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -16,16 +19,40 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with("whatRoles")->where('active', true)->get();
-        return response()->json($users);
+    
+        foreach ($users as $user) {
+            $details = DB::table('user_details')->where('id_user', $user->id)->first();
+    
+            if ($details) {
+                $department = DB::table('departments')->where('id', $details->id_department)->value('name_department');
+                $department_id = DB::table('departments')->where('id', $details->id_department)->value('id');
+                $company = DB::table('companies')->where('id', $details->id_company)->value('name');
+                $company_id = DB::table('companies')->where('id', $details->id_company)->value('id');
+            } else {
+                $department = null;
+                $company = null;
+            }
+            $user->department = $department;
+            $user->company = $company;
+            $user->department_id = $department_id;
+            $user->company_id = $company_id;
+            
+        }
+    
+        return response()->json([$users, 'status' => 200], 200);
     }
+    
 
     // Crear el metodo create con el name, email, active
     public function create(Request $request)
     {
         $validation = Validator::make($request->all(), [
             'name' => 'required',
-            'email' => 'required|unique:users',
-            'roles' => 'required|array',
+            'email' => 'required|unique:users|email',
+            'id_department' => 'required',
+            'id_company' => 'required',
+            'role_id' => 'required',
+            ////'roles' => 'required|array',
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -45,9 +72,24 @@ class UserController extends Controller
         $user->email = $request->email;
         $user->password = $password;
         $user->save();
+
+        $iduser = $user->id;
+
+        $usersDetails = new UserDetails();
+        $usersDetails->id_user = $iduser;
+        $usersDetails->id_department = $request->id_department;
+        $usersDetails->id_company = $request->id_company;
+        $usersDetails->save();
+
+        $UserRol = new UserRole();
+        $UserRol->role_id = $request->role_id;
+        $UserRol->user_id = $iduser;
+        $UserRol->user_type = "App\Models\User";
+        $UserRol->save();
+
         // Asignar roles que vienen en el request en formato de array
-        $user->syncRoles($request->roles);
-        try {
+        //$user->syncRoles($request->roles);
+        /*try {
             $dataNotification = [
                 'name' => $user->name,
                 'email' => $user->email,
@@ -58,24 +100,67 @@ class UserController extends Controller
             $user->notify(new RegisteredUser($dataNotification));
         } catch (Exception $th) {
             return response()->json(["usuario" => $user, 'message' => 'Usuario creado correctamente, pero no se pudo enviar el correo']);
-        }
-        return response()->json(["usuario" => $user, 'message' => 'Usuario creado correctamente']);
+        }*/
+        return response()->json(["usuario" => $user, "Detalles del usuario" => $usersDetails, "Rol asignado" => $UserRol ,'message' => 'Usuario creado correctamente', "status" => 200], 200);
     }
 
     // Metodo para actualizar el usuario
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $user = User::find($id);
+        $this->validate($request, [
+            'id_user' => 'required',
+            'name' => 'required',
+            'email' => 'required|email',
+            'id_department' => 'required',
+            'id_company' => 'required',
+            'role_id' => 'required',
+        ]);
+
+        $user = User::find($request->id_user);
         if (!$user) {
             return response()->json(["message" => "El usuario no existe"], Response::HTTP_NOT_FOUND);
         }
-        $user->name = $request->name ?? $user->name;
-        $user->active = $request->active ?? $user->active;
-        $user->email = $request->email ?? $user->email;
-        $user->save();
-        if ($request->roles)
-            $user->syncRoles($request->roles);
-        return response()->json(["usuario" => $user, 'message' => 'Usuario actualizado correctamente']);
+
+        DB::table('users')->where('id', $request->id_user)->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        //ACTUALIZAMOS LOS DETALLES DEL USUARIO//
+        $busqueda = DB::table('user_details')->where('id_user', $request->id_user)->value('id_user');
+        //dd($busqueda);
+
+        if(!$busqueda){
+            UserDetails::create([
+                'id_user' => $request->id_user,
+                'id_department' => $request->id_department,
+                'id_company' => $request->id_company,
+            ]);
+        }else{
+            DB::table('user_details')->where('id_user', $request->id_user)->update([
+                'id_department' => $request->id_department,
+                'id_company' => $request->id_company,
+            ]);
+        }
+
+        ///ACTUALIZAR EL ROL///
+        DB::table('role_user')->where('user_id', $request->id_user)->update([
+            'role_id' => $request->role_id,
+        ]);
+        $newValues = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'id_department' => $request->id_department,
+            'id_company' => $request->id_company,
+            'role_id' => [$request->role_id], // Convertir el ID del rol en un array para ser consistente con $oldValues
+        ];
+    
+        // Comparar los valores y enviar la respuesta JSON
+        return response()->json([
+            'message' => 'Usuario actualizado correctamente',
+            'status' => 200,
+            'new_values' => $newValues,
+        ], 200);
     }
 
     // Metodo para eliminar el usuario que solo desactiva el usuario

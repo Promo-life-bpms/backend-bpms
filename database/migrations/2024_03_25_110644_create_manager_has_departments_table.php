@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateEventualesTable extends Migration
+class CreateManagerHasDepartmentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class CreateEventualesTable extends Migration
      */
     public function up()
     {
-        Schema::create('eventuales', function (Blueprint $table) {
+        Schema::create('manager_has_departments', function (Blueprint $table) {
             $table->id();
-            $table->longText('eventuales');
-            $table->foreignId('purchase_id')->references('id')->on('purchase_requests')->onDelete('cascade');
+            $table->foreignId('id_user')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('id_department')->references('id')->on('departments')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ class CreateEventualesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('eventuales');
+        Schema::dropIfExists('manager_has_departments');
     }
 }

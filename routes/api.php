@@ -15,6 +15,7 @@ use App\Http\Controllers\EstimationSmallBoxController;
 use App\Http\Controllers\EventualesController;
 use App\Http\Controllers\ExchangeReturnController;
 use App\Http\Controllers\BinnacleController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\UploadImageController;
 use App\Http\Controllers\UserCenterController;
 use App\Models\EstimationSmallBox;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserDetailsController;
 use App\Notifications\Acces;
 use App\Models\User;
 
@@ -60,7 +62,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Apis de el userController
     Route::get('users', [UserController::class, 'index']);
     Route::post('users', [UserController::class, 'create']);
-    Route::put('users/{id}', [UserController::class, 'update']);
+    Route::post('users/edit', [UserController::class, 'update']);
     Route::delete('users/{id}', [UserController::class, 'delete']);
     Route::get('users/sendNewAccess/{id}', [UserController::class, 'sendNewAccess']);
     Route::get('syncUsers', [UserController::class, 'syncUsers']);
@@ -177,6 +179,13 @@ Route::group(['middleware' => 'auth'], function () {
     //PurchaseRequest
     Route::get('caja-chica/solicitudes-de-compra/ver/', [PurchaseRequestController::class, 'show']);
     Route::get('caja-chica/solicitudes-de-compra/ver/{page}', [PurchaseRequestController::class, 'showPage']);
+
+    ////APIS DE PRUEBA///
+    Route::get('caja-chica/solicitudes-de-compra/por-departamento/ver', [PurchaseRequestController::class, 'DepartmentPurchase']);
+    Route::get('caja-chica/solicitudes-de-compra/por-departamento/ver/{page}', [PurchaseRequestController::class, 'DepartmentPage']);
+    Route::post('caja-chica/aprobar-solicitud/por-department/', [PurchaseRequestController::class, 'approvedDepartment']);
+    Route::post('caja-chica/editar/eventuales',[PurchaseRequestController::class,'updateEventuales']);
+
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
     Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class,'editdate']);
     Route::post('caja-chica/solicitudes-de-compra/editar/', [PurchaseRequestController::class, 'update']);
@@ -190,7 +199,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/realizar-devolucion/confirmada/',[PurchaseRequestController::class, 'confirmationDevolution']);
     Route::post('caja-chica/realizar-devolucion/cancelation/',[PurchaseRequestController::class, 'cancelationDevolution']);
     Route::post('caja-chica/realizar-cancelacion/', [PurchaseRequestController::class, 'createCancellation']);
-    Route::post('caja-chica/actualizar-pago/', [PurchaseRequestController::class, 'updatePaymentMethod']);
+    Route::post('caja-chica/actualizar-pago', [PurchaseRequestController::class, 'updatePaymentMethod']);
 
     //actualizar el monto del pago//
     route::post('caja-chica/actualizar-pago-monto',[PurchaseRequestController::class,'updatemoney']);
@@ -243,7 +252,14 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/return/excess/money', [ExchangeReturnController::class, 'ReturnExcessMoney']);
     Route::post('caja-chica/return/excess/money/confirmation', [ExchangeReturnController::class, 'ConfirmationReturnMoney']);
 
+    /////CAJA CHICA/BPMS /CREAR DEPARTAMENTOS/
+    ///VER DEPARTAMENTOS
+    Route::get('view/departments', [DepartmentController::class, 'AllDepartments'])->name('view.department');
+    Route::post('create/departments', [DepartmentController::class, 'AddDepartment'])->name('create.department');
+    Route::post('updated/departments',[DepartmentController::class, 'UpdatedDepartment'])->name('updated.department');
+
+    ///USERS DETAILS ///
+    Route::get('users/department/{id_department}', [UserDetailsController::class,'UserforDepartment'])->name('users.department');
     //Video
     Route::get('video', [VideoController::class, 'storeVideoInfo']);
 });
-
