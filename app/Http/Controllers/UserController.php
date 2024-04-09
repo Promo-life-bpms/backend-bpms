@@ -19,26 +19,26 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with("whatRoles")->where('active', true)->get();
-    
         foreach ($users as $user) {
             $details = DB::table('user_details')->where('id_user', $user->id)->first();
-    
             if ($details) {
                 $department = DB::table('departments')->where('id', $details->id_department)->value('name_department');
                 $department_id = DB::table('departments')->where('id', $details->id_department)->value('id');
                 $company = DB::table('companies')->where('id', $details->id_company)->value('name');
                 $company_id = DB::table('companies')->where('id', $details->id_company)->value('id');
+                $area = DB::table('areas')->where('id', $details->id_area)->value('name_area');
+                $area_id = DB::table('areas')->where('id', $details->id_area)->value('id');
             } else {
                 $department = null;
                 $company = null;
             }
             $user->department = $department;
             $user->company = $company;
+            $user->area = $area;
             $user->department_id = $department_id;
             $user->company_id = $company_id;
-            
+            $user->area_id = $area_id;     
         }
-    
         return response()->json([$users, 'status' => 200], 200);
     }
     
@@ -52,6 +52,7 @@ class UserController extends Controller
             'id_department' => 'required',
             'id_company' => 'required',
             'role_id' => 'required',
+            'id_area' => 'required'
             ////'roles' => 'required|array',
         ]);
         if ($validation->fails()) {
@@ -79,6 +80,7 @@ class UserController extends Controller
         $usersDetails->id_user = $iduser;
         $usersDetails->id_department = $request->id_department;
         $usersDetails->id_company = $request->id_company;
+        $usersDetails->id_area = $request->id_area;
         $usersDetails->save();
 
         $UserRol = new UserRole();
@@ -135,11 +137,13 @@ class UserController extends Controller
                 'id_user' => $request->id_user,
                 'id_department' => $request->id_department,
                 'id_company' => $request->id_company,
+                'id_area' => $request->id_area
             ]);
         }else{
             DB::table('user_details')->where('id_user', $request->id_user)->update([
                 'id_department' => $request->id_department,
                 'id_company' => $request->id_company,
+                'id_area' => $request->id_area
             ]);
         }
 
@@ -147,6 +151,7 @@ class UserController extends Controller
         DB::table('role_user')->where('user_id', $request->id_user)->update([
             'role_id' => $request->role_id,
         ]);
+        
         $newValues = [
             'name' => $request->name,
             'email' => $request->email,
@@ -156,11 +161,7 @@ class UserController extends Controller
         ];
     
         // Comparar los valores y enviar la respuesta JSON
-        return response()->json([
-            'message' => 'Usuario actualizado correctamente',
-            'status' => 200,
-            'new_values' => $newValues,
-        ], 200);
+        return response()->json(['message' => 'Usuario actualizado correctamente', 'status' => 200, 'new_values' => $newValues], 200);
     }
 
     // Metodo para eliminar el usuario que solo desactiva el usuario

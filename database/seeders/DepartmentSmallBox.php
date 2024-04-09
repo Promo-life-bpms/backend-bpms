@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Areas;
 use App\Models\Company;
 use App\Models\Department;
 use App\Models\ManagerHasDepartment;
@@ -15,24 +16,18 @@ class DepartmentSmallBox extends Seeder
     public function run()
     {
         $departments = [
-            'ADMINISTRACIÓN',
-            'ALMACÉN',
+            'ADMINISTRACIÓN', 
+            'OPERACIONES',
             'AUDITORÍA Y GESTIÓN DE CALIDAD',
-            'CALIDAD',
-            'COMPRAS',
-            'DIRECCIÓN',
-            'DISEÑO',
-            'IMPORTACIONES',
-            'LOGISTICA',
-            'MANTENIMIENTO',
-            'MESA DE CONTROL',
-            'RECURSOS HUMANOS',
-            'SISTEMAS',
-            'TECNOLOGÍA E INNOVACIÓN',
-            'VENTAS BH',
+            'DIRECCIÓN BH',
+            'DIRECCIÓN PL',
+            'IMPORTACIONES', 
+            'RECURSOS HUMANOS', 
+            'TECNOLOGÍA E INNOVACIÓN', 
+            'VENTAS BH', 
             'VENTAS PL',
-            'VENTAS PMZ',
-            'MARKETING',
+            'PRODUCCIÓN',
+            'SIN DEFINIR',
         ];
 
         foreach ($departments as $department){
@@ -41,7 +36,188 @@ class DepartmentSmallBox extends Seeder
                 'status' => 1,
             ]);
         }
+    
+        $areas = array(
+            ///ADMINISTRACIÓN
+            (object)[
+                'name_area' => 'Tesoreria',
+                'id_department' => 1, // optional
+            ],
+            (object)[
+                'name_area' => 'Cuentas por cobrar',
+                'id_department' => 1, // optional
+            ],(object)[
+                'name_area' => 'Facturación',
+                'id_department' => 1, // optional
+            ],(object)[
+                'name_area' => 'Gerencia',
+                'id_department' => 1, // optional
+            ],
+            /////OPERACIONES
+            (object)[
+                'name_area' => 'Logistica',
+                'id_department' => 2, // optional
+            ],
+            (object)[
+                'name_area' => 'Mesa de control',
+                'id_department' => 2, // optional
+            ],
+            (object)[
+                'name_area' => 'Almacen',
+                'id_department' => 2, // optional
+            ],
+            (object)[
+                'name_area' => 'Calidad',
+                'id_department' => 2, // optional
+            ],
+            (object)[
+                'name_area' => 'Compras',
+                'id_department' => 2, // optional
+            ],
+            ////AUDITORÍA Y GESTIÓN DE CALIDAD
+            (object)[
+                'name_area' => 'Gerencia',
+                'id_department' => 3, // optional
+            ],
+            (object)[
+                'name_area' => 'Auditoria',
+                'id_department' => 3, // optional
+            ],
+            ////DIRECCIÓN
+            (object)[
+                'name_area' => 'Dirreción',
+                'id_department' => 4, // optional
+            ],
+            (object)[
+                'name_area' => 'Gestión de Proyectos',
+                'id_department' => 4, // optional
+            ],
+            //DIRECCION PL
+            (object)[
+                'name_area' => 'Dirección',
+                'id_department' => 5, // optional
+            ],
+            (object)[
+                'name_area' => 'Marketing Promo Life',
+                'id_department' => 5, // optional
+            ],
 
+            ////IMPORTACIONES
+            (object)[
+                'name_area' => 'Importaciones',
+                'id_department' => 6, // optional
+            ],
+            (object)[
+                'name_area' => 'Gerencia',
+                'id_department' => 6, // optional
+            ],
+
+            ///RH
+            (object)[
+                'name_area' => 'Mantenimiento',
+                'id_department' => 7, // optional
+            ],
+            (object)[
+                'name_area' => 'RH',
+                'id_department' => 7, // optional
+            ],
+            (object)[
+                'name_area' => 'Gerencia',
+                'id_department' => 7, // optional
+            ],
+            (object)[
+                'name_area' => 'Recepción',
+                'id_department' => 7, // optional
+            ],
+            (object)[
+                'name_area' => 'Limpieza',
+                'id_department' => 7, // optional
+            ],
+
+            ///Tecnología e innovación
+            (object)[
+                'name_area' => 'Sistemas',
+                'id_department' => 8, // optional
+            ],
+            (object)[
+                'name_area' => 'Desarrollo',
+                'id_department' => 8, // optional
+            ],
+            (object)[
+                'name_area' => 'Marketing BH',
+                'id_department' => 8, // optional
+            ],
+            (object)[
+                'name_area' => 'Gerencia',
+                'id_department' => 8, // optional
+            ],
+            (object)[
+                'name_area' => 'Diseño',
+                'id_department' => 8, // optional
+            ],
+
+            ////VENTAS BH
+            (object)[
+                'name_area' => 'Gerencia',
+                'id_department' => 9, // optional
+            ],
+            (object)[
+                'name_area' => 'Gerencia Jacobo',
+                'id_department' => 9, // optional
+            ],
+            (object)[
+                'name_area' => 'Gerencia Promo Zale',
+                'id_department' => 9, // optional
+            ],
+            (object)[
+                'name_area' => 'Ventas Cancún/Monterry',
+                'id_department' => 9, // optional
+            ],
+            (object)[
+                'name_area' => 'Ventas Jacobo',
+                'id_department' => 9, // optional
+            ],
+            (object)[
+                'name_area' => 'Ventas México',
+                'id_department' => 9, // optional
+            ],
+            (object)[
+                'name_area' => 'Ventas Promo Zale',
+                'id_department' => 9, // optional
+            ],
+            (object)[
+                'name_area' => 'Ventas USA',
+                'id_department' => 9, // optional
+            ],
+
+            ///'VENTAS PL'
+            (object)[
+                'name_area' => 'Gerencia',
+                'id_department' => 10, // optional
+            ],
+            (object)[
+                'name_area' => 'Ventas',
+                'id_department' => 10, // optional
+            ],
+
+            //PRODUCCIÓN
+            (object)[
+                'name_area' => 'Impresión',
+                'id_department' => 11, // optional
+            ],
+            //PRODUCCIÓN
+            (object)[
+                'name_area' => 'SIN DEFINIR',
+                'id_department' => 12, // optional
+            ],
+        );
+
+        foreach ($areas as $area){
+            Areas::create([
+                'name_area' => $area->name_area,
+                'id_department' => $area->id_department,
+            ]);
+        }
     
         $companies = array(
             (object)[
@@ -456,11 +632,11 @@ class DepartmentSmallBox extends Seeder
         $managers = array(
             (object)[
                 'id_department' => 1,
-                'id_user' => 57,
+                'id_user' => 57,  ////
             ],
             (object)[
                 'id_department' => 2,
-                'id_user' => 110,
+                'id_user' => 90,
             ],
             (object)[
                 'id_department' => 3,
@@ -468,11 +644,19 @@ class DepartmentSmallBox extends Seeder
             ],
             (object)[
                 'id_department' => 4,
-                'id_user' => 97,
+                'id_user' => 51,
+            ],
+            (object)[
+                'id_department' => 11,
+                'id_user' => 54,
+            ],
+            (object)[
+                'id_department' => 5,
+                'id_user' => 63,
             ],
             (object)[
                 'id_department' => 6,
-                'id_user' => 135,
+                'id_user' => 55,
             ],
             (object)[
                 'id_department' => 7,
@@ -480,47 +664,15 @@ class DepartmentSmallBox extends Seeder
             ],
             (object)[
                 'id_department' => 8,
-                'id_user' => 64,
-            ],
-            (object)[
-                'id_department' => 8,
-                'id_user' => 63,
-            ],
-            (object)[
-                'id_department' => 9,
-                'id_user' => 99,
-            ],
-            (object)[
-                'id_department' => 10,
-                'id_user' => 55,
-            ],
-            (object)[
-                'id_department' => 11,
-                'id_user' => 90,
-            ],
-            (object)[
-                'id_department' => 12,
-                'id_user' => 55,
-            ],
-            (object)[
-                'id_department' => 13,
-                'id_user' => 66,
-            ],
-            (object)[
-                'id_department' => 14,
-                'id_user' => 66,
-            ],
-            (object)[
-                'id_department' => 15,
                 'id_user' => 73,
             ],
             (object)[
-                'id_department' => 16,
+                'id_department' => 9,
                 'id_user' => 80,
             ],
             (object)[
-                'id_department' => 17,
-                'id_user' => 53,
+                'id_department' => 10,
+                'id_user' => 90,
             ],
         );
 
@@ -539,36 +691,43 @@ class DepartmentSmallBox extends Seeder
                 'id_user' => 57,
                 'id_department' => 1,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 58,
                 'id_department' => 1,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 61,
                 'id_department' => 1,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 62,
                 'id_department' => 1,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 184,
                 'id_department' => 1,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 59,
                 'id_department' => 1,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 160,
                 'id_department' => 1,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             /////////////////////
 
@@ -579,53 +738,200 @@ class DepartmentSmallBox extends Seeder
                 'id_user' => 127,
                 'id_department' => 2,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 98,
                 'id_department' => 2,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 145,
                 'id_department' => 2,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 148,
                 'id_department' => 2,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 109,
                 'id_department' => 2,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 110,
                 'id_department' => 2,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 111,
                 'id_department' => 2,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 113,
                 'id_department' => 2,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 156,
                 'id_department' => 2,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 153,
                 'id_department' => 2,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
-
+             //////////LOGISTICA = 2
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2
+            (object)[
+                'id_user' => 105,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 106,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 167,
+                'id_department' => 2,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 99,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 96,
+                'id_department' => 2,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 107,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 115,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            //////////MESA DE CONTROL = 2
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2
+            (object)[
+                'id_user' => 92,
+                'id_department' => 2,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 93,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            //////////CALIDAD = 2
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2
+            (object)[
+                'id_user' => 97,
+                'id_department' => 2,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 231,
+                'id_department' => 2,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 108,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 125,
+                'id_department' => 2,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 230,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            //////////COMPRAS = 2
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2
+            (object)[
+                'id_user' => 136,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 229,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 91,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 95,
+                'id_department' => 2,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 126,
+                'id_department' => 2,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 228,
+                'id_department' => 2,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 137,
+                'id_department' => 2,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
             ///// AUDITORÍA Y GESTIÓN DE CALIDAD ES ID = 3
             ///PROMO ES ID = 1
             ///BH ES ID = 2
@@ -633,479 +939,419 @@ class DepartmentSmallBox extends Seeder
                 'id_user' => 90,
                 'id_department' => 3,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 157,
                 'id_department' => 3,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 102,
                 'id_department' => 3,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
-
-            //////////CALIDAD = 4
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 97,
-                'id_department' => 4,
-                'id_company' => 1,
-            ],
-            (object)[
-                'id_user' => 231,
-                'id_department' => 4,
-                'id_company' => 1,
-            ],
-            (object)[
-                'id_user' => 108,
-                'id_department' => 4,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 125,
-                'id_department' => 4,
-                'id_company' => 1,
-            ],
-            (object)[
-                'id_user' => 230,
-                'id_department' => 4,
-                'id_company' => 2,
-            ],
-
-            //////////COMPRAS = 5
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 136,
-                'id_department' => 5,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 229,
-                'id_department' => 5,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 91,
-                'id_department' => 5,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 95,
-                'id_department' => 5,
-                'id_company' => 1,
-            ],
-            (object)[
-                'id_user' => 126,
-                'id_department' => 5,
-                'id_company' => 1,
-            ],
-            (object)[
-                'id_user' => 228,
-                'id_department' => 5,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 137,
-                'id_department' => 5,
-                'id_company' => 1,
-            ],
-
-            //////////DIRECCIÓN = 6
+            //////////DIRECCIÓN = 4
             ///PROMO ES ID = 1
             ///BH ES ID = 2
             (object)[
                 'id_user' => 233,
-                'id_department' => 6,
+                'id_department' => 4,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 79,
-                'id_department' => 6,
+                'id_department' => 4,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
-            //////////DISEÑO = 7
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 123,
-                'id_department' => 7,
-                'id_company' => 1,
-            ],
-            //////////IMPORTACIONES = 8
+            //////////IMPORTACIONES = 6
             ///PROMO ES ID = 1
             ///BH ES ID = 2
             (object)[
                 'id_user' => 64,
-                'id_department' => 8,
+                'id_department' => 6,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 63,
-                'id_department' => 8,
+                'id_department' => 6,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
-            //////////LOGISTICA = 9
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 105,
-                'id_department' => 9,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 106,
-                'id_department' => 9,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 167,
-                'id_department' => 9,
-                'id_company' => 1,
-            ],
-            (object)[
-                'id_user' => 99,
-                'id_department' => 9,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 96,
-                'id_department' => 9,
-                'id_company' => 1,
-            ],
-            (object)[
-                'id_user' => 107,
-                'id_department' => 9,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 115,
-                'id_department' => 9,
-                'id_company' => 2,
-            ],
-            //////////MANTENIMIENTO = 10
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 159,
-                'id_department' => 10,
-                'id_company' => 2,
-            ],
-            //////////MESA DE CONTROL = 11
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 92,
-                'id_department' => 11,
-                'id_company' => 1,
-            ],
-            (object)[
-                'id_user' => 93,
-                'id_department' => 11,
-                'id_company' => 2,
-            ],
-            //////////RECURSOS HUMANOS = 12
+            //////////RECURSOS HUMANOS = 7
             ///PROMO ES ID = 1
             ///BH ES ID = 2
             (object)[
                 'id_user' => 55,
-                'id_department' => 12,
+                'id_department' => 7,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 56,
-                'id_department' => 12,
+                'id_department' => 7,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 112,
-                'id_department' => 12,
+                'id_department' => 7,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 116,
-                'id_department' => 12,
+                'id_department' => 7,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 117,
-                'id_department' => 12,
+                'id_department' => 7,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 128,
-                'id_department' => 12,
+                'id_department' => 7,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
-            //////////SISTEMAS = 13
+            //////////MANTENIMIENTO = 7
             ///PROMO ES ID = 1
             ///BH ES ID = 2
             (object)[
-                'id_user' => 118,
-                'id_department' => 13,
-                'id_company' => 1,
+                'id_user' => 159,
+                'id_department' => 7,
+                'id_company' => 2,
+                'id_area' => 39,
             ],
-            //////////TECNOLOGÍA E INNOVACIÓN = 14
+            //////////TECNOLOGÍA E INNOVACIÓN = 8
             ///PROMO ES ID = 1
             ///BH ES ID = 2
             (object)[
                 'id_user' => 139,
-                'id_department' => 14,
+                'id_department' => 8,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 68,
-                'id_department' => 14,
+                'id_department' => 8,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 140,
-                'id_department' => 14,
+                'id_department' => 8,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 135,
-                'id_department' => 14,
+                'id_department' => 8,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 129,
-                'id_department' => 14,
+                'id_department' => 8,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 130,
-                'id_department' => 14,
+                'id_department' => 8,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 132,
-                'id_department' => 14,
+                'id_department' => 8,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 158,
-                'id_department' => 14,
+                'id_department' => 8,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 66,
-                'id_department' => 14,
+                'id_department' => 8,
                 'id_company' => 2,
+                'id_area' => 39,
             ],
-            //////////VENTAS BH = 15
+            //////////SISTEMAS = 8
             ///PROMO ES ID = 1
             ///BH ES ID = 2
             (object)[
-                'id_user' => 103,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 78,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 77,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 100,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 101,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 149,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 164,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 189,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 232,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 75,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 76,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 73,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 71,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 69,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 70,
-                'id_department' => 15,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 122,
-                'id_department' => 15,
-                'id_company' => 2,
-            ], 
-            //////////VENTAS PL = 16
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2  
-            (object)[
-                'id_user' => 86,
-                'id_department' => 16,
+                'id_user' => 118,
+                'id_department' => 8,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
-            (object)[
-                'id_user' => 82,
-                'id_department' => 16,
-                'id_company' => 1,
-            ], 
-            (object)[
-                'id_user' => 81,
-                'id_department' => 16,
-                'id_company' => 1,
-            ], 
-            (object)[
-                'id_user' => 85,
-                'id_department' => 16,
-                'id_company' => 1,
-            ], 
-            (object)[
-                'id_user' => 80,
-                'id_department' => 16,
-                'id_company' => 1,
-            ], 
-            (object)[
-                'id_user' => 131,
-                'id_department' => 16,
-                'id_company' => 1,
-            ], 
-            (object)[
-                'id_user' => 142,
-                'id_department' => 16,
-                'id_company' => 1,
-            ], 
-            (object)[
-                'id_user' => 143,
-                'id_department' => 16,
-                'id_company' => 1,
-            ], 
-            (object)[
-                'id_user' => 88,
-                'id_department' => 16,
-                'id_company' => 1,
-            ], 
-            (object)[
-                'id_user' => 89,
-                'id_department' => 16,
-                'id_company' => 1,
-            ],
-            (object)[
-                'id_user' => 150,
-                'id_department' => 16,
-                'id_company' => 1,
-            ],
-            (object)[
-                'id_user' => 152,
-                'id_department' => 16,
-                'id_company' => 1,
-            ], 
-            (object)[
-                'id_user' => 151,
-                'id_department' => 16,
-                'id_company' => 1,
-            ],
-            //////////VENTAS PMZ = 17
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2 
-            ////PROMO ZALE ES ID = 3
-            (object)[
-                'id_user' => 124,
-                'id_department' => 17,
-                'id_company' => 3,
-            ],
-            (object)[
-                'id_user' => 74,
-                'id_department' => 17,
-                'id_company' => 3,
-            ],
-            (object)[
-                'id_user' => 222,
-                'id_department' => 17,
-                'id_company' => 3,
-            ],
-
-            ////JEFES
-            (object)[
-                'id_user' => 51,
-                'id_department' => 6,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 52,
-                'id_department' => 6,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 53,
-                'id_department' => 6,
-                'id_company' => 2,
-            ],
-            (object)[
-                'id_user' => 54,
-                'id_department' => 6,
-                'id_company' => 1,
-            ],
-
-            //MARKETING = 18
+            //MARKETING = 8
             ///PROMO ES ID = 1
             ///BH ES ID = 2 
             ////PROMO ZALE ES ID = 3
             (object)[
                 'id_user' => 188,
-                'id_department' => 18,
+                'id_department' => 8,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 141,
-                'id_department' => 18,
+                'id_department' => 8,
                 'id_company' => 1,
+                'id_area' => 39,
             ],
             (object)[
                 'id_user' => 138,
-                'id_department' => 18,
+                'id_department' => 8,
                 'id_company' => 1,
+                'id_area' => 39,
+            ],
+            //////////DISEÑO = 8
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2
+            (object)[
+                'id_user' => 123,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            //////////VENTAS BH = 9
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2
+            (object)[
+                'id_user' => 103,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 78,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 77,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 100,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 101,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 149,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 164,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 189,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 232,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 75,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 76,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 73,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 71,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 69,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 70,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 122,
+                'id_department' => 9,
+                'id_company' => 2,
+                'id_area' => 39,
+            ], 
+            //////////VENTAS PMZ = 9
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2 
+            ////PROMO ZALE ES ID = 3
+            (object)[
+                'id_user' => 124,
+                'id_department' => 9,
+                'id_company' => 3,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 74,
+                'id_department' => 9,
+                'id_company' => 3,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 222,
+                'id_department' => 9,
+                'id_company' => 3,
+                'id_area' => 39,
+            ],
+            //////////VENTAS PL = 10
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2  
+            (object)[
+                'id_user' => 86,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 82,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ], 
+            (object)[
+                'id_user' => 81,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ], 
+            (object)[
+                'id_user' => 85,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ], 
+            (object)[
+                'id_user' => 80,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ], 
+            (object)[
+                'id_user' => 131,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ], 
+            (object)[
+                'id_user' => 142,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ], 
+            (object)[
+                'id_user' => 143,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ], 
+            (object)[
+                'id_user' => 88,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ], 
+            (object)[
+                'id_user' => 89,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 150,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+            (object)[
+                'id_user' => 152,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ], 
+            (object)[
+                'id_user' => 151,
+                'id_department' => 10,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],
+
+            /////JEFES/////
+            (object)[
+                'id_user' => 51,
+                'id_department' => 12,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],(object)[
+                'id_user' => 52,
+                'id_department' => 12,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],(object)[
+                'id_user' => 53,
+                'id_department' => 12,
+                'id_company' => 1,
+                'id_area' => 39,
+            ],(object)[
+                'id_user' => 54,
+                'id_department' => 12,
+                'id_company' => 1,
+                'id_area' => 39,
             ],
         );
 
@@ -1113,7 +1359,8 @@ class DepartmentSmallBox extends Seeder
             UserDetails::create([
                 'id_user' => $user->id_user,
                 'id_department' => $user->id_department,
-                'id_company' => $user->id_company
+                'id_company' => $user->id_company,
+                'id_area' => $user->id_area
             ]);  
         }
 
