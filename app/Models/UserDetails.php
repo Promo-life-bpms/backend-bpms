@@ -14,7 +14,8 @@ class UserDetails extends Model
     protected $fillable = [
         'id_user',
         'id_department',
-        'id_company'
+        'id_company',
+        'id_area',
     ];
 
     public function user(){
@@ -27,5 +28,9 @@ class UserDetails extends Model
 
     public function company(){
         return $this->belongsTo(Company::class);
+    }
+
+    public function area(){
+        return $this->belongsTo(Areas::class);
     }
 }
