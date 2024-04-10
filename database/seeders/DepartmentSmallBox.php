@@ -10,12 +10,13 @@ use App\Models\Role;
 use App\Models\UserDetails;
 use App\Models\UserRole;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DepartmentSmallBox extends Seeder
 {
     public function run()
     {
-        $departments = [
+        /*$departments = [
             'ADMINISTRACIÓN', 
             'OPERACIONES',
             'AUDITORÍA Y GESTIÓN DE CALIDAD',
@@ -28,16 +29,16 @@ class DepartmentSmallBox extends Seeder
             'VENTAS PL',
             'PRODUCCIÓN',
             'SIN DEFINIR',
-        ];
+        ];*/
 
-        foreach ($departments as $department){
+        /*foreach ($departments as $department){
             Department::create([
                 'name_department' => $department,
                 'status' => 1,
             ]);
-        }
+        }*/
     
-        $areas = array(
+        /*$areas = array(
             ///ADMINISTRACIÓN
             (object)[
                 'name_area' => 'Tesoreria',
@@ -210,16 +211,16 @@ class DepartmentSmallBox extends Seeder
                 'name_area' => 'SIN DEFINIR',
                 'id_department' => 12, // optional
             ],
-        );
+        );*/
 
-        foreach ($areas as $area){
+        /*foreach ($areas as $area){
             Areas::create([
                 'name_area' => $area->name_area,
                 'id_department' => $area->id_department,
             ]);
-        }
+        }*/
     
-        $companies = array(
+        /*$companies = array(
             (object)[
                 'name' => 'Promo Zale',
                 'description' => 'Promo Zale', // optional
@@ -228,16 +229,16 @@ class DepartmentSmallBox extends Seeder
                 'name' => 'Trade Market 57',
                 'description' => 'Trade Market 57', // optional
             ],
-        );
+        );*/
 
-        foreach ($companies as $company){
+        /*foreach ($companies as $company){
             Company::create([
                 'name' => $company->name,
                 'description' => $company->description,
             ]);
-        }
+        }*/
 
-        $roles = array(
+        /*$roles = array(
             (object)[
                 'name' => 'equipo_administración',
                 'display_name' => 'Equipo administración', // optional
@@ -343,18 +344,18 @@ class DepartmentSmallBox extends Seeder
                 'display_name' => 'Trade Market 57', // optional
                 'description' => 'Trade Market 57', 
             ],
-        );
+        );*/
 
-        foreach ($roles as $rol) {
+        /*foreach ($roles as $rol) {
             Role::create([
                 'name' => $rol->name,
                 'display_name' => $rol->display_name,
                 'description' => $rol->description,
             ]);  
-        }
+        }*/
 
         ///33///
-        $asigarroles = array(
+        /*$asigarroles = array(
             (object)[
                 'role_id' => '33',
                 'user_id' => '55', // optional
@@ -620,68 +621,84 @@ class DepartmentSmallBox extends Seeder
                 'user_id' => '265', // optional
                 'user_type' => 'App\Models\User', // optional
             ],
-        );
-        foreach ($asigarroles as $asignarrol) {
+        );*/
+        /*foreach ($asigarroles as $asignarrol) {
             UserRole::create([
                 'role_id' => $asignarrol->role_id,
                 'user_id' => $asignarrol->user_id,
                 'user_type' => $asignarrol->user_type,
             ]);  
-        }
+        }*/
         
-        $managers = array(
+        /*$managers = array(
             (object)[
+                'id' => 1,
                 'id_department' => 1,
                 'id_user' => 57,  ////
             ],
             (object)[
+                'id' => 2,
                 'id_department' => 2,
                 'id_user' => 90,
             ],
             (object)[
+                'id' => 3,
                 'id_department' => 3,
                 'id_user' => 90,
             ],
             (object)[
+                'id' => 4,
                 'id_department' => 4,
                 'id_user' => 51,
             ],
             (object)[
+                'id' => 5,
                 'id_department' => 11,
                 'id_user' => 54,
             ],
             (object)[
+                'id' => 6,
                 'id_department' => 5,
                 'id_user' => 63,
             ],
             (object)[
+                'id' => 7,
                 'id_department' => 6,
                 'id_user' => 55,
             ],
             (object)[
+                'id' => 8,
                 'id_department' => 7,
                 'id_user' => 66,
             ],
             (object)[
+                'id' => 9,
                 'id_department' => 8,
                 'id_user' => 73,
             ],
             (object)[
+                'id' => 10,
                 'id_department' => 9,
                 'id_user' => 80,
             ],
             (object)[
+                'id' => 11,
                 'id_department' => 10,
                 'id_user' => 90,
             ],
-        );
+        );*/
 
-        foreach ($managers as $manager) {
+        /*foreach ($managers as $manager) {
+            DB::table('manager_has_departments')->where('id', $manager->id)->update([
+                'id_department' => $manager->id_department,
+                'id_user' => $manager->id_user,
+
+            ]);
             ManagerHasDepartment::create([
                 'id_department' => $manager->id_department,
                 'id_user' => $manager->id_user,
             ]);  
-        }
+        }*/
 
         ////PROMO ES ID = 1
         ///BH ES ID = 2
