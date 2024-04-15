@@ -79,7 +79,7 @@ class IncidenceController extends Controller
             $dataValidation['tipo_de_tecnica'] = 'required';
             $dataValidation['responsable'] = 'required';
             $dataValidation['fecha_compromiso'] = 'required';
-          /*   $dataValidation['solucion'] = 'required'; */
+            /*   $dataValidation['solucion'] = 'required'; */
             $dataValidation['reviso'] = 'required';
             $dataValidation['firma_reviso'] = 'required';
         }
@@ -116,20 +116,22 @@ class IncidenceController extends Controller
             ->orderBy("remisiones.created_at", "DESC")
             ->select('remisiones.*')
             ->first();
-
+        /*
         if (!$rem) {
             return response()->json(["msg" => "No se han encontrado remisiones del pedido"], response::HTTP_NOT_FOUND);
-        }
+        } */
 
         if (!$userIsTagger) {
-            $diasDiferencia = $rem->created_at->diffInDays(now());
+            /*    $diasDiferencia = $rem->created_at->diffInDays(now()); */
 
             //return $date;
             //return $date;
             $user =  auth()->user();
             $aux = false;
+            return $user->whatRoles;
             // return [$user->whatRoles, $diasDiferencia];
             foreach ($user->whatRoles as $rol) {
+
                 switch ($rol->name) {
                     case "control_calidad":
                         $aux = true;
@@ -144,10 +146,10 @@ class IncidenceController extends Controller
                         $aux = true;
                         break;
                     case "ventas":
-                        if ($diasDiferencia <= 30) {
+                        /*  if ($diasDiferencia <= 30) {
                             $aux = true;
                         }
-                        break;
+                        break; */
                     default:
                         return response()->json(['No tienes permiso de crear una incidencia'], 400);
                         break;
