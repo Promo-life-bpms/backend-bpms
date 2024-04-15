@@ -79,7 +79,7 @@ class IncidenceController extends Controller
             $dataValidation['tipo_de_tecnica'] = 'required';
             $dataValidation['responsable'] = 'required';
             $dataValidation['fecha_compromiso'] = 'required';
-          /*   $dataValidation['solucion'] = 'required'; */
+            /*   $dataValidation['solucion'] = 'required'; */
             $dataValidation['reviso'] = 'required';
             $dataValidation['firma_reviso'] = 'required';
         }
@@ -128,8 +128,8 @@ class IncidenceController extends Controller
             //return $date;
             $user =  auth()->user();
             $aux = false;
-            // return [$user->whatRoles, $diasDiferencia];
             foreach ($user->whatRoles as $rol) {
+
                 switch ($rol->name) {
                     case "control_calidad":
                         $aux = true;
@@ -144,7 +144,7 @@ class IncidenceController extends Controller
                         $aux = true;
                         break;
                     case "ventas":
-                        if ($diasDiferencia <= 30) {
+                         if ($diasDiferencia <= 30) {
                             $aux = true;
                         }
                         break;
