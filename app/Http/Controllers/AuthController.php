@@ -81,11 +81,11 @@ class AuthController extends Controller
     }
     public function login(Request $request)
     {
-
         $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
+        
         $credentials = request(['email', 'password']);
         $user = User::where("email", "=", $request->email)->first();
         $UserDerails = DB::table('user_details')->where('id_user', $user->id)->exists();
@@ -112,15 +112,15 @@ class AuthController extends Controller
                         "name" => $user->name,
                         "email" => $user->email,
                         "photo" => $user->photo ? env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . str_replace(' ', '%20', $user->photo) : null],
-                    ])->attempt($credentials)) {
-                        return response()->json(['msg' => 'No autorizado'], response::HTTP_UNAUTHORIZED); //401
+                        ])->attempt($credentials)) {
+                            return response()->json(['msg' => 'No autorizado'], response::HTTP_UNAUTHORIZED); //401
+                        }
+                        return $this->respondWithToken($token);
+                    } else {
+                        return response()->json(["msg" => "Correo incorrecto o no registrado"],Response::HTTP_UNAUTHORIZED);
                     }
-                    return $this->respondWithToken($token);
-                } else {
-                    return response()->json(["msg" => "Correo incorrecto o no registrado"],Response::HTTP_UNAUTHORIZED);
-                }
-            }
         }
+    }
 
     public function userProfile(Request $request)
     {
