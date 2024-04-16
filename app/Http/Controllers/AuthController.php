@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
@@ -80,39 +81,44 @@ class AuthController extends Controller
     }
     public function login(Request $request)
     {
-
         $request->validate([
             'email' => 'required|email',
             'password' => 'required'
         ]);
+        
         $credentials = request(['email', 'password']);
         $user = User::where("email", "=", $request->email)->first();
-        if (isset($user->id)) {
-            $role = [];
-            if (count($user->whatRoles) > 0) {
-                $role = [
-                    "id" => $user->whatRoles[0]->id,
-                    "name" => $user->whatRoles[0]->name
-                ];
-            }
-            if (!$token = auth()->claims([
-                'role' => $role,
-                'user' => [
-                    "name" => $user->name,
-                    "email" => $user->email,
-                    "photo" => $user->photo ? env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . str_replace(' ', '%20', $user->photo) : null
-                ],
-            ])->attempt($credentials)) {
-                return response()->json(['msg' => 'No autorizado'], response::HTTP_UNAUTHORIZED); //401
-            }
-            return $this->respondWithToken($token);
-        } else {
-            return response()->json(
-                [
-                    "msg" => "Correo incorrecto o no registrado"
-                ],
-                Response::HTTP_UNAUTHORIZED
-            );
+        $UserDerails = DB::table('user_details')->where('id_user', $user->id)->exists();
+        $UserRol = DB::table('role_user')->where('user_id', $user->id)->exists();
+        if((!$UserDerails) && (!$UserRol)){
+            return response()->json(['message' => 'Aún no tienes registrada una empresa, un departamento, un área y un rol. Acercate con el administrador del sistema en el departamento TI.', 'status'  => 400], 400);
+        }elseif((!$UserDerails) && ($UserRol)){
+            return response()->json(['message' => 'Aún no tienes registrada una empresa o un departamento. Acercate con el administrador del sistema en el departamento TI.', 'status'  => 400], 400);
+        }elseif (($UserDerails) && (!$UserRol)) {
+            return response()->json(['message' => 'Aún no tienes asignado un rol. Acercate con el administrador del sistema en el departamento TI.', 'status'  => 400], 400);
+        }
+        else{
+            if (isset($user->id)) {
+                $role = [];
+                if (count($user->whatRoles) > 0) {
+                    $role = [
+                        "id" => $user->whatRoles[0]->id,
+                        "name" => $user->whatRoles[0]->name
+                    ];
+                }
+                if (!$token = auth()->claims([
+                    'role' => $role,
+                    'user' => [
+                        "name" => $user->name,
+                        "email" => $user->email,
+                        "photo" => $user->photo ? env("URL_INTRANET", "https://intranet.promolife.lat") . '/' . str_replace(' ', '%20', $user->photo) : null],
+                        ])->attempt($credentials)) {
+                            return response()->json(['msg' => 'No autorizado'], response::HTTP_UNAUTHORIZED); //401
+                        }
+                        return $this->respondWithToken($token);
+                    } else {
+                        return response()->json(["msg" => "Correo incorrecto o no registrado"],Response::HTTP_UNAUTHORIZED);
+                    }
         }
     }
 
