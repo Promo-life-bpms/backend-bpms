@@ -23,6 +23,7 @@ class SaleController extends Controller
      */
     public function index(Request $request)
     {
+        /////PRUEBA DE CAMBIOS/////
         // Vista de tabla de Pedidos
         // crear una var que se llame per_page = 10
         // Vista de tabla de Pedidos
