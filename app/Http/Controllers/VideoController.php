@@ -9,30 +9,30 @@ class VideoController extends Controller
     public function storeVideoInfo()
     {
         $videos = [
-            [
+            /*  [
                 'nombre' => 'Inicio de sesion',
                 'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/iniciodesesion.mp4',
                 'rol' => '*'
-            ],
+            ], */
             [
                 'nombre' => 'Nueva Solicitud',
                 'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/nuevasolicitud.mp4',
                 'rol' => '*'
             ],
             [
-                'nombre' => 'Autorización Manager y Administrador',
+                'nombre' => 'Autorización Manager / Administrador',
                 'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/autorizacionmangeryadministrador.mp4',
-                'rol' => '*'
+                'rol' => 'admnistrator, manager'
             ],
             [
                 'nombre' => 'Autorización Caja Chica',
                 'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/autorizacioncajachica.mp4',
-                'rol' => '*'
+                'rol' => 'caja_chica'
             ],
             [
                 'nombre' => 'Reporte General',
                 'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/reportegeneral.mp4',
-                'rol' => '*'
+                'rol' => 'caja_chica, adminstrator'
             ]
         ];
         return response()->json(["videos" => $videos]);
