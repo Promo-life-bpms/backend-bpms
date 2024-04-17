@@ -77,7 +77,6 @@ class ApiOdooController extends Controller
                 } */
                 // Obtener el pedido
                 $requestData = (object) $request->sale;
-
                 // Obtener datos principales
                 $delivery_time = $requestData->delivery_time ?  Carbon::parse($requestData->delivery_time) : null;
                 $order_date = $requestData->order_date ?  Carbon::parse($requestData->order_date) : null;
