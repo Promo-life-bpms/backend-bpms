@@ -25,6 +25,8 @@ class SaleController extends Controller
     {
         // Vista de tabla de Pedidos
         // crear una var que se llame per_page = 10
+        // Vista de tabla de Pedidos
+        // crear una var que se llame per_page = 10
         $per_page = 15;
         if ($request->per_page) {
             //Asignarle el valor al var per_page
@@ -45,7 +47,6 @@ class SaleController extends Controller
         $isMaquilador = auth()->user()->whatRoles()->whereIn('name', ['maquilador'])->first();
         // return $isSeller;
         DB::statement("SET SQL_MODE=''");
-
         if ($request->ordenes_proximas) {
             $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')

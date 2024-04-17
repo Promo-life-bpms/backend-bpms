@@ -28,7 +28,6 @@ class CreateOrderPurchasesTable extends Migration
             $table->string("status_bpm")->nullable();
             $table->string("type_purchase");
             $table->decimal("total", 10, 2);
-            $table->integer("tagger_user_id")->nullable();
             $table->timestamps();
         });
     }
