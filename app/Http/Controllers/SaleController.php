@@ -86,6 +86,8 @@ class SaleController extends Controller
         } else {
             $sales = Sale::with('lastStatus', "detailsOrders", "moreInformation")
                 ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
+                /////////////////////
+                ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
                 ->join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
                 ->join('product_delivery_routes', 'product_delivery_routes.code_order_route_id', 'code_order_delivery_routes.id')
                 ->when($isSeller !== null, function ($query) {
