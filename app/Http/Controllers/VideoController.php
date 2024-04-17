@@ -9,7 +9,7 @@ class VideoController extends Controller
     public function storeVideoInfo()
     {
         $videos = [
-            [
+        /*     [
                 'nombre' => 'Inicio de sesion',
                 'url' => 'https://api-bpms.promolife.lat/storage/capacitacion/iniciodesesion.mp4',
                 'rol' => '*',
@@ -113,7 +113,7 @@ class VideoController extends Controller
                 'nombre' => 'Asignar dirección a un pedido',
                 'url' => 'https://api-bpms.promolife.lat/storage/capacitacion/asignardireccionaunpedido.mp4',
                 'rol' => 'ventas,gerente-operaciones,jefe_de_logistica,logistica-y-mesa-de-control',
-            ],
+            ], */
         ];
         return response()->json(["videos" => $videos]);
     }
