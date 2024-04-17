@@ -14,6 +14,7 @@ class VideoController extends Controller
                 'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/iniciodesesion.mp4',
                 'rol' => '*'
             ], */
+
             [
                 'nombre' => 'Nueva Solicitud',
                 'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/nuevasolicitud.mp4',
@@ -22,7 +23,7 @@ class VideoController extends Controller
             [
                 'nombre' => 'Autorización Manager / Administrador',
                 'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/autorizacionmangeryadministrador.mp4',
-                'rol' => 'admnistrator, manager'
+                'rol' => 'manager, administrator'
             ],
             [
                 'nombre' => 'Autorización Caja Chica',
@@ -32,7 +33,7 @@ class VideoController extends Controller
             [
                 'nombre' => 'Reporte General',
                 'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/reportegeneral.mp4',
-                'rol' => 'caja_chica, adminstrator'
+                'rol' => 'caja_chica, administrator'
             ]
         ];
         return response()->json(["videos" => $videos]);
