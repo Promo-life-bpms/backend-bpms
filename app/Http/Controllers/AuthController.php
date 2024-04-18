@@ -111,7 +111,6 @@ class AuthController extends Controller
                         "display_name" => $user->whatRoles[0]->display_name
                     ];
                 }
-                dd($role);
                 if (!$token = auth()->claims([
                     'role' => $role,
                     'user' => [
