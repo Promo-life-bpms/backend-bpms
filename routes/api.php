@@ -62,7 +62,7 @@ Route::get('userAccess', [AuthController::class, 'userAccess']);
 Route::group(['middleware' => 'auth'], function () {
 
     /////API PRUEBA///
-    Route::get('prueba',[Pruebas::class,'PruebasServidor']);
+    Route::get('status',[Pruebas::class,'PruebasServidor']);
     // Apis de el userController
     Route::get('users', [UserController::class, 'index']);
     Route::post('users', [UserController::class, 'create']);

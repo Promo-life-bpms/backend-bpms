@@ -7,13 +7,13 @@ use Illuminate\Support\Facades\DB;
 
 class Pruebas extends Controller
 {
-    public function PruebasServidor(){
-        $user = DB::table('users')->where('id', 130)->exists();
-        if ($user) {
+    public function PruebasServidor()
+    {
+        try {
             return response()->json(['message' => 'El servidor está arriba', 'status' => 200]);
-
-        }else{
-            return response()->json(['error' => 'El servidor no está disponible', 'status' => 400]);
+        } catch (\Throwable $th) {
+            //throw $th;
+            return response()->json(['message' => 'El servidor no está arriba', 'status' => 500]);
         }
     }
 }
