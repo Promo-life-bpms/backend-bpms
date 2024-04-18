@@ -107,9 +107,11 @@ class AuthController extends Controller
                 if (count($user->whatRoles) > 0) {
                     $role = [
                         "id" => $user->whatRoles[0]->id,
-                        "name" => $user->whatRoles[0]->name
+                        "name" => $user->whatRoles[0]->name,
+                        "display_name" => $user->whatRoles[0]->display_name
                     ];
                 }
+                dd($role);
                 if (!$token = auth()->claims([
                     'role' => $role,
                     'user' => [
