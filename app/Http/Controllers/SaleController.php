@@ -23,6 +23,7 @@ class SaleController extends Controller
      */
     public function index(Request $request)
     {
+
         // Vista de tabla de Pedidos
         // crear una var que se llame per_page = 10
         // Vista de tabla de Pedidos
@@ -34,6 +35,7 @@ class SaleController extends Controller
         }
 
         // Filtros de buscador
+
         $idPedidos = $request->idPedidos ?? ""; // Sale.code_sale
         $fechaCreacion = $request->fechaCreacion ?? ""; // Pendiente
         $horariodeentrega = $request->horariodeentrega ?? ""; // Pendiente
@@ -65,8 +67,8 @@ class SaleController extends Controller
                 })->when($cliente !== null, function ($query) use ($cliente) {
                     $query->where("additional_sale_information.client_name", "LIKE", "%" . $cliente . "%");
                 })->where("sales.commercial_name", "LIKE", "%" . $comercial . "%")
-                    ->when($total !== null, function ($query) use ($total) {
-                        $query->where("sales.total", "LIKE", "%" . $total . "%");
+                ->when($total !== null, function ($query) use ($total) {
+                    $query->where("sales.total", "LIKE", "%" . $total . "%");
                 })->groupBy('sales.id')->orderby('order_purchases.planned_date', 'ASC')->select(
                     'sales.*',
                     "additional_sale_information.client_name as client_name",
@@ -97,6 +99,7 @@ class SaleController extends Controller
                     "additional_sale_information.company as company"
                 )->paginate($per_page);
         }
+        dd($sales);
         // TODO: Pedido 153 muestra mal el status
         foreach ($sales as $sale) {
             if ($sale->lastStatus !== null) {
