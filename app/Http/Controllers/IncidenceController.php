@@ -18,7 +18,7 @@ class IncidenceController extends Controller
 
     public function show($incidencia)
     {
-        $incidencia = Incidence::where('internal_code_incidence', $incidencia)->first();
+        $incidencia = Incidence::where('code_incidence', $incidencia)->first();
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
@@ -104,11 +104,11 @@ class IncidenceController extends Controller
             ->get();
 
 
-        if (count($remision) < 0) {
+     /*    if (count($remision) < 0) {
             return response()->json([
                 "msg" => 'No hay remisiones'
             ]);
-        }
+        } */
         $rem = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
             ->join('delivery_routes', 'delivery_routes.id', 'code_order_delivery_routes.delivery_route_id')
             ->join('remisiones', 'remisiones.delivery_route_id', 'delivery_routes.id')
@@ -116,14 +116,14 @@ class IncidenceController extends Controller
             ->orderBy("remisiones.created_at", "DESC")
             ->select('remisiones.*')
             ->first();
-
+/*
         if (!$rem) {
             return response()->json(["msg" => "No se han encontrado remisiones del pedido"], response::HTTP_NOT_FOUND);
-        }
+        } */
 
         if (!$userIsTagger) {
-            $diasDiferencia = $rem->created_at->diffInDays(now());
-
+        /*     $diasDiferencia = $rem->created_at->diffInDays(now());
+ */
             //return $date;
             //return $date;
             $user =  auth()->user();
@@ -144,18 +144,18 @@ class IncidenceController extends Controller
                         $aux = true;
                         break;
                     case "ventas":
-                         if ($diasDiferencia <= 30) {
+                     /*     if ($diasDiferencia <= 30) {
                             $aux = true;
-                        }
+                        } */
                         break;
                     default:
                         return response()->json(['No tienes permiso de crear una incidencia'], 400);
                         break;
                 }
             }
-            if ($aux == false) {
+           /*  if ($aux == false) {
                 return response()->json(['No tienes permiso de crear una incidencia'], 400);
-            }
+            } */
         }
         $maxINC = Incidence::max('internal_code_incidence');
         $idinc = null;
