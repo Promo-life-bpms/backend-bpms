@@ -20,6 +20,7 @@ use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
+use App\Http\Controllers\Pruebas;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SmallBoxUserController;
 use App\Http\Controllers\SpentController;
@@ -59,6 +60,9 @@ Route::get('Acces', [AuthController::class, 'Acces']);
 Route::get('userAccess', [AuthController::class, 'userAccess']);
 
 Route::group(['middleware' => 'auth'], function () {
+
+    /////API PRUEBA///
+    Route::get('prueba',[Pruebas::class,'PruebasServidor']);
     // Apis de el userController
     Route::get('users', [UserController::class, 'index']);
     Route::post('users', [UserController::class, 'create']);
@@ -190,7 +194,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class,'editdate']);
     Route::post('caja-chica/solicitudes-de-compra/editar/', [PurchaseRequestController::class, 'update']);
     Route::post('caja-chica/solicitudes-de-compra/borrar/', [PurchaseRequestController::class, 'delete']);
-    
+
     Route::post('caja-chica/aprobar-solicitud/', [PurchaseRequestController::class, 'approved']);
     Route::post('caja-chica/rechazar-solicitud/', [PurchaseRequestController::class, 'rejected']);
     Route::post('caja-chica/confirmar-entrega/', [PurchaseRequestController::class, 'confirmDelivered']);
@@ -208,7 +212,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('caja-chica/administrador/solicitudes-de-compra/ver', [PurchaseRequestController::class, 'showAdministrador']);
     Route::post('caja-chica/administrador/solicitudes-de-compra/aprobar', [PurchaseRequestController::class, 'approvedByAdmin']);
 
-    
+
     //Center
     Route::get('caja-chica/centros-de-costos/ver/', [CenterController::class, 'show']);
     Route::post('caja-chica/centros-de-costos/crear/', [CenterController::class, 'store']);
@@ -216,7 +220,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/centros-de-costos/borrar', [CenterController::class, 'deactivateCenters']);
     Route::post('caja-chica/centros-de-costos/activate', [CenterController::class, 'activateCenters']);
 
-    //UserCenter 
+    //UserCenter
     Route::get('caja-chica/usuarios-centro-de-costos/ver/', [UserCenterController::class, 'show']);
     Route::get('caja-chica/usuarios-centro-de-costos/crear/', [UserCenterController::class, 'store']);
     Route::get('caja-chica/usuarios-centro-de-costos/eliminar/', [UserCenterController::class, 'delete']);
