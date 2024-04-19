@@ -99,7 +99,6 @@ class SaleController extends Controller
                     "additional_sale_information.company as company"
                 )->paginate($per_page);
         }
-        dd($sales);
         // TODO: Pedido 153 muestra mal el status
         foreach ($sales as $sale) {
             if ($sale->lastStatus !== null) {
