@@ -36,30 +36,36 @@ class SaleController extends Controller
         // Filtros de buscador
 
         $idPedidos = $request->idPedidos ?? ""; // Sale.code_sale
-        $fechaCreacion = $request->fechaCreacion ?? ""; // Pendiente
-        $horariodeentrega = $request->horariodeentrega ?? ""; // Pendiente
+        /*  $fechaCreacion = $request->fechaCreacion ?? ""; // Pendiente
+         $horariodeentrega = $request->horariodeentrega ?? ""; // Pendiente
         $empresa = $request->empresa ?? null; // AdditionalSaleInformation.warehouse_company
         $cliente = $request->cliente ?? null; // additional_sale_information.client_name
         $comercial = $request->comercial ?? ""; // Sale.commercial_name
-        $total = $request->total ?? null; // sale.total
+        $total = $request->total ?? null; // sale.total */
 
-        $sales = null;
+
+        $sales = Sale::where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")->paginate($per_page);
+        return response()->json([
+            'msg' => 'Lista de los pedidos', 'data' => ["sales" => $sales]
+            // 'ordenes' => $ordenes
+        ], response::HTTP_OK); //200
+        /*    $sales = null;
         $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente', 'asistente_de_gerente'])->first();
         $isMaquilador = auth()->user()->whatRoles()->whereIn('name', ['maquilador'])->first();
         DB::statement("SET SQL_MODE=''");
         if ($request->ordenes_proximas) {
             $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
                 ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
-                /*  ->when($isSeller !== null, function ($query) {
+                ->when($isSeller !== null, function ($query) {
                     $user =  auth()->user();
                     // $query->where('additional_sale_information.company', $user->company);
                     $query->where('sales.commercial_email', $user->email);
                 })->when($isMaquilador !== null, function ($query) {
                     $user =  auth()->user();
                     $query->where('order_purchases.tagger_user_id', $user->id);
-                }) */->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
-                // ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
-                // ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
+                })->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
+                ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
+                ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
                 ->when($empresa !== null, function ($query) use ($empresa) {
                     $query->where("additional_sale_information.warehouse_company", "LIKE", "%" . $empresa . "%");
                 })->when($cliente !== null, function ($query) use ($cliente) {
@@ -75,17 +81,17 @@ class SaleController extends Controller
         } else {
 
             $sales = Sale::with('lastStatus', "detailsOrders", "moreInformation")->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
-                ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')/* ->when($isSeller !== null, function ($query) {
+                ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')->when($isSeller !== null, function ($query) {
                     $user =  auth()->user();
                     // $query->where('additional_sale_information.company', $user->company);
                     $query->where('sales.commercial_email', $user->email);
                 })->when($isMaquilador !== null, function ($query) {
                     $user =  auth()->user();
                     $query->where('order_purchases.tagger_user_id', $user->id);
-                }) */->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
+                })->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
 
-                // ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
-                // ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
+                ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
+                ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
                 ->when($empresa !== null, function ($query) use ($empresa) {
                     $query->where("additional_sale_information.warehouse_company", "LIKE", "%" . $empresa . "%");
                 })->when($cliente !== null, function ($query) use ($cliente) {
@@ -152,7 +158,7 @@ class SaleController extends Controller
         return response()->json([
             'msg' => 'Lista de pedidos', 'data' => ["sales" => $sales]
             // 'ordenes' => $ordenes
-        ], response::HTTP_OK); //200
+        ], response::HTTP_OK); //200 */
     }
 
     /**
