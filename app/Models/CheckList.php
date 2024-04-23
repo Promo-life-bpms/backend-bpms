@@ -10,15 +10,7 @@ class CheckList extends Model
     use HasFactory;
     protected $fillable = [
         'code_sale',
-        'order_com',
-        'virtual',
-        'arte',
-        'logo',
-        'quote_pro',
-        'distribution',
-        'delivery_address',
-        'data_invoicing',
-        'contact'
-
+        'description',
+        'status_checklist',
     ];
 }

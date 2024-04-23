@@ -16,15 +16,8 @@ class CreateCheckListsTable extends Migration
         Schema::create('check_lists', function (Blueprint $table) {
             $table->id();
             $table->text('code_sale');
-            $table->text('order_com')->nullable();
-            $table->text('virtual')->nullable();
-            $table->text('arte')->nullable();
-            $table->text('logo')->nullable();
-            $table->text('contact')->nullable();
-            $table->text('quote_pro')->nullable();
-            $table->text('distribution')->nullable();
-            $table->text('delivery_address')->nullable();
-            $table->text('data_invoicing')->nullable();
+            $table->text('description')->nullable();
+            $table->text('status_checklist')->nullable();
             $table->timestamps();
         });
     }
