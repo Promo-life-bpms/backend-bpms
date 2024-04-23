@@ -133,19 +133,16 @@ class ApiOdooController extends Controller
                         } else {
                             $sale->moreInformation()->create($dataAdditionalInfo);
                         }
-                        $check = CheckList::create([
-                            "code_sale" => $sale->id,
-                            "order_com" => null,
-                            "virtual" => null,
-                            "arte" => null,
-                            "logo" => null,
-                            "quote_pro" => null,
-                            "distribution" => null,
-                            "delivery_address" => null,
-                            "data_invoicing" => null,
-                            'contact' => null,
-                        ]);
-                        return $check;
+                        $conceptos = ['OC', 'Virtual', 'Logo', 'AI', 'Cotizacion_Proveedor', 'Distribucion', 'Direccion_de_entrega', 'Contacto', 'Datos_de_facturacion'];
+                        foreach ($conceptos as $concepto) {
+                            # code...
+                            $check = CheckList::create([
+                                "code_sale" => $sale->code_sale,
+                                "description" => $concepto,
+                                "status_checklist" => 'Creado',
+                            ]);
+                            $check->save();
+                        }
                     } else {
                         $sale = Sale::create($dataSale);
                         $sale->moreInformation()->create($dataAdditionalInfo);
