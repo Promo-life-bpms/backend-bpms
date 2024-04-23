@@ -15,6 +15,7 @@ use App\Http\Controllers\EstimationSmallBoxController;
 use App\Http\Controllers\EventualesController;
 use App\Http\Controllers\ExchangeReturnController;
 use App\Http\Controllers\BinnacleController;
+use App\Http\Controllers\CheckList as ControllersCheckList;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
@@ -30,6 +31,7 @@ use App\Http\Controllers\UserCenterController;
 use App\Models\EstimationSmallBox;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserDetailsController;
+use App\Models\CheckList;
 use App\Notifications\Acces;
 use App\Models\User;
 
@@ -62,7 +64,7 @@ Route::get('userAccess', [AuthController::class, 'userAccess']);
 Route::group(['middleware' => 'auth'], function () {
 
     /////API PRUEBA///
-    Route::get('status',[Pruebas::class,'PruebasServidor']);
+    Route::get('status', [Pruebas::class, 'PruebasServidor']);
     // Apis de el userController
     Route::get('users', [UserController::class, 'index']);
     Route::post('users', [UserController::class, 'create']);
@@ -81,7 +83,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('calendario', [SaleController::class, 'calendario']);
 
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
-
+    //crear el check-list
+    Route::post('crear-checklist/{pedido}', [ControllersCheckList::class, 'create']);
+    //ver el chec-list
+    Route::get('pedido-checklist/{pedido}', [ControllersCheckList::class, 'show']);
     // Actualizar la ruta de entrega
     Route::put('pedidos/{pedido}/update_delivery_address_custom', [SaleController::class, 'updateDeliveryAddressCustom']);
 
@@ -188,10 +193,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('caja-chica/solicitudes-de-compra/por-departamento/ver', [PurchaseRequestController::class, 'DepartmentPurchase']);
     Route::get('caja-chica/solicitudes-de-compra/por-departamento/ver/{page}', [PurchaseRequestController::class, 'DepartmentPage']);
     Route::post('caja-chica/aprobar-solicitud/por-department/', [PurchaseRequestController::class, 'approvedDepartment']);
-    Route::post('caja-chica/editar/eventuales',[PurchaseRequestController::class,'updateEventuales']);
+    Route::post('caja-chica/editar/eventuales', [PurchaseRequestController::class, 'updateEventuales']);
 
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
-    Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class,'editdate']);
+    Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class, 'editdate']);
     Route::post('caja-chica/solicitudes-de-compra/editar/', [PurchaseRequestController::class, 'update']);
     Route::post('caja-chica/solicitudes-de-compra/borrar/', [PurchaseRequestController::class, 'delete']);
 
@@ -200,13 +205,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/confirmar-entrega/', [PurchaseRequestController::class, 'confirmDelivered']);
     Route::post('caja-chica/confirmar-recibido/', [PurchaseRequestController::class, 'confirmReceived']);
     Route::post('caja-chica/realizar-devolucion/', [PurchaseRequestController::class, 'createDevolution']);
-    Route::post('caja-chica/realizar-devolucion/confirmada/',[PurchaseRequestController::class, 'confirmationDevolution']);
-    Route::post('caja-chica/realizar-devolucion/cancelation/',[PurchaseRequestController::class, 'cancelationDevolution']);
+    Route::post('caja-chica/realizar-devolucion/confirmada/', [PurchaseRequestController::class, 'confirmationDevolution']);
+    Route::post('caja-chica/realizar-devolucion/cancelation/', [PurchaseRequestController::class, 'cancelationDevolution']);
     Route::post('caja-chica/realizar-cancelacion/', [PurchaseRequestController::class, 'createCancellation']);
     Route::post('caja-chica/actualizar-pago', [PurchaseRequestController::class, 'updatePaymentMethod']);
 
     //actualizar el monto del pago//
-    route::post('caja-chica/actualizar-pago-monto',[PurchaseRequestController::class,'updatemoney']);
+    route::post('caja-chica/actualizar-pago-monto', [PurchaseRequestController::class, 'updatemoney']);
 
     //Administrador
     Route::get('caja-chica/administrador/solicitudes-de-compra/ver', [PurchaseRequestController::class, 'showAdministrador']);
@@ -239,17 +244,17 @@ Route::group(['middleware' => 'auth'], function () {
 
 
     //CAJA CHICA PRESUPUESTO//
-    Route::post('caja-chica/estimate/',[EstimationSmallBoxController::class,'create'])->name('estimate');
-    Route::get('caja-chica/information/estimate',[EstimationSmallBoxController::class,'index'])->name('information.estimate');
-    Route::get('caja-chica/information/history',[EstimationSmallBoxController::class,'ExpenseHistory'])->name('information.history');
-    Route::post('caja-chica/estimate/return',[EstimationSmallBoxController::class,'BudgetReturn'])->name('estimate.return');
-    Route::get('caja-chica/devolution/product/history', [EstimationSmallBoxController::class,'DevolutionHistory'])->name('devolution.product.history');
+    Route::post('caja-chica/estimate/', [EstimationSmallBoxController::class, 'create'])->name('estimate');
+    Route::get('caja-chica/information/estimate', [EstimationSmallBoxController::class, 'index'])->name('information.estimate');
+    Route::get('caja-chica/information/history', [EstimationSmallBoxController::class, 'ExpenseHistory'])->name('information.history');
+    Route::post('caja-chica/estimate/return', [EstimationSmallBoxController::class, 'BudgetReturn'])->name('estimate.return');
+    Route::get('caja-chica/devolution/product/history', [EstimationSmallBoxController::class, 'DevolutionHistory'])->name('devolution.product.history');
     Route::get('caja-chica/estimate/return/history', [EstimationSmallBoxController::class, 'HistoryOfTheReturnOfMoney'])->name('estimate.return.history');
 
     //CAJA CHICA AGREGAR EMPRESA/EVENTUALES //
     Route::post('caja-chica/newcompany', [TemporyCompanyController::class, 'store'])->name('newcompany');
-    Route::post('caja-chica/delete',[TemporyCompanyController::class, 'delete'])->name('deletecompany');
-    Route::get('caja-chica/company', [TemporyCompanyController::class,'index'])->name('infocompany');
+    Route::post('caja-chica/delete', [TemporyCompanyController::class, 'delete'])->name('deletecompany');
+    Route::get('caja-chica/company', [TemporyCompanyController::class, 'index'])->name('infocompany');
     Route::post('caja-chica/company/restore', [TemporyCompanyController::class, 'restore'])->name('name');
 
     ///CAJA CHICA REGRESAR DINERO QUE SOBRO DEL EFECTIVO///
@@ -260,10 +265,10 @@ Route::group(['middleware' => 'auth'], function () {
     ///VER DEPARTAMENTOS
     Route::get('view/departments', [DepartmentController::class, 'AllDepartments'])->name('view.department');
     Route::post('create/departments', [DepartmentController::class, 'AddDepartment'])->name('create.department');
-    Route::post('updated/departments',[DepartmentController::class, 'UpdatedDepartment'])->name('updated.department');
+    Route::post('updated/departments', [DepartmentController::class, 'UpdatedDepartment'])->name('updated.department');
 
     ///USERS DETAILS ///
-    Route::get('users/department/{id_department}', [UserDetailsController::class,'UserforDepartment'])->name('users.department');
+    Route::get('users/department/{id_department}', [UserDetailsController::class, 'UserforDepartment'])->name('users.department');
     //Video
     Route::get('video', [VideoController::class, 'storeVideoInfo']);
 });
