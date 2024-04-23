@@ -240,10 +240,11 @@ class SaleController extends Controller
     }
 
     //////////////////////////////ENDPOINT DE PRUEBA PARA DETALLES DE LOS PEDIDOS/////
-    public function infoSales($sale_id){
+    public function infoSales($sale_id)
+    {
         $sale = Sale::where('code_sale', $sale_id)->first();
 
-        if($sale){
+        if ($sale) {
             ////////////////DETALLES DEL PEDIDO//////////////////////
             $InfoAditional = [
                 'id' => $sale->id,
@@ -290,23 +291,23 @@ class SaleController extends Controller
                             'code_order' => $ordenCompra->code_order,
                             'description' => $producto->description,
                             'odoo_product_id' => $producto->odoo_product_id,
-                            'order_purchase_id' => $producto->order_purchase_id,                    
-                            'planned_date' => $producto->planned_date,                    
-                            'product' => $producto->product,             
-                            'quantity' => $producto->quantity,                   
-                            'quantity_delivered' => $producto->quantity_delivered,                  
-                            'quantity_invoiced' => $producto->quantity_invoiced,                  
-                            'created_at' => $producto->created_at,                
+                            'order_purchase_id' => $producto->order_purchase_id,
+                            'planned_date' => $producto->planned_date,
+                            'product' => $producto->product,
+                            'quantity' => $producto->quantity,
+                            'quantity_delivered' => $producto->quantity_delivered,
+                            'quantity_invoiced' => $producto->quantity_invoiced,
+                            'created_at' => $producto->created_at,
                             'updated_at' => $producto->updated_at
                         ];
                     }
                 }
             }
 
-            
+
             ////////MÁS INFORMACIÓN//////////////////////////
             $idSale = $sale->id;
-            $Information = DB::table('additional_sale_information')-> where('sale_id', $idSale)->first();    
+            $Information = DB::table('additional_sale_information')->where('sale_id', $idSale)->first();
             $MoreInformation = [
                 'id'  => $Information->id,
                 'sale_id' => $idSale,
@@ -326,7 +327,7 @@ class SaleController extends Controller
             $lastStatus = [
                 "created_at" => $LastStatus->created_at,
                 "slug" => $NombreStatus->slug,
-                "last_status"=>$NombreStatus->status,
+                "last_status" => $NombreStatus->status,
 
             ];
 
@@ -334,14 +335,16 @@ class SaleController extends Controller
             $incidences = DB::table('incidences')->where('code_sale', $sale_id)->get();
 
             /////INSPECTIONS////////////////////////
-            $inspections = DB::table('inspections')->where('sale_id', $idSale )->get();
-            
+            $inspections = DB::table('inspections')->where('sale_id', $idSale)->get();
 
 
-        return response()->json(['Additional information' => $InfoAditional, 'Orders'  => $orders, 'Products orders' =>$products, 'More information'=>$MoreInformation, 
-                            'Last_status' => $lastStatus, 'incidences'=>$incidences, 'inspections'  =>$inspections]);
-        }else{
-            return response()->json(['message' => 'No existe este pedido', 'status' => 404],404);
+
+            return response()->json([
+                'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
+                'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections
+            ]);
+        } else {
+            return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);
         }
     }
 
