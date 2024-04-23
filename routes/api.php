@@ -81,6 +81,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('calendario', [SaleController::class, 'calendario']);
 
     Route::get('pedidos/{pedido}', [SaleController::class, 'show']);
+    Route::get('pedido/{pedido}', [SaleController::class, 'infoSales']);
 
     // Actualizar la ruta de entrega
     Route::put('pedidos/{pedido}/update_delivery_address_custom', [SaleController::class, 'updateDeliveryAddressCustom']);
