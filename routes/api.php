@@ -87,6 +87,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('crear-checklist/{pedido}', [ControllersCheckList::class, 'create']);
     //ver el chec-list
     Route::get('pedido-checklist/{pedido}', [ControllersCheckList::class, 'show']);
+    Route::get('pedido/{pedido}', [SaleController::class, 'infoSales']);
+
     // Actualizar la ruta de entrega
     Route::put('pedidos/{pedido}/update_delivery_address_custom', [SaleController::class, 'updateDeliveryAddressCustom']);
 
