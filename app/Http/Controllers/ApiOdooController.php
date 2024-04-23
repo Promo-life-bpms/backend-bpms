@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\CheckList;
 use App\Models\Delivery;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
@@ -68,6 +69,7 @@ class ApiOdooController extends Controller
                     'sale.products.*.quantity_invoiced' => 'required|numeric',
                     'sale.products.*.unit_price' => 'required|numeric',
                     'sale.products.*.subtotal' => 'required|numeric',
+                    'sale.checklist' => 'bail|required|array',
                     'sale.total' => 'required|numeric',
                     'sale.status' => 'required',
                 ]); */
@@ -131,6 +133,19 @@ class ApiOdooController extends Controller
                         } else {
                             $sale->moreInformation()->create($dataAdditionalInfo);
                         }
+                        $check = CheckList::create([
+                            "code_sale" => $sale->id,
+                            "order_com" => null,
+                            "virtual" => null,
+                            "arte" => null,
+                            "logo" => null,
+                            "quote_pro" => null,
+                            "distribution" => null,
+                            "delivery_address" => null,
+                            "data_invoicing" => null,
+                            'contact' => null,
+                        ]);
+                        return $check;
                     } else {
                         $sale = Sale::create($dataSale);
                         $sale->moreInformation()->create($dataAdditionalInfo);

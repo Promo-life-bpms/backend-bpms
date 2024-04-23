@@ -46,7 +46,7 @@ class SaleController extends Controller
 
         $sales = Sale::where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")->paginate($per_page);
         return response()->json([
-            'msg' => 'Lista de pedidos', 'data' => ["sales" => $sales]
+            'msg' => 'Lista de los pedidos', 'data' => ["sales" => $sales]
             // 'ordenes' => $ordenes
         ], response::HTTP_OK); //200
         /*    $sales = null;
