@@ -239,6 +239,112 @@ class SaleController extends Controller
         return response()->json(['msg' => "No hay informacion acerca de este pedido"], response::HTTP_OK); //200
     }
 
+    //////////////////////////////ENDPOINT DE PRUEBA PARA DETALLES DE LOS PEDIDOS/////
+    public function infoSales($sale_id){
+        $sale = Sale::where('code_sale', $sale_id)->first();
+
+        if($sale){
+            ////////////////DETALLES DEL PEDIDO//////////////////////
+            $InfoAditional = [
+                'id' => $sale->id,
+                'code_sale' => $sale->code_sale,
+                'commercial_email' => $sale->commercial_email,
+                'commercial_name' => $sale->commercial_name,
+                'commercial_odoo_id' => $sale->commercial_odoo_id,
+                'incidence' => $sale->incidence,
+                'name_sale' => $sale->name_sale,
+                'status_id' => $sale->status_id,
+                'created_at' => $sale->created_at,
+                'updated_at' => $sale->updated_at,
+            ];
+
+            /////ORDENES////////////////
+            $ordenes = DB::table('order_purchases')->where('code_sale', $sale_id)->get();
+            $orders = [];
+            foreach ($ordenes as $orden) {
+                $Orden = [
+                    'id' => $orden->id,
+                    'code_order' => $orden->code_order,
+                    'code_sale' => $orden->code_sale,
+                    'provider_name' => $orden->provider_name,
+                    'order_date' => $orden->order_date,
+                    'planned_date' => $orden->planned_date,
+                    'status' => $orden->status,
+                    'status_bpm' => $orden->status_bpm,
+                    'supplier_representative' => $orden->supplier_representative,
+                    'created_at' => $orden->created_at,
+                    'updated_at' => $orden->updated_at,
+                ];
+                $orders[] = $Orden;
+            }
+            /////////////PRODUCTOS/////////////////
+            $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->pluck('id');
+            $products = [];
+            foreach ($idOrdenes as $idOrden) {
+                $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
+                if ($ordenCompra) {
+                    $productosOrden = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
+                    foreach ($productosOrden as $producto) {
+                        $products[] = [
+                            'id' => $producto->id,
+                            'code_order' => $ordenCompra->code_order,
+                            'description' => $producto->description,
+                            'odoo_product_id' => $producto->odoo_product_id,
+                            'order_purchase_id' => $producto->order_purchase_id,                    
+                            'planned_date' => $producto->planned_date,                    
+                            'product' => $producto->product,             
+                            'quantity' => $producto->quantity,                   
+                            'quantity_delivered' => $producto->quantity_delivered,                  
+                            'quantity_invoiced' => $producto->quantity_invoiced,                  
+                            'created_at' => $producto->created_at,                
+                            'updated_at' => $producto->updated_at
+                        ];
+                    }
+                }
+            }
+
+            
+            ////////MÁS INFORMACIÓN//////////////////////////
+            $idSale = $sale->id;
+            $Information = DB::table('additional_sale_information')-> where('sale_id', $idSale)->first();    
+            $MoreInformation = [
+                'id'  => $Information->id,
+                'sale_id' => $idSale,
+                'client_contact' => $Information->client_contact ?? 'Aún no hay un contacto del cliente',
+                'client_name'  => $Information->client_name ?? 'Aún no hay un nombre del cliente.',
+                'commitment_date'  => $Information->commitment_date ?? 'Aún no hay información.',
+                'effective_date'  => $Information->effective_date ?? 'Aún no hay información.',
+                'planned_date'  => $Information->planned_date ?? 'Aún no hay una fecha de entrega.',
+                'created_at'  => $Information->created_at,
+                'updated_at'  => $Information->updated_at
+            ];
+
+            //////////////////Last status///////////////////////
+            $LastStatus = DB::table('sale_status_changes')->where('sale_id', $idSale)->orderBy('created_at', 'desc')->first();
+            $idstatus = $LastStatus->status_id;
+            $NombreStatus = DB::table('statuses')->where('id', $idstatus)->first();
+            $lastStatus = [
+                "created_at" => $LastStatus->created_at,
+                "slug" => $NombreStatus->slug,
+                "last_status"=>$NombreStatus->status,
+
+            ];
+
+            ///////////INCIDENCIAS///////////////
+            $incidences = DB::table('incidences')->where('code_sale', $sale_id)->get();
+
+            /////INSPECTIONS////////////////////////
+            $inspections = DB::table('inspections')->where('sale_id', $idSale )->get();
+            
+
+
+        return response()->json(['Additional information' => $InfoAditional, 'Orders'  => $orders, 'Products orders' =>$products, 'More information'=>$MoreInformation, 
+                            'Last_status' => $lastStatus, 'incidences'=>$incidences, 'inspections'  =>$inspections]);
+        }else{
+            return response()->json(['message' => 'No existe este pedido', 'status' => 404],404);
+        }
+    }
+
     //updateDeliveryAddressCustom
     public function updateDeliveryAddressCustom(Request $request, $sale_id)
     {
