@@ -242,10 +242,11 @@ class SaleController extends Controller
     //////////////////////////////ENDPOINT DE PRUEBA PARA DETALLES DE LOS PEDIDOS/////
     public function infoSales($sale_id)
     {
+
         $sale = Sale::where('code_sale', $sale_id)->first();
         $id = $sale->id;
-        $Company = DB::table('additional_sale_information')-> where('sale_id', $id)->first();
-        if($sale){
+        $Company = DB::table('additional_sale_information')->where('sale_id', $id)->first();
+        if ($sale) {
             ////////////////DETALLES DEL PEDIDO//////////////////////
             $InfoAditional = [
                 'id' => $sale->id,
@@ -262,8 +263,9 @@ class SaleController extends Controller
             ];
 
             /////ORDENES////////////////
-            $ordenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function($query) {
-                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');})->get();
+            $ordenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
+                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
+            })->get();
             $orders = [];
             foreach ($ordenes as $orden) {
                 $Orden = [
@@ -282,8 +284,9 @@ class SaleController extends Controller
                 $orders[] = $Orden;
             }
             /////////////PRODUCTOS/////////////////
-            $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function($query) {
-                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');})->pluck('id');
+            $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
+                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
+            })->pluck('id');
             $products = [];
             foreach ($idOrdenes as $idOrden) {
                 $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
@@ -341,19 +344,20 @@ class SaleController extends Controller
 
             /////INSPECTIONS////////////////////////
             $inspections = DB::table('inspections')->where('sale_id', $idSale)->get();
-            
+            //////////////CHECK-LIST//////////////////////
+            $check_list = DB::table('check_lists')->where('code_sale', $sale_id)->get();
             ////////////////INFORMACIÓN DE LOS PRODUCTS SALE//////////////////
             $SalesProducts = DB::table('sales_products')->where('sale_id', $idSale)->get()->toArray();
             $Sale = [];
-            foreach ($SalesProducts as $saleProduct){
+            foreach ($SalesProducts as $saleProduct) {
                 $SaleProducts = [
                     'sale_id' => $sale_id,
                     'odoo_product_id' => $saleProduct->odoo_product_id,
                     'description' => $saleProduct->description,
-                    'product'=> $saleProduct->product,
+                    'product' => $saleProduct->product,
                     'quantity_ordered' => $saleProduct->quantity_ordered,
                     'quantity_delivered' => $saleProduct->quantity_delivered,
-                    'quantity_invoiced'=> $saleProduct->quantity_invoiced,
+                    'quantity_invoiced' => $saleProduct->quantity_invoiced,
 
                 ];
                 $Sale[] = $SaleProducts;
@@ -361,8 +365,8 @@ class SaleController extends Controller
 
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
-                'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' =>$Sale
-            ],200);
+                'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list
+            ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);
         }
