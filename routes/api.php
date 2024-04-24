@@ -19,6 +19,7 @@ use App\Http\Controllers\CheckList as ControllersCheckList;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\ManagerHasDepartmentController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
 use App\Http\Controllers\Pruebas;
@@ -273,4 +274,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('users/department/{id_department}', [UserDetailsController::class, 'UserforDepartment'])->name('users.department');
     //Video
     Route::get('video', [VideoController::class, 'storeVideoInfo']);
+
+
+
+    ///////////////////APIS PARA MANAGERS//////////////////////////////
+    Route::get('managers/department', [ManagerHasDepartmentController::class, 'ViewManager']);
+    Route::post('create/manager/department',[ManagerHasDepartmentController::class,'CrearManager']);
+    Route::post('update/manager/department',[ManagerHasDepartmentController::class,'UpdateManager']);
+    
 });
