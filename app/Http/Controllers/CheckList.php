@@ -12,49 +12,46 @@ class CheckList extends Controller
 {
     public function create(Request $request, $sale_id)
     {
-        $dataValidation = [
-            'description' => 'required',
-            'status_checklist' => 'required',
-
-        ];
-        $validation = Validator::make($request->all(), $dataValidation);
+        $validation = Validator::make($request->all(), [
+            '*.description' => 'required',
+            '*.status_checklist' => 'required',
+        ]);
 
         if ($validation->fails()) {
             return response()->json([
-                "msg" => 'No se registro correctamente la informacion',
-                'data' =>
-                ["errorValidacion" => $validation->getMessageBag()]
-            ], response::HTTP_UNPROCESSABLE_ENTITY);
+                'msg' => "Error al validar información de la ruta de entrega",
+                'data' => ['errorValidacion' => $validation->getMessageBag()]
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-        $check = ModelsCheckList::where('code_sale', $sale_id)->first();
-        if ($check->status_checklist == 'Creado') {
-            # code...
 
+        $check = ModelsCheckList::where('code_sale', $sale_id)->first();
+
+        if (!$check || $check->status_checklist !== 'Creado') {
+            return response()->json([
+                "msg" => 'No existe una check-list asociada a esta venta o no está en el estado adecuado'
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $check_lists = [];
+
+        foreach ($request->all() as $item) {
             $check_list = ModelsCheckList::create([
                 "code_sale" => $sale_id,
-                "description" => $request->description,
-                "status_checklist" => $request->status_checklist,
+                "description" => $item['description'],
+                "status_checklist" => $item['status_checklist'],
             ]);
-        } else {
-            return response()->json([
-                "msg" => 'No existe una check-list'
-            ], response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-        if ($check_list) {
-            return response()->json([
-                "msg" => 'Check-list creado exitosamente',
-                'data' =>
-                [
 
-                    "checklist" => $check_list,
-
-                ]
-            ], response::HTTP_CREATED);
+            $check_lists[] = $check_list;
         }
+
         return response()->json([
-            "msg" => 'Check-list no se pudo crear correctamente',
-        ], response::HTTP_BAD_REQUEST);
+            'msg' => 'Check-lists creadas exitosamente',
+            'data' => [
+                "check-lists" =>  $check_lists,
+            ]
+        ], Response::HTTP_CREATED);
     }
+
 
     public function show($sale_id)
     {

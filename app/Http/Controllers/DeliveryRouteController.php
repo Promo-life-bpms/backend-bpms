@@ -72,18 +72,18 @@ class DeliveryRouteController extends Controller
     {
         //pedidos por agendar
         //traer todos los usuarios que son choferes
-        $rolChofer = Role::find(4);
+       /*  $rolChofer = Role::find(4);
         $choferes = [];
         foreach ($rolChofer->users as $chofer) {
             array_push($choferes, ['id' => $chofer->id, 'name' => $chofer->name]);
         }
-
+ */
         // traer los productos de las ordenes de compra o trabajo que no han sido entregados o cancelados
-        $per_page = 10;
+       /*  $per_page = 10;
 
         if ($request->per_page) {
             $per_page = $request->per_page;
-        }
+        } */
         $pedidos = Sale::join('order_purchases', 'order_purchases.code_sale', 'sales.code_sale')->whereIn('order_purchases.status_bpm', ["Cancelado", "Confirmado"])->orderBy('sales.code_sale', 'ASC')->paginate($per_page);
 
         foreach ($pedidos as $pedido) {
@@ -147,7 +147,7 @@ class DeliveryRouteController extends Controller
             'date_of_delivery' => 'required',
             'code_orders' => 'required|array',
             'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
-            'code_orders.*.type_of_origin' => 'required',
+   /*          'code_orders.*.type_of_origin' => 'required', */
             'code_orders.*.type_of_destiny' => 'required',
             'code_orders.*.orders' => 'required|array',
             'code_orders.*.orders.*.code_order' => 'required|exists:order_purchases,code_order',
