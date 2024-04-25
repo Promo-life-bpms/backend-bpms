@@ -17,8 +17,8 @@ class ManagerHasDepartmentController extends Controller
             $nameUser = DB::table('users')->where('id',$Manager->id_user)->value('name');
             $NameDepartment = DB::table('departments')->where('id', $Manager->id_department)->value('name_department');
             $Info = [
-                'Name of the manager'=> $nameUser,
-                'Name of the Department' => $NameDepartment,
+                'Name_of_the_Manager'=> $nameUser,
+                'Name_of_the_Department' => $NameDepartment,
             ];
             $Managers[] = $Info;
         }
