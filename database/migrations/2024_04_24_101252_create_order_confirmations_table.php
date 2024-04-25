@@ -17,7 +17,7 @@ class CreateOrderConfirmationsTable extends Migration
             $table->id();
             $table->integer('status');
             $table->string('description');
-            $table->integer('code_sale');
+            $table->string('code_sale');
             $table->foreignId('order_purchase_id')->references('id')->on('order_purchases')->onDelete('cascade');
             $table->foreignId('id_order_products')->references('id')->on('order_purchase_products')->onDelete('cascade');
             $table->timestamps();
