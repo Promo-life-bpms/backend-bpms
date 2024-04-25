@@ -20,6 +20,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\ManagerHasDepartmentController;
+use App\Http\Controllers\OrderConfirmationController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
 use App\Http\Controllers\Pruebas;
@@ -170,6 +171,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/image/upload', [UploadImageController::class, 'uploadImage']);
     Route::post('/image/delete', [UploadImageController::class, 'deleteImage']);
 
+
+    /////////////////////RUTAS  PARA CONFIRMAR LOS PEDIDOS //////////////////////
+    Route::post('confirmation/order/products', [OrderConfirmationController::class, 'ConfirmOrderProducts']);
 
     //CAJA CHICA
 

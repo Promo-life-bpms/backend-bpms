@@ -266,8 +266,25 @@ class SaleController extends Controller
             $ordenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
                 $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
             })->get();
+
             $orders = [];
             foreach ($ordenes as $orden) {
+                $product = DB::table('order_purchase_products')->where('order_purchase_id',$orden->id)->first();
+                $idOrden = $product->order_purchase_id;
+                $registros = DB::table('order_confirmations')->where('order_purchase_id', $idOrden)->get();
+                $productos_confirmados = count($registros);
+                $productos_totales = DB::table('order_purchase_products')->where('order_purchase_id',$idOrden)->count();
+                $estado_confirmacion = ''; 
+                if ($registros) {
+                    if ($productos_confirmados == 0) {
+                        $estado_confirmacion = 'Sin confirmar'; 
+                    }elseif ($productos_confirmados == $productos_totales) {
+                        $estado_confirmacion = 'Confirmado';
+                    }elseif ($productos_confirmados < $productos_totales){
+                        $estado_confirmacion = 'Parcial';   
+                    }
+                }
+
                 $Orden = [
                     'id' => $orden->id,
                     'code_order' => $orden->code_order,
@@ -278,6 +295,7 @@ class SaleController extends Controller
                     'status' => $orden->status,
                     'status_bpm' => $orden->status_bpm,
                     'supplier_representative' => $orden->supplier_representative,
+                    'Confirmation' => $estado_confirmacion,
                     'created_at' => $orden->created_at,
                     'updated_at' => $orden->updated_at,
                 ];
@@ -288,6 +306,8 @@ class SaleController extends Controller
                 $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
             })->pluck('id');
             $products = [];
+
+            ////VERIFICAMOS QUE LOS PRODUCTOS ESTEN COMPLETADOS/////////////
             foreach ($idOrdenes as $idOrden) {
                 $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
                 if ($ordenCompra) {
