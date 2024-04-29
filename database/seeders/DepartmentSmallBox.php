@@ -17,46 +17,77 @@ class DepartmentSmallBox extends Seeder
     public function run()
     {
         $departments = [
-            'ADMINISTRACIÓN', 
-            'OPERACIONES',
-            'AUDITORÍA Y GESTIÓN DE CALIDAD',
-            'DIRECCIÓN BH',
-            'DIRECCIÓN PL',
-            'IMPORTACIONES', 
-            'RECURSOS HUMANOS', 
-            'TECNOLOGÍA E INNOVACIÓN', 
-            'VENTAS BH', 
-            'VENTAS PL',
-            'PRODUCCIÓN',
-            'SIN DEFINIR',
+            (object)[
+                'id' => 1,
+                'name_department' => 'ADMINISTRACIÓN',
+            ],
+            (object)[
+                'id' => 2,
+                'name_department' => 'OPERACIONES',
+            ],
+            (object)[
+                'id' => 3,
+                'name_department' => 'AUDITORÍA Y GESTIÓN DE CALIDAD',
+            ],
+            (object)[
+                'id' => 4,
+                'name_department' => 'DIRECCIÓN BH',
+            ],
+            (object)[
+                'id' => 5,
+                'name_department' => 'DIRECCIÓN PL',
+            ],
+            (object)[
+                'id' => 6,
+                'name_department' => 'IMPORTACIONES',
+            ],
+            (object)[
+                'id' => 7,
+                'name_department' => 'RECURSOS HUMANOS',
+            ],
+            (object)[
+                'id' => 8,
+                'name_department' => 'TECNOLOGÍA E INNOVACIÓN',
+            ],
+            (object)[
+                'id' => 9,
+                'name_department' => 'VENTAS BH',
+            ],
+            (object)[
+                'id' => 10,
+                'name_department' => 'VENTAS PL',
+            ],
+            (object)[
+                'id' => 11,
+                'name_department' => 'LOGÍSTICA',
+            ],
+            (object)[
+                'id' => 12,
+                'name_department' => 'COMPRAS NACIONALES',
+            ],
         ];
 
         foreach ($departments as $department){
-            Department::create([
-                'name_department' => $department,
-                'status' => 1,
+
+            DB::table('departments')->where('id', $department->id)->update([
+                'id' => $department->id,
+                'name_department' => $department->name_department,
             ]);
         }
     
         $areas = array(
             ///ADMINISTRACIÓN
             (object)[
-                'name_area' => 'Tesoreria',
+                'name_area' => 'Manager administración',
                 'id_department' => 1, // optional
             ],
             (object)[
-                'name_area' => 'Cuentas por cobrar',
-                'id_department' => 1, // optional
-            ],(object)[
-                'name_area' => 'Facturación',
-                'id_department' => 1, // optional
-            ],(object)[
-                'name_area' => 'Gerencia',
+                'name_area' => 'Administración',
                 'id_department' => 1, // optional
             ],
             /////OPERACIONES
             (object)[
-                'name_area' => 'Logistica',
+                'name_area' => 'Manager operaciones',
                 'id_department' => 2, // optional
             ],
             (object)[
@@ -64,27 +95,31 @@ class DepartmentSmallBox extends Seeder
                 'id_department' => 2, // optional
             ],
             (object)[
-                'name_area' => 'Almacen',
+                'name_area' => 'Almacén',
                 'id_department' => 2, // optional
             ],
             (object)[
-                'name_area' => 'Calidad',
+                'name_area' => 'Operador láser',
                 'id_department' => 2, // optional
             ],
             (object)[
-                'name_area' => 'Compras',
+                'name_area' => 'Gestión de incidencias',
                 'id_department' => 2, // optional
             ],
             ////AUDITORÍA Y GESTIÓN DE CALIDAD
             (object)[
-                'name_area' => 'Gerencia',
+                'name_area' => 'Manager de auditoría y gestión de calidad',
                 'id_department' => 3, // optional
             ],
             (object)[
                 'name_area' => 'Auditoria',
                 'id_department' => 3, // optional
             ],
-            ////DIRECCIÓN
+            (object)[
+                'name_area' => 'Gestión de calidad',
+                'id_department' => 3, // optional
+            ],
+            ////DIRECCIÓN BH
             (object)[
                 'name_area' => 'Dirreción',
                 'id_department' => 4, // optional
@@ -105,73 +140,56 @@ class DepartmentSmallBox extends Seeder
 
             ////IMPORTACIONES
             (object)[
-                'name_area' => 'Importaciones',
+                'name_area' => 'Manager importaciones',
                 'id_department' => 6, // optional
             ],
             (object)[
-                'name_area' => 'Gerencia',
+                'name_area' => 'Importacionaes',
                 'id_department' => 6, // optional
             ],
 
             ///RH
             (object)[
-                'name_area' => 'Mantenimiento',
+                'name_area' => 'Manager Recursos Humanos',
                 'id_department' => 7, // optional
             ],
             (object)[
-                'name_area' => 'RH',
+                'name_area' => 'Recursos Humanos',
                 'id_department' => 7, // optional
             ],
-            (object)[
-                'name_area' => 'Gerencia',
-                'id_department' => 7, // optional
-            ],
-            (object)[
-                'name_area' => 'Recepción',
-                'id_department' => 7, // optional
-            ],
-            (object)[
-                'name_area' => 'Limpieza',
-                'id_department' => 7, // optional
-            ],
-
             ///Tecnología e innovación
+            (object)[
+                'name_area' => 'Manager Tecnología e Innovación',
+                'id_department' => 8, // optional
+            ],
+            (object)[
+                'name_area' => 'Tecnología e Innovación',
+                'id_department' => 8, // optional
+            ],
+            (object)[
+                'name_area' => 'Marketing',
+                'id_department' => 8, // optional
+            ],
             (object)[
                 'name_area' => 'Sistemas',
                 'id_department' => 8, // optional
             ],
-            (object)[
-                'name_area' => 'Desarrollo',
-                'id_department' => 8, // optional
-            ],
-            (object)[
-                'name_area' => 'Marketing BH',
-                'id_department' => 8, // optional
-            ],
-            (object)[
-                'name_area' => 'Gerencia',
-                'id_department' => 8, // optional
-            ],
-            (object)[
-                'name_area' => 'Diseño',
-                'id_department' => 8, // optional
-            ],
-
             ////VENTAS BH
             (object)[
-                'name_area' => 'Gerencia',
+                'name_area' => 'Manager Daniel',
                 'id_department' => 9, // optional
             ],
             (object)[
-                'name_area' => 'Gerencia Jacobo',
+                'name_area' => 'Manager Jacobo',
+                'id_department' => 9, // optional
+            ],
+            
+            (object)[
+                'name_area' => 'Manager Ventas BH Base',
                 'id_department' => 9, // optional
             ],
             (object)[
-                'name_area' => 'Gerencia Promo Zale',
-                'id_department' => 9, // optional
-            ],
-            (object)[
-                'name_area' => 'Ventas Cancún/Monterry',
+                'name_area' => 'Ventas BH Base',
                 'id_department' => 9, // optional
             ],
             (object)[
@@ -179,36 +197,30 @@ class DepartmentSmallBox extends Seeder
                 'id_department' => 9, // optional
             ],
             (object)[
-                'name_area' => 'Ventas México',
-                'id_department' => 9, // optional
-            ],
-            (object)[
                 'name_area' => 'Ventas Promo Zale',
                 'id_department' => 9, // optional
             ],
-            (object)[
-                'name_area' => 'Ventas USA',
-                'id_department' => 9, // optional
-            ],
-
             ///'VENTAS PL'
             (object)[
-                'name_area' => 'Gerencia',
+                'name_area' => 'Manager Ventas PL',
                 'id_department' => 10, // optional
             ],
             (object)[
-                'name_area' => 'Ventas',
+                'name_area' => 'Ventas PL',
                 'id_department' => 10, // optional
             ],
-
-            //PRODUCCIÓN
+            /////////////LOGÍSTICA//////////
             (object)[
-                'name_area' => 'Impresión',
+                'name_area' => 'Manager Logística',
                 'id_department' => 11, // optional
             ],
-            //PRODUCCIÓN
             (object)[
-                'name_area' => 'SIN DEFINIR',
+                'name_area' => 'Logística',
+                'id_department' => 11, // optional
+            ],
+            //COMPRAS NACIONALES////
+            (object)[
+                'name_area' => 'Compras nacionales',
                 'id_department' => 12, // optional
             ],
         );
@@ -220,7 +232,7 @@ class DepartmentSmallBox extends Seeder
             ]);
         }
     
-        $companies = array(
+        /*$companies = array(
             (object)[
                 'name' => 'Promo Zale',
                 'description' => 'Promo Zale', // optional
@@ -236,114 +248,140 @@ class DepartmentSmallBox extends Seeder
                 'name' => $company->name,
                 'description' => $company->description,
             ]);
-        }
+        }*/
 
         $roles = array(
             (object)[
-                'name' => 'equipo_administración',
+                'name' => 'administrator',
+                'display_name' => 'Administrador', // optional
+                'description' => 'Administrator', // optional
+            ],
+            (object)[
+                'name' => 'maquilador',
+                'display_name' => 'Maquilador', // optional
+                'description' => 'Maquilador', // optional
+            ],
+            (object)[
+                'name' => 'almacen',
+                'display_name' => 'Almacen', // optional
+                'description' => 'Almacen', // optional
+            ],
+            (object)[
+                'name' => 'chofer',
+                'display_name' => 'Chofer', // optional
+                'description' => 'Chofer', // optional
+            ],
+            (object)[
+                'name' => 'control_calidad',
+                'display_name' => 'Control Calidad', // optional
+                'description' => 'Control Calidad', // optional
+            ],
+            (object)[
+                'name' => 'compras',
+                'display_name' => 'Compras', // optional
+                'description' => 'Compras', // optional
+            ],
+            (object)[
+                'name' => 'ventas',
+                'display_name' => 'Ventas', // optional
+                'description' => 'Ventas', // optional
+            ],
+            (object)[
+                'name' => 'logistica-y-mesa-de-control',
+                'display_name' => 'Logistica-y-mesa-de-control', // optional
+                'description' => 'Logistica-y-mesa-de-control', // optional
+            ],
+            (object)[
+                'name' => 'gerente',
+                'display_name' => 'Gerente', // optional
+                'description' => 'Gerente', // optional
+            ],
+            (object)[
+                'name' => 'asistente_de_gerente',
+                'display_name' => 'Asistente De Gerente', // optional
+                'description' => 'Asistente De Gerente', // optional
+            ],
+            (object)[
+                'name' => 'jefe_de_logistica',
+                'display_name' => 'Jefe de Logistica', // optional
+                'description' => 'Jefe de Logistica', // optional
+            ],
+            (object)[
+                'name' => 'gerente-operaciones',
+                'display_name' => 'Gerente de Operaciones', // optional
+                'description' => 'Gerente de Operaciones', // optional
+            ],
+            (object)[
+                'name' => 'manager',
+                'display_name' => 'Manager', // optional
+                'description' => 'Manager', // optional
+            ],
+            (object)[
+                'name' => 'caja chica',
+                'display_name' => 'Caja chica', // optional
+                'description' => 'Caja chica', // optional
+            ],
+            (object)[
+                'name' => 'equipo_administracion',
                 'display_name' => 'Equipo administración', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'description' => 'Equipo administración', // optional
             ],
             (object)[
-                'name' => 'equipo_almacén',
-                'display_name' => 'Equipo almacén', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'name' => 'equipo_auditoria_gestion_calidad',
+                'display_name' => 'Equipo Auditoría y gestión de calidad', // optional
+                'description' => 'Equipo Auditoría y gestión de calidad', // optional
             ],
             (object)[
-                'name' => 'equipo_auditoría_gestión_calidad',
-                'display_name' => 'Equipo auditoría y gestión de calidad', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'name' => 'quipo_compras_nacionales',
+                'display_name' => 'Equipo compras nacionales', // optional
+                'description' => 'Equipo compras nacionales', // optional
             ],
             (object)[
-                'name' => 'equipo_calidad',
-                'display_name' => 'Equipo calidad', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'name' => 'equipo_direccion_bh',
+                'display_name' => 'Equipo Dirección BH', // optional
+                'description' => 'Equipo Dirección BH', // optional
             ],
             (object)[
-                'name' => 'equipo_compras',
-                'display_name' => 'Equipo compras', // optional
-                'description' => 'Equipo de trabajo', // optional
-            ],
-            (object)[
-                'name' => 'equipo_dirección',
-                'display_name' => 'Equipo dirección', // optional
-                'description' => 'Equipo de trabajo', // optional
-            ],
-            (object)[
-                'name' => 'equipo_diseño',
-                'display_name' => 'Equipo diseño', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'name' => 'equipo_direccion_pl',
+                'display_name' => 'Equipo Dirección PL', // optional
+                'description' => 'Equipo Dirección PL', // optional
             ],
             (object)[
                 'name' => 'equipo_importaciones',
-                'display_name' => 'Equipo importaciones', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'display_name' => 'Equipo Importaciones', // optional
+                'description' => 'Equipo Importaciones', // optional
             ],
             (object)[
                 'name' => 'equipo_logistica',
-                'display_name' => 'Equipo logistica', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'display_name' => 'Equipo Logística', // optional
+                'description' => 'Equipo Logística', // optional
             ],
             (object)[
-                'name' => 'equipo_mantenimiento',
-                'display_name' => 'Equipo mantenimiento', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'name' => 'equipo_operaciones',
+                'display_name' => 'Equipo Operaciones', // optional
+                'description' => 'Equipo Operaciones', // optional
             ],
             (object)[
-                'name' => 'equipo_mesa_control',
-                'display_name' => 'Equipo mesa de control', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'name' => 'equipo_rh',
+                'display_name' => 'Equipo Recursos Humanos', // optional
+                'description' => 'Equipo Recursos Humanos', // optional
             ],
             (object)[
-                'name' => 'equipo_recursos_humanos',
-                'display_name' => 'Equipo recursos humanos', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'name' => 'equipo_tecnología_innovacion',
+                'display_name' => 'Equipo Tecnología e Innovación', // optional
+                'description' => 'Equipo Tecnología e Innovación', // optional
             ],
             (object)[
-                'name' => 'equipo_sistemas',
-                'display_name' => 'Equipo sistemas', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'name' => 'equipo_ventas_bh',
+                'display_name' => 'Equipo Ventas BH', // optional
+                'description' => 'Equipo Ventas BH', // optional
             ],
             (object)[
-                'name' => 'equipo_tecnología_e_innovación',
-                'display_name' => 'Equipo tecnología e innovación', // optional
-                'description' => 'Equipo de trabajo', // optional
+                'name' => 'equipo_ventas_pl',
+                'display_name' => 'Equipo Ventas PL', // optional
+                'description' => 'Equipo Ventas PL', // optional
             ],
-            (object)[
-                'name' => 'equipo_ventas_BH',
-                'display_name' => 'Equipo ventas BH', // optional
-                'description' => 'Equipo de trabajo', // optional
-            ],
-            (object)[
-                'name' => 'equipo_ventas_PL',
-                'display_name' => 'Equipo ventas PL', // optional
-                'description' => 'Equipo de trabajo', // optional
-            ],
-            (object)[
-                'name' => 'equipo_ventas_PMZ',
-                'display_name' => 'Equipo ventas PMZ', // optional
-                'description' => 'Equipo de trabajo', // optional
-            ],
-            (object)[
-                'name' => 'equipo_marketing',
-                'display_name' => 'Equipo marketing', // optional
-                'description' => 'Equipo de trabajo', // optional
-            ],
-            (object)[
-                'name' => 'caja_chica',
-                'display_name' => 'Caja chica', // optional
-                'description' => 'Caja chica', 
-            ],
-            (object)[
-                'name' => 'sin_definir',
-                'display_name' => 'Sin definir', // optional
-                'description' => 'El usuario aún no tiene un rol', 
-            ],
-            (object)[
-                'name' => 'equipo_tm_57',
-                'display_name' => 'Trade Market 57', // optional
-                'description' => 'Trade Market 57', 
-            ],
+            
         );
 
         foreach ($roles as $rol) {
@@ -354,8 +392,9 @@ class DepartmentSmallBox extends Seeder
             ]);  
         }
 
+        ///////////////AQUÍ ME QUEDE FIN////////////////////////
         ///33///
-        $asigarroles = array(
+        /*$asigarroles = array(
             (object)[
                 'role_id' => '33',
                 'user_id' => '55', // optional
@@ -1379,7 +1418,7 @@ class DepartmentSmallBox extends Seeder
                 'id_company' => $user->id_company,
                 'id_area' => $user->id_area
             ]);  
-        }
+        }*/
 
     }
 }
