@@ -174,6 +174,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     /////////////////////RUTAS  PARA CONFIRMAR LOS PEDIDOS //////////////////////
     Route::post('confirmation/order/products', [OrderConfirmationController::class, 'ConfirmOrderProducts']);
+    Route::post('order/create');
 
     //CAJA CHICA
 
