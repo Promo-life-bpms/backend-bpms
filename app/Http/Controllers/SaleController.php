@@ -245,6 +245,7 @@ class SaleController extends Controller
 
         $sale = Sale::where('code_sale', $sale_id)->first();
         $id = $sale->id;
+        
         $Company = DB::table('additional_sale_information')->where('sale_id', $id)->first();
         if ($sale) {
             ////////////////DETALLES DEL PEDIDO//////////////////////
@@ -366,6 +367,7 @@ class SaleController extends Controller
             $inspections = DB::table('inspections')->where('sale_id', $idSale)->get();
             //////////////CHECK-LIST//////////////////////
             $check_list = DB::table('check_lists')->where('code_sale', $sale_id)->get();
+
             ////////////////INFORMACIÓN DE LOS PRODUCTS SALE//////////////////
             $SalesProducts = DB::table('sales_products')->where('sale_id', $idSale)->get()->toArray();
             $Sale = [];
@@ -383,9 +385,36 @@ class SaleController extends Controller
                 $Sale[] = $SaleProducts;
             }
 
+            //////////////////PRODUCTOS QUE YA ESTAN EN STATUS 1/////////////////////////////////
+            $status = DB::table('order_confirmations')->select('order_purchase_id', 'status', 'id', 'id_order_products')->where('code_sale', $sale_id)
+                                                    ->groupBy('order_purchase_id', 'status', 'id', 'id_order_products')
+                                                    ->get();
+                                                    
+            $combinedResults = [];
+
+            foreach ($status as $item) {
+                $orderPurchaseId = $item->order_purchase_id;
+                                                    
+                $codeOrder = DB::table('order_purchases')->where('id', $orderPurchaseId)->value('code_order');
+        
+                if (!isset($combinedResults[$orderPurchaseId])) {
+                    $combinedResults[$orderPurchaseId] = [];
+                }
+                                                    
+                // Agrega el elemento actual al arreglo correspondiente al 'order_purchase_id'
+                $combinedResults[$orderPurchaseId][] = [
+                    'id' => $item->id,
+                    'code_order' => $codeOrder,
+                    'status' => $item->status,
+                    'order_purchase_id' => $item->order_purchase_id,
+                    'id_order_products' => $item->id_order_products
+                ];
+            }                           
+
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
-                'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list
+                'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
+                'status' => $combinedResults
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);
