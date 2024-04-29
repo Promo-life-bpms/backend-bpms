@@ -314,8 +314,14 @@ class SaleController extends Controller
                 if ($ordenCompra) {
                     $productosOrden = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
                     foreach ($productosOrden as $producto) {
+                        $status = 0; 
+                        $estado = DB::table('order_confirmations')->where('id_order_products', $producto->id)->first();
+                        if ($estado) {
+                            $status = $estado->status;
+                        }
                         $products[] = [
                             'id' => $producto->id,
+                            'status'  => $status,
                             'code_order' => $ordenCompra->code_order,
                             'provider_name' => $ordenCompra->provider_name,
                             'description' => $producto->description,
