@@ -317,9 +317,14 @@ class DepartmentSmallBox extends Seeder
                 'description' => 'Manager', // optional
             ],
             (object)[
-                'name' => 'caja chica',
+                'name' => 'caja_chica',
                 'display_name' => 'Caja chica', // optional
                 'description' => 'Caja chica', // optional
+            ],
+            (object)[
+                'name' => 'Adquisiciones',
+                'display_name' => 'Adquisiciones', // optional
+                'description' => 'Adquisiciones', // optional
             ],
             (object)[
                 'name' => 'equipo_administracion',
@@ -394,270 +399,559 @@ class DepartmentSmallBox extends Seeder
 
         ///////////////AQUÍ ME QUEDE FIN////////////////////////
         ///33///
-        /*$asigarroles = array(
+        $asigarroles = array(
+            ////////////ROLES DE USUARIOS ADMINISTRACIÓN
             (object)[
-                'role_id' => '33',
-                'user_id' => '55', // optional
+                'role_id' => 1,
+                'user_id' =>  57, // optional
                 'user_type' => 'App\Models\User', // optional
             ],
             (object)[
-                'role_id' => '33',
-                'user_id' => '56', // optional
+                'role_id' => 15,
+                'user_id' => 58, // optional
                 'user_type' => 'App\Models\User', // optional
             ],
             (object)[
-                'role_id' => '33',
-                'user_id' => '58', // optional
+                'role_id' => 16,
+                'user_id' => 59, // optional
                 'user_type' => 'App\Models\User', // optional
             ],
             (object)[
-                'role_id' => '33',
-                'user_id' => '59', // optional
+                'role_id' => 16,
+                'user_id' => 61, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '60', // optional
+                'role_id' => 16,
+                'user_id' => 62, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '61', // optional
+                'role_id' => 16,
+                'user_id' => 127, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '62', // optional
+                'role_id' => 14,
+                'user_id' => '160', // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '65', // optional
+                'role_id' => 16,
+                'user_id' => 184, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            ///////////////AUDITORÍA Y GESTIÓN DE CALIDAD
+            (object)[
+                'role_id' => 13,
+                'user_id' => 90, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '68', // optional
+                'role_id' => 17,
+                'user_id' => 102, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '72', // optional
+                'role_id' => 17,
+                'user_id' => 125, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '112', // optional
+                'role_id' => 17,
+                'user_id' => 157, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '114', // optional
+                'role_id' => 17,
+                'user_id' => 230, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '116', // optional
+                'role_id' => 17,
+                'user_id' => 231, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            //////////////COMPRAS NACIONALES
+            (object)[
+                'role_id' => 18,
+                'user_id' => 91, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '117', // optional
+                'role_id' => 18,
+                'user_id' => 95, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '118', // optional
-                'user_type' => 'App\Models\User', // optional
-            ],(object)[
-                'role_id' => '33',
-                'user_id' => '119', // optional
-                'user_type' => 'App\Models\User', // optional
-            ],(object)[
-                'role_id' => '33',
-                'user_id' => '120', // optional
+                'role_id' => 18,
+                'user_id' => 126, // optional
                 'user_type' => 'App\Models\User', // optional
             ],
             (object)[
-                'role_id' => '33',
-                'user_id' => '121', // optional
+                'role_id' => 18,
+                'user_id' => 136, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '123', // optional
+                'role_id' => 18,
+                'user_id' => 137, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '125', // optional
+                'role_id' => 18,
+                'user_id' => 228, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '126', // optional
+                'role_id' => 18,
+                'user_id' => 229, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '127', // optional
+                'role_id' => 18,
+                'user_id' => 239, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '128', // optional
+                'role_id' => 18,
+                'user_id' => 247, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '129', // optional
+                'role_id' => 18,
+                'user_id' => 256, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            ////////////////////DIRECCIÓN BH
+            (object)[
+                'role_id' => 1,
+                'user_id' => 51, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '132', // optional
+                'role_id' => 19,
+                'user_id' => 72, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '138', // optional
+                'role_id' => 19,
+                'user_id' => 233, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            /////////////////////DIRECCIÓN PL
+            (object)[
+                'role_id' => 1,
+                'user_id' => 54, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '139', // optional
+                'role_id' => 20,
+                'user_id' => 79, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            ////////////////IMPORTACIONES
+            (object)[
+                'role_id' => 13,
+                'user_id' => 63, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '140', // optional
+                'role_id' => 21,
+                'user_id' => 64, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '141', // optional
+                'role_id' => 21,
+                'user_id' => 121, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            /////////////////////LOGÍSITCA
+            (object)[
+                'role_id' => 22,
+                'user_id' => 96, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '157', // optional
+                'role_id' => 13,
+                'user_id' => 99, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '159', // optional
+                'role_id' => 22,
+                'user_id' => 105, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '170', // optional
+                'role_id' => 22,
+                'user_id' => 106, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '180', // optional
+                'role_id' => 22,
+                'user_id' => 107, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '181', // optional
+                'role_id' => 22,
+                'user_id' => 113, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '184', // optional
+                'role_id' => 22,
+                'user_id' => 115, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '188', // optional
+                'role_id' => 22,
+                'user_id' => 167, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            //////////////OPERACIONES
+            (object)[
+                'role_id' => 13,
+                'user_id' => 57, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '232', // optional
+                'role_id' => 13,
+                'user_id' => 90, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '234', // optional
+                'role_id' => 23,
+                'user_id' => 92, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '239', // optional
+                'role_id' => 23,
+                'user_id' => 93, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '240', // optional
+                'role_id' => 23,
+                'user_id' => 97, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '241', // optional
+                'role_id' => 23,
+                'user_id' => 98, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '242', // optional
+                'role_id' => 23,
+                'user_id' => 108, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '243', // optional
+                'role_id' => 23,
+                'user_id' => 109, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '244', // optional
+                'role_id' => 23,
+                'user_id' => 110, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '245', // optional
+                'role_id' => 23,
+                'user_id' => 111, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '246', // optional
+                'role_id' => 23,
+                'user_id' => 145, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '247', // optional
+                'role_id' => 23,
+                'user_id' => 148, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '248', // optional
+                'role_id' => 23,
+                'user_id' => 153, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '249', // optional
+                'role_id' => 23,
+                'user_id' => 156, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '250', // optional
+                'role_id' => 23,
+                'user_id' => 224, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '251', // optional
+                'role_id' => 23,
+                'user_id' => 242, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            /////////////////RECURSOS HUMANOS
+            (object)[
+                'role_id' => 13,
+                'user_id' => 55, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '252', // optional
+                'role_id' => 24,
+                'user_id' => 56, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '253', // optional
+                'role_id' => 24,
+                'user_id' => 112, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '254', // optional
+                'role_id' => 24,
+                'user_id' => 116, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '255', // optional
+                'role_id' => 24,
+                'user_id' => 117, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '256', // optional
+                'role_id' => 24,
+                'user_id' => 128, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '257', // optional
+                'role_id' => 24,
+                'user_id' => 159, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            ///////////TECNOLOGÍA E INNOVACIÓN
+            (object)[
+                'role_id' => 13,
+                'user_id' => 66, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '258', // optional
+                'role_id' => 25,
+                'user_id' => 138, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            (object)[
+                'role_id' => 25,
+                'user_id' => 141, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '259', // optional
+                'role_id' => 25,
+                'user_id' => 188, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '260', // optional
+                'role_id' => 25,
+                'user_id' => 244, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '261', // optional
+                'role_id' => 25,
+                'user_id' => 118, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '262', // optional
+                'role_id' => 25,
+                'user_id' => 68, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '263', // optional
+                'role_id' => 25,
+                'user_id' => 120, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '264', // optional
+                'role_id' => 25,
+                'user_id' => 123, // optional
                 'user_type' => 'App\Models\User', // optional
             ],(object)[
-                'role_id' => '33',
-                'user_id' => '265', // optional
+                'role_id' => 25,
+                'user_id' => 129, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 130, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 132, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 135, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 139, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 140, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 158, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 241, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 248, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 261, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 262, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 264, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 25,
+                'user_id' => 265, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            //////////////VENTAS BH
+            (object)[
+                'role_id' => 13,
+                'user_id' => 52, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 13,
+                'user_id' => 53, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 13,
+                'user_id' => 73, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 69, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 70, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 71, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 74, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 75, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 76, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 77, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 78, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 86, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 100, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 101, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 103, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 122, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 124, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 134, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 143, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 149, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 164, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 166, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 222, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 232, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 243, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 246, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 249, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 250, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 257, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 258, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 26,
+                'user_id' => 259, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            /////////////VENTAS PL
+            (object)[
+                'role_id' => 27,
+                'user_id' => 80, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 81, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 82, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 85, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],
+            (object)[
+                'role_id' => 27,
+                'user_id' => 88, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 89, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 131, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 150, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 151, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 152, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 223, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 240, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 251, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 252, // optional
+                'user_type' => 'App\Models\User', // optional
+            ],(object)[
+                'role_id' => 27,
+                'user_id' => 255, // optional
                 'user_type' => 'App\Models\User', // optional
             ],
         );
@@ -668,8 +962,8 @@ class DepartmentSmallBox extends Seeder
                 'user_type' => $asignarrol->user_type,
             ]);  
         }
-        
-        $managers = array(
+
+        /*$managers = array(
             (object)[
                 'id' => 1,
                 'id_department' => 1,
@@ -737,7 +1031,7 @@ class DepartmentSmallBox extends Seeder
                 'id_department' => $manager->id_department,
                 'id_user' => $manager->id_user,
             ]);  
-        }
+        }*/
 
         ////PROMO ES ID = 1
         ///BH ES ID = 2
@@ -747,45 +1041,535 @@ class DepartmentSmallBox extends Seeder
                 'id_user' => 57,
                 'id_department' => 1,
                 'id_company' => 2,
-                'id_area' => 39,
+                'id_area' => 1,
             ],
             (object)[
                 'id_user' => 58,
                 'id_department' => 1,
                 'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 61,
-                'id_department' => 1,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 62,
-                'id_department' => 1,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 184,
-                'id_department' => 1,
-                'id_company' => 2,
-                'id_area' => 39,
+                'id_area' => 2,
             ],
             (object)[
                 'id_user' => 59,
                 'id_department' => 1,
                 'id_company' => 2,
-                'id_area' => 39,
+                'id_area' => 2,
+            ],
+            (object)[
+                'id_user' => 61,
+                'id_department' => 1,
+                'id_company' => 2,
+                'id_area' => 2,
+            ],
+            (object)[
+                'id_user' => 62,
+                'id_department' => 1,
+                'id_company' => 1,
+                'id_area' => 2,
+            ],
+            (object)[
+                'id_user' => 127,
+                'id_department' => 1,
+                'id_company' => 2,
+                'id_area' => 2,
             ],
             (object)[
                 'id_user' => 160,
                 'id_department' => 1,
                 'id_company' => 2,
-                'id_area' => 39,
+                'id_area' => 1,
             ],
-            /////////////////////
+            (object)[
+                'id_user' => 184,
+                'id_department' => 1,
+                'id_company' => 2,
+                'id_area' => 2,
+            ],
+            ///// AUDITORÍA Y GESTIÓN DE CALIDAD ES ID = 3
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2
+            (object)[
+                'id_user' => 90,
+                'id_department' => 3,
+                'id_company' => 2,
+                'id_area' => 8,
+            ],
+            (object)[
+                'id_user' => 102,
+                'id_department' => 3,
+                'id_company' => 1,
+                'id_area' => 8,
+            ],
+            (object)[
+                'id_user' => 125,
+                'id_department' => 3,
+                'id_company' => 1,
+                'id_area' =>10 ,
+            ],
+            (object)[
+                'id_user' => 157,
+                'id_department' => 3,
+                'id_company' => 2,
+                'id_area' => 9,
+            ],
+            (object)[
+                'id_user' => 230,
+                'id_department' => 3,
+                'id_company' => 1,
+                'id_area' => 10,
+            ],
+            (object)[
+                'id_user' => 231,
+                'id_department' => 3,
+                'id_company' => 1,
+                'id_area' => 10,
+            ],
+            ////////////COMPRAS NACIONALES/////
+            (object)[
+                'id_user' => 91,
+                'id_department' => 12,
+                'id_company' => 5,
+                'id_area' => 33,
+            ],
+            (object)[
+                'id_user' => 95,
+                'id_department' => 12,
+                'id_company' => 5,
+                'id_area' => 33,
+            ],
+            (object)[
+                'id_user' => 126,
+                'id_department' => 12,
+                'id_company' => 5,
+                'id_area' => 33,
+            ],
+            (object)[
+                'id_user' => 136,
+                'id_department' => 12,
+                'id_company' => 5,
+                'id_area' => 33,
+            ],
+            (object)[
+                'id_user' => 137,
+                'id_department' => 12,
+                'id_company' => 5,
+                'id_area' => 33,
+            ],
+            (object)[
+                'id_user' => 228,
+                'id_department' => 12,
+                'id_company' => 5,
+                'id_area' => 33,
+            ],
+            (object)[
+                'id_user' => 229,
+                'id_department' => 12,
+                'id_company' => 5,
+                'id_area' => 33,
+            ],
+            (object)[
+                'id_user' => 239,
+                'id_department' => 12,
+                'id_company' => 5,
+                'id_area' => 33,
+            ],
+            (object)[
+                'id_user' => 247,
+                'id_department' => 12,
+                'id_company' => 5,
+                'id_area' => 33,
+            ],
+            (object)[
+                'id_user' => 256,
+                'id_department' => 12,
+                'id_company' => 5,
+                'id_area' => 33,
+            ],
+            //////////DIRECCIÓN BH
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2
+            (object)[
+                'id_user' => 51,
+                'id_department' => 4,
+                'id_company' => 2,
+                'id_area' => 11,
+            ],
+            (object)[
+                'id_user' => 72,
+                'id_department' => 4,
+                'id_company' => 2,
+                'id_area' => 11,
+            ],
+            (object)[
+                'id_user' => 233,
+                'id_department' => 4,
+                'id_company' => 2,
+                'id_area' => 12,
+            ],
+            /////DIRECCIÓN PL////
+            (object)[
+                'id_user' => 54,
+                'id_department' => 5,
+                'id_company' => 1,
+                'id_area' => 13,
+            ],
+            (object)[
+                'id_user' => 79,
+                'id_department' => 5,
+                'id_company' => 1,
+                'id_area' => 13,
+            ],
+            ///////IMPORTACIONES///////
+            (object)[
+                'id_user' => 63,
+                'id_department' => 6,
+                'id_company' => 5,
+                'id_area' => 15,
+            ],
+            (object)[
+                'id_user' => 64,
+                'id_department' => 6,
+                'id_company' => 5,
+                'id_area' => 16,
+            ],
+            (object)[
+                'id_user' => 121,
+                'id_department' => 6,
+                'id_company' => 5,
+                'id_area' => 15,
+            ],
+            //////////LOGISTICA/////
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2
+            (object)[
+                'id_user' => 96,
+                'id_department' => 11,
+                'id_company' => 1,
+                'id_area' => 32,
+            ],
+            (object)[
+                'id_user' => 99,
+                'id_department' => 11,
+                'id_company' => 2,
+                'id_area' => 31,
+            ],
+            (object)[
+                'id_user' => 105,
+                'id_department' => 11,
+                'id_company' => 2,
+                'id_area' => 32,
+            ],
+            (object)[
+                'id_user' => 106,
+                'id_department' => 11,
+                'id_company' => 2,
+                'id_area' => 32,
+            ],
+            (object)[
+                'id_user' => 107,
+                'id_department' => 11,
+                'id_company' => 2,
+                'id_area' => 32,
+            ],
+            (object)[
+                'id_user' => 113,
+                'id_department' => 11,
+                'id_company' => 5,
+                'id_area' => 32,
+            ],
+            (object)[
+                'id_user' => 115,
+                'id_department' => 11,
+                'id_company' => 2,
+                'id_area' => 32,
+            ],
+            (object)[
+                'id_user' => 167,
+                'id_department' => 11,
+                'id_company' => 1,
+                'id_area' => 32,
+            ],
+            /////////OPERACIONES//
+            (object)[
+                'id_user' => 57,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 3,
+            ],
+            (object)[
+                'id_user' => 90,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 3,
+            ],
+            (object)[
+                'id_user' => 92,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 4,
+            ],
+            (object)[
+                'id_user' => 93,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 4,
+            ],
+            (object)[
+                'id_user' => 97,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 7,
+            ],
+            (object)[
+                'id_user' => 98,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 5,
+            ],
+            (object)[
+                'id_user' => 108,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 5,
+            ],
+            (object)[
+                'id_user' => 109,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 5,
+            ],
+            (object)[
+                'id_user' => 110,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 5,
+            ],
+            (object)[
+                'id_user' => 111,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 5,
+            ],
+            (object)[
+                'id_user' => 145,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 5,
+            ],
+            (object)[
+                'id_user' => 148,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 6,
+            ],
+            (object)[
+                'id_user' => 153,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 5,
+            ],
+            (object)[
+                'id_user' => 156,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 5,
+            ],
+            (object)[
+                'id_user' => 224,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 4,
+            ],
+            (object)[
+                'id_user' => 242,
+                'id_department' => 2,
+                'id_company' => 5,
+                'id_area' => 5,
+            ],
+            //////////RECURSOS HUMANOS = 7
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2
+            (object)[
+                'id_user' => 55,
+                'id_department' => 7,
+                'id_company' => 2,
+                'id_area' => 17,
+            ],
+            (object)[
+                'id_user' => 56,
+                'id_department' => 7,
+                'id_company' => 2,
+                'id_area' => 18,
+            ],
+            (object)[
+                'id_user' => 112,
+                'id_department' => 7,
+                'id_company' => 1,
+                'id_area' => 18,
+            ],
+            (object)[
+                'id_user' => 116,
+                'id_department' => 7,
+                'id_company' => 2,
+                'id_area' => 18,
+            ],
+            (object)[
+                'id_user' => 117,
+                'id_department' => 7,
+                'id_company' => 2,
+                'id_area' => 18,
+            ],
+            (object)[
+                'id_user' => 128,
+                'id_department' => 7,
+                'id_company' => 2,
+                'id_area' => 18,
+            ],
+            (object)[
+                'id_user' => 159,
+                'id_department' => 7,
+                'id_company' => 2,
+                'id_area' => 18,
+            ],
+            //////////TECNOLOGÍA E INNOVACIÓN = 8
+            ///PROMO ES ID = 1
+            ///BH ES ID = 2
+            (object)[
+                'id_user' => 66,
+                'id_department' => 8,
+                'id_company' => 2,
+                'id_area' => 19,
+            ],
+            (object)[
+                'id_user' => 138,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 21,
+            ],
+            (object)[
+                'id_user' => 141,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 21,
+            ],
+            (object)[
+                'id_user' => 188,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 21,
+            ],
+            (object)[
+                'id_user' => 244,
+                'id_department' => 8,
+                'id_company' => 5,
+                'id_area' => 21,
+            ],
+            (object)[
+                'id_user' => 118,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 22,
+            ], 
+            (object)[
+                'id_user' => 68,
+                'id_department' => 8,
+                'id_company' => 2,
+                'id_area' => 20,
+            ],
+            (object)[
+                'id_user' => 120,
+                'id_department' => 8,
+                'id_company' => 5,
+                'id_area' => 20,
+            ],
+            (object)[
+                'id_user' => 123,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 20,
+            ],
+            (object)[
+                'id_user' => 129,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 20,
+            ],
+            (object)[
+                'id_user' => 130,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 20,
+            ],
+            (object)[
+                'id_user' => 132,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 20,
+            ],
+            (object)[
+                'id_user' => 135,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 20,
+            ],
+            (object)[
+                'id_user' => 139,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 20,
+            ],
+            (object)[
+                'id_user' => 140,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 20,
+            ],
+            (object)[
+                'id_user' => 158,
+                'id_department' => 8,
+                'id_company' => 1,
+                'id_area' => 20,
+            ], 
+            (object)[
+                'id_user' => 241,
+                'id_department' => 8,
+                'id_company' => 5,
+                'id_area' => 20,
+            ],  
+            (object)[
+                'id_user' => 248,
+                'id_department' => 8,
+                'id_company' => 5,
+                'id_area' => 20,
+            ],   
+            (object)[
+                'id_user' => 261,
+                'id_department' => 8,
+                'id_company' => 5,
+                'id_area' => 20,
+            ],  
+            (object)[
+                'id_user' => 262,
+                'id_department' => 8,
+                'id_company' => 5,
+                'id_area' => 20,
+            ],   
+            (object)[
+                'id_user' => 264,
+                'id_department' => 8,
+                'id_company' => 5,
+                'id_area' => 20,
+            ],     
+            (object)[
+                'id_user' => 265,
+                'id_department' => 8,
+                'id_company' => 5,
+                'id_area' => 20,
+            ], 
+            /////////////ME QUEDE EN TI
+            ////
+            ////
+            /////
 
             ////////ALMACÉN = 2
             ///PROMO ES ID = 1
@@ -846,51 +1630,6 @@ class DepartmentSmallBox extends Seeder
             ],
             (object)[
                 'id_user' => 153,
-                'id_department' => 2,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-             //////////LOGISTICA = 2
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 105,
-                'id_department' => 2,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 106,
-                'id_department' => 2,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 167,
-                'id_department' => 2,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 99,
-                'id_department' => 2,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 96,
-                'id_department' => 2,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 107,
-                'id_department' => 2,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 115,
                 'id_department' => 2,
                 'id_company' => 2,
                 'id_area' => 39,
@@ -988,42 +1727,6 @@ class DepartmentSmallBox extends Seeder
                 'id_company' => 1,
                 'id_area' => 39,
             ],
-            ///// AUDITORÍA Y GESTIÓN DE CALIDAD ES ID = 3
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 90,
-                'id_department' => 3,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 157,
-                'id_department' => 3,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 102,
-                'id_department' => 3,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            //////////DIRECCIÓN = 4
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 233,
-                'id_department' => 4,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 79,
-                'id_department' => 4,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
             //////////IMPORTACIONES = 6
             ///PROMO ES ID = 1
             ///BH ES ID = 2
@@ -1037,151 +1740,6 @@ class DepartmentSmallBox extends Seeder
                 'id_user' => 63,
                 'id_department' => 6,
                 'id_company' => 2,
-                'id_area' => 39,
-            ],
-            //////////RECURSOS HUMANOS = 7
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 55,
-                'id_department' => 7,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 56,
-                'id_department' => 7,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 112,
-                'id_department' => 7,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 116,
-                'id_department' => 7,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 117,
-                'id_department' => 7,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 128,
-                'id_department' => 7,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            //////////MANTENIMIENTO = 7
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 159,
-                'id_department' => 7,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            //////////TECNOLOGÍA E INNOVACIÓN = 8
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 139,
-                'id_department' => 8,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 68,
-                'id_department' => 8,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 140,
-                'id_department' => 8,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 135,
-                'id_department' => 8,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 129,
-                'id_department' => 8,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 130,
-                'id_department' => 8,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 132,
-                'id_department' => 8,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 158,
-                'id_department' => 8,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 66,
-                'id_department' => 8,
-                'id_company' => 2,
-                'id_area' => 39,
-            ],
-            //////////SISTEMAS = 8
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 118,
-                'id_department' => 8,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            //MARKETING = 8
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2 
-            ////PROMO ZALE ES ID = 3
-            (object)[
-                'id_user' => 188,
-                'id_department' => 8,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 141,
-                'id_department' => 8,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            (object)[
-                'id_user' => 138,
-                'id_department' => 8,
-                'id_company' => 1,
-                'id_area' => 39,
-            ],
-            //////////DISEÑO = 8
-            ///PROMO ES ID = 1
-            ///BH ES ID = 2
-            (object)[
-                'id_user' => 123,
-                'id_department' => 8,
-                'id_company' => 1,
                 'id_area' => 39,
             ],
             //////////VENTAS BH = 9
@@ -1418,7 +1976,7 @@ class DepartmentSmallBox extends Seeder
                 'id_company' => $user->id_company,
                 'id_area' => $user->id_area
             ]);  
-        }*/
+        }
 
     }
 }
