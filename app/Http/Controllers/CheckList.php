@@ -26,11 +26,7 @@ class CheckList extends Controller
 
         $check = ModelsCheckList::where('code_sale', $sale_id)->first();
 
-        if (!$check || $check->status_checklist !== 'Creado') {
-            return response()->json([
-                "msg" => 'No existe una check-list asociada a esta venta o no está en el estado adecuado'
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
+
 
         $check_lists = [];
 
