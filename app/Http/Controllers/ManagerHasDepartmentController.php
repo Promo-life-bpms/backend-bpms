@@ -32,12 +32,22 @@ class ManagerHasDepartmentController extends Controller
             'id_user' => 'required',
             'id_department' => 'required',
         ]);
-        
-        ManagerHasDepartment::create([
-            'id_user' => $request->id_user,
-            'id_department' => $request->id_department
-        ]);
-        
+
+        $restricción = DB::table('manager_has_departments')->where('id_user', $request->id_user)->first();
+        $idUser = $restricción->id_user;
+        $idDepartment =$restricción->id_department;
+
+        if(($request->id_user == $idUser) && ($request->id_department == $idDepartment)){
+
+            return response()->json(['message' => 'Este registro ya existe', 'status' => 409], 409);
+
+        }else{
+            ManagerHasDepartment::create([
+                'id_user' => $request->id_user,
+                'id_department' => $request->id_department
+            ]);
+
+        }
         return response()->json(['message' => 'Agregaste un nuevo manager', 'status' => 200], 200);
     }
 
