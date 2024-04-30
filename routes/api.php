@@ -285,6 +285,6 @@ Route::group(['middleware' => 'auth'], function () {
     ///////////////////APIS PARA MANAGERS//////////////////////////////
     Route::get('managers/department', [ManagerHasDepartmentController::class, 'ViewManager']);
     Route::post('create/manager/department',[ManagerHasDepartmentController::class,'CrearManager']);
-    Route::post('update/manager/department',[ManagerHasDepartmentController::class,'UpdateManager']);
+    Route::post('delete/manager/department',[ManagerHasDepartmentController::class,'DeleteManager']);
     
 });
