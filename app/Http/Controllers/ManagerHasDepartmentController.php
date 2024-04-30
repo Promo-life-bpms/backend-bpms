@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ExManagerDepartment;
 use App\Models\ManagerHasDepartment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -40,24 +41,27 @@ class ManagerHasDepartmentController extends Controller
         return response()->json(['message' => 'Agregaste un nuevo manager', 'status' => 200], 200);
     }
 
-    public function UpdateManager(Request $request){
+    public function DeleteManager(Request $request)
+    {
+        $user = auth()->user();
+
         $this->validate($request,[
-            'id_manager' => 'required',
-            'id_user' => 'required',
-            'id_department' => 'required',
+            'id' => 'required',
         ]);
 
-        $editManager = DB::table('manager_has_departments')->where('id', $request->id_manager)->update([
-            'id_user'=> $request->id_user,
-            'id_department'=> $request->id_department,
+        $exManager = DB::table('manager_has_departments')->where('id', $request->id)->first();
+
+        ExManagerDepartment::create([
+            'id_manager_has_department' => $request->id,
+            'user_who_deleted' => $user->id,
+            'ex_manager' => $exManager->id_user,
+            'id_department' => $exManager->id_department,
         ]);
 
-        if($editManager){
-            return response()->json(['message' => 'Manager editado correctamente', 'status' => 200], 200);
-        }else{
+        DB::table('manager_has_departments')->where('id', $request->id)->delete();
 
-            return response()->json(['message' => 'No se pudo editar el manager', 'status' => 404], 404);
-        }
+        return response()->json(['message' => 'Registro eliminado correctamente', 'status'=> 200], 200);
+
     }
 
 }
