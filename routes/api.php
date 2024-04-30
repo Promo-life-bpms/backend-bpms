@@ -138,7 +138,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Leer pedidos por agendar
     Route::get('pedidos-por-agendar', [DeliveryRouteController::class, 'create']);
     // Guardar la ruta de entrega
-    Route::post('rutas-de-entrega', [DeliveryRouteController::class, 'store']);
+    Route::post('rutas-de-entrega/{id}', [DeliveryRouteController::class, 'store']);
     //ver una ruta de entrega
     Route::get('rutas-de-entrega/show/{id}', [DeliveryRouteController::class, 'show']);
 

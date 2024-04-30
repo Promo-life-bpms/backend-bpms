@@ -16,13 +16,13 @@ class CreateDeliveryRoutesTable extends Migration
     {
         Schema::create('delivery_routes', function (Blueprint $table) {
             $table->id();
-            $table->string('code_route');
-            $table->boolean('is_active')->default(1)->nullable();
-            $table->date('date_of_delivery');
-            $table->string('status');
-            $table->string('elaborated')->nullable();
-            $table->string('revised')->nullable();
-            $table->string('reason')->nullable();
+            $table->foreignId('code_sale')->reference('code_sale')->on('sales');
+            $table->foreignId('code_order')->reference('code_order')->on('code_order');
+            $table->date('product_id');
+            $table->string('type_of_destiny');
+            $table->string('date_of_delivery');
+            $table->string('status_delivery');
+            $table->string('shipping_type');
             $table->timestamps();
         });
     }

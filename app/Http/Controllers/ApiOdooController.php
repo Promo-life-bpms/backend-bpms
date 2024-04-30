@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ApiOdooController extends Controller
 {
@@ -26,7 +27,7 @@ class ApiOdooController extends Controller
     {
         try {
             if ($request->header('token') == config('key_odoo.key_to_odoo')) {
-                /* $validator = Validator::make($request->all(), [
+                $validator = Validator::make($request->all(), [
                     'sale' => 'bail|required|array',
                     'sale.code_sale' => 'required',
                     'sale.name_sale' => 'required',
@@ -72,11 +73,11 @@ class ApiOdooController extends Controller
                     'sale.checklist' => 'bail|required|array',
                     'sale.total' => 'required|numeric',
                     'sale.status' => 'required',
-                ]); */
+                ]);
 
-                /* if ($validator->fails()) {
+                if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
-                } */
+                }
                 // Obtener el pedido
                 $requestData = (object) $request->sale;
                 // Obtener datos principales
@@ -133,7 +134,7 @@ class ApiOdooController extends Controller
                         } else {
                             $sale->moreInformation()->create($dataAdditionalInfo);
                         }
-                        $conceptos = ['Order', 'Virtual', 'Logo', 'AI', 'Cotización proveedor', 'Distribución', 'Dirección de entrega', 'Contacto', 'Datos de facturación'];
+                        $conceptos = ['OC', 'Virtual', 'Logo', 'AI', 'Cotización proveedor', 'Distribución', 'Dirección de entrega', 'Contacto', 'Datos de facturación'];
                         foreach ($conceptos as $concepto) {
                             # code...
                             $check = CheckList::create([

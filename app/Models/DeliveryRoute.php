@@ -12,22 +12,19 @@ class DeliveryRoute extends Model
 
     // Datos de la tabla de ruta de entrega
     protected $fillable = [
-        'code_route',
-        'is_active',
+        'code_sale',
+        'code_order',
+        'product_id',
+        'type_of_destiny',
         'date_of_delivery',
-        // 'user_chofer_id',
-        // 'type_of_chofer',
-        // 'type_of_product',
-        'status',
-        'elaborated',
-        'revised',
-        'reason'
+        'status_delivery',
+        'shipping_type',
     ];
 
-    public function codeOrderDeliveryRoute()
+    /*  public function codeOrderDeliveryRoute()
     {
         return $this->hasMany(CodeOrderDeliveryRoute::class, "delivery_route_id");
-    }
+    } */
 
     public function remissions()
     {
