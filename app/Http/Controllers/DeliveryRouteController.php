@@ -72,14 +72,14 @@ class DeliveryRouteController extends Controller
     {
         //pedidos por agendar
         //traer todos los usuarios que son choferes
-       /*  $rolChofer = Role::find(4);
+        /*  $rolChofer = Role::find(4);
         $choferes = [];
         foreach ($rolChofer->users as $chofer) {
             array_push($choferes, ['id' => $chofer->id, 'name' => $chofer->name]);
         }
  */
         // traer los productos de las ordenes de compra o trabajo que no han sido entregados o cancelados
-       /*  $per_page = 10;
+        /*  $per_page = 10;
 
         if ($request->per_page) {
             $per_page = $request->per_page;
@@ -110,14 +110,14 @@ class DeliveryRouteController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $sale)
     {
         //validar que la informacion este correcta si no no se puede registrar
         // utilizar validator
 
         $user =  auth()->user();
 
-        foreach ($user->whatRoles as $rol) {
+        /*   foreach ($user->whatRoles as $rol) {
             switch ($rol->name) {
 
                 case ("logistica-y-mesa-de-control" == $rol->name):
@@ -139,24 +139,17 @@ class DeliveryRouteController extends Controller
                     );
                     break;
             }
-        }
+        } */
         //switch con casos de true para logistica, administrador y compras
 
 
         $validation = Validator::make($request->all(), [
-            'date_of_delivery' => 'required',
-            'code_orders' => 'required|array',
-            'code_orders.*.code_sale' => 'required|exists:sales,code_sale',
-   /*          'code_orders.*.type_of_origin' => 'required', */
-            'code_orders.*.type_of_destiny' => 'required',
-            'code_orders.*.orders' => 'required|array',
-            'code_orders.*.orders.*.code_order' => 'required|exists:order_purchases,code_order',
-            'code_orders.*.orders.*.products' => 'required|array',
-            'code_orders.*.orders.*.products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
-            'code_orders.*.orders.*.products.*.amount' => 'required',
-            'code_orders.*.orders.*.products.*.action' => 'required',
-            'code_orders.*.orders.*.products.*.provider' => 'required',
-            'code_orders.*.orders.*.products.*.destiny_address' => 'required',
+            'delivery_route' => 'required|array',
+            'delivery_routes.*.product_id' => 'required',
+            'delivery_routes.*.type_of_destiny' => 'required',
+            'delivery_routes.*.date_of_delivery' => 'required',
+            'delivery_routes.*.status_delivery' => 'required',
+            'delivery_routes.*.shipping_type' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -201,23 +194,35 @@ class DeliveryRouteController extends Controller
         }
         // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
         //codigo de ruta
-        $maxINSP = DeliveryRoute::max('code_route');
+        /*  $maxINSP = DeliveryRoute::max('code_route');
         $idInsp = null;
         if (!$maxINSP) {
             $idInsp = 1;
         } else {
             $idInsp = (int) explode('-', $maxINSP)[1];
             $idInsp++;
+        } */
+        $sale = Sale::where('code_sale', $sale)->first();
+        $order = OrderPurchase::where('code_sale', $sale->code_sale)->first();
+        if (!$order) {
+            'Esa orden no existe o no esta en ese pedido';
+        }
+        $routes = [];
+        foreach ($request['delivery_route'] as $deliveryRouteData) {
+
+            $ruta = DeliveryRoute::create([
+                'code_sale' => $sale->code_sale,
+                'code_order' => $order->code_order,
+                'product_id' => $deliveryRouteData['product_id'],
+                'type_of_destiny' => $deliveryRouteData['type_of_destiny'],
+                'date_of_delivery' => $deliveryRouteData['date_of_delivery'],
+                'status_delivery' => $deliveryRouteData['status_delivery'],
+                'shipping_type' => $deliveryRouteData['shipping_type']
+            ]);
+            $routes[] = $ruta;
         }
 
-        $ruta = DeliveryRoute::create([
-            'code_route' => "RUT-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
-            'date_of_delivery' => $request->date_of_delivery,
-            'status' => 'Pendiente',
-            'is_active' => 1,
-        ]);
-
-        //crear los productos de esa ruta de entrega
+        /* //crear los productos de esa ruta de entrega
         $sales_order = [];
         foreach ($request->code_orders as $codeOrder) {
             $codeOrder = (object)$codeOrder;
@@ -290,12 +295,11 @@ class DeliveryRouteController extends Controller
             $sales_order[] = [
                 'order' => $codeOrder,
             ];
-        }
+        } */
         return response()->json([
             'msg' => 'Ruta Creada Existosamente',
             'data' => [
-                "ruta" =>  $ruta,
-                "pedidos" => $sales_order,
+                "ruta" => $routes,
             ]
         ], Response::HTTP_CREATED);
     }
@@ -352,10 +356,11 @@ class DeliveryRouteController extends Controller
 
             ];
 
-            $codeOrder->update($dataSale);
+            $codeOrder->save($dataSale);
         }
         return response()->json(['msg'  => 'Actualizacion completa.'], response::HTTP_ACCEPTED);
     }
+
     /**
      * Display the specified resource.
      *
@@ -408,150 +413,18 @@ class DeliveryRouteController extends Controller
         return response()->download($filename)->deleteFileAfterSend();
     }
 
-    public function show($id)
+    public function show($product_id)
     {
 
         // Corresponde con la ruta  rutas-de-entrega
         // Buscamos un study por el ID.
-        $ruta = DeliveryRoute::where('code_route', $id)->first();
-
+        $ruta = DeliveryRoute::where('product_id', $product_id)->orderBy('created_at', 'desc')->get();
         // Chequeaos si encontró o no la ruta
         if (!$ruta) {
             // Se devuelve un array errors con los errores detectados y código 404
-            return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
-        }
-        // $ruta->user_chofer_name = $ruta->user->name;
-        // unset($ruta->user);
-        $isChofer =  auth()->user()->whatRoles()->where('id', 4)->first();
-
-        // Buscar los productos de esta ruta
-        $products = ProductDeliveryRoute::join('code_order_delivery_routes', 'code_order_delivery_routes.id', 'product_delivery_routes.code_order_route_id')
-            ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
-            ->select('product_delivery_routes.*')
-            ->get();
-        // Obtener las ordenes de compra de estos productos
-        $orders = [];
-        foreach ($products as $product) {
-            $order = $product->codeOrderRoute->orderPurchase;
-            // revisar si la orden ya esta en el array
-            $orderExist = false;
-            foreach ($orders as $orderInArray) {
-                if ($orderInArray->code_order == $order->code_order) {
-                    $orderExist = true;
-                    break;
-                }
-            }
-            if (!$orderExist) {
-                array_push($orders, $order);
-            }
+            return response()->json(['msg'  => 'No existe una ruta de entrega.'], response::HTTP_NOT_FOUND); //404
         }
 
-        // Obtener los productos de cada orden de compra
-        $dataOrders = [];
-        foreach ($orders as $order) {
-            $productsInThisOrder = [];
-            foreach ($products as $product) {
-                $orderPurchase = $product->codeOrderRoute->orderPurchase;
-                if ($orderPurchase->code_order == $order->code_order) {
-                    $infoProduct = $product->codeOrderRoute->orderPurchase->products()->where('odoo_product_id', $product->odoo_product_id)->first()->toArray();
-                    $product = $product->toArray();
-                    unset($product['code_order_route']);
-                    $product['id'] = $infoProduct['id'];
-                    $productsInThisOrder[] = array_merge($product, $infoProduct);
-                }
-            }
-            $data = $order->toArray();
-            $data['products'] = $productsInThisOrder;
-            array_push($dataOrders, $data);
-        }
-
-        // Obtener los pedidos de cada orden de compra
-        $sales = [];
-        foreach ($dataOrders as $order) {
-            $sale_ped = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
-                ->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
-                ->where('sales.code_sale', $order['code_sale'])
-                ->where('code_order_delivery_routes.delivery_route_id', $ruta->id)
-                ->when($isChofer, function ($query) {
-                    $query->where("code_order_delivery_routes.user_chofer_id", auth()->user()->id);
-                })->select(
-                    'sales.*',
-                    'code_order_delivery_routes.type_of_origin',
-                    'code_order_delivery_routes.type_of_destiny',
-                    'code_order_delivery_routes.user_chofer_id',
-                    'code_order_delivery_routes.type_of_product',
-                    'code_order_delivery_routes.type_of_chofer',
-                    'code_order_delivery_routes.parcel_name',
-                    'code_order_delivery_routes.status',
-                    'additional_sale_information.client_name',
-                    'additional_sale_information.client_contact',
-                    'additional_sale_information.warehouse_company',
-                    'additional_sale_information.planned_date',
-                    'additional_sale_information.company',
-                )
-                ->get();
-            // No se encontró el pedido y se continua con la siguiente orden.
-            foreach ($sale_ped as $sale) {
-                # code...
-
-                if (!$sale) {
-                    continue;
-                }
-
-                if ($sale->user_chofer_id) {
-
-                    $sale->chofer_name = User::find($sale->user_chofer_id)->name;
-                } else {
-                    $sale->chofer_name = "Sin Chofer Asignado";
-                }
-
-
-                $sale->lastStatus->slug = $sale->lastStatus->status->slug;
-                $sale->lastStatus->last_status = $sale->lastStatus->status->status;
-                unset($sale->lastStatus->status);
-                unset($sale->lastStatus->id);
-                unset($sale->lastStatus->sale_id);
-                unset($sale->lastStatus->status_id);
-                unset($sale->lastStatus->updated_at);
-                $remission =  $sale->remissions()->where('remisiones.delivery_route_id', $ruta->id)->first();
-                if ($remission) {
-                    $sale->remission_id = $remission->code_remission;
-                } else {
-                    $sale->remission_id = null;
-                }
-                unset($sale->ordersDeliveryRoute);
-            }
-            // revisar si el pedido ya esta en el array
-            $saleExist = false;
-            foreach ($sales as $saleInArray) {
-                if ($saleInArray->code_sale == $sale->code_sale) {
-                    $saleExist = true;
-                    break;
-                }
-            }
-            if (!$saleExist) {
-                array_push($sales, $sale);
-            }
-        }
-
-        $dataSales = [];
-        foreach ($sales as $sale) {
-            $ordersInThisSale = [];
-            foreach ($dataOrders as $order) {
-
-                if ($order['code_sale'] == $sale->code_sale) {
-                    $ordersInThisSale[] = $order;
-                }
-            }
-
-            $data = $sale->toArray();
-            unset($data['ordersDeliveryRoute']);
-            $data['details_orders'] = $ordersInThisSale;
-            array_push($dataSales, $data);
-        }
-
-        $ruta->pedidos = $dataSales;
-        // Devolvemos la información encontrada.
 
         return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['ruta' => $ruta]], response::HTTP_OK);
     }
