@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Sale;
+use App\Models\SaleStatusChange;
 use App\Models\StatusOT;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -415,12 +416,48 @@ class SaleController extends Controller
                     'order_purchase_id' => $item->order_purchase_id,
                     'id_order_products' => $item->id_order_products
                 ];
-            }                           
+            }  
+            
+            
+            ///////////////STATUS 2////////////
+            $NumOrders = [];
+            foreach ($ordenes as $Order){
+                $idOrder = $Order->id;
+                $productos_totales = DB::table('order_purchase_products')->where('order_purchase_id',$idOrder)->count();
+                $NumOrders[] = $productos_totales;   
+            }
+            
+            $OrdersFinales = array_sum($NumOrders);
+            
+            $registros = [];
+            foreach ($ordenes as $order){
+                $id = $order->id;
+                $ya = DB::table('order_confirmations')->where('order_purchase_id', $id)->count();
+                $registros[] = $ya;
+            }
+            $ConfirmationOrders = array_sum($registros);
+            $statusOrders = '';
+            if($OrdersFinales == $ConfirmationOrders)
+            {
+                $registros = DB::table('sale_status_changes')->where('sale_id',$id)->get();
+                if(!$registros){
+                    SaleStatusChange::create([
+                        'sale_id' => $id,
+                        'status_id' => 15,
+                    ]);
+                    //1 = 'Está completo el paso dos'
+                    $statusOrders = 1;
+                }
+                $statusOrders = 1;           
+            }else{
+                // 0 = 'Aún no esta completo'
+                $statusOrders = 0;
+            }
 
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
-                'status' => $combinedResults
+                'status' => $combinedResults, 'status_two' => $statusOrders,
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);

@@ -93,11 +93,11 @@ class AuthController extends Controller
         $idComapny = $UserDerails->id_company;
         $idArea = $UserDerails->id_area;
         $UserRol = DB::table('role_user')->where('user_id', $user->id)->exists();
-        if($idDepartment == 12){
+        if($idDepartment == 13){
             return response()->json(['message' => 'Aún no tienes asignado un departamento. Acercate con el administrador del sistema en el departamento TI.', 'status'  => 400], 400);
         }elseif($idComapny == 5){
             return response()->json(['message' => 'Aún no tienes asignada una compañia. Acercate con el administrador del sistema en el departamento TI.', 'status'  => 400], 400);
-        }elseif($idArea == 39){
+        }elseif($idArea == 34){
             return response()->json(['message' => 'Aún no tienes asignada una área. Acercate con el administrador del sistema en el departamento TI.', 'status'  => 400], 400);
         }elseif (!$UserRol) {
             return response()->json(['message' => 'Aún no tienes asignado un rol. Acercate con el administrador del sistema en el departamento TI.', 'status'  => 400], 400);

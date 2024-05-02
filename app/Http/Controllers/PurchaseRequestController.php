@@ -235,6 +235,7 @@ class PurchaseRequestController extends Controller
         //dd($department_ids);
 
         $rol = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
+        $Adquisiciones = DB::table('roles')->where('id', 15)->value('id');
         $rolcajachi = DB::table('roles')->where('id', 14)->value('id');
         $administrador = DB::table('roles')->where('id', 1)->value('id');
         // Verificar si el usuario autenticado es gerente de algún departamento
@@ -242,7 +243,7 @@ class PurchaseRequestController extends Controller
             $id = DB::table('purchase_requests')->where('id', $page)->value('user_id');
             if($id == $user->id){
             $spent = PurchaseRequest::where('id',$page)->get()->last();
-            }elseif($rol == $rolcajachi){
+            }elseif($rol == $rolcajachi || $rol == $Adquisiciones){
                 $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
                 if(trim($status) != "rechazada" && trim($status) != "en proceso"){
                     $spent = PurchaseRequest::where('id', $page)->get()->last();
@@ -259,10 +260,9 @@ class PurchaseRequestController extends Controller
             $idDepartment = DB::table('purchase_requests')->where('id', $page)->value('department_id');
             $DepartmentManager = DB::table('manager_has_departments')->where('id_user', $user->id)->pluck('id_department')->toArray();
             $managerAdmin = DB::table('manager_has_departments')->where('id_user', $user->id)->value('id_department');
-            $rolcajachi = DB::table('roles')->where('id', 14)->value('id');
             if (in_array($idDepartment, $DepartmentManager)) {
                 $spent = PurchaseRequest::where('id', $page)->get()->last();
-            } elseif(($managerAdmin == 1) && $rolcajachi) {
+            } elseif(($managerAdmin == 1) && $rolcajachi && $Adquisiciones) {
                 $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
                 if(trim($status) != "rechazada" && trim($status) != "en proceso"){
                     $spent = PurchaseRequest::where('id', $page)->get()->last();
@@ -690,8 +690,9 @@ class PurchaseRequestController extends Controller
 
         $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
         $rolcajachi = DB::table('roles')->where('id', 14)->value('id');
+        $roladquicision = DB::table('roles')->where('id', 15)->value('id');
         
-        if ($rolcajachica == $rolcajachi) {
+        if ($rolcajachica == $rolcajachi || $rolcajachica == $roladquicision) {
             $method = DB::table('purchase_requests')->where('id', $request->id_purchase)->select('payment_method_id')->first();
 
         if ($method->payment_method_id == 1) {
@@ -1334,8 +1335,9 @@ class PurchaseRequestController extends Controller
 
         $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
         $rolcajachi = DB::table('roles')->where('id', 14)->value('id');
+        $roladquicision = DB::table('roles')->where('id', 15)->value('id');
         
-        if ($rolcajachica == $rolcajachi) {
+        if ($rolcajachica == $rolcajachi || $rolcajachica == $roladquicision) {
             ///VERIFICAMOS SI EL METODO DE PAGO QUE SE USUARA ES EFECTIVO///
             if($request->payment_method_id == 1){
                 $pago = DB::table('purchase_requests')->where('id', $request->id)->select('total')->first();
