@@ -145,11 +145,12 @@ class DeliveryRouteController extends Controller
 
         $validation = Validator::make($request->all(), [
             'delivery_route' => 'required|array',
-            'delivery_routes.*.product_id' => 'required',
-            'delivery_routes.*.type_of_destiny' => 'required',
-            'delivery_routes.*.date_of_delivery' => 'required',
-            'delivery_routes.*.status_delivery' => 'required',
-            'delivery_routes.*.shipping_type' => 'required',
+            'delivery_route.*.code_order' => 'required',
+            'delivery_route.*.product_id' => 'required',
+            'delivery_route.*.type_of_destiny' => 'required',
+            'delivery_route.*.date_of_delivery' => 'required',
+            'delivery_route.*.status_delivery' => 'required',
+            'delivery_route.*.shipping_type' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -203,16 +204,12 @@ class DeliveryRouteController extends Controller
             $idInsp++;
         } */
         $sale = Sale::where('code_sale', $sale)->first();
-        $order = OrderPurchase::where('code_sale', $sale->code_sale)->first();
-        if (!$order) {
-            'Esa orden no existe o no esta en ese pedido';
-        }
         $routes = [];
         foreach ($request['delivery_route'] as $deliveryRouteData) {
 
             $ruta = DeliveryRoute::create([
                 'code_sale' => $sale->code_sale,
-                'code_order' => $order->code_order,
+                'code_order' => $deliveryRouteData['code_order'],
                 'product_id' => $deliveryRouteData['product_id'],
                 'type_of_destiny' => $deliveryRouteData['type_of_destiny'],
                 'date_of_delivery' => $deliveryRouteData['date_of_delivery'],
