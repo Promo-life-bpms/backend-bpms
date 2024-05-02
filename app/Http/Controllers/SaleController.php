@@ -268,21 +268,30 @@ class SaleController extends Controller
             $ordenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
                 $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
             })->get();
-
+            
             $orders = [];
             foreach ($ordenes as $orden) {
-                $product = DB::table('order_purchase_products')->where('order_purchase_id',$orden->id)->first();
+                $product = DB::table('order_purchase_products')->where('order_purchase_id', $orden->id)->first();
                 $idOrden = $product->order_purchase_id;
                 $registros = DB::table('order_confirmations')->where('order_purchase_id', $idOrden)->get();
+    
+                // Obtener la última fecha de creación de los registros de confirmación
+                $ultima_creacion = null;
+                foreach ($registros as $registro) {
+                    if ($registro->created_at > $ultima_creacion) {
+                        $ultima_creacion = $registro->created_at;
+                    }
+                }
+                
                 $productos_confirmados = count($registros);
-                $productos_totales = DB::table('order_purchase_products')->where('order_purchase_id',$idOrden)->count();
+                $productos_totales = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->count();
                 $estado_confirmacion = ''; 
                 if ($registros) {
                     if ($productos_confirmados == 0) {
                         $estado_confirmacion = 'Sin confirmar'; 
-                    }elseif ($productos_confirmados == $productos_totales) {
+                    } elseif ($productos_confirmados == $productos_totales) {
                         $estado_confirmacion = 'Confirmado';
-                    }elseif ($productos_confirmados < $productos_totales){
+                    } elseif ($productos_confirmados < $productos_totales) {
                         $estado_confirmacion = 'Parcial';   
                     }
                 }
@@ -298,11 +307,13 @@ class SaleController extends Controller
                     'status_bpm' => $orden->status_bpm,
                     'supplier_representative' => $orden->supplier_representative,
                     'Confirmation' => $estado_confirmacion,
+                    'last_confirmation_created_at' => $ultima_creacion, // Aquí agregamos la última fecha de creación
                     'created_at' => $orden->created_at,
                     'updated_at' => $orden->updated_at,
                 ];
                 $orders[] = $Orden;
             }
+
             /////////////PRODUCTOS/////////////////
             $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
                 $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
@@ -322,7 +333,7 @@ class SaleController extends Controller
                         }
                         $products[] = [
                             'id' => $producto->id,
-                            'status'  => $status,
+                            'status'  => $status, 
                             'code_order' => $ordenCompra->code_order,
                             'provider_name' => $ordenCompra->provider_name,
                             'description' => $producto->description,
@@ -431,27 +442,38 @@ class SaleController extends Controller
             
             $registros = [];
             foreach ($ordenes as $order){
-                $id = $order->id;
-                $ya = DB::table('order_confirmations')->where('order_purchase_id', $id)->count();
+                $idPurchase = $order->id;
+                $ya = DB::table('order_confirmations')->where('order_purchase_id', $idPurchase)->count();
                 $registros[] = $ya;
             }
             $ConfirmationOrders = array_sum($registros);
             $statusOrders = '';
-            if($OrdersFinales == $ConfirmationOrders)
+            $registros = DB::table('sale_status_changes')->where('sale_id',$idSale)->first();
+            $idSaleStatusChange = $registros->id;
+            $status = $registros->status;
+            if($OrdersFinales != $ConfirmationOrders)
             {
-                $registros = DB::table('sale_status_changes')->where('sale_id',$id)->get();
                 if(!$registros){
                     SaleStatusChange::create([
                         'sale_id' => $id,
                         'status_id' => 15,
+                        'status' => 0,
+                    ]);
+                    $statusOrders = 0;
+                }
+               
+            }elseif ($OrdersFinales == $ConfirmationOrders) {
+                if($registros){
+                    DB::table('sale_status_changes')->where('id',$idSaleStatusChange)->update([
+                        'sale_id' => $id,
+                        'status_id' => 15,
+                        'status' => 1,
                     ]);
                     //1 = 'Está completo el paso dos'
                     $statusOrders = 1;
+                }elseif($status == 1){
+                    $statusOrders = 1;
                 }
-                $statusOrders = 1;           
-            }else{
-                // 0 = 'Aún no esta completo'
-                $statusOrders = 0;
             }
 
             return response()->json([

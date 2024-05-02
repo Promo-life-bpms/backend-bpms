@@ -223,10 +223,6 @@ class DepartmentSmallBox extends Seeder
                 'name_area' => 'Compras nacionales',
                 'id_department' => 12, // optional
             ],
-            (object)[
-                'name_area' => 'Sin definir',
-                'id_department' => 13, // optional
-            ],
         );
 
         foreach ($areas as $area){

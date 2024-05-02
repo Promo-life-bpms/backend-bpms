@@ -12,6 +12,7 @@ class SaleStatusChange extends Model
     protected $fillable = [
         "sale_id",
         "status_id",
+        "status",
     ];
 
     public function pedido()
