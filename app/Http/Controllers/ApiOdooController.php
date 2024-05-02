@@ -27,7 +27,7 @@ class ApiOdooController extends Controller
     {
         try {
             if ($request->header('token') == config('key_odoo.key_to_odoo')) {
-                $validator = Validator::make($request->all(), [
+                /*$validator = Validator::make($request->all(), [
                     'sale' => 'bail|required|array',
                     'sale.code_sale' => 'required',
                     'sale.name_sale' => 'required',
@@ -77,7 +77,7 @@ class ApiOdooController extends Controller
 
                 if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
-                }
+                }*/
                 // Obtener el pedido
                 $requestData = (object) $request->sale;
                 // Obtener datos principales
