@@ -223,6 +223,10 @@ class DepartmentSmallBox extends Seeder
                 'name_area' => 'Compras nacionales',
                 'id_department' => 12, // optional
             ],
+            (object)[
+                'name_area' => 'Sin definir',
+                'id_department' => 13, // optional
+            ],
         );
 
         foreach ($areas as $area){
@@ -386,7 +390,6 @@ class DepartmentSmallBox extends Seeder
                 'display_name' => 'Equipo Ventas PL', // optional
                 'description' => 'Equipo Ventas PL', // optional
             ],
-            
         );
 
         foreach ($roles as $rol) {
@@ -1108,61 +1111,61 @@ class DepartmentSmallBox extends Seeder
             (object)[
                 'id_user' => 91,
                 'id_department' => 12,
-                'id_company' => 5,
+                'id_company' => 1, ///Promo
                 'id_area' => 33,
             ],
             (object)[
                 'id_user' => 95,
                 'id_department' => 12,
-                'id_company' => 5,
+                'id_company' => 4, ///trademarket 57
                 'id_area' => 33,
             ],
             (object)[
                 'id_user' => 126,
                 'id_department' => 12,
-                'id_company' => 5,
+                'id_company' => 4, ///trademarket 57
                 'id_area' => 33,
             ],
             (object)[
                 'id_user' => 136,
                 'id_department' => 12,
-                'id_company' => 5,
+                'id_company' => 2, ///bh
                 'id_area' => 33,
             ],
             (object)[
                 'id_user' => 137,
                 'id_department' => 12,
-                'id_company' => 5,
+                'id_company' => 4, ///trademarket 57
                 'id_area' => 33,
             ],
             (object)[
                 'id_user' => 228,
                 'id_department' => 12,
-                'id_company' => 5,
+                'id_company' => 4,///trademarket 57
                 'id_area' => 33,
             ],
             (object)[
                 'id_user' => 229,
                 'id_department' => 12,
-                'id_company' => 5,
+                'id_company' => 2, ///bh
                 'id_area' => 33,
             ],
             (object)[
                 'id_user' => 239,
                 'id_department' => 12,
-                'id_company' => 5,
+                'id_company' => 1, ///promo 
                 'id_area' => 33,
             ],
             (object)[
                 'id_user' => 247,
                 'id_department' => 12,
-                'id_company' => 5,
+                'id_company' => 4, ///trademarket 57
                 'id_area' => 33,
             ],
             (object)[
                 'id_user' => 256,
-                'id_department' => 12,
-                'id_company' => 5,
+                'id_department' => 12, ///BH
+                'id_company' => 2,
                 'id_area' => 33,
             ],
             //////////DIRECCIÓN BH
@@ -1203,19 +1206,19 @@ class DepartmentSmallBox extends Seeder
             (object)[
                 'id_user' => 63,
                 'id_department' => 6,
-                'id_company' => 5,
+                'id_company' => 4, //// ///trademarket 57
                 'id_area' => 15,
             ],
             (object)[
                 'id_user' => 64,
-                'id_department' => 6,
-                'id_company' => 5,
+                'id_department' => 6, ////PROMO
+                'id_company' => 1,
                 'id_area' => 16,
             ],
             (object)[
                 'id_user' => 121,
                 'id_department' => 6,
-                'id_company' => 5,
+                'id_company' => 4, ///trademarket 57
                 'id_area' => 15,
             ],
             //////////LOGISTICA/////
@@ -1254,7 +1257,7 @@ class DepartmentSmallBox extends Seeder
             (object)[
                 'id_user' => 113,
                 'id_department' => 11,
-                'id_company' => 5,
+                'id_company' => 4, ///trademarket 57
                 'id_area' => 32,
             ],
             (object)[
@@ -1273,97 +1276,97 @@ class DepartmentSmallBox extends Seeder
             (object)[
                 'id_user' => 57,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 2, ///BH
                 'id_area' => 3,
             ],
             (object)[
                 'id_user' => 90,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 2, ///bh
                 'id_area' => 3,
             ],
             (object)[
                 'id_user' => 92,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 4, ///trademarket 57
                 'id_area' => 4,
             ],
             (object)[
                 'id_user' => 93,
-                'id_department' => 2,
-                'id_company' => 5,
+                'id_department' => 2, //////trademarket 57
+                'id_company' => 4,
                 'id_area' => 4,
             ],
             (object)[
                 'id_user' => 97,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 2, ///bh
                 'id_area' => 7,
             ],
             (object)[
                 'id_user' => 98,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 2, ///BH
                 'id_area' => 5,
             ],
             (object)[
                 'id_user' => 108,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 4, ///trademarket 57
                 'id_area' => 5,
             ],
             (object)[
                 'id_user' => 109,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 4, ///trademarket 57
                 'id_area' => 5,
             ],
             (object)[
                 'id_user' => 110,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 4, ///trademarket 57
                 'id_area' => 5,
             ],
             (object)[
                 'id_user' => 111,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 4, ///trademarket 57
                 'id_area' => 5,
             ],
             (object)[
                 'id_user' => 145,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 2, ///BH
                 'id_area' => 5,
             ],
             (object)[
                 'id_user' => 148,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 2,
                 'id_area' => 6,
             ],
             (object)[
                 'id_user' => 153,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 2,
                 'id_area' => 5,
             ],
             (object)[
                 'id_user' => 156,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 2,
                 'id_area' => 5,
             ],
             (object)[
                 'id_user' => 224,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 1,
                 'id_area' => 4,
             ],
             (object)[
                 'id_user' => 242,
                 'id_department' => 2,
-                'id_company' => 5,
+                'id_company' => 2,
                 'id_area' => 5,
             ],
             //////////RECURSOS HUMANOS = 7
@@ -1441,7 +1444,7 @@ class DepartmentSmallBox extends Seeder
             (object)[
                 'id_user' => 244,
                 'id_department' => 8,
-                'id_company' => 5,
+                'id_company' => 1,
                 'id_area' => 21,
             ],
             (object)[
@@ -1459,7 +1462,7 @@ class DepartmentSmallBox extends Seeder
             (object)[
                 'id_user' => 120,
                 'id_department' => 8,
-                'id_company' => 5,
+                'id_company' => 1,
                 'id_area' => 20,
             ],
             (object)[
@@ -1513,37 +1516,37 @@ class DepartmentSmallBox extends Seeder
             (object)[
                 'id_user' => 241,
                 'id_department' => 8,
-                'id_company' => 5,
+                'id_company' => 1,
                 'id_area' => 20,
             ],  
             (object)[
                 'id_user' => 248,
                 'id_department' => 8,
-                'id_company' => 5,
+                'id_company' => 1,
                 'id_area' => 20,
             ],   
             (object)[
                 'id_user' => 261,
                 'id_department' => 8,
-                'id_company' => 5,
+                'id_company' => 1,
                 'id_area' => 20,
             ],  
             (object)[
                 'id_user' => 262,
                 'id_department' => 8,
-                'id_company' => 5,
+                'id_company' => 1,
                 'id_area' => 20,
             ],   
             (object)[
                 'id_user' => 264,
                 'id_department' => 8,
-                'id_company' => 5,
+                'id_company' => 1,
                 'id_area' => 20,
             ],     
             (object)[
                 'id_user' => 265,
                 'id_department' => 8,
-                'id_company' => 5,
+                'id_company' => 1,
                 'id_area' => 20,
             ], 
 
