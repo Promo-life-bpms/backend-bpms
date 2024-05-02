@@ -690,8 +690,9 @@ class PurchaseRequestController extends Controller
 
         $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
         $rolcajachi = DB::table('roles')->where('id', 14)->value('id');
+        $roladquicision = DB::table('roles')->where('id', 15)->value('id');
         
-        if ($rolcajachica == $rolcajachi) {
+        if ($rolcajachica == $rolcajachi || $rolcajachica == $roladquicision) {
             $method = DB::table('purchase_requests')->where('id', $request->id_purchase)->select('payment_method_id')->first();
 
         if ($method->payment_method_id == 1) {
@@ -1334,8 +1335,9 @@ class PurchaseRequestController extends Controller
 
         $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
         $rolcajachi = DB::table('roles')->where('id', 14)->value('id');
+        $roladquicision = DB::table('roles')->where('id', 15)->value('id');
         
-        if ($rolcajachica == $rolcajachi) {
+        if ($rolcajachica == $rolcajachi || $rolcajachica == $roladquicision) {
             ///VERIFICAMOS SI EL METODO DE PAGO QUE SE USUARA ES EFECTIVO///
             if($request->payment_method_id == 1){
                 $pago = DB::table('purchase_requests')->where('id', $request->id)->select('total')->first();
