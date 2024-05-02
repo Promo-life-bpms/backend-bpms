@@ -27,6 +27,7 @@ use App\Http\Controllers\Pruebas;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SmallBoxUserController;
 use App\Http\Controllers\SpentController;
+use App\Http\Controllers\StatusOrdersController;
 use App\Http\Controllers\TemporyCompanyController;
 use App\Http\Controllers\UploadImageController;
 use App\Http\Controllers\UserCenterController;
@@ -174,7 +175,9 @@ Route::group(['middleware' => 'auth'], function () {
 
     /////////////////////RUTAS  PARA CONFIRMAR LOS PEDIDOS //////////////////////
     Route::post('confirmation/order/products', [OrderConfirmationController::class, 'ConfirmOrderProducts']);
-    Route::post('order/create');
+
+
+    Route::post('status/two/{pedido}',[StatusOrdersController::class, 'StatusTwo']);
 
     //CAJA CHICA
 

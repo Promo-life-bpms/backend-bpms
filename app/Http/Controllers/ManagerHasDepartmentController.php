@@ -26,6 +26,7 @@ class ManagerHasDepartmentController extends Controller
         }
         return response()->json(['Managers' => $Managers]);
     }
+    
     public function CrearManager(Request $request)
     {
         $this->validate($request,[
@@ -33,13 +34,22 @@ class ManagerHasDepartmentController extends Controller
             'id_department' => 'required',
         ]);
         
-        ManagerHasDepartment::create([
-            'id_user' => $request->id_user,
-            'id_department' => $request->id_department
-        ]);
-        
-        return response()->json(['message' => 'Agregaste un nuevo manager', 'status' => 200], 200);
+        $restriccion = DB::table('manager_has_departments')
+                    ->where('id_user', $request->id_user)
+                    ->where('id_department', $request->id_department)
+                    ->first();
+                    
+        if($restriccion){
+            return response()->json(['message' => 'Este registro ya existe', 'status' => 409], 409);
+        } else {
+            ManagerHasDepartment::create([
+                'id_user' => $request->id_user,
+                'id_department' => $request->id_department
+            ]);
+            return response()->json(['message' => 'Agregaste un nuevo manager', 'status' => 200], 200);
+        }
     }
+
 
     public function DeleteManager(Request $request)
     {

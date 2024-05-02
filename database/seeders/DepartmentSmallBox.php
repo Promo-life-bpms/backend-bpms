@@ -121,7 +121,7 @@ class DepartmentSmallBox extends Seeder
             ],
             ////DIRECCIÓN BH
             (object)[
-                'name_area' => 'Dirreción',
+                'name_area' => 'Dirección BH',
                 'id_department' => 4, // optional
             ],
             (object)[
@@ -130,7 +130,7 @@ class DepartmentSmallBox extends Seeder
             ],
             //DIRECCION PL
             (object)[
-                'name_area' => 'Dirección',
+                'name_area' => 'Dirección PL',
                 'id_department' => 5, // optional
             ],
             (object)[
@@ -185,11 +185,11 @@ class DepartmentSmallBox extends Seeder
             ],
             
             (object)[
-                'name_area' => 'Manager Ventas BH Base',
+                'name_area' => 'Manager Ventas BH México',
                 'id_department' => 9, // optional
             ],
             (object)[
-                'name_area' => 'Ventas BH Base',
+                'name_area' => 'Ventas BH México',
                 'id_department' => 9, // optional
             ],
             (object)[
