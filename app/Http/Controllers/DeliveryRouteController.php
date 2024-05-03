@@ -148,6 +148,7 @@ class DeliveryRouteController extends Controller
             'delivery_route.*.code_order' => 'required',
             'delivery_route.*.product_id' => 'required',
             'delivery_route.*.type_of_destiny' => 'required',
+            'delivery_route.*.type' => 'required',
             'delivery_route.*.date_of_delivery' => 'required',
             'delivery_route.*.status_delivery' => 'required',
             'delivery_route.*.shipping_type' => 'required',
@@ -205,16 +206,32 @@ class DeliveryRouteController extends Controller
         } */
         $sale = Sale::where('code_sale', $sale)->first();
         $routes = [];
+        $color = null;
         foreach ($request['delivery_route'] as $deliveryRouteData) {
+            switch ($color) {
+                case ($deliveryRouteData['status_delivery'] == 'Completo' & $deliveryRouteData['type_of_detiny'] == 'Parcial'):
+                    $color = 1;
+                    break;
+                case ($deliveryRouteData['status_delivery'] == 'Completo' & $deliveryRouteData['type_of_detiny'] == 'Total'):
+                    $color = 2;
+                    break;
 
+
+                default:
+                    $color = 0;
+                    break;
+            }
+         
             $ruta = DeliveryRoute::create([
                 'code_sale' => $sale->code_sale,
                 'code_order' => $deliveryRouteData['code_order'],
                 'product_id' => $deliveryRouteData['product_id'],
+                'type' => $deliveryRouteData['type'],
                 'type_of_destiny' => $deliveryRouteData['type_of_destiny'],
                 'date_of_delivery' => $deliveryRouteData['date_of_delivery'],
                 'status_delivery' => $deliveryRouteData['status_delivery'],
-                'shipping_type' => $deliveryRouteData['shipping_type']
+                'shipping_type' => $deliveryRouteData['shipping_type'],
+                'color' => $color
             ]);
             $routes[] = $ruta;
         }
