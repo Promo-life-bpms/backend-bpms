@@ -1,17 +1,15 @@
 @component('mail::message')
 # ¡Buen día, {{ $data['name'] }}!
-# Bienvenido al sistema {{ config('app.name') }}
-Has sido registrado con los siguientes datos:
+# Bienvenido al sistema BPMS
+Tu información de inicio de sesión es:
 <br>
 Usuario: {{ $data['email'] }}
 <br>
-Password: {{ $data['password'] }}
+Contraseña: {{ $data['password'] }}
 <br>
 @component('mail::button', ['url' => $data['url'], 'color' => 'blue'])
-    Acceder
+    Inicia sesión
 @endcomponent
-Gracias,<br>
-{{ config('app.name') }}
 <hr>
-Si tienes problemas para visualizar el boton, puedes hacer click en el siguiente enlace: <a href="{{$data['url']}}">{{$data['url']}}</a>
+Si tienes problemas con el botón "Inicia sesión", dale click en el siguiente enlace: <a href="{{$data['url']}}">{{$data['url']}}</a>
 @endcomponent
