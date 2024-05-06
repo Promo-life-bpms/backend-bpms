@@ -245,9 +245,9 @@ class SaleController extends Controller
     {
 
         $sale = Sale::where('code_sale', $sale_id)->first();
-        $id = $sale->id;
-        
-        $Company = DB::table('additional_sale_information')->where('sale_id', $id)->first();
+        $idSale = $sale->id;
+            
+        $Company = DB::table('additional_sale_information')->where('sale_id', $idSale)->first();
         if ($sale) {
             ////////////////DETALLES DEL PEDIDO//////////////////////
             $InfoAditional = [
@@ -350,7 +350,6 @@ class SaleController extends Controller
                     }
                 }
             }
-
 
             ////////MÁS INFORMACIÓN//////////////////////////
             $idSale = $sale->id;
@@ -455,21 +454,21 @@ class SaleController extends Controller
             {
                 if(!$registros){
                     SaleStatusChange::create([
-                        'sale_id' => $id,
+                        'sale_id' => $idSale,
                         'status_id' => 15,
                         'status' => 0,
                     ]);
                     $statusOrders = 0;
                 }
+                $statusOrders = 0;
                
             }elseif ($OrdersFinales == $ConfirmationOrders) {
                 if($registros){
                     DB::table('sale_status_changes')->where('id',$idSaleStatusChange)->update([
-                        'sale_id' => $id,
+                        'sale_id' => $idSale,
                         'status_id' => 15,
                         'status' => 1,
                     ]);
-                    //1 = 'Está completo el paso dos'
                     $statusOrders = 1;
                 }elseif($status == 1){
                     $statusOrders = 1;

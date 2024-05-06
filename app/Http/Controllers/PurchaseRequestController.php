@@ -449,12 +449,12 @@ class PurchaseRequestController extends Controller
                 $title = 'Nueva solicitud de compra';
                 $message = 'Haz recibido una nueva solicitud de compras.';
                 
-                try {
+                /*try {
                     Notification::route('mail', $users_to_send_mail->email)
                     ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
                 } catch (\Exception $e) {
                     return $e;
-                }
+                }*/
             }
             return response()->json(['message' => "Solicitud aprobada satisfactoriamente"], 200);
         }
@@ -848,7 +848,7 @@ class PurchaseRequestController extends Controller
         $user_role = UserRole::where('role_id', $role_buyer->id)->get();
         $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
 
-        foreach($user_role as $role){
+        /*foreach($user_role as $role){
             $users_to_send_mail = User::where('id',$role->user_id)->get()->last();
 
             $title = 'Nueva solicitud de compra';
@@ -860,7 +860,7 @@ class PurchaseRequestController extends Controller
             } catch (\Exception $e) {
                 return $e;
             }
-        }
+        }*/
 
         return response()->json(['message' => "Solicitud aprobada satisfactoriamente"], 200);
     }
@@ -950,12 +950,12 @@ class PurchaseRequestController extends Controller
         $title = 'Solicitud rechazada';
         $message = 'Tu solicitud ha sido rechazada, revisa la información e intenta enviarla nuevamente.';
 
-        try {
+        /*try {
             Notification::route('mail', $users_to_send_mail->email)
             ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
         } catch (\Exception $e) {
             return $e;
-        }
+        }*/
     
         return response()->json(['message' => "Solicitud rechazada satisfactoriamente"], 200);
         
@@ -1020,12 +1020,12 @@ class PurchaseRequestController extends Controller
             $title = 'Haz recibido el Pedido';
             $message = 'Se ha confirmado que haz recibido el pedido';
 
-            try {
+            /*try {
                 Notification::route('mail', $users_to_send_mail->email)
                 ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
             } catch (\Exception $e) {
                 return $e;
-            }
+            }*/
     
             return response()->json(['message' => "Se ha confirmado que el pedido fue recibido"], 200);
         }else{
@@ -1059,12 +1059,12 @@ class PurchaseRequestController extends Controller
             $title = 'Devolución de Pedido';
             $message = 'Se ha realizado la devolución del pedido';
 
-            try {
+            /*try {
                 Notification::route('mail', $users_to_send_mail->email)
                 ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
             } catch (\Exception $e) {
                 return $e;
-            }
+            }*/
     
             return response()->json(['message' => "Devolución en proceso"], 200);
         }
@@ -1171,12 +1171,12 @@ class PurchaseRequestController extends Controller
             $title = 'Cancelación de Pedido';
             $message = 'Se ha realizado la cancelación del pedido';
 
-            try {
+            /*try {
                 Notification::route('mail', $users_to_send_mail->email)
                 ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
             } catch (\Exception $e) {
                 return $e;
-            }
+            }*/
             return response()->json(['message' => "Cancelación realizada"], 200);
         }else{
             return response()->json(['message' => "No es posible realizar una cancelación una vez que recibas el producto; se debe realizar una devolución"], 400);
@@ -1400,6 +1400,7 @@ class PurchaseRequestController extends Controller
         $this->validate($request,[
             'purchase_id' => 'required',
             'id_eventual' => 'required|array',
+            'id_company' => 'required|array',
             'new_pay' => 'required|array'
         ]);
     
@@ -1413,10 +1414,12 @@ class PurchaseRequestController extends Controller
         // Iteramos sobre cada ID proporcionado
         foreach ($id_eventuales as $key => $id_eventual) {
             $new_pay_amount = $request->new_pay[$key]; // Obtener el pago correspondiente al ID actual
+            $new_company = $request->id_company[$key];
             foreach ($eventualArray as &$item) {
                 $id = $item['id'];
                 if ($id === $id_eventual) {
                     $item['pay'] = $new_pay_amount;
+                    $item['company'] = $new_company;
                     break; // Detener el bucle una vez que se ha actualizado el pago
                 }
             }
