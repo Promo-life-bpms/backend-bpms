@@ -175,11 +175,10 @@ Route::group(['middleware' => 'auth'], function () {
 
     /////////////////////RUTAS  PARA CONFIRMAR LOS PEDIDOS //////////////////////
     Route::post('confirmation/order/products', [OrderConfirmationController::class, 'ConfirmOrderProducts']);
-    ////////////////////////////CONFIRMAR RECEPCIÓN DE LA RUTA/////////////////
-    Route::post('confirmation/route/order', [OrderConfirmationController::class, 'confirmationOrderRoute']);
-
+    
 
     Route::post('status/two/{pedido}',[StatusOrdersController::class, 'StatusTwo']);
+    Route::post('confirmation/route/order', [StatusOrdersController::class, 'confirmationOrderRoute']);
 
     //CAJA CHICA
 

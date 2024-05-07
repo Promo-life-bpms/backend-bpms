@@ -16,8 +16,9 @@ class CreateConfirmRouteReceiptsTable extends Migration
         Schema::create('confirm_route_receipts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('id_order_purchase_products')->references('id')->on('order_purchase_products')->onDelete('cascade');
-            $table->string('reception_type');
-            $table->string('destination');
+            $table->foreignId('id_delivery_routes')->references('id')->on('delivery_routes')->onDelete('cascade');
+            $table->text('reception_type');
+            $table->text('destination');
             $table->timestamps();
         });
     }
