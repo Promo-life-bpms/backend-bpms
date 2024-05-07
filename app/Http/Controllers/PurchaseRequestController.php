@@ -1561,10 +1561,7 @@ class PurchaseRequestController extends Controller
                 });
             })->sum('total');
             
-            $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
-            dd($AvailableBudget);
-            
-            
+            $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' ); 
             $purchase = DB::table('purchase_requests')->where('id', $request->id_purchase)->first();
             if ($purchase) {
                 // Obtener el total anterior de la compra
