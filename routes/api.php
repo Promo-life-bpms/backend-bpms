@@ -175,6 +175,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     /////////////////////RUTAS  PARA CONFIRMAR LOS PEDIDOS //////////////////////
     Route::post('confirmation/order/products', [OrderConfirmationController::class, 'ConfirmOrderProducts']);
+    ////////////////////////////CONFIRMAR RECEPCIÓN DE LA RUTA/////////////////
+    Route::post('confirmation/route/order', [OrderConfirmationController::class, 'confirmationOrderRoute']);
 
 
     Route::post('status/two/{pedido}',[StatusOrdersController::class, 'StatusTwo']);
@@ -205,7 +207,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('caja-chica/solicitudes-de-compra/por-departamento/ver/{page}', [PurchaseRequestController::class, 'DepartmentPage']);
     Route::post('caja-chica/aprobar-solicitud/por-department/', [PurchaseRequestController::class, 'approvedDepartment']);
     Route::post('caja-chica/editar/eventuales', [PurchaseRequestController::class, 'updateEventuales']);
-    Route::post('caja-chica/add/eventual/finde', [PurchaseRequestController::class, 'updateEventuales']);
+    Route::post('caja-chica/add/eventual/finde', [PurchaseRequestController::class, 'EventualesFinde']);
 
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
     Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class, 'editdate']);
