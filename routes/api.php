@@ -106,7 +106,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('pedidos/{pedido}/orders/{order}', [OrderPurchaseController::class, 'show']);
 
     // Recepciones de Inventario
-    Route::post('orders/{order}/receptions', [ReceptionController::class, 'saveReception']);
+    Route::post('reception/{code_order}', [ReceptionController::class, 'saveReception']);
 
     Route::get('orders/{order}/receptions/{reception}', [ReceptionController::class, 'getReception']);
     //confirmar un producto

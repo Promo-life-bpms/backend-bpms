@@ -10,15 +10,11 @@ class Reception extends Model
     use HasFactory;
 
     protected $fillable = [
-        'code_reception',
         'code_order',
-        'company',
-        'type_operation',
-        'planned_date',
-        'effective_date',
-        'status',
-        'user_id',
-        'maquilador'
+        'product_id',
+        'type',
+        'date_of_reception',
+        'destiny',
     ];
 
     public function productsReception()
