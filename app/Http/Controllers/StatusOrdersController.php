@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ConfirmRouteReceipt;
 use App\Models\Sale;
 use App\Models\SaleStatusChange;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class StatusOrdersController extends Controller
@@ -49,5 +51,16 @@ class StatusOrdersController extends Controller
         }else{
             return response()->json(['message' => 'Aún no esta completo', 'status'=> 404], 404);
         }      
+    }
+
+    public function confirmationOrderRoute(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'required',
+        ]);
+       $datos = DB::table('confirm_route_receipts')->where('id', $request->id)->get();
+       
+       return $datos;
+
     }
 }

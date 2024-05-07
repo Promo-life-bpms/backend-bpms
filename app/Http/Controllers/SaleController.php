@@ -447,9 +447,7 @@ class SaleController extends Controller
             }
             $ConfirmationOrders = array_sum($registros);
             $statusOrders = '';
-            $registros = DB::table('sale_status_changes')->where('sale_id',$idSale)->first();
-            $idSaleStatusChange = $registros->id;
-            $status = $registros->status;
+            $registros = DB::table('sale_status_changes')->where('sale_id',$idSale)->where('status_id', 15)->first();
             if($OrdersFinales != $ConfirmationOrders)
             {
                 if(!$registros){
@@ -464,6 +462,8 @@ class SaleController extends Controller
                
             }elseif ($OrdersFinales == $ConfirmationOrders) {
                 if($registros){
+                    $status = $registros->status;
+                    $idSaleStatusChange = $registros->id;
                     DB::table('sale_status_changes')->where('id',$idSaleStatusChange)->update([
                         'sale_id' => $idSale,
                         'status_id' => 15,
@@ -474,7 +474,7 @@ class SaleController extends Controller
                     $statusOrders = 1;
                 }
             }
-
+            
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,

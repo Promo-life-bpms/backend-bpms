@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ConfirmRouteReceipt;
 use App\Models\OrderConfirmation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -84,10 +85,5 @@ class OrderConfirmationController extends Controller
             return response()->json(['message' => 'Se confirmaron los pedidos, por Parcial.', 'status' => 200], 200); 
         } 
          
-    }
-
-    public function confirmationOrderRoute(Request $request)
-    {
-        ///
     }
 }
