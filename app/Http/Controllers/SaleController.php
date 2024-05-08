@@ -6,7 +6,6 @@ use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Sale;
 use App\Models\StatusDeliveryRouteChange;
-use App\Models\SaleStatusChange;
 use App\Models\StatusOT;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -246,9 +245,8 @@ class SaleController extends Controller
     {
 
         $sale = Sale::where('code_sale', $sale_id)->first();
-        $idSale = $sale->id;
-            
-        $Company = DB::table('additional_sale_information')->where('sale_id', $idSale)->first();
+        $id = $sale->id;
+        $Company = DB::table('additional_sale_information')->where('sale_id', $id)->first();
         if ($sale) {
             ////////////////DETALLES DEL PEDIDO//////////////////////
             $InfoAditional = [
@@ -269,34 +267,8 @@ class SaleController extends Controller
             $ordenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
                 $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
             })->get();
-            
             $orders = [];
             foreach ($ordenes as $orden) {
-                $product = DB::table('order_purchase_products')->where('order_purchase_id', $orden->id)->first();
-                $idOrden = $product->order_purchase_id;
-                $registros = DB::table('order_confirmations')->where('order_purchase_id', $idOrden)->get();
-    
-                // Obtener la última fecha de creación de los registros de confirmación
-                $ultima_creacion = null;
-                foreach ($registros as $registro) {
-                    if ($registro->created_at > $ultima_creacion) {
-                        $ultima_creacion = $registro->created_at;
-                    }
-                }
-                
-                $productos_confirmados = count($registros);
-                $productos_totales = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->count();
-                $estado_confirmacion = ''; 
-                if ($registros) {
-                    if ($productos_confirmados == 0) {
-                        $estado_confirmacion = 'Sin confirmar'; 
-                    } elseif ($productos_confirmados == $productos_totales) {
-                        $estado_confirmacion = 'Confirmado';
-                    } elseif ($productos_confirmados < $productos_totales) {
-                        $estado_confirmacion = 'Parcial';   
-                    }
-                }
-
                 $Orden = [
                     'id' => $orden->id,
                     'code_order' => $orden->code_order,
@@ -307,14 +279,11 @@ class SaleController extends Controller
                     'status' => $orden->status,
                     'status_bpm' => $orden->status_bpm,
                     'supplier_representative' => $orden->supplier_representative,
-                    'Confirmation' => $estado_confirmacion,
-                    'last_confirmation_created_at' => $ultima_creacion, // Aquí agregamos la última fecha de creación
                     'created_at' => $orden->created_at,
                     'updated_at' => $orden->updated_at,
                 ];
                 $orders[] = $Orden;
             }
-
             /////////////PRODUCTOS/////////////////
             // $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
             //     $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
@@ -359,6 +328,7 @@ class SaleController extends Controller
                 ->pluck('id');
 
             $products = [];
+
             foreach ($idOrdenes as $idOrden) {
                 $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
 
@@ -367,14 +337,8 @@ class SaleController extends Controller
 
                     foreach ($productosOrden as $producto) {
                         $statuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $producto->id)->get();
-                        $status = 0; 
-                        $estado = DB::table('order_confirmations')->where('id_order_products', $producto->id)->first();
-                        if ($estado) {
-                            $status = $estado->status;
-                        }
-                        $products[] = [
+                        $product = [
                             'id' => $producto->id,
-                            'status'  => $status, 
                             'code_order' => $ordenCompra->code_order,
                             'provider_name' => $ordenCompra->provider_name,
                             'description' => $producto->description,
@@ -398,6 +362,10 @@ class SaleController extends Controller
                     }
                 }
             }
+
+            // Devolver el arreglo completo de productos fuera del bucle
+
+
 
             ////////MÁS INFORMACIÓN//////////////////////////
             $idSale = $sale->id;
@@ -432,7 +400,6 @@ class SaleController extends Controller
             $inspections = DB::table('inspections')->where('sale_id', $idSale)->get();
             //////////////CHECK-LIST//////////////////////
             $check_list = DB::table('check_lists')->where('code_sale', $sale_id)->get();
-
             ////////////////INFORMACIÓN DE LOS PRODUCTS SALE//////////////////
             $SalesProducts = DB::table('sales_products')->where('sale_id', $idSale)->get()->toArray();
             $Sale = [];
@@ -450,84 +417,11 @@ class SaleController extends Controller
 
                 $Sale[] = $SaleProducts;
             }
-
-            //////////////////PRODUCTOS QUE YA ESTAN EN STATUS 1/////////////////////////////////
-            $status = DB::table('order_confirmations')->select('order_purchase_id', 'status', 'id', 'id_order_products')->where('code_sale', $sale_id)
-                                                    ->groupBy('order_purchase_id', 'status', 'id', 'id_order_products')
-                                                    ->get();
-                                                    
-            $combinedResults = [];
-
-            foreach ($status as $item) {
-                $orderPurchaseId = $item->order_purchase_id;
-                                                    
-                $codeOrder = DB::table('order_purchases')->where('id', $orderPurchaseId)->value('code_order');
-        
-                if (!isset($combinedResults[$orderPurchaseId])) {
-                    $combinedResults[$orderPurchaseId] = [];
-                }
-                                                    
-                // Agrega el elemento actual al arreglo correspondiente al 'order_purchase_id'
-                $combinedResults[$orderPurchaseId][] = [
-                    'id' => $item->id,
-                    'code_order' => $codeOrder,
-                    'status' => $item->status,
-                    'order_purchase_id' => $item->order_purchase_id,
-                    'id_order_products' => $item->id_order_products
-                ];
-            }  
-            
-            
-            ///////////////STATUS 2////////////
-            $NumOrders = [];
-            foreach ($ordenes as $Order){
-                $idOrder = $Order->id;
-                $productos_totales = DB::table('order_purchase_products')->where('order_purchase_id',$idOrder)->count();
-                $NumOrders[] = $productos_totales;   
-            }
-            
-            $OrdersFinales = array_sum($NumOrders);
-            
-            $registros = [];
-            foreach ($ordenes as $order){
-                $idPurchase = $order->id;
-                $ya = DB::table('order_confirmations')->where('order_purchase_id', $idPurchase)->count();
-                $registros[] = $ya;
-            }
-            $ConfirmationOrders = array_sum($registros);
-            $statusOrders = '';
-            $registros = DB::table('sale_status_changes')->where('sale_id',$idSale)->where('status_id', 15)->first();
-            if($OrdersFinales != $ConfirmationOrders)
-            {
-                if(!$registros){
-                    SaleStatusChange::create([
-                        'sale_id' => $idSale,
-                        'status_id' => 15,
-                        'status' => 0,
-                    ]);
-                    $statusOrders = 0;
-                }
-                $statusOrders = 0;
-               
-            }elseif ($OrdersFinales == $ConfirmationOrders) {
-                if($registros){
-                    $status = $registros->status;
-                    $idSaleStatusChange = $registros->id;
-                    DB::table('sale_status_changes')->where('id',$idSaleStatusChange)->update([
-                        'sale_id' => $idSale,
-                        'status_id' => 15,
-                        'status' => 1,
-                    ]);
-                    $statusOrders = 1;
-                }elseif($status == 1){
-                    $statusOrders = 1;
-                }
-            }
-            
+            ////////////////////////////////////// STATUSDELPRODUCTO/////////////////////////7
+            $status = StatusDeliveryRouteChange::where('code_order', $orden->code_order)->get();
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
-                'status' => $combinedResults, 'status_two' => $statusOrders,
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);
