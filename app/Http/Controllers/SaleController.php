@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Sale;
+use App\Models\StatusDeliveryRouteChange;
 use App\Models\SaleStatusChange;
 use App\Models\StatusOT;
 use Illuminate\Http\Request;
@@ -315,17 +316,57 @@ class SaleController extends Controller
             }
 
             /////////////PRODUCTOS/////////////////
-            $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
-                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
-            })->pluck('id');
-            $products = [];
+            // $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
+            //     $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
+            // })->pluck('id');
+            // $products = [];
+            // foreach ($idOrdenes as $idOrden) {
+            //     $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
+            //     if ($ordenCompra) {
+            //         $productosOrden = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
+            //         foreach ($productosOrden as $producto) {
+            //             $statuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $producto->id)->get();
+            //             $products = [
+            //                 'id' => $producto->id,
+            //                 'code_order' => $ordenCompra->code_order,
+            //                 'provider_name' => $ordenCompra->provider_name,
+            //                 'description' => $producto->description,
+            //                 'odoo_product_id' => $producto->odoo_product_id,
+            //                 'order_purchase_id' => $producto->order_purchase_id,
+            //                 'planned_date' => $producto->planned_date,
+            //                 'product' => $producto->product,
+            //                 'quantity' => $producto->quantity,
+            //                 'quantity_delivered' => $producto->quantity_delivered,
+            //                 'quantity_invoiced' => $producto->quantity_invoiced,
+            //                 'created_at' => $producto->created_at,
+            //                 'updated_at' => $producto->updated_at,
+            //                 'status' => collect() // Crear una colección vacía para status
+            //             ];
 
-            ////VERIFICAMOS QUE LOS PRODUCTOS ESTEN COMPLETADOS/////////////
+            //             // Agregar los datos obtenidos a la colección status
+            //             $products['status']->push($statuses);
+
+            //         }
+            //     }
+            // }
+
+            $idOrdenes = DB::table('order_purchases')
+                ->where('code_sale', $sale_id)
+                ->where(function ($query) {
+                    $query->where('code_order', 'like', 'OC-%')
+                        ->orWhere('code_order', 'like', 'OT-%');
+                })
+                ->pluck('id');
+
+            $products = [];
             foreach ($idOrdenes as $idOrden) {
                 $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
+
                 if ($ordenCompra) {
                     $productosOrden = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
+
                     foreach ($productosOrden as $producto) {
+                        $statuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $producto->id)->get();
                         $status = 0; 
                         $estado = DB::table('order_confirmations')->where('id_order_products', $producto->id)->first();
                         if ($estado) {
@@ -345,8 +386,15 @@ class SaleController extends Controller
                             'quantity_delivered' => $producto->quantity_delivered,
                             'quantity_invoiced' => $producto->quantity_invoiced,
                             'created_at' => $producto->created_at,
-                            'updated_at' => $producto->updated_at
+                            'updated_at' => $producto->updated_at,
+                            'status' => collect() // Crear una colección vacía para status
                         ];
+
+                        // Agregar los datos obtenidos a la colección status
+                        $product['status']->push($statuses);
+
+                        // Agregar el producto al arreglo de productos
+                        $products[] = $product;
                     }
                 }
             }
@@ -399,6 +447,7 @@ class SaleController extends Controller
                     'quantity_invoiced' => $saleProduct->quantity_invoiced,
 
                 ];
+
                 $Sale[] = $SaleProducts;
             }
 
