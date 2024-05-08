@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateConfirmRouteReceiptsTable extends Migration
+class CreateConfirmRoutesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class CreateConfirmRouteReceiptsTable extends Migration
      */
     public function up()
     {
-        Schema::create('confirm_route_receipts', function (Blueprint $table) {
+        Schema::create('confirm_routes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('id_order_purchase_products')->references('id')->on('order_purchase_products')->onDelete('cascade');
+            $table->foreignId('id_product_order')->references('id')->on('order_purchase_products')->onDeete('cascade');
             $table->foreignId('id_delivery_routes')->references('id')->on('delivery_routes')->onDelete('cascade');
             $table->text('reception_type');
             $table->text('destination');
@@ -30,6 +30,6 @@ class CreateConfirmRouteReceiptsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('confirm_route_receipts');
+        Schema::dropIfExists('confirm_routes');
     }
 }

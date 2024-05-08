@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Sale;
+use App\Models\SaleStatusChange;
 use App\Models\StatusDeliveryRouteChange;
 use App\Models\StatusOT;
 use Illuminate\Http\Request;
@@ -284,87 +285,50 @@ class SaleController extends Controller
                 ];
                 $orders[] = $Orden;
             }
-            /////////////PRODUCTOS/////////////////
-            // $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
-            //     $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
-            // })->pluck('id');
-            // $products = [];
-            // foreach ($idOrdenes as $idOrden) {
-            //     $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
-            //     if ($ordenCompra) {
-            //         $productosOrden = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
-            //         foreach ($productosOrden as $producto) {
-            //             $statuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $producto->id)->get();
-            //             $products = [
-            //                 'id' => $producto->id,
-            //                 'code_order' => $ordenCompra->code_order,
-            //                 'provider_name' => $ordenCompra->provider_name,
-            //                 'description' => $producto->description,
-            //                 'odoo_product_id' => $producto->odoo_product_id,
-            //                 'order_purchase_id' => $producto->order_purchase_id,
-            //                 'planned_date' => $producto->planned_date,
-            //                 'product' => $producto->product,
-            //                 'quantity' => $producto->quantity,
-            //                 'quantity_delivered' => $producto->quantity_delivered,
-            //                 'quantity_invoiced' => $producto->quantity_invoiced,
-            //                 'created_at' => $producto->created_at,
-            //                 'updated_at' => $producto->updated_at,
-            //                 'status' => collect() // Crear una colección vacía para status
-            //             ];
+           /////////////PRODUCTOS/////////////////
+           $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
+            $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
+        })->pluck('id', 'code_order');
+        $products = [];
 
-            //             // Agregar los datos obtenidos a la colección status
-            //             $products['status']->push($statuses);
-
-            //         }
-            //     }
-            // }
-
-            $idOrdenes = DB::table('order_purchases')
-                ->where('code_sale', $sale_id)
-                ->where(function ($query) {
-                    $query->where('code_order', 'like', 'OC-%')
-                        ->orWhere('code_order', 'like', 'OT-%');
-                })
-                ->pluck('id');
-
-            $products = [];
-
-            foreach ($idOrdenes as $idOrden) {
-                $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
-
-                if ($ordenCompra) {
-                    $productosOrden = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
-
-                    foreach ($productosOrden as $producto) {
-                        $statuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $producto->id)->get();
-                        $product = [
-                            'id' => $producto->id,
-                            'code_order' => $ordenCompra->code_order,
-                            'provider_name' => $ordenCompra->provider_name,
-                            'description' => $producto->description,
-                            'odoo_product_id' => $producto->odoo_product_id,
-                            'order_purchase_id' => $producto->order_purchase_id,
-                            'planned_date' => $producto->planned_date,
-                            'product' => $producto->product,
-                            'quantity' => $producto->quantity,
-                            'quantity_delivered' => $producto->quantity_delivered,
-                            'quantity_invoiced' => $producto->quantity_invoiced,
-                            'created_at' => $producto->created_at,
-                            'updated_at' => $producto->updated_at,
-                            'status' => collect() // Crear una colección vacía para status
-                        ];
-
-                        // Agregar los datos obtenidos a la colección status
-                        $product['status']->push($statuses);
-
-                        // Agregar el producto al arreglo de productos
-                        $products[] = $product;
+        ////VERIFICAMOS QUE LOS PRODUCTOS ESTEN COMPLETADOS/////////////
+        foreach ($idOrdenes as $id => $idOrden) {
+            $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
+            if ($ordenCompra) {
+                $productosOrden = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
+                foreach ($productosOrden as $producto) {
+                    $status = 0; 
+                    $estado = DB::table('order_confirmations')->where('id_order_products', $producto->id)->first();
+                    if ($estado) {
+                        $status = $estado->status;
                     }
+                    $statuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $producto->id)->get();
+                    $products[] = [
+                        'id' => $producto->id,
+                        'status'  => $status, 
+                        'code_order' => $ordenCompra->code_order,
+                        'provider_name' => $ordenCompra->provider_name,
+                        'description' => $producto->description,
+                        'odoo_product_id' => $producto->odoo_product_id,
+                        'order_purchase_id' => $producto->order_purchase_id,
+                        'planned_date' => $producto->planned_date,
+                        'product' => $producto->product,
+                        'quantity' => $producto->quantity,
+                        'quantity_delivered' => $producto->quantity_delivered,
+                        'quantity_invoiced' => $producto->quantity_invoiced,
+                        'created_at' => $producto->created_at,
+                        'updated_at' => $producto->updated_at,
+                        'status' => collect()
+                    ];
+                    // Agregar los datos obtenidos a la colección status
+                    $product['status']->push($statuses);
+
+                    // Agregar el producto al arreglo de productos
+                    $products[] = $product;
                 }
             }
-
-            // Devolver el arreglo completo de productos fuera del bucle
-
+        }
+          
 
 
             ////////MÁS INFORMACIÓN//////////////////////////
@@ -417,11 +381,112 @@ class SaleController extends Controller
 
                 $Sale[] = $SaleProducts;
             }
-            ////////////////////////////////////// STATUSDELPRODUCTO/////////////////////////7
-            $status = StatusDeliveryRouteChange::where('code_order', $orden->code_order)->get();
+
+            //////////////////PRODUCTOS QUE YA ESTAN EN STATUS 1/////////////////////////////////
+            $status = DB::table('order_confirmations')->select('order_purchase_id', 'status', 'id', 'id_order_products')->where('code_sale', $sale_id)
+                                                    ->groupBy('order_purchase_id', 'status', 'id', 'id_order_products')
+                                                    ->get();
+                                                    
+            $combinedResults = [];
+
+            foreach ($status as $item) {
+                $orderPurchaseId = $item->order_purchase_id;
+                                                    
+                $codeOrder = DB::table('order_purchases')->where('id', $orderPurchaseId)->value('code_order');
+        
+                if (!isset($combinedResults[$orderPurchaseId])) {
+                    $combinedResults[$orderPurchaseId] = [];
+                }
+                                                    
+                // Agrega el elemento actual al arreglo correspondiente al 'order_purchase_id'
+                $combinedResults[$orderPurchaseId][] = [
+                    'id' => $item->id,
+                    'code_order' => $codeOrder,
+                    'status' => $item->status,
+                    'order_purchase_id' => $item->order_purchase_id,
+                    'id_order_products' => $item->id_order_products
+                ];
+            }  
+            
+            
+            ///////////////STATUS 2////////////
+            $NumOrders = [];
+            foreach ($ordenes as $Order){
+                $idOrder = $Order->id;
+                $productos_totales = DB::table('order_purchase_products')->where('order_purchase_id',$idOrder)->count();
+                $NumOrders[] = $productos_totales;   
+            }
+            
+            $OrdersFinales = array_sum($NumOrders);
+            
+            $registros = [];
+            foreach ($ordenes as $order){
+                $idPurchase = $order->id;
+                $ya = DB::table('order_confirmations')->where('order_purchase_id', $idPurchase)->count();
+                $registros[] = $ya;
+            }
+            $ConfirmationOrders = array_sum($registros);
+            $statusOrders = '';
+            $registros = DB::table('sale_status_changes')->where('sale_id',$idSale)->where('status_id', 15)->first();
+            if($OrdersFinales != $ConfirmationOrders)
+            {
+                if(!$registros){
+                    SaleStatusChange::create([
+                        'sale_id' => $idSale,
+                        'status_id' => 15,
+                        'status' => 0,
+                    ]);
+                    $statusOrders = 0;
+                }
+                $statusOrders = 0;
+               
+            }elseif ($OrdersFinales == $ConfirmationOrders) {
+                if($registros){
+                    $status = $registros->status;
+                    $idSaleStatusChange = $registros->id;
+                    DB::table('sale_status_changes')->where('id',$idSaleStatusChange)->update([
+                        'sale_id' => $idSale,
+                        'status_id' => 15,
+                        'status' => 1,
+                    ]);
+                    $statusOrders = 1;
+                }elseif($status == 1){
+                    $statusOrders = 1;
+                }
+            }
+
+
+            ////////////////////////////////////////COMFIRMACION DE LAS RUTAS/////////////////////////////////////
+            /*$Ordenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
+                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
+            })->pluck('id', 'code_order');*/
+            
+            $primer = [];
+            foreach ($idOrdenes as $code_order => $idOrden) {
+                $ConfirmationRoute = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
+                $info = [];
+                foreach ($ConfirmationRoute as $Confirma) {
+                    $DatosConfirmate = DB::table('confirm_routes')->where('id_product_order', $Confirma->id)
+                        ->orderBy('created_at', 'desc')
+                        ->limit(1)
+                        ->get();
+                    foreach ($DatosConfirmate as $confirmados) {
+                        if ($confirmados) {
+                            $info[] = [
+                                'referencia' => $code_order,
+                                'id_product' => $Confirma->id,
+                                'description' => $Confirma->description,
+                            ];
+                        }
+                    }
+                }
+                $primer[$code_order] = $info;
+            }
+            
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
+                'status' => $combinedResults, 'status_two' => $statusOrders, 'HistoryConfirmationOrder' => $primer,
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);

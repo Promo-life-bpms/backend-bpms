@@ -37,6 +37,11 @@ class VideoController extends Controller
                         'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/reportegeneral.mp4',
                         'rol' => 'caja_chica, administrator'
                     ],
+                    [
+                        'nombre' => 'Autorización Caja Chica',
+                        'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/autorizacioncajachica.mp4',
+                        'rol' => 'caja_chica'
+                    ],
 
                 ];
                 break;
@@ -59,6 +64,26 @@ class VideoController extends Controller
             case 14:
                 /////VIDEOS PARA CAJA CHICA/////
                 //dd(3);
+                $videos = [
+                    [
+                        'nombre' => 'Nueva Solicitud',
+                        'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/nuevasolicitud.mp4',
+                        'rol' => '*'
+                    ],
+                    [
+                        'nombre' => 'Autorización Caja Chica',
+                        'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/autorizacioncajachica.mp4',
+                        'rol' => 'caja_chica'
+                    ],
+                    [
+                        'nombre' => 'Reporte General',
+                        'url' => 'https://dev-api-bpms.promolife.lat/storage/capacitacion/reportegeneral.mp4',
+                        'rol' => 'caja_chica, administrator'
+                    ],
+                ];
+                break;
+            case 15:
+                ////////////ROL DE ADQUISICION 
                 $videos = [
                     [
                         'nombre' => 'Nueva Solicitud',
