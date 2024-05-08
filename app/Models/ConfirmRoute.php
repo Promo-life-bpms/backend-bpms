@@ -5,25 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ConfirmRouteReceipt extends Model
+class ConfirmRoute extends Model
 {
     use HasFactory;
 
-    public $table = ['confirm_route_receipts'];
+    public $table = 'confirm_routes';
 
     protected $fillable = [
-        'id_order_purchase_products',
+        'id_product_order',
         'id_delivery_routes',
         'reception_type',
-        'destination'
-       
+        'destination',
     ];
 
-    public function OrderProducs()
+    public function OrderProduct()
     {
-        return $this->belongsTo(OrderPurchaseProduct::class, 'id_order_purchase_products');
+        return $this->belongsTo(OrderPurchaseProduct::class, 'id_product_order');
     }
-    
+
     public function DeliveryRoutes()
     {
         return $this->belongsTo(DeliveryRoute::class, 'id_delivery_routes');

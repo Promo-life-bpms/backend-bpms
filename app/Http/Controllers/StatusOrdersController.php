@@ -52,15 +52,4 @@ class StatusOrdersController extends Controller
             return response()->json(['message' => 'Aún no esta completo', 'status'=> 404], 404);
         }      
     }
-
-    public function confirmationOrderRoute(Request $request)
-    {
-        $this->validate($request, [
-            'id' => 'required',
-        ]);
-       $datos = DB::table('confirm_route_receipts')->where('id', $request->id)->get();
-       
-       return $datos;
-
-    }
 }

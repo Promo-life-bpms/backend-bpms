@@ -317,11 +317,11 @@ class SaleController extends Controller
             /////////////PRODUCTOS/////////////////
             $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
                 $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
-            })->pluck('id');
+            })->pluck('id', 'code_order');
             $products = [];
 
             ////VERIFICAMOS QUE LOS PRODUCTOS ESTEN COMPLETADOS/////////////
-            foreach ($idOrdenes as $idOrden) {
+            foreach ($idOrdenes as $id => $idOrden) {
                 $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
                 if ($ordenCompra) {
                     $productosOrden = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
@@ -474,11 +474,39 @@ class SaleController extends Controller
                     $statusOrders = 1;
                 }
             }
+
+
+            ////////////////////////////////////////COMFIRMACION DE LAS RUTAS/////////////////////////////////////
+            /*$Ordenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
+                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
+            })->pluck('id', 'code_order');*/
+            
+            $primer = [];
+            foreach ($idOrdenes as $code_order => $idOrden) {
+                $ConfirmationRoute = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
+                $info = [];
+                foreach ($ConfirmationRoute as $Confirma) {
+                    $DatosConfirmate = DB::table('confirm_routes')->where('id_product_order', $Confirma->id)
+                        ->orderBy('created_at', 'desc')
+                        ->limit(1)
+                        ->get();
+                    foreach ($DatosConfirmate as $confirmados) {
+                        if ($confirmados) {
+                            $info[] = [
+                                'referencia' => $code_order,
+                                'id_product' => $Confirma->id,
+                                'description' => $Confirma->description,
+                            ];
+                        }
+                    }
+                }
+                $primer[$code_order] = $info;
+            }
             
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
-                'status' => $combinedResults, 'status_two' => $statusOrders,
+                'status' => $combinedResults, 'status_two' => $statusOrders, 'HistoryConfirmationOrder' => $primer,
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);
