@@ -285,16 +285,59 @@ class SaleController extends Controller
                 $orders[] = $Orden;
             }
             /////////////PRODUCTOS/////////////////
-            $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
-                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
-            })->pluck('id');
+            // $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
+            //     $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
+            // })->pluck('id');
+            // $products = [];
+            // foreach ($idOrdenes as $idOrden) {
+            //     $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
+            //     if ($ordenCompra) {
+            //         $productosOrden = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
+            //         foreach ($productosOrden as $producto) {
+            //             $statuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $producto->id)->get();
+            //             $products = [
+            //                 'id' => $producto->id,
+            //                 'code_order' => $ordenCompra->code_order,
+            //                 'provider_name' => $ordenCompra->provider_name,
+            //                 'description' => $producto->description,
+            //                 'odoo_product_id' => $producto->odoo_product_id,
+            //                 'order_purchase_id' => $producto->order_purchase_id,
+            //                 'planned_date' => $producto->planned_date,
+            //                 'product' => $producto->product,
+            //                 'quantity' => $producto->quantity,
+            //                 'quantity_delivered' => $producto->quantity_delivered,
+            //                 'quantity_invoiced' => $producto->quantity_invoiced,
+            //                 'created_at' => $producto->created_at,
+            //                 'updated_at' => $producto->updated_at,
+            //                 'status' => collect() // Crear una colección vacía para status
+            //             ];
+
+            //             // Agregar los datos obtenidos a la colección status
+            //             $products['status']->push($statuses);
+
+            //         }
+            //     }
+            // }
+
+            $idOrdenes = DB::table('order_purchases')
+                ->where('code_sale', $sale_id)
+                ->where(function ($query) {
+                    $query->where('code_order', 'like', 'OC-%')
+                        ->orWhere('code_order', 'like', 'OT-%');
+                })
+                ->pluck('id');
+
             $products = [];
+
             foreach ($idOrdenes as $idOrden) {
                 $ordenCompra = DB::table('order_purchases')->where('id', $idOrden)->first();
+
                 if ($ordenCompra) {
                     $productosOrden = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
+
                     foreach ($productosOrden as $producto) {
-                        $products[] = [
+                        $statuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $producto->id)->get();
+                        $product = [
                             'id' => $producto->id,
                             'code_order' => $ordenCompra->code_order,
                             'provider_name' => $ordenCompra->provider_name,
@@ -307,11 +350,21 @@ class SaleController extends Controller
                             'quantity_delivered' => $producto->quantity_delivered,
                             'quantity_invoiced' => $producto->quantity_invoiced,
                             'created_at' => $producto->created_at,
-                            'updated_at' => $producto->updated_at
+                            'updated_at' => $producto->updated_at,
+                            'status' => collect() // Crear una colección vacía para status
                         ];
+
+                        // Agregar los datos obtenidos a la colección status
+                        $product['status']->push($statuses);
+
+                        // Agregar el producto al arreglo de productos
+                        $products[] = $product;
                     }
                 }
             }
+
+            // Devolver el arreglo completo de productos fuera del bucle
+
 
 
             ////////MÁS INFORMACIÓN//////////////////////////
@@ -361,13 +414,14 @@ class SaleController extends Controller
                     'quantity_invoiced' => $saleProduct->quantity_invoiced,
 
                 ];
+
                 $Sale[] = $SaleProducts;
             }
             ////////////////////////////////////// STATUSDELPRODUCTO/////////////////////////7
             $status = StatusDeliveryRouteChange::where('code_order', $orden->code_order)->get();
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
-                'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list, 'status_product' => $status
+                'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);
