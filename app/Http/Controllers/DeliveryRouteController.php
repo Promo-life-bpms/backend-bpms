@@ -98,6 +98,7 @@ class DeliveryRouteController extends Controller
         }
         $sale = Sale::where('code_sale', $sale)->first();
         $routes = [];
+        $status_delivery = [];
         $color = null;
         foreach ($request['delivery_route'] as $deliveryRouteData) {
             $order = OrderPurchase::where('code_order', $deliveryRouteData['code_order'])->where('code_sale', $sale->code_sale)->first();
@@ -125,6 +126,8 @@ class DeliveryRouteController extends Controller
                 $visible = 0;
             }
 
+            # code...
+
             $ruta = DeliveryRoute::create([
                 'code_sale' => $sale->code_sale,
                 'code_order' => $order->code_order,
@@ -138,46 +141,35 @@ class DeliveryRouteController extends Controller
                 'visible' => $visible
             ]);
             $routes[] = $ruta;
-        }
 
-    /*     $status_order = [];
+            $existingStatus = StatusDeliveryRouteChange::where('order_purchase_product_id', $deliveryRouteData['product_id'])
+                ->where('code_order', $order->code_order)
+                ->where('status', $deliveryRouteData['type_of_destiny'])
+                ->first();
 
 
-        foreach ($routes as $key => $route) {
-            $status_delivery = StatusDeliveryRouteChange::where('code_order', $ruta->code_order)->first();
-            //return $status_deliverys;
-            $status_delivery = StatusDeliveryRouteChange::updateOrCreate(
-                ['code_order' => $route->code_order],
-                ['status' => $route->status],
-                ['visible' => $route->visible]
-            );
-              if (!$status_delivery && $route->color == 1 || $route->color == 0) {
-                // No existe, crear un nuevo registro
 
-                $new_status_delivery = StatusDeliveryRouteChange::create([
-                    'order_purchase_product_id' => $route->product_id,
-                    'code_order' => $route->code_order,
-                    'status' => $route->type_of_destiny,
-                    'visible' => $route->visible
+            if ($existingStatus) {
+                $existingStatus->update([
+                    'status' => $deliveryRouteData['type_of_destiny'],
+                    'visible' => $visible
                 ]);
-                $status_order[] = $new_status_delivery;
+                $status_delivery[] = $existingStatus;
             } else {
-                // Ya existe, actualizar el registro existente
-                $status_delivery->update([
-                    'order_purchase_product_id' => $route->product_id,
-                    'code_order' => $route->code_order,
-                    'status' => $route->type_of_destiny,
-                    'visible' => $route->visible
+                $status_1 = StatusDeliveryRouteChange::create([
+                    'order_purchase_product_id' => $deliveryRouteData['product_id'],
+                    'code_order' => $order->code_order,
+                    'status' => $deliveryRouteData['type_of_destiny'],
+                    'visible' => $visible
                 ]);
-
-                $status_order[] = $status_delivery;
+                $status_delivery[] = $status_1;
             }
-        } */
+        }
         return response()->json([
             'msg' => 'Ruta Creada Existosamente',
             'data' => [
                 "ruta" => $routes,
-          /*       "status" => $status_order */
+                "status" => $status_delivery
             ]
         ], Response::HTTP_CREATED);
     }
