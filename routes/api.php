@@ -19,12 +19,15 @@ use App\Http\Controllers\CheckList as ControllersCheckList;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\ManagerHasDepartmentController;
+use App\Http\Controllers\OrderConfirmationController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
 use App\Http\Controllers\Pruebas;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SmallBoxUserController;
 use App\Http\Controllers\SpentController;
+use App\Http\Controllers\StatusOrdersController;
 use App\Http\Controllers\TemporyCompanyController;
 use App\Http\Controllers\UploadImageController;
 use App\Http\Controllers\UserCenterController;
@@ -170,6 +173,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/image/delete', [UploadImageController::class, 'deleteImage']);
 
 
+    /////////////////////RUTAS  PARA CONFIRMAR LOS PEDIDOS //////////////////////
+    Route::post('confirmation/order/products', [OrderConfirmationController::class, 'ConfirmOrderProducts']);
+    
+
+    Route::post('status/two/{pedido}',[StatusOrdersController::class, 'StatusTwo']);
+    Route::post('confirmation/route/order', [StatusOrdersController::class, 'confirmationOrderRoute']);
+
     //CAJA CHICA
 
     //Ordenes Usuario
@@ -196,6 +206,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('caja-chica/solicitudes-de-compra/por-departamento/ver/{page}', [PurchaseRequestController::class, 'DepartmentPage']);
     Route::post('caja-chica/aprobar-solicitud/por-department/', [PurchaseRequestController::class, 'approvedDepartment']);
     Route::post('caja-chica/editar/eventuales', [PurchaseRequestController::class, 'updateEventuales']);
+    Route::post('caja-chica/add/eventual/finde', [PurchaseRequestController::class, 'EventualesFinde']);
 
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
     Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class, 'editdate']);
@@ -273,4 +284,12 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('users/department/{id_department}', [UserDetailsController::class, 'UserforDepartment'])->name('users.department');
     //Video
     Route::get('video', [VideoController::class, 'storeVideoInfo']);
+
+
+
+    ///////////////////APIS PARA MANAGERS//////////////////////////////
+    Route::get('managers/department', [ManagerHasDepartmentController::class, 'ViewManager']);
+    Route::post('create/manager/department',[ManagerHasDepartmentController::class,'CrearManager']);
+    Route::post('delete/manager/department',[ManagerHasDepartmentController::class,'DeleteManager']);
+    
 });

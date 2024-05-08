@@ -235,14 +235,15 @@ class PurchaseRequestController extends Controller
         //dd($department_ids);
 
         $rol = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
-        $rolcajachi = DB::table('roles')->where('id', 43)->value('id');
+        $Adquisiciones = DB::table('roles')->where('id', 15)->value('id');
+        $rolcajachi = DB::table('roles')->where('id', 14)->value('id');
         $administrador = DB::table('roles')->where('id', 1)->value('id');
         // Verificar si el usuario autenticado es gerente de algún departamento
         if ($department_ids->isEmpty()) {
             $id = DB::table('purchase_requests')->where('id', $page)->value('user_id');
             if($id == $user->id){
             $spent = PurchaseRequest::where('id',$page)->get()->last();
-            }elseif($rol == $rolcajachi){
+            }elseif($rol == $rolcajachi || $rol == $Adquisiciones){
                 $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
                 if(trim($status) != "rechazada" && trim($status) != "en proceso"){
                     $spent = PurchaseRequest::where('id', $page)->get()->last();
@@ -259,10 +260,9 @@ class PurchaseRequestController extends Controller
             $idDepartment = DB::table('purchase_requests')->where('id', $page)->value('department_id');
             $DepartmentManager = DB::table('manager_has_departments')->where('id_user', $user->id)->pluck('id_department')->toArray();
             $managerAdmin = DB::table('manager_has_departments')->where('id_user', $user->id)->value('id_department');
-            $rolcajachi = DB::table('roles')->where('id', 43)->value('id');
             if (in_array($idDepartment, $DepartmentManager)) {
                 $spent = PurchaseRequest::where('id', $page)->get()->last();
-            } elseif(($managerAdmin == 1) && $rolcajachi) {
+            } elseif(($managerAdmin == 1) && $rolcajachi && $Adquisiciones) {
                 $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
                 if(trim($status) != "rechazada" && trim($status) != "en proceso"){
                     $spent = PurchaseRequest::where('id', $page)->get()->last();
@@ -449,12 +449,12 @@ class PurchaseRequestController extends Controller
                 $title = 'Nueva solicitud de compra';
                 $message = 'Haz recibido una nueva solicitud de compras.';
                 
-                try {
+                /*try {
                     Notification::route('mail', $users_to_send_mail->email)
                     ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
                 } catch (\Exception $e) {
                     return $e;
-                }
+                }*/
             }
             return response()->json(['message' => "Solicitud aprobada satisfactoriamente"], 200);
         }
@@ -689,9 +689,10 @@ class PurchaseRequestController extends Controller
         ]);
 
         $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
-        $rolcajachi = DB::table('roles')->where('id', 43)->value('id');
+        $rolcajachi = DB::table('roles')->where('id', 14)->value('id');
+        $roladquicision = DB::table('roles')->where('id', 15)->value('id');
         
-        if ($rolcajachica == $rolcajachi) {
+        if ($rolcajachica == $rolcajachi || $rolcajachica == $roladquicision) {
             $method = DB::table('purchase_requests')->where('id', $request->id_purchase)->select('payment_method_id')->first();
 
         if ($method->payment_method_id == 1) {
@@ -847,7 +848,7 @@ class PurchaseRequestController extends Controller
         $user_role = UserRole::where('role_id', $role_buyer->id)->get();
         $spent = Spent::where('id',$purchase_request->spent_id)->get()->first();
 
-        foreach($user_role as $role){
+        /*foreach($user_role as $role){
             $users_to_send_mail = User::where('id',$role->user_id)->get()->last();
 
             $title = 'Nueva solicitud de compra';
@@ -859,7 +860,7 @@ class PurchaseRequestController extends Controller
             } catch (\Exception $e) {
                 return $e;
             }
-        }
+        }*/
 
         return response()->json(['message' => "Solicitud aprobada satisfactoriamente"], 200);
     }
@@ -949,12 +950,12 @@ class PurchaseRequestController extends Controller
         $title = 'Solicitud rechazada';
         $message = 'Tu solicitud ha sido rechazada, revisa la información e intenta enviarla nuevamente.';
 
-        try {
+        /*try {
             Notification::route('mail', $users_to_send_mail->email)
             ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
         } catch (\Exception $e) {
             return $e;
-        }
+        }*/
     
         return response()->json(['message' => "Solicitud rechazada satisfactoriamente"], 200);
         
@@ -1019,12 +1020,12 @@ class PurchaseRequestController extends Controller
             $title = 'Haz recibido el Pedido';
             $message = 'Se ha confirmado que haz recibido el pedido';
 
-            try {
+            /*try {
                 Notification::route('mail', $users_to_send_mail->email)
                 ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
             } catch (\Exception $e) {
                 return $e;
-            }
+            }*/
     
             return response()->json(['message' => "Se ha confirmado que el pedido fue recibido"], 200);
         }else{
@@ -1058,12 +1059,12 @@ class PurchaseRequestController extends Controller
             $title = 'Devolución de Pedido';
             $message = 'Se ha realizado la devolución del pedido';
 
-            try {
+            /*try {
                 Notification::route('mail', $users_to_send_mail->email)
                 ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
             } catch (\Exception $e) {
                 return $e;
-            }
+            }*/
     
             return response()->json(['message' => "Devolución en proceso"], 200);
         }
@@ -1170,12 +1171,12 @@ class PurchaseRequestController extends Controller
             $title = 'Cancelación de Pedido';
             $message = 'Se ha realizado la cancelación del pedido';
 
-            try {
+            /*try {
                 Notification::route('mail', $users_to_send_mail->email)
                 ->notify(new BuyersRequestNotification($title, $message, $spent->concept, $spent->center->name, $purchase_request->total));
             } catch (\Exception $e) {
                 return $e;
-            }
+            }*/
             return response()->json(['message' => "Cancelación realizada"], 200);
         }else{
             return response()->json(['message' => "No es posible realizar una cancelación una vez que recibas el producto; se debe realizar una devolución"], 400);
@@ -1333,9 +1334,10 @@ class PurchaseRequestController extends Controller
         ]);
 
         $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
-        $rolcajachi = DB::table('roles')->where('id', 43)->value('id');
+        $rolcajachi = DB::table('roles')->where('id', 14)->value('id');
+        $roladquicision = DB::table('roles')->where('id', 15)->value('id');
         
-        if ($rolcajachica == $rolcajachi) {
+        if ($rolcajachica == $rolcajachi || $rolcajachica == $roladquicision) {
             ///VERIFICAMOS SI EL METODO DE PAGO QUE SE USUARA ES EFECTIVO///
             if($request->payment_method_id == 1){
                 $pago = DB::table('purchase_requests')->where('id', $request->id)->select('total')->first();
@@ -1398,6 +1400,7 @@ class PurchaseRequestController extends Controller
         $this->validate($request,[
             'purchase_id' => 'required',
             'id_eventual' => 'required|array',
+            'id_company' => 'required|array',
             'new_pay' => 'required|array'
         ]);
     
@@ -1411,22 +1414,22 @@ class PurchaseRequestController extends Controller
         // Iteramos sobre cada ID proporcionado
         foreach ($id_eventuales as $key => $id_eventual) {
             $new_pay_amount = $request->new_pay[$key]; // Obtener el pago correspondiente al ID actual
+            $new_company = $request->id_company[$key];
             foreach ($eventualArray as &$item) {
                 $id = $item['id'];
                 if ($id === $id_eventual) {
                     $item['pay'] = $new_pay_amount;
+                    $item['company'] = $new_company;
                     break; // Detener el bucle una vez que se ha actualizado el pago
                 }
             }
         }
-        
         // Guardamos los cambios
         $updatedEventualJSON = json_encode($eventualArray);
         DB::table('eventuales')->where('purchase_id', $purchase_id)->update(['eventuales' => $updatedEventualJSON]);
     
         // Recalculamos el total de pago
         $eventuales = DB::table('eventuales')->where('purchase_id', $purchase_id)->get();
-    
         $pays = [];
         foreach ($eventuales as $eventual) {
             $eventualArray = json_decode($eventual->eventuales, true);
@@ -1436,13 +1439,53 @@ class PurchaseRequestController extends Controller
         }
         // Sumar todos los valores de 'pay' en $pays
         $total_pay = array_sum($pays);
-    
-        // Actualizamos el total de la solicitud de compra
+        
         DB::table('purchase_requests')->where('id', $purchase_id)->update([
             'total' => $total_pay,
         ]);
-    
+        
         return response()->json(['message' => 'Pagos actualizados', 'status' => 200], 200);
     }
+
+    public function EventualesFinde(Request $request)
+    {
+        $request->validate([
+            'id_purchase' => 'required',
+            'eventuales' => 'nullable|array',
+            'eventuales.*.name' => 'required|string',
+            'eventuales.*.pay' => 'required|numeric',
+            'eventuales.*.company' => 'required'
+        ]);
+        
+        
+     
+        $eventuales = $request->eventuales;
+        // Genera un ID único para cada eventual combinando los IDs
+        foreach ($eventuales as &$eventual) {
+            $eventId = uniqid(); // Genera un ID único para el eventual
+            $eventual['id'] = $eventId . '_' . $request->id_purchase; // Combina los IDs
+        }
+        $eventualesData = [
+            'eventuales' => json_encode($eventuales),
+            'purchase_id' => $request->id_purchase,
+        ];
+        Eventuales::create($eventualesData);
     
+        $eventuales = DB::table('eventuales')->where('purchase_id', $request->id_purchase)->get();
+        $pays = [];
+        foreach ($eventuales as $eventual) {
+            $eventualArray = json_decode($eventual->eventuales, true);
+            foreach ($eventualArray as $item) {
+                $pays[] = $item['pay'];
+            }
+        }
+        // Sumar todos los valores de 'pay' en $pays
+        $total_pay = array_sum($pays);
+        DB::table('purchase_requests')->where('id', $request->id_purchase)->update([
+            'total' => $total_pay,
+        ]);
+                
+
+        return response()->json(['message' => 'Se agregaron correctamente los usuarios eventuales de fin de semana.'], 200);
+    }
 }
