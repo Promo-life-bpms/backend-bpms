@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Sale;
+use App\Models\StatusDeliveryRouteChange;
 use App\Models\StatusOT;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -362,10 +363,11 @@ class SaleController extends Controller
                 ];
                 $Sale[] = $SaleProducts;
             }
-
+            ////////////////////////////////////// STATUSDELPRODUCTO/////////////////////////7
+            $status = StatusDeliveryRouteChange::where('code_order', $orden->code_order)->get();
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
-                'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list
+                'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list, 'status_product' => $status
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);
