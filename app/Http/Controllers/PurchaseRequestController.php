@@ -708,6 +708,13 @@ class PurchaseRequestController extends Controller
                     ->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
                     ->sum('total');
             }
+
+            ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
+            $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])->where(function($query){
+                $query->where(function($subquery){
+                    $subquery->where('status', '=', 'Confirmado');
+                });
+            })->sum('total_return');
             
             ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
             //gastosmentuales == monthlyexpenses
@@ -726,7 +733,23 @@ class PurchaseRequestController extends Controller
             })->sum('total');
             
             $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
-            
+
+            $restaDelCajaReturn = DB::table('refund_of_money')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
+                                                        ->sum('total_returned');
+            // Restar total_returned al AvailableBudget si hay valores
+            if ($restaDelCajaReturn) {
+                $AvailableBudget -= $restaDelCajaReturn;
+            }
+
+            ///REGRESAR  AL PRESUPUESTO EL DINERO///
+            if($devolutionmoney){
+                $AvailableBudget +=$devolutionmoney;
+            }
+            ///RESTARLE EL DINERO A LO EGRESADO///                                                
+            if($devolutionmoney){
+                $MonthlyExpenses -= $devolutionmoney;
+            }
+
             $purchase = DB::table('purchase_requests')->where('id', $request->id_purchase)->first();
             if ($purchase) {
                 // Obtener el total anterior de la compra
@@ -1354,6 +1377,13 @@ class PurchaseRequestController extends Controller
                 }
                 ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
                 ///gastosmentuales == monthlyexpenses///
+
+                ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
+                $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])->where(function($query){
+                    $query->where(function($subquery){
+                        $subquery->where('status', '=', 'Confirmado');
+                    });
+                })->sum('total_return');
                 $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
                     $query->where(function ($subquery) {
                         $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
@@ -1367,11 +1397,26 @@ class PurchaseRequestController extends Controller
                         $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'rechazada')->where('payment_method_id', '=', 1);
                     });
                 })->sum('total');
-                
-                //dd($MonthlyExpenses);
+
+                ///presupuestodisponible == AvailableBudget                                        
                 $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
-                //dd($AvailableBudget);
-                //dd($total>$AvailableBudget);
+
+                $restaDelCajaReturn = DB::table('refund_of_money')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])
+                                                        ->sum('total_returned');
+                // Restar total_returned al AvailableBudget si hay valores
+                if ($restaDelCajaReturn) {
+                    $AvailableBudget -= $restaDelCajaReturn;
+                }
+
+                ///REGRESAR  AL PRESUPUESTO EL DINERO///
+                if($devolutionmoney){
+                     $AvailableBudget +=$devolutionmoney;
+                }
+                ///RESTARLE EL DINERO A LO EGRESADO///                                                
+                if($devolutionmoney){
+                    $MonthlyExpenses -= $devolutionmoney;
+                }
+        
                 if ($pago) {
                     if($total > $AvailableBudget){
                         return response()->json(['message' => 'No tienes fondos suficientes'], 400);
