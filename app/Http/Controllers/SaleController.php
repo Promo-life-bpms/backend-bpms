@@ -478,7 +478,6 @@ class SaleController extends Controller
             $primer = [];
             foreach ($idOrdenes as $code_order => $idOrden) {
                 $ConfirmationRoute = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
-                $info = [];
                 foreach ($ConfirmationRoute as $Confirma) {
                     $DatosConfirmate = DB::table('confirm_routes')->where('id_product_order', $Confirma->id)
                         ->orderBy('created_at', 'desc')
@@ -486,16 +485,16 @@ class SaleController extends Controller
                         ->get();
                     foreach ($DatosConfirmate as $confirmados) {
                         if ($confirmados) {
-                            $info[] = [
-                                'referencia' => $code_order,
+                            $info = [
+                                'reference' => $code_order,
                                 'id_product' => $Confirma->id,
                                 'description' => $Confirma->description,
                             ];
+                            $primer[] = $info;
                         }
                     }
                 }
-                $primer[$code_order] = $info;
-            }
+            }            
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
