@@ -20,6 +20,7 @@ use App\Http\Controllers\ConfirmRouteController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\LackOfMoneyEventualsController;
 use App\Http\Controllers\ManagerHasDepartmentController;
 use App\Http\Controllers\OrderConfirmationController;
 use App\Http\Controllers\ReceptionController;
@@ -212,6 +213,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('caja-chica/aprobar-solicitud/por-department/', [PurchaseRequestController::class, 'approvedDepartment']);
     Route::post('caja-chica/editar/eventuales', [PurchaseRequestController::class, 'updateEventuales']);
     Route::post('caja-chica/add/eventual/finde', [PurchaseRequestController::class, 'EventualesFinde']);
+    ///////////CONFIRMAR RETORNO DE DINERO////////////////
+    Route::post('confirmation/returnormore/money/eventuales', [LackOfMoneyEventualsController::class, 'ConfirmationReturnMoneyEventuales']);
 
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
     Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class, 'editdate']);
