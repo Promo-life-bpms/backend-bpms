@@ -11,20 +11,27 @@ class ConfirmProductCountController extends Controller
     public function ProductCount(Request $request)
     {
         $this->validate($request, [
-            'id_product' => 'required'
+            'confirmation_type' => 'required',
+            'type' => 'required'
         ]);
 
-        $infoConfirmRoute = DB::table('confirm_routes')->where('id_product_order', $request->id_product)->first();
+        $infoConfirmRoute = DB::table('confirm_routes')->where('reception_type', $request->confirmation_type)
+                                                    ->where('destination', $request->type)->orderBy('created_at', 'desc')
+                                                    ->first();
+        $type = $infoConfirmRoute->destination;
+        $confirmation_type = $infoConfirmRoute->reception_type;
+        $id_confirm_routes = $infoConfirmRoute->id;
+        $id_product = $infoConfirmRoute->id_product_order;
         if(!$infoConfirmRoute)
         {
             return response()->json(['message' => 'Es posible que aún no se confirme la recepción del producto.'], 409);
             
         }else{
             ConfirmProductCount::create([
-                'id_product' => $request->id_product,
-                'type' => $infoConfirmRoute->destination,
-                'confirmation_type' => $infoConfirmRoute->reception_type,
-                'id_confirm_routes' => $infoConfirmRoute->id,
+                'id_product' => $id_product,
+                'type' => $type,
+                'confirmation_type' => $confirmation_type,
+                'id_confirm_routes' => $id_confirm_routes,
                 'observation' => $request->observation
             ]);
         }
