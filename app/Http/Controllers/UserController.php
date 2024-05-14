@@ -193,7 +193,7 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'password' => $pass,
-                'url' => env("URL_FRONTEND", "https://bpms.promolife.lat")
+                'url' => env("URL_FRONTEND", "https://bpms.promolife.lat/login")
             ];
             // Enviar email con la contraseña
             $user->notify(new RegisteredUser($dataNotification));
