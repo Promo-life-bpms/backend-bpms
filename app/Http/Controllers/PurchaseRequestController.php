@@ -380,18 +380,23 @@ class PurchaseRequestController extends Controller
 
             $returnmoney = [];
 
-            foreach ($returnmoneyexcess as $returnmoney) {
-                $returnmoney->created_at = date('d-m-Y H:i:s', strtotime($returnmoney->created_at));
-
-                if ($returnmoney->confirmation_datetime != null) {
-                    $returnmoney->confirmation_datetime = date('d-m-Y H:i:s', strtotime($returnmoney->confirmation_datetime));
+            foreach ($returnmoneyexcess as $item) {
+                $item->created_at = date('d-m-Y H:i:s', strtotime($item->created_at));
+            
+                if ($item->confirmation_datetime != null) {
+                    $item->confirmation_datetime = date('d-m-Y H:i:s', strtotime($item->confirmation_datetime));
                 }
-
-                $user = DB::table('users')->where('id', $returnmoney->confirmation_user_id)->select('name')->first();
-                $returnmoney->confirmation_user_id = $user ? $user->name : null;
-                $username = DB::table('users')->where('id', $returnmoney->return_user_id)->select('name')->first();
-                $returnmoney->return_user_id = $username ? $username->name : null;
+            
+                $user = DB::table('users')->where('id', $item->confirmation_user_id)->select('name')->first();
+                $item->confirmation_user_id = $user ? $user->name : null;
+                $username = DB::table('users')->where('id', $item->return_user_id)->select('name')->first();
+                $item->return_user_id = $username ? $username->name : null;
+                $total = DB::table('purchase_requests')->where('id', $page)->select('total')->first();
+                $item->total = $total ? $total->total : null;
+                
+                $returnmoney[] = $item;
             }
+            
 
             $moremoney = DB::table('lack_of_money_eventuals')->where('id_purchase', $page)->select(
                 'id',
