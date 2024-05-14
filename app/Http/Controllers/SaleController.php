@@ -472,10 +472,7 @@ class SaleController extends Controller
                 }
             }
             ////////////////////////////////////////COMFIRMACION DE LAS RUTAS/////////////////////////////////////
-            /*$Ordenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
-                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
-            })->pluck('id', 'code_order');*/
-            $primer = [];
+            $ConfirmationOrder = [];
             foreach ($idOrdenes as $code_order => $idOrden) {
                 $ConfirmationRoute = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
                 foreach ($ConfirmationRoute as $Confirma) {
@@ -484,13 +481,20 @@ class SaleController extends Controller
                         ->limit(1)
                         ->get();
                     foreach ($DatosConfirmate as $confirmados) {
+                        $ProductsCounts = DB::table('confirm_product_counts')->where('id_product',$Confirma->id)->exists();
+                        $HistoryProductsCounts = 0;
+                        if($ProductsCounts){
+                            $HistoryProductsCounts = 1;
+
+                        }
                         if ($confirmados) {
                             $info = [
                                 'reference' => $code_order,
                                 'id_product' => $Confirma->id,
                                 'description' => $Confirma->description,
+                                'Products_Counts_History' => $HistoryProductsCounts,
                             ];
-                            $primer[] = $info;
+                            $ConfirmationOrder[] = $info;
                         }
                     }
                 }
@@ -498,7 +502,7 @@ class SaleController extends Controller
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
-                'status' => $combinedResults, 'status_two' => $statusOrders, 'HistoryConfirmationOrder' => $primer,
+                'status' => $combinedResults, 'status_two' => $statusOrders, 'HistoryConfirmationOrder' => $ConfirmationOrder,
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);

@@ -16,6 +16,7 @@ use App\Http\Controllers\EventualesController;
 use App\Http\Controllers\ExchangeReturnController;
 use App\Http\Controllers\BinnacleController;
 use App\Http\Controllers\CheckList as ControllersCheckList;
+use App\Http\Controllers\ConfirmProductCountController;
 use App\Http\Controllers\ConfirmRouteController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExcelRutaController;
@@ -184,6 +185,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('confirmation/route/product', [ConfirmRouteController::class, 'ConfirmationRoute']);
     Route::get('history/confirmation/route/product/{idProductOrder}', [ConfirmRouteController::class, 'index']);
 
+    //////////////////CONTEO DEL PRODUCTO///////////////////////
+    Route::post('product/count/confirmation', [ConfirmProductCountController::class, 'ProductCount']);
+    Route::get('product/count/confirmation/history/{idProductOrder}', [ConfirmProductCountController::class, 'ProductCountHistory']);
     
 
     //CAJA CHICA
