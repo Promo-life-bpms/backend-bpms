@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Models\UserCenter;
 use App\Models\UserRole;
 use App\Notifications\BuyersRequestNotification;
+use App\Notifications\CreatePurchaseRequest;
 use App\Notifications\CreateRequestNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -687,8 +688,24 @@ class PurchaseRequestController extends Controller
             Eventuales::create($eventualesData);
         }
         ///////////////////////////////////
+        //////////PRIMERO VERIFICAMOS QUIEN ES SU JEFE DIRECTO////////////
+        $department = DB::table('user_details')->where('id_user', $user->id)->first();
+        //dd($department);
+        $idDepartment = $department->id_department;
+        //dd($idDepartment);
+        $InfoDepartmentManager = DB::table('manager_has_departments')->where('id_department', $idDepartment)->get();
+        $idUsers = $InfoDepartmentManager->pluck('id_user')->toArray();
 
-        $users_to_send_mail = UserCenter::where('center_id', $center_id)->get();
+        foreach($idUsers as $idUser){
+            $Usuario = User::where('id', $idUser)->first();
+            try {
+                $Usuario->notify(new CreatePurchaseRequest($user->name, $Usuario->name, $id));
+                
+            } catch (\Exception $e) {
+                return $e;
+            }
+        }
+        /*$users_to_send_mail = UserCenter::where('center_id', $center_id)->get();
 
         if (count($users_to_send_mail) != 0) {
             $spent = Spent::where('id', $request->spent_id)->get()->first();
@@ -703,7 +720,7 @@ class PurchaseRequestController extends Controller
                     return $e;
                 }
             }
-        }
+        }*/
 
         return response()->json(['message' => "Registro guardado satisfactoriamente"], 200);
     }
