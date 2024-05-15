@@ -22,16 +22,20 @@ class ConfirmRouteController extends Controller
                                                         ->orderBy('created_at', 'desc')
                                                         ->first();
 
-        $type = $inforDelivery->type;
-        $idDelivery =  $inforDelivery->id;
-                                                    
-        ConfirmRoute::create([
-            'id_product_order' => $request->id_product_order,
-            'id_delivery_routes' => $idDelivery,
-            'reception_type' => $type,
-            'destination' => $request->destiny,
-        ]);
+        if(!$inforDelivery){
+            return response()->json(['message' => 'Aún no se actualiza la ruta.'], 409);
 
+        }else{
+            $type = $inforDelivery->type;
+            $idDelivery =  $inforDelivery->id;
+            ConfirmRoute::create([
+                'id_product_order' => $request->id_product_order,
+                'id_delivery_routes' => $idDelivery,
+                'reception_type' => $type,
+                'destination' => $request->destiny,
+            ]);
+        }
+                                                    
         return response()->json(['message' => 'Se confirmo la ruta del producto'], 200);
     }
 
