@@ -18,7 +18,7 @@ class CreateStatusDeliveryRouteChangesTable extends Migration
             $table->integer('order_purchase_product_id');
             $table->string('code_order');
             $table->string('status');
-            $table->integer('visible');
+            $table->integer('visible')->nullable();
             $table->timestamps();
         });
     }
