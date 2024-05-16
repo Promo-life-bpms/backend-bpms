@@ -18,13 +18,26 @@ class LackOfMoneyEventualsController extends Controller
         ]);
         
         ////////////////////PARA CONFIRMAR CUANDO ES MENOR EL DINERO/////////////////////////////
-        $infoReturn  = DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->where('status', 'Sin confirmar')->exists();
+        $infoReturn  = DB::table('return_money_from_eventualities')->where('id_purchase', $request->purchase_id)->where('status', 'Sin confirmar')->exists();
         if($infoReturn){
+            $eventuales = DB::table('eventuales')->where('purchase_id', $request->purchase_id)->get();
+            $pays = [];
+            foreach ($eventuales as $eventual) {
+                $eventualArray = json_decode($eventual->eventuales, true);
+                foreach ($eventualArray as $item) {
+                    $pays[] = $item['pay'];
+                }
+            }
+            $total_pay = array_sum($pays);
+            DB::table('purchase_requests')->where('id', $request->purchase_id)->update([
+                'total' => $total_pay,
+            ]);
+            
             $hora = Carbon::now();
-            DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->update([
+            DB::table('return_money_from_eventualities')->where('id_purchase', $request->purchase_id)->update([
                 'status' => 'Confirmado',
                 'confirmation_datetime' => $hora,
-                'confirmation_user_id' => $user->id,
+                'id_person_who_delivers' => $user->id,
             ]);
         }
 

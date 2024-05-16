@@ -10,6 +10,7 @@ use App\Models\HistoryDevolution;
 use App\Models\LackOfMoneyEventuals;
 use App\Models\PaymentMethodInformation;
 use App\Models\PurchaseRequest;
+use App\Models\ReturnMoneyFromEventualities;
 use App\Models\Role;
 use App\Models\Spent;
 use App\Models\spent_money;
@@ -425,6 +426,32 @@ class PurchaseRequestController extends Controller
                 $username = DB::table('users')->where('id', $moremoneyeventual->id_person_who_delivers)->select('name')->first();
                 $moremoneyeventual->id_person_who_delivers = $username ? $username->name : null;
             }
+
+            $returnmoneyeventuals = DB::table('return_money_from_eventualities')->where('id_purchase', $page)->select(
+                'id',
+                'id_applicant_person',
+                'id_person_who_delivers',
+                'description',
+                'file',
+                'previous_total',
+                'current_total',
+                'status',
+                'confirmation_datetime',
+                'created_at'
+            )->get()->toArray();
+            $lessmoneyeventual = [];
+            foreach ($returnmoneyeventuals as $lessmoneyeventual) {
+                $lessmoneyeventual->created_at = date('d-m-Y H:i:s', strtotime($lessmoneyeventual->created_at));
+
+                if ($lessmoneyeventual->confirmation_datetime != null) {
+                    $lessmoneyeventual->confirmation_datetime = date('d-m-Y H:i:s', strtotime($lessmoneyeventual->confirmation_datetime));
+                }
+
+                $user = DB::table('users')->where('id', $lessmoneyeventual->id_applicant_person)->select('name')->first();
+                $lessmoneyeventual->id_applicant_person = $user ? $user->name : null;
+                $username = DB::table('users')->where('id', $lessmoneyeventual->id_person_who_delivers)->select('name')->first();
+                $lessmoneyeventual->id_person_who_delivers = $username ? $username->name : null;
+            }
            
 
             array_push($data, (object)[
@@ -453,6 +480,7 @@ class PurchaseRequestController extends Controller
                 'event' => $event,
                 'returnmoney' => $returnmoney,
                 'moremoneyeventual' => $moremoneyeventual,
+                'lessmoneyeventual' => $lessmoneyeventual
             ]);
         }
 
@@ -808,6 +836,7 @@ class PurchaseRequestController extends Controller
                 if ($devolutionmoney) {
                     $MonthlyExpenses -= $devolutionmoney;
                 }
+                //dd($AvailableBudget);
 
                 $purchase = DB::table('purchase_requests')->where('id', $request->id_purchase)->first();
                 if ($purchase) {
@@ -1479,6 +1508,7 @@ class PurchaseRequestController extends Controller
                 if ($devolutionmoney) {
                     $MonthlyExpenses -= $devolutionmoney;
                 }
+                //dd($AvailableBudget);
 
                 if ($pago) {
                     if ($total > $AvailableBudget) {
@@ -1752,8 +1782,7 @@ class PurchaseRequestController extends Controller
                     'description' => 'required',
                     'file' => 'required',
                 ]);
-                $total_return = $total_anterior - $total_pay;
-
+            
                 ////GUARDAMOS EL EVENTUAL////
                 $eventual = Eventuales::create($eventualesData);
 
@@ -1766,12 +1795,15 @@ class PurchaseRequestController extends Controller
                     $path= $request->file('file')->move('storage/smallbox/files/', $fileNameToStore);
                 }
 
-                ExchangeReturn::create([
-                    'total_return' => $total_return,
+                ReturnMoneyFromEventualities::create([
+                    'id_applicant_person' => $user->id,
                     'description' => $request->description,
-                    'purchase_id' => $request->id_purchase,
-                    'file_exchange_returns' => $path,
-                    'return_user_id' => $user->id,
+                    'file' => $path,
+                    'previous_total' => $total_anterior,
+                    'current_total' => $total_pay,
+                    'status' => "Sin confirmar",
+                    'id_eventual' => $eventual->id,
+                    'id_purchase' => $request->id_purchase
                 ]);
                 return response()->json(['message' => 'Comenzaste el proceso de regresar el sobrante'], 200);
             }
