@@ -18,7 +18,7 @@ class CreateReturnMoneyFromEventualitiesTable extends Migration
             $table->integer('id_applicant_person');
             $table->integer('id_person_who_delivers')->nullable();
             $table->text('description');
-            $table->string('file')->nullable();
+            $table->string('file');
             $table->decimal('previous_total', 16,2);
             $table->decimal('current_total', 16,2);
             $table->string('status');
