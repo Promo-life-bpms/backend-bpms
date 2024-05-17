@@ -19,10 +19,13 @@ class CreateDeliveryRoutesTable extends Migration
             $table->foreignId('code_sale')->reference('code_sale')->on('sales');
             $table->foreignId('code_order')->reference('code_order')->on('code_order');
             $table->date('product_id');
+            $table->string('type');
             $table->string('type_of_destiny');
             $table->string('date_of_delivery');
             $table->string('status_delivery');
             $table->string('shipping_type');
+            $table->integer('color');
+            $table->integer('visible');
             $table->timestamps();
         });
     }

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ConfirmRouteReceipt;
 use App\Models\Sale;
 use App\Models\SaleStatusChange;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class StatusOrdersController extends Controller

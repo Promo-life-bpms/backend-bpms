@@ -16,9 +16,12 @@ use App\Http\Controllers\EventualesController;
 use App\Http\Controllers\ExchangeReturnController;
 use App\Http\Controllers\BinnacleController;
 use App\Http\Controllers\CheckList as ControllersCheckList;
+use App\Http\Controllers\ConfirmProductCountController;
+use App\Http\Controllers\ConfirmRouteController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ExcelRutaController;
 use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\LackOfMoneyEventualsController;
 use App\Http\Controllers\ManagerHasDepartmentController;
 use App\Http\Controllers\OrderConfirmationController;
 use App\Http\Controllers\ReceptionController;
@@ -106,7 +109,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('pedidos/{pedido}/orders/{order}', [OrderPurchaseController::class, 'show']);
 
     // Recepciones de Inventario
-    Route::post('orders/{order}/receptions', [ReceptionController::class, 'saveReception']);
+    Route::post('reception/{code_order}', [ReceptionController::class, 'saveReception']);
 
     Route::get('orders/{order}/receptions/{reception}', [ReceptionController::class, 'getReception']);
     //confirmar un producto
@@ -175,9 +178,17 @@ Route::group(['middleware' => 'auth'], function () {
 
     /////////////////////RUTAS  PARA CONFIRMAR LOS PEDIDOS //////////////////////
     Route::post('confirmation/order/products', [OrderConfirmationController::class, 'ConfirmOrderProducts']);
-
+    
 
     Route::post('status/two/{pedido}',[StatusOrdersController::class, 'StatusTwo']);
+    /////////////////CONFIRMAR ORDENES DE PRODUCTOS///////////////
+    Route::post('confirmation/route/product', [ConfirmRouteController::class, 'ConfirmationRoute']);
+    Route::get('history/confirmation/route/product/{idProductOrder}', [ConfirmRouteController::class, 'index']);
+
+    //////////////////CONTEO DEL PRODUCTO///////////////////////
+    Route::post('product/count/confirmation', [ConfirmProductCountController::class, 'ProductCount']);
+    Route::get('product/count/confirmation/history/{idProductOrder}', [ConfirmProductCountController::class, 'ProductCountHistory']);
+    
 
     //CAJA CHICA
 
@@ -205,6 +216,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('caja-chica/solicitudes-de-compra/por-departamento/ver/{page}', [PurchaseRequestController::class, 'DepartmentPage']);
     Route::post('caja-chica/aprobar-solicitud/por-department/', [PurchaseRequestController::class, 'approvedDepartment']);
     Route::post('caja-chica/editar/eventuales', [PurchaseRequestController::class, 'updateEventuales']);
+    Route::post('caja-chica/add/eventual/finde', [PurchaseRequestController::class, 'EventualesFinde']);
+    ///////////CONFIRMAR RETORNO DE DINERO////////////////
+    Route::post('confirmation/returnormore/money/eventuales', [LackOfMoneyEventualsController::class, 'ConfirmationReturnMoneyEventuales']);
 
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
     Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class, 'editdate']);

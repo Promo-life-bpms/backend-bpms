@@ -15,10 +15,13 @@ class DeliveryRoute extends Model
         'code_sale',
         'code_order',
         'product_id',
+        'type',
         'type_of_destiny',
         'date_of_delivery',
         'status_delivery',
         'shipping_type',
+        'color',
+        'visible',
     ];
 
     /*  public function codeOrderDeliveryRoute()

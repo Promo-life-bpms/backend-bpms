@@ -17,6 +17,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\OrderPurchaseProduct;
 use App\Models\SaleStatusChange;
+use App\Models\StatusDeliveryRoute;
+use App\Models\StatusDeliveryRouteChange;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -61,49 +63,6 @@ class DeliveryRouteController extends Controller
 
 
     }
-
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create(Request $request)
-    {
-        //pedidos por agendar
-        //traer todos los usuarios que son choferes
-        /*  $rolChofer = Role::find(4);
-        $choferes = [];
-        foreach ($rolChofer->users as $chofer) {
-            array_push($choferes, ['id' => $chofer->id, 'name' => $chofer->name]);
-        }
- */
-        // traer los productos de las ordenes de compra o trabajo que no han sido entregados o cancelados
-        /*  $per_page = 10;
-
-        if ($request->per_page) {
-            $per_page = $request->per_page;
-        } */
-        $pedidos = Sale::join('order_purchases', 'order_purchases.code_sale', 'sales.code_sale')->whereIn('order_purchases.status_bpm', ["Cancelado", "Confirmado"])->orderBy('sales.code_sale', 'ASC')->paginate($per_page);
-
-        foreach ($pedidos as $pedido) {
-            $pedido->orders = $pedido->orders()->whereIn('order_purchases.status_bpm', ["Cancelado", "Confirmado"])->get();
-            $pedido->moreInformation;
-            $pedido->client_name = $pedido->moreInformation->client_name;
-            $pedido->client_contact = $pedido->moreInformation->client_contact;
-            unset($pedido->moreInformation);
-            foreach ($pedido->orders as $orden) {
-                $orden->products;
-            }
-        }
-        return response()->json([
-            'msg' => 'Pedidos por agendar',
-            'data' => [
-                "pedidos" => $pedidos, "choferes" => $choferes
-            ]
-        ], response::HTTP_OK);
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -112,44 +71,15 @@ class DeliveryRouteController extends Controller
      */
     public function store(Request $request, $sale)
     {
-        //validar que la informacion este correcta si no no se puede registrar
-        // utilizar validator
-
-        $user =  auth()->user();
-
-        /*   foreach ($user->whatRoles as $rol) {
-            switch ($rol->name) {
-
-                case ("logistica-y-mesa-de-control" == $rol->name):
-
-                    break;
-                case ("administrator" == $rol->name):
-
-                    break;
-                case ("compras" == $rol->name):
-
-                    break;
-
-                default:
-                    return response()->json(
-                        [
-                            'msg' => "No tienes autorizacion para generar una ruta de entrega",
-                        ],
-
-                    );
-                    break;
-            }
-        } */
-        //switch con casos de true para logistica, administrador y compras
-
-
         $validation = Validator::make($request->all(), [
             'delivery_route' => 'required|array',
-            'delivery_routes.*.product_id' => 'required',
-            'delivery_routes.*.type_of_destiny' => 'required',
-            'delivery_routes.*.date_of_delivery' => 'required',
-            'delivery_routes.*.status_delivery' => 'required',
-            'delivery_routes.*.shipping_type' => 'required',
+            'delivery_route.*.code_order' => 'required',
+            'delivery_route.*.product_id' => 'required',
+            'delivery_route.*.type_of_destiny' => 'required',
+            'delivery_route.*.type' => 'required',
+            'delivery_route.*.date_of_delivery' => 'required',
+            'delivery_route.*.status_delivery' => 'required',
+            'delivery_route.*.shipping_type' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json(
@@ -163,143 +93,144 @@ class DeliveryRouteController extends Controller
 
         // Validar que la informacion sea la correcta
         $errores = [];
-        /*      foreach ($request->code_orders as $saleOrder) {
-            $saleOrder = (object)$saleOrder;
-
-            $saleOrderBD = Sale::where('code_sale', $saleOrder->code_sale)->get();
-
-            foreach ($saleOrder->orders as $orderRQ) {
-                $orderRQ = (object) $orderRQ;
-
-                // return $orderRQ;
-                $orderDB = OrderPurchase::where('code_sale', $saleOrder->code_sale)->where('code_order', $orderRQ->code_order)->first();
-                if (!$orderDB) {
-                    array_push($errores, 'La orden de compra ' . $orderRQ->code_order . ' no pertenece al pedido ' . $saleOrder->code_sale);
-                    continue;
-                }
-                foreach ($orderRQ->products as $productRQ) {
-                    $productRQ = (object) $productRQ;
-                    $productDB = OrderPurchaseProduct::where('odoo_product_id', $productRQ->odoo_product_id)->where('order_purchase_id', $orderDB->id)->first();
-                    if (!$productDB) {
-                        array_push($errores, 'El producto ' . $productRQ->odoo_product_id . ' no pertenece a la orden de compra ' . $orderRQ->code_order);
-                        continue;
-                    }
-                }
-            }
-        } */
-
-
         if (count($errores) > 0) {
             return response()->json($errores, 400);
         }
-        // crear una ruta de entrega con los campos de Deliveryroute y guardar esa ruta de entrega en una variable
-        //codigo de ruta
-        /*  $maxINSP = DeliveryRoute::max('code_route');
-        $idInsp = null;
-        if (!$maxINSP) {
-            $idInsp = 1;
-        } else {
-            $idInsp = (int) explode('-', $maxINSP)[1];
-            $idInsp++;
-        } */
         $sale = Sale::where('code_sale', $sale)->first();
-        $order = OrderPurchase::where('code_sale', $sale->code_sale)->first();
-        if (!$order) {
-            'Esa orden no existe o no esta en ese pedido';
-        }
         $routes = [];
+        $productIdsWithStates = [];
+        $color = null;
+
         foreach ($request['delivery_route'] as $deliveryRouteData) {
+            $order = OrderPurchase::where('code_order', $deliveryRouteData['code_order'])->where('code_sale', $sale->code_sale)->first();
+
+            if (!$order) {
+                return response()->json(
+                    [
+                        'msg' => "no existe esta orden",
+                    ],
+                    response::HTTP_UNPROCESSABLE_ENTITY
+                );
+            }
+            if (
+                $deliveryRouteData['type'] == "Parcial" && $deliveryRouteData['status_delivery'] == "Completo" ||
+                $deliveryRouteData['type'] == "Parcial" && $deliveryRouteData['status_delivery'] == "Reprogramado" ||
+                $deliveryRouteData['type'] == "Parcial" && $deliveryRouteData['status_delivery'] == "Pendiente" ||
+                $deliveryRouteData['type'] == "Total" && $deliveryRouteData['status_delivery'] == "Pendiente" ||
+                $deliveryRouteData['type'] == "Total" && $deliveryRouteData['status_delivery'] == "Reprogramado"
+            ) {
+                $color = 1;
+            } elseif ($deliveryRouteData['status_delivery'] == "Completo" && $deliveryRouteData['type'] == "Total") {
+                $color = 2;
+            } else {
+                $color = 0; // Establecer un valor predeterminado para $color si no se cumple ninguna condición
+            }
+
+            $visible = null;
+
+            if ($color == 2) {
+                $visible = 1; //El visible 1 es de que ya esta completo y total
+            } else if ($color == 1) {
+                $visible = 0; //El visible 0 es de que status sea diferente a completo y a total puede ser que sea parcial y que sea reprogramado o pendiente
+            } else {
+                $visible = 2; //El visible 2 es que no tiene ningun dato
+            }
+            //$visible = ($color == 2) ? 1 : 0;
+            /*    $rutas = DeliveryRoute::where('product_id', $deliveryRouteData['product_id'])->where()->get(); */
 
             $ruta = DeliveryRoute::create([
                 'code_sale' => $sale->code_sale,
                 'code_order' => $order->code_order,
                 'product_id' => $deliveryRouteData['product_id'],
+                'type' => $deliveryRouteData['type'],
                 'type_of_destiny' => $deliveryRouteData['type_of_destiny'],
                 'date_of_delivery' => $deliveryRouteData['date_of_delivery'],
                 'status_delivery' => $deliveryRouteData['status_delivery'],
-                'shipping_type' => $deliveryRouteData['shipping_type']
+                'shipping_type' => $deliveryRouteData['shipping_type'],
+                'color' => $color,
+                'visible' => $visible
             ]);
             $routes[] = $ruta;
         }
 
-        /* //crear los productos de esa ruta de entrega
-        $sales_order = [];
-        foreach ($request->code_orders as $codeOrder) {
-            $codeOrder = (object)$codeOrder;
-            $dataSale = [
-                'code_sale' => $codeOrder->code_sale,
-                'type_of_origin' => $codeOrder->type_of_origin,
-                'type_of_destiny' => $codeOrder->type_of_destiny,
-                'user_chofer_id' => null,
-                'type_of_product' => $codeOrder->type_of_product,
-                'type_of_chofer' => null,
-                'status' => 'Pendiente'
-            ];
+        $existingStatuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $deliveryRouteData['product_id'])
+            ->where('code_order', $order->code_order)
+            ->get();
 
-            // Agendado en ruta de entrega (Material maquilado):
-            //Agendado en ruta de entrega (Material maquilado):
+        $statuses = StatusDeliveryRoute::all();
 
-            foreach ($codeOrder->orders as $order) {
-                $saleOrderBD = Sale::where('code_sale', $codeOrder->code_sale)->first();
-                $order = (object) $order;
-                $dataSale['code_order'] = $order->code_order;
-                $codeOrderRoute =  $ruta->codeOrderDeliveryRoute()->create($dataSale);
-                foreach ($order->products as $newProduct) {
-                    $newProduct = (object)$newProduct;
-                    $codeOrderRoute->productDeliveryRoute()->create([
-                        'odoo_product_id' => $newProduct->odoo_product_id,
-                        'amount' => $newProduct->amount,
-                        'action' => $newProduct->action,
-                        'hour' => $newProduct->hour,
-                        'observations' => $newProduct->observations,
-                        'provider' => $newProduct->provider,
-                        'destinity_address' => $newProduct->destiny_address,
-                        'confirmation_sheet' => $newProduct->confirmation_sheet,
-                        'buyer_id' => auth()->user()->name,
-                        'files_reception_accepted' => null,
+        $status_deliverys = [];
+
+        // Si no existen registros, crea nuevos
+        if ($existingStatuses->isEmpty()) {
+            foreach ($routes as $ruta) {
+                // Busca el estado correspondiente al tipo_de_destino de la ruta actual
+                $status = collect($statuses)->firstWhere('status', $ruta['type_of_destiny']);
+
+                if ($status) {
+                    // Crea el registro de estado utilizando el valor "visible" de la ruta
+                    $statuses_Delivery = StatusDeliveryRouteChange::create([
+                        'order_purchase_product_id' => $ruta['product_id'],
+                        'code_order' => $ruta['code_order'],
+                        'status' => $status['status'],
+                        'visible' => $ruta['visible'], // Utiliza la visibilidad de la ruta
                     ]);
-                }
-                $type_of_product = $request->type_of_product;
-                $type_of_destiny =  $codeOrder->type_of_destiny;
-                if ($type_of_destiny == 'Cliente') {
-                    if ($saleOrderBD->lastStatus) {
-                        if ($saleOrderBD->lastStatus->status_id < 10) {
-                            SaleStatusChange::create([
-                                'sale_id' => $saleOrderBD->id,
-                                "status_id" => 10
-                            ]);
-                        }
-                    }
-                } else {
-                    if ($type_of_product == "Limpio") {
-                        if ($saleOrderBD->lastStatus) {
-                            if ($saleOrderBD->lastStatus->status_id < 3) {
-                                SaleStatusChange::create([
-                                    'sale_id' => $saleOrderBD->id,
-                                    "status_id" => 3
-                                ]);
-                            }
-                        }
-                    } else {
-                        if ($saleOrderBD->lastStatus) {
-                            if ($saleOrderBD->lastStatus->status_id < 5) {
-                                SaleStatusChange::create([
-                                    'sale_id' => $saleOrderBD->id,
-                                    "status_id" => 5
-                                ]);
-                            }
-                        }
-                    }
+
+                    $status_deliverys[] = $statuses_Delivery;
                 }
             }
-            $sales_order[] = [
-                'order' => $codeOrder,
-            ];
-        } */
+
+            // Crear registros para los estados que no están presentes en las rutas
+            foreach ($statuses as $status) {
+                // Verifica si el tipo de destino del estado está presente en las rutas
+                $ruta_presente = collect($routes)->contains('type_of_destiny', $status['status']);
+
+                // Si el tipo de destino no está presente en las rutas, crea un registro de estado para él
+                if (!$ruta_presente) {
+                    // Crea el registro de estado con visibilidad 2
+                    $statuses_Delivery = StatusDeliveryRouteChange::create([
+                        'order_purchase_product_id' => $routes[0]['product_id'], // Usa el primer producto_id de las rutas, asumiendo que es el mismo
+                        'code_order' => $routes[0]['code_order'], // Usa el primer code_order de las rutas, asumiendo que es el mismo
+                        'status' => $status['status'],
+                        'visible' => 2, // Asigna visibilidad 2
+                    ]);
+
+                    $status_deliverys[] = $statuses_Delivery;
+                }
+            }
+        } else {
+            // Si existen registros, actualizarlos
+            foreach ($routes as $ruta) {
+                // Busca el estado correspondiente al tipo_de_destino de la ruta actual
+                $status = collect($statuses)->firstWhere('status', $ruta['type_of_destiny']);
+
+                if ($status) {
+                    // Busca si ya existe un registro para este estado y orden
+                    $existingStatus = StatusDeliveryRouteChange::where('order_purchase_product_id', $ruta['product_id'])
+                        ->where('code_order', $ruta['code_order'])
+                        ->where('status', $status['status'])
+                        ->first();
+
+                    if ($existingStatus) {
+                        // Actualiza el registro existente con la nueva visibilidad
+                        $existingStatus->update([
+                            'visible' => $ruta['visible'],
+                        ]);
+                    }
+
+                }
+            }
+        }
+
+        $existingStatuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $deliveryRouteData['product_id'])
+            ->where('code_order', $order->code_order)
+            ->get();
+
         return response()->json([
             'msg' => 'Ruta Creada Existosamente',
             'data' => [
                 "ruta" => $routes,
+                "status" => $existingStatuses
             ]
         ], Response::HTTP_CREATED);
     }
