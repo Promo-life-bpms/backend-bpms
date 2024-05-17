@@ -9,19 +9,22 @@ use App\Models\OrderPurchaseProduct;
 use App\Models\Sale;
 use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class IncidenceController extends Controller
 {
 
     public function show($incidencia)
     {
-        $incidencia = Incidence::where('internal_code_incidence', $incidencia)->first();
+
+        $incidencia = Incidence::where('code_incidence', $incidencia)->first();
+
         if (!$incidencia) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
+
         unset($incidencia->requested_by);
         DB::statement("SET SQL_MODE=''");
         $dataIncidencia = OrderPurchase::join('order_purchase_products', 'order_purchase_products.order_purchase_id', 'order_purchases.id')
@@ -54,110 +57,47 @@ class IncidenceController extends Controller
     public function store(Request $request, $sale_id)
     {
 
-        // Calidad y ventas puede generar incidencias hasta 30 dias de entregado el producto, despues solo calidad.
-        //return $sale_id;
-        //validar que la informacion este correcta si no no se puede registrar
-        // utilizar validator
-        $userIsTagger = auth()->user()->hasRole('maquilador');
         $incidencia = '';
+        $data = $request->all();
         $dataValidation = [
+            'area' => 'required',
+            'motivo_de_incidencia' => 'required',
             'tipo_de_producto' => 'required',
-            'fecha_creacion' => 'required',
             'evidencia' => 'required',
-            'id_user' => 'required',
-            'elaboro' => 'required',
+            'fecha_creacion' => 'required|date',
+            'solution' => 'required',
+            'solucion_de_incidencia' => 'required',
+            'fecha_solucion' => 'nullable|date',
+            'fecha_compromiso' => 'required|date',
+            'responsable' => 'required',
             'firma_elaboro' => 'required',
-            'comentarios_generales' => 'required',
+            'firma_de_revision' => 'required',
+            'comments' => 'required',
             'incidence_products' => 'required|array',
             'incidence_products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
             'incidence_products.*.order_purchase_product_id' => 'required|exists:order_purchase_products,id',
-            'incidence_products.*.quantity_selected' => 'required'
+            'incidence_products.*.quantity_selected' => 'required|integer|min:1'
         ];
-        if (!$userIsTagger) {
-            $dataValidation['motivo'] = 'required';
-            $dataValidation['area'] = 'required';
-            $dataValidation['tipo_de_tecnica'] = 'required';
-            $dataValidation['responsable'] = 'required';
-            $dataValidation['fecha_compromiso'] = 'required';
-            /*   $dataValidation['solucion'] = 'required'; */
-            $dataValidation['reviso'] = 'required';
-            $dataValidation['firma_reviso'] = 'required';
-        }
-        $validation = Validator::make($request->all(), $dataValidation);
 
-        if ($validation->fails()) {
+        $validator = Validator::make($data, $dataValidation);
+
+        if ($validator->fails()) {
             return response()->json([
-                "msg" => 'No se registro correctamente la informacion',
-                'data' =>
-                ["errorValidacion" => $validation->getMessageBag()]
-            ], response::HTTP_UNPROCESSABLE_ENTITY);
+                "msg" => 'No se registró correctamente la información',
+                'data' => [
+                    "errorValidacion" => $validator->errors()
+                ]
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-        $sale = Sale::with('moreInformation')->where('code_sale', $sale_id)->first();
-        //return $sale;
+
+        $sale = Sale::where('code_sale', $sale_id)->first();
+
         if (!$sale) {
             return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
         }
-        $remision = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
-            ->join('delivery_routes', 'delivery_routes.id', 'code_order_delivery_routes.delivery_route_id')
-            ->join('remisiones', 'remisiones.delivery_route_id', 'delivery_routes.id')
-            ->where('sales.code_sale', $sale_id)
-            ->get();
+        $user = auth()->user()->name;
+        $maxINC = Incidence::max('code_incidence');
 
-
-        /*    if (count($remision) < 0) {
-            return response()->json([
-                "msg" => 'No hay remisiones'
-            ]);
-        } */
-        $rem = Sale::join('code_order_delivery_routes', 'code_order_delivery_routes.code_sale', 'sales.code_sale')
-            ->join('delivery_routes', 'delivery_routes.id', 'code_order_delivery_routes.delivery_route_id')
-            ->join('remisiones', 'remisiones.delivery_route_id', 'delivery_routes.id')
-            ->where('sales.code_sale', $sale_id)
-            ->orderBy("remisiones.created_at", "DESC")
-            ->select('remisiones.*')
-            ->first();
-        /*
-        if (!$rem) {
-            return response()->json(["msg" => "No se han encontrado remisiones del pedido"], response::HTTP_NOT_FOUND);
-        } */
-
-        if (!$userIsTagger) {
-            /*     $diasDiferencia = $rem->created_at->diffInDays(now());
- */
-            //return $date;
-            //return $date;
-            $user =  auth()->user();
-            $aux = false;
-            foreach ($user->whatRoles as $rol) {
-
-                switch ($rol->name) {
-                    case "control_calidad":
-                        $aux = true;
-                        break;
-                    case "gerente-operaciones":
-                        $aux = true;
-                        break;
-                    case "administrator":
-                        $aux = true;
-                        break;
-                    case "logistica-y-mesa-de-control":
-                        $aux = true;
-                        break;
-                    case "ventas":
-                        /*     if ($diasDiferencia <= 30) {
-                            $aux = true;
-                        } */
-                        break;
-                    default:
-                        return response()->json(['No tienes permiso de crear una incidencia'], 400);
-                        break;
-                }
-            }
-            /*  if ($aux == false) {
-                return response()->json(['No tienes permiso de crear una incidencia'], 400);
-            } */
-        }
-        $maxINC = Incidence::max('internal_code_incidence');
         $idinc = null;
         if (!$maxINC) {
             $idinc = 1;
@@ -165,37 +105,25 @@ class IncidenceController extends Controller
             $idinc = (int) explode('-', $maxINC)[1];
             $idinc++;
         }
-        $response = null;
 
         $incidencia = Incidence::create([
-            "code_incidence" => 'No Definido',
+            "code_incidence" => "INC-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
             "code_sale" => $sale->code_sale,
-            "client" => $sale->moreInformation->client_name,
-            "requested_by" => '',
-            "description" => $request->comentarios_generales,
-            "date_request" => $request->fecha_creacion,
-            "company" => $sale->moreInformation->warehouse_company,
-            "odoo_status" => 'Confirmado',
-            "sync_with_odoo" => false,
-
-            'internal_code_incidence' => "INCD-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
-            'rol_creator' => auth()->user()->whatRoles[0]->name,
+            "comments" => $request->comments,
+            "creation_date" => $request->fecha_creacion,
             'area' => $request->area,
-            'reason' => $request->motivo,
+            'reason' => $request->motivo_de_incidencia,
             'product_type' => $request->tipo_de_producto,
-            'type_of_technique' => $request->tipo_de_tecnica,
+            'type_of_technique' => $request->tipo_de_tecnica ?? null,
             'responsible' => $request->responsable ?? null,
             'creation_date' => $request->fecha_creacion,
-            'bpm_status' => "Creada",
             'evidence' => $request->evidencia,
-            'commitment_date' => $request->fecha_compromiso ?? null,
-            'solution' => $request->solucion ?? null,
+            'solution' => $request->solution ?? null,
             'solution_date' => null,
-            'user_id' => auth()->user()->id,
-            'elaborated' => $request->elaboro,
+            'elaborated' => $user, ///////meter quein elabroo
             'signature_elaborated' => $request->firma_elaboro,
             'reviewed' => $request->reviso ?? null,
-            'signature_reviewed' => $request->firma_reviso ?? null,
+            'signature_reviewed' => $request->firma_de_revision ?? null,
             'sale_id' => $sale->id
         ]);
 
@@ -227,118 +155,18 @@ class IncidenceController extends Controller
             ]);
             array_push($dataProducts, $productOdoo);
         }
-
-
-        $keyOdoo = '';
-        $company = $sale->moreInformation->warehouse_company;
-
-        switch ($company) {
-            case 'PROMOLIFE':
-                $keyOdoo = config('key_odoo.key_pl');
-                break;
-            case 'BH':
-                $keyOdoo = config('key_odoo.key_bh');
-                break;
-            default:
-                return response()->json(['msg' => 'No se pudo asignar el key para enviar la incidencia a Odoo correctamente'], response::HTTP_BAD_REQUEST); //400
-                break;
-        }
+        $productOrder = OrderPurchaseProduct::where("id", $incidence_product->order_purchase_product_id)->first();
+        $orderpurchase_id = $productOrder->order_purchase_id;
         $orderpurchase = OrderPurchase::find($orderpurchase_id);
-        if (!$orderpurchase) {
+        if (!$productOrder) {
             return response()->json(["msg" => "No se ha encontrado el OT/OC"], response::HTTP_NOT_FOUND);
         };
-        try {
-            $url = config('key_odoo.endpoint_incidence');
-            $data =  [
-                'incidencias' => [
-                    [
-                        "name" => false,
-                        "sale_id" => $sale->code_sale,
-                        "description" => $incidencia->description,
-                        "date_incidence" => $incidencia->date_request,
-                        "supplier_id" => $orderpurchase->provider_name,
-                        "line_ids" => $dataProducts,
-                        "po_ids" => [
-                            [
-                                "com_id" => $orderpurchase->code_order
-                            ]
-                        ],
-                    ]
-                ]
-            ];
-            $curl = curl_init($url);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS,  json_encode($data));
-            curl_setopt($curl, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json',
-                'X-VDE-APIKEY: ' . $keyOdoo,
-                'X-VDE-TYPE: Ambos',
-            ]);
-            $response = curl_exec($curl);
-
-            $responseOdoo = $response;
-            $errors = false;
-            $message = '';
-            if ($response !== false) {
-                $dataResponse = json_decode($response);
-                if ($dataResponse) {
-                    if (isset($dataResponse->error)) {
-                        $message = $dataResponse->detail;
-                        $errors = true;
-                    }
-                    if (!$errors && $dataResponse[0]->success) {
-                        if ($dataResponse[0]->success) {
-                            $folio = $dataResponse[0]->Folio;
-                            //Actualizar Folio de la Incidencia
-                            $incidencia->code_incidence = $folio;
-                            $incidencia->sync_with_odoo = true;
-                            $incidencia->save();
-                        } else {
-                            $errors = true;
-                            $message = $dataResponse[0]->message;
-                        }
-                    }
-                } else {
-
-                    $errors = true;
-                    $message = "Error de Conexion a odoo";
-                }
-            } else {
-                $errors = true;
-                $message = "Error al enviar el lead a odoo";
-            }
-
-            if ($errors) {
-                return response()->json([
-                    'msg' => 'La Incidencia fue creada correctamente, pero no se pudo enviar a odoo',
-                    'data' =>
-                    [
-                        "messageOdoo" => $message,
-                        "incidencia" => $incidencia,
-                        'responseOdoo' => json_decode($response),
-                    ]
-                ], response::HTTP_BAD_REQUEST);
-            }
-        } catch (Exception $exception) {
-            $message = $exception->getMessage();
-            $errors = true;
-            return response()->json(
-                [
-                    'msg' => 'La Incidencia fue creada, pero no se pudo enviar a odoo',
-                    'data' => ["message" => $message,  "incidencia" => $incidencia,  'responseOdoo' => json_decode($response),]
-                ],
-                response::HTTP_BAD_REQUEST
-            );
-        }
-
         return response()->json([
             "msg" => 'Incidencia creada exitosamente',
             'data' =>
             [
 
                 "incidencia" => $incidencia,
-                'responseOdoo' => json_decode($response),
             ]
         ], response::HTTP_CREATED);
     }
