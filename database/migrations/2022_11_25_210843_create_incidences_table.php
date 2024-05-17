@@ -33,6 +33,7 @@ class CreateIncidencesTable extends Migration
             $table->string('type_of_technique')->nullable();
             $table->string('user_solution')->nullable();
             $table->date('creation_date')->nullable();
+            $table->date('status');
             //Creacion de llave foranea
             $table->foreignId('sale_id')
                 ->nullable()
