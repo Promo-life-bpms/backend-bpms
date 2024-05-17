@@ -1,6 +1,6 @@
 @component('mail::message')
 # ¡Buen día, {{ $data['name'] }}!
-# Bienvenido al sistema BPMS
+# Bienvenido al sistema BPMS - Promo Life - BH Trade Market
 Tu información de inicio de sesión es:
 <br>
 Usuario: {{ $data['email'] }}
