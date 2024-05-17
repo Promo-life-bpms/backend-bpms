@@ -17,33 +17,22 @@ class CreateIncidencesTable extends Migration
             $table->id();
             $table->string("code_incidence");
             $table->string("code_sale");
-            $table->string("client");
-            $table->string("requested_by");
-            $table->text("description");
-            $table->date("date_request")->nullable();
-            $table->string("company");
-            $table->string("odoo_status");
-            $table->boolean("sync_with_odoo")->default(true);
-
-            $table->string('internal_code_incidence')->nullable();
-            $table->string('rol_creator')->nullable();
             $table->string('area')->nullable();
             $table->text('reason')->nullable();
             $table->string('product_type')->nullable();
-            $table->string('type_of_technique')->nullable();
-            $table->string('responsible')->nullable();
-            $table->date('creation_date')->nullable();
-            $table->string('bpm_status')->nullable();
             $table->text('evidence')->nullable();
-            $table->date('commitment_date')->nullable();
             $table->string('solution')->nullable();
+            $table->string('responsible')->nullable();
             $table->date('solution_date')->nullable();
-            $table->string('user_id')->nullable();
+            $table->string("comments")->nullable();
             $table->string('elaborated')->nullable();
             $table->text('signature_elaborated')->nullable();
             $table->string('reviewed')->nullable();
             $table->text('signature_reviewed')->nullable();
+            $table->text("description");
+            $table->string('type_of_technique')->nullable();
             $table->string('user_solution')->nullable();
+            $table->date('creation_date')->nullable();
             //Creacion de llave foranea
             $table->foreignId('sale_id')
                 ->nullable()
@@ -51,6 +40,23 @@ class CreateIncidencesTable extends Migration
                 ->cascadeOnUpdate()
                 ->nullOnDelete();
             $table->timestamps();
+            /*
+            $table->string("company");
+            $table->string("odoo_status");
+            $table->boolean("sync_with_odoo")->default(true);
+            $table->string('internal_code_incidence')->nullable();
+            $table->string('rol_creator')->nullable();
+
+            $table->string('bpm_status')->nullable();
+            $table->date('commitment_date')->nullable();
+            $table->string('user_id')->nullable();
+            //Creacion de llave foranea
+            $table->foreignId('sale_id')
+                ->nullable()
+                ->constrained('sales')
+                ->cascadeOnUpdate()
+                ->nullOnDelete();
+            $table->timestamps(); */
         });
     }
 
