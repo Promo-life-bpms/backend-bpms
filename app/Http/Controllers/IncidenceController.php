@@ -66,7 +66,7 @@ class IncidenceController extends Controller
             'evidencia' => 'required',
             'fecha_creacion' => 'required|date',
             'solution' => 'required',
-            'solucion_de_incidencia' => 'required',
+            /*          'solucion_de_incidencia' => 'required', */
             'fecha_solucion' => 'nullable|date',
             'fecha_compromiso' => 'required|date',
             'responsable' => 'required',
@@ -124,6 +124,7 @@ class IncidenceController extends Controller
             'signature_elaborated' => $request->firma_elaboro,
             'reviewed' => $request->reviso ?? null,
             'signature_reviewed' => $request->firma_de_revision ?? null,
+            'status' => 'Creado',
             'sale_id' => $sale->id
         ]);
 

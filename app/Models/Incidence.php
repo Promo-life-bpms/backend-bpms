@@ -28,6 +28,7 @@ class Incidence extends Model
         'type_of_technique',
         'user_solution',
         'creation_date',
+        'status',
         'sale_id'
     ];
 
