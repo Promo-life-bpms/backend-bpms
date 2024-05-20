@@ -30,6 +30,7 @@ class Incidence extends Model
         'creation_date',
         'status',
         'commitment_date',
+        'user_department',
         'sale_id'
     ];
 

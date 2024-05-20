@@ -35,6 +35,7 @@ class CreateIncidencesTable extends Migration
             $table->string('commitment_date')->nullable();
             $table->date('creation_date')->nullable();
             $table->text('status');
+            $table->text('user_department');
             //Creacion de llave foranea
             $table->foreignId('sale_id')
                 ->nullable()
