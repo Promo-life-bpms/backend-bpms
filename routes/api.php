@@ -102,7 +102,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('pedidos/{pedido}/bitacora/create', [BinnacleController::class, 'store']);
 
     // Crear y actualizar la inspeccion
-    Route::post('pedido/{pedido}/inspections', [InspectionController::class, 'store']);
+    Route::post('pedido/{pedido}/inspections/{product}', [InspectionController::class, 'store']);
     Route::get('inspections/{inspection}', [InspectionController::class, 'show']);
 
     // Detalle de  OC, OT

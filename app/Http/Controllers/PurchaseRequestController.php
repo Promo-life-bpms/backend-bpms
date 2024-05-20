@@ -250,7 +250,7 @@ class PurchaseRequestController extends Controller
                 $spent = PurchaseRequest::where('id', $page)->get()->last();
             } elseif ($rol == $rolcajachi || $rol == $Adquisiciones) {
                 $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
-                if (trim($status) != "rechazada" && trim($status) != "en proceso") {
+                if (trim($status) != "rechazada" && trim($status) != "en proceso" && trim($status) != "pendiente") {
                     $spent = PurchaseRequest::where('id', $page)->get()->last();
                 } else {
                     return response()->json(['message' => 'Esta solicitud no fue aprobada']);
@@ -268,7 +268,7 @@ class PurchaseRequestController extends Controller
                 $spent = PurchaseRequest::where('id', $page)->get()->last();
             } elseif (($managerAdmin == 1) && $rolcajachi && $Adquisiciones) {
                 $status = DB::table('purchase_requests')->where('id', $page)->value('approved_status');
-                if (trim($status) != "rechazada" && trim($status) != "en proceso") {
+                if (trim($status) != "rechazada" && trim($status) != "en proceso" && trim($status) != "pendiente") {
                     $spent = PurchaseRequest::where('id', $page)->get()->last();
                 } else {
                     return response()->json(['message' => 'Esta solicitud no fue aprobada']);

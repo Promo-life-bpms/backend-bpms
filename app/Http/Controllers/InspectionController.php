@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Str;
 
 class InspectionController extends Controller
 {
@@ -25,7 +26,7 @@ class InspectionController extends Controller
     public function store(Request $request, $sale_id)
     {
         // Crear una inspeccion de calidad
-        $validation = Validator::make($request->all(), [
+        /* $validation = Validator::make($request->all(), [
             'date_inspeccion' => 'required|date:Y-m-d h:i:s',
             'type_product' => 'required|in:limpio,maquilado',
             'observations' => 'required|string',
@@ -53,12 +54,12 @@ class InspectionController extends Controller
 
         if ($validation->fails()) {
             return response()->json(['msg' => "Error al crear la inspeccion de calidad", 'data' => ["errorValidacion" => $validation->getMessageBag()]], response::HTTP_BAD_REQUEST); //400
-        }
+        }  */
 
         $sale = Sale::where('code_sale', $sale_id)->first();
         if (!$sale) {
             return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
-        }
+        } 
 
         $maxINSP = Inspection::max('code_inspection');
         $idInsp = null;
@@ -68,6 +69,15 @@ class InspectionController extends Controller
             $idInsp = (int) explode('-', $maxINSP)[1];
             $idInsp++;
         }
+
+        $imagenes = $request->file('files');
+        $namesImagenes = [];
+        foreach ($imagenes as $imagen) {
+            $n =  $imagen->getClientOriginalName();
+            $nombreImagen = time() . ' ' . Str::slug($n) . '.' . $imagen->getClientOriginalExtension();
+            $imagen->move(public_path('storage/smallboxfiles'), $nombreImagen);
+            array_push($namesImagenes, 'storage/smallbox/files' . $nombreImagen);
+        
 
         $dataInspection = [
             'sale_id' => $sale->id,
@@ -82,7 +92,7 @@ class InspectionController extends Controller
             'user_signature_reviewed' => $request->user_signature_reviewed,
             'quantity_revised' => $request->quantity_revised,
             'quantity_denied' => $request->quantity_denied,
-            'files_ins' => $request->files_ins,
+            'files_ins' => $namesImagenes,
 
         ];
 
