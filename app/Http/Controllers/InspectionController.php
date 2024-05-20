@@ -26,7 +26,7 @@ class InspectionController extends Controller
     public function store(Request $request, $sale_id)
     {
         // Crear una inspeccion de calidad
-        /* $validation = Validator::make($request->all(), [
+        $validation = Validator::make($request->all(), [
             'date_inspeccion' => 'required|date:Y-m-d h:i:s',
             'type_product' => 'required|in:limpio,maquilado',
             'observations' => 'required|string',
@@ -54,7 +54,7 @@ class InspectionController extends Controller
 
         if ($validation->fails()) {
             return response()->json(['msg' => "Error al crear la inspeccion de calidad", 'data' => ["errorValidacion" => $validation->getMessageBag()]], response::HTTP_BAD_REQUEST); //400
-        }  */
+        } 
 
         $sale = Sale::where('code_sale', $sale_id)->first();
         if (!$sale) {
