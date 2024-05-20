@@ -105,7 +105,6 @@ class IncidenceController extends Controller
             $idinc = (int) explode('-', $maxINC)[1];
             $idinc++;
         }
-
         $incidencia = Incidence::create([
             "code_incidence" => "INC-" . str_pad($idinc, 5, "0", STR_PAD_LEFT),
             "code_sale" => $sale->code_sale,
@@ -124,10 +123,10 @@ class IncidenceController extends Controller
             'signature_elaborated' => $request->firma_elaboro,
             'reviewed' => $request->reviso ?? null,
             'signature_reviewed' => $request->firma_de_revision ?? null,
-            'status' => 'Creado',
+            'status' => 'Creada',
+            'commitment_date' => $request->fecha_compromiso,
             'sale_id' => $sale->id
         ]);
-
         $response = null;
 
         $dataProducts = [];

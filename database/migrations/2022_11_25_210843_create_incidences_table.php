@@ -32,6 +32,7 @@ class CreateIncidencesTable extends Migration
             $table->text("description");
             $table->string('type_of_technique')->nullable();
             $table->string('user_solution')->nullable();
+            $table->string('commitment_date')->nullable();
             $table->date('creation_date')->nullable();
             $table->text('status');
             //Creacion de llave foranea
