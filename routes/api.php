@@ -127,7 +127,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('incidencias/{incidencia}', [IncidenceController::class, 'show']);
     // Crear una incidencia
     Route::post('pedidos/{pedido}/incidencia', [IncidenceController::class, 'store']);
-    Route::patch('incidencias/{incidencia}', [IncidenceController::class, 'update']);
+    Route::put('incidencias/{incidencia}', [IncidenceController::class, 'updateSolution']);
     Route::put('incidencias/{incidencia}/update', [IncidenceController::class, 'updateIncidenceComplete']);
 
     // Vista de status de incidencia
@@ -178,7 +178,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     /////////////////////RUTAS  PARA CONFIRMAR LOS PEDIDOS //////////////////////
     Route::post('confirmation/order/products', [OrderConfirmationController::class, 'ConfirmOrderProducts']);
-    
+
 
     Route::post('status/two/{pedido}',[StatusOrdersController::class, 'StatusTwo']);
     /////////////////CONFIRMAR ORDENES DE PRODUCTOS///////////////
@@ -188,7 +188,7 @@ Route::group(['middleware' => 'auth'], function () {
     //////////////////CONTEO DEL PRODUCTO///////////////////////
     Route::post('product/count/confirmation', [ConfirmProductCountController::class, 'ProductCount']);
     Route::get('product/count/confirmation/history/{idProductOrder}', [ConfirmProductCountController::class, 'ProductCountHistory']);
-    
+
 
     //CAJA CHICA
 
@@ -303,5 +303,5 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('managers/department', [ManagerHasDepartmentController::class, 'ViewManager']);
     Route::post('create/manager/department',[ManagerHasDepartmentController::class,'CrearManager']);
     Route::post('delete/manager/department',[ManagerHasDepartmentController::class,'DeleteManager']);
-    
+
 });
