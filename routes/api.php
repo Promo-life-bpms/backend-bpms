@@ -104,7 +104,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Crear y actualizar la inspeccion
     Route::post('pedido/{pedido}/inspections/{product}', [InspectionController::class, 'store']);
     Route::get('inspections/{inspection}', [InspectionController::class, 'show']);
-    Route::post('pedido/files', [InspectionController::class, 'files']);
+    Route::post('pedido/files/inspections', [InspectionController::class, 'files']);
 
     // Detalle de  OC, OT
     Route::get('pedidos/{pedido}/orders/{order}', [OrderPurchaseController::class, 'show']);
