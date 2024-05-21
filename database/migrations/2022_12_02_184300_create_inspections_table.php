@@ -28,6 +28,7 @@ class CreateInspectionsTable extends Migration
             $table->text('user_signature_reviewed');
             $table->integer('quantity_revised');
             $table->integer('quantity_denied');
+            $table->integer('sample');
             $table->timestamps();
         });
     }
