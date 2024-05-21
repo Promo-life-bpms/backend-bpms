@@ -32,6 +32,7 @@ class InspectionController extends Controller
             'observations' => 'required|string',
             'user_signature_created' => 'required',
             'user_reviewed' => 'required',
+            'files' => 'required',
             'user_signature_reviewed' => 'required',
             'quantity_revised' => 'required|numeric',
             'quantity_denied' => 'required|numeric',
@@ -70,6 +71,18 @@ class InspectionController extends Controller
             $idInsp++;
         }
 
+        $files = $request->files;
+
+        // Array para almacenar las rutas de los archivos
+        $filePaths = [];
+
+        // Iterar sobre cada archivo y obtener su ruta
+        foreach ($files as $file) {
+            // Obtener la ruta del archivo y almacenarla
+            $filePath = $file->getPathname();
+            $filePaths[] = $filePath;
+        }
+
         $dataInspection = [
             'sale_id' => $sale->id,
             'code_inspection' => "INSP-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
@@ -83,7 +96,7 @@ class InspectionController extends Controller
             'user_signature_reviewed' => $request->user_signature_reviewed,
             'quantity_revised' => $request->quantity_revised,
             'quantity_denied' => $request->quantity_denied,
-            'files_ins' => $request->files_ins,
+            'files_ins' => $filePaths,
         ];
 
         try {
@@ -227,7 +240,7 @@ class InspectionController extends Controller
     public function files(Request $request)
     {
         $validation = Validator::make($request->all(), [
-            'files_ins' => 'required',
+            'files' => 'required',
         ]);
 
         if ($validation->fails()) {
@@ -236,12 +249,12 @@ class InspectionController extends Controller
                 "errorValidacion" => $validation->getMessageBag()
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
-        $imagenes = $request->file('files_ins');
+        $imagenes = $request->file('files');
         $namesImagenes = [];
         foreach ($imagenes as $imagen) {
             $n =  $imagen->getClientOriginalName();
             $nombreImagen = time() . ' ' . Str::slug($n) . '.' . $imagen->getClientOriginalExtension();
-            $imagen->move(public_path('storage/images/'), $nombreImagen);
+            $imagen->move(public_path('storage/public/images/'), $nombreImagen);
             array_push($namesImagenes, 'storage/images/' . $nombreImagen);
         }
         return response()->json(['images' => $namesImagenes]);
