@@ -70,15 +70,6 @@ class InspectionController extends Controller
             $idInsp++;
         }
 
-        $imagenes = $request->file('files');
-        $namesImagenes = [];
-        foreach ($imagenes as $imagen) {
-            $n =  $imagen->getClientOriginalName();
-            $nombreImagen = time() . ' ' . Str::slug($n) . '.' . $imagen->getClientOriginalExtension();
-            $imagen->move(public_path('storage/smallboxfiles'), $nombreImagen);
-            array_push($namesImagenes, 'storage/smallbox/files' . $nombreImagen);
-        
-
         $dataInspection = [
             'sale_id' => $sale->id,
             'code_inspection' => "INSP-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
@@ -92,8 +83,7 @@ class InspectionController extends Controller
             'user_signature_reviewed' => $request->user_signature_reviewed,
             'quantity_revised' => $request->quantity_revised,
             'quantity_denied' => $request->quantity_denied,
-            'files_ins' => $namesImagenes,
-
+            'files_ins' => $request->files_ins,
         ];
 
         try {
@@ -150,12 +140,6 @@ class InspectionController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Inspection  $inspection
-     * @return \Illuminate\Http\Response
-     */
     public function show($inspection_id)
     {
         $inspection = Inspection::with('productsSelected')->where('code_inspection', $inspection_id)->first();
@@ -238,5 +222,29 @@ class InspectionController extends Controller
         ], response::HTTP_OK); //200
 
         // Detalle de la inspeccion
+    }
+
+    public function files(Request $request)
+    {
+        $validation = Validator::make($request->all(), [
+            'files_ins' => 'required',
+        ]);
+
+        if ($validation->fails()) {
+            return response()->json([
+                "msg" => 'No se registro correctamente la informacion',
+                "errorValidacion" => $validation->getMessageBag()
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+        $imagenes = $request->file('files_ins');
+        $namesImagenes = [];
+        foreach ($imagenes as $imagen) {
+            $n =  $imagen->getClientOriginalName();
+            $nombreImagen = time() . ' ' . Str::slug($n) . '.' . $imagen->getClientOriginalExtension();
+            $imagen->move(public_path('storage/images/'), $nombreImagen);
+            array_push($namesImagenes, 'storage/images/' . $nombreImagen);
+        }
+        return response()->json(['images' => $namesImagenes]);
+    
     }
 }
