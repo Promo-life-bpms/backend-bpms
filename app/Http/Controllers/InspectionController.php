@@ -37,6 +37,7 @@ class InspectionController extends Controller
             'user_signature_reviewed' => 'required',
             'quantity_revised' => 'required|numeric',
             'quantity_denied' => 'required|numeric',
+            'sample' => 'required|numeric',
             'features_quantity' => 'required|array',
             'features_quantity.wrong_pantone_color' => 'required|numeric',
             'features_quantity.damage_logo' => 'required|numeric',
@@ -87,6 +88,7 @@ class InspectionController extends Controller
             'user_signature_reviewed' => $request->user_signature_reviewed,
             'quantity_revised' => $request->quantity_revised,
             'quantity_denied' => $request->quantity_denied,
+            'sample' => $request->sample,
             'files' => $jsonData,
         ];
 
@@ -151,7 +153,50 @@ class InspectionController extends Controller
         if (!$inspection) {
             return response()->json(["msg" => "No se ha encontrado la inspeccion"], response::HTTP_NOT_FOUND); //404
         }
-        DB::statement("SET SQL_MODE=''");
+        $inspection = DB::table('inspections')->where('code_inspection', $inspection_id)->first();
+        $filesJson = $inspection->files;
+        $filesArray = json_decode($filesJson);
+        
+        $inspections = [
+            'id' => $inspection->id,
+            'code_inspection' => $inspection->code_inspection,
+            'sale_id' => $inspection->sale_id,
+            'user_created_id' => $inspection->user_created_id,
+            'date_inspection' => $inspection->date_inspection,
+            'files' => $filesArray,
+            'type_product' => $inspection->type_product,
+            'observations' => $inspection->observations,
+            'user_created' => $inspection->user_created,
+            'user_signature_created'=> $inspection->user_signature_created,
+            'user_reviewed' => $inspection->user_reviewed,
+            'user_signature_reviewed'=> $inspection->user_signature_reviewed,
+            'quantity_revised' => $inspection->quantity_revised,
+            'quantity_denied' => $inspection->quantity_denied,
+            //'sample' =>$inspection->sample,
+            'created_at' => $inspection->created_at,
+        ];
+
+        
+
+        $inspection_products = DB::table('inspection_products')->where('inspection_id', $inspection->id)->first();
+        $orden= DB::table('order_purchases')->where('code_order', $inspection_products->code_order)->first();
+        $productDescription = DB::table('order_purchase_products')->where('order_purchase_id', $orden->id)->value('description');
+    
+        $inspection_product = [
+            'description_product' => $productDescription,
+            'id' => $inspection_products->id,
+            'inspection_id' => $inspection_products->inspection_id,
+            'odoo_product_id' => $inspection_products->odoo_product_id,
+            'code_order' => $inspection_products->code_order,
+            'quantity_selected' => $inspection_products->quantity_selected,
+            'created_at' => $inspection_products->created_at,
+            'updated_at' => $inspection_products->updated_at
+        ];
+
+        $features_quantity = DB::table('features_quantity')->where('inspection_id', $inspection_products->id)->first();
+
+        return response()->json(['inspections' => $inspections, 'products_inspection' => $inspection_product, 'features_quantity' => $features_quantity]);
+        /* DB::statement("SET SQL_MODE=''");
         $pedidoIns = Sale::join("additional_sale_information", "sales.id", "additional_sale_information.sale_id")
             ->join("inspections", "inspections.sale_id", "additional_sale_information.sale_id")
             ->where("code_inspection", $inspection_id)
@@ -219,7 +264,7 @@ class InspectionController extends Controller
 
         unset($pedidoIns->detailsOrders);
         $pedidoIns->detailsOrders = $ordenesnueva;
-
+ */
         return response()->json([
             'msg' => "Inspeccion de calidad solicitada correctamente",
             'data' =>
