@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use App\Models\Incidence;
 use App\Models\IncidenceProduct;
 use App\Models\OrderPurchase;
 use App\Models\OrderPurchaseProduct;
 use App\Models\Sale;
+use App\Models\UserDetails;
+use Database\Seeders\DepartmentSmallBox;
 use Exception;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -94,7 +97,9 @@ class IncidenceController extends Controller
         if (!$sale) {
             return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
         }
-        $user = auth()->user()->name;
+        $user = auth()->user()->id;
+        $user_details = UserDetails::where('id_user', $user)->first();
+        $user_department = Department::where('id', $user_details->id_department)->first();
         $maxINC = Incidence::max('code_incidence');
 
         $idinc = null;
@@ -124,7 +129,7 @@ class IncidenceController extends Controller
             'signature_reviewed' => $request->firma_de_revision ?? null,
             'status' => 'Creada',
             'commitment_date' => $request->fecha_compromiso,
-            "user_department" => $user,
+            "user_department" => $user_department->name_department,
             'sale_id' => $sale->id
         ]);
         $response = null;
