@@ -73,7 +73,7 @@ class InspectionController extends Controller
         }
 
         //$jsonData = $request->input('files'); // Acceder a la cadena JSON enviada en la solicitud
-        $jsonData = json_encode($request->input('files'));
+        $jsonData = json_encode($request->input('files'), JSON_UNESCAPED_SLASHES);
         $dataInspection = [
             'sale_id' => $sale->id,
             'code_inspection' => "INSP-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
