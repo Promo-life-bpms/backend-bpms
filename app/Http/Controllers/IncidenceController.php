@@ -132,10 +132,13 @@ class IncidenceController extends Controller
         $dataProducts = [];
         $orderpurchase_id = null;
         foreach ($request->incidence_products as $incidence_product) {
+
+
             $incidence_product = (object)$incidence_product;
-
-            $productOrder = OrderPurchaseProduct::where("id", $incidence_product->order_purchase_product_id)->first();
-
+            $productOrder = OrderPurchaseProduct::where("id", $incidence_product->order_purchase_product_id)->where('odoo_product_id', $incidence_product->odoo_product_id)->first();
+            if (!$productOrder) {
+                return response()->json(["msg" => "No se ha encontrado el OT/OC"], response::HTTP_NOT_FOUND);
+            };
             $orderpurchase_id = $productOrder->order_purchase_id;
             $productOdoo = [
                 "pro_name" => $productOrder->product,
@@ -165,17 +168,16 @@ class IncidenceController extends Controller
             "msg" => 'Incidencia creada exitosamente',
             'data' =>
             [
-
                 "incidencia" => $incidencia,
+                "incidencia_products" => $incidence_product
             ]
         ], response::HTTP_CREATED);
     }
 
-    public function update(Request $request, $incidencia)
+    public function updateSolution(Request $request, $incidencia)
     {
         $validation = Validator::make($request->all(), [
-            'quantity_selected' => 'required',
-            'evidence' => 'required|nullable'
+            'solution_date' => 'required',
         ]);
         if ($validation->fails()) {
             return response()->json([
@@ -190,9 +192,9 @@ class IncidenceController extends Controller
         }
 
 
-        $incidencia->evidence = $request->evidence;
+        $incidencia->solution_date = $request->solution_date;
         $incidencia->save();
-        foreach ($request->incidence_products as $incidence_product) {
+        /*  foreach ($request->incidence_products as $incidence_product) {
             $incidence_product = (object)$incidence_product;
             // Revisar si exite el atributo id en el objeto incidence_producto
             if (isset($incidence_product->incidence_product_id)) {
@@ -200,8 +202,13 @@ class IncidenceController extends Controller
                 $incidenceProduct->quantity_selected = $incidence_product->quantity_selected ?? $incidenceProduct->quantity_selected;
                 $incidenceProduct->save();
             }
-        }
-        return response()->json(["msg" => "Se actualizo la incidencia"], response::HTTP_ACCEPTED);
+        } */
+
+        return response()->json([
+            "msg" => "Se actualizo la fecha de solucion correctamente",
+            "incidencia" =>
+            $incidencia
+        ], response::HTTP_ACCEPTED);
     }
 
     public function updateIncidenceComplete(Request $request, $incidencia)
@@ -210,76 +217,61 @@ class IncidenceController extends Controller
         if (!$incidence) {
             return response()->json(["msg" => "No se ha encontrado la incidencia"], response::HTTP_NOT_FOUND); //404
         }
-        $dataValidation = [
-            'area' => 'required',
-            'motivo_de_incidencia' => 'required',
-            'tipo_de_producto' => 'required',
-            'evidencia' => 'required',
-            'fecha_creacion' => 'required|date',
-            'solution' => 'required',
-            'fecha_solucion' => 'nullable|date',
-            'fecha_compromiso' => 'required|date',
-            'responsable' => 'required',
-            'firma_elaboro' => 'required',
-            'firma_de_revision' => 'required',
-            'comments' => 'required',
-            'incidence_products' => 'required|array',
-            'incidence_products.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
-            'incidence_products.*.order_purchase_product_id' => 'required|exists:order_purchase_products,id',
-            'incidence_products.*.quantity_selected' => 'required|integer|min:1'
-        ];
 
 
 
-        $validation = Validator::make($request->all(), $dataValidation);
+        DB::beginTransaction();
+        try {
+            // Manejo de la evidencia nueva
+            $newEvidence = $request->input('evidencia', null); // Aquí cambiamos 'evidence' por 'evidencia'
 
-        if ($validation->fails()) {
-            return response()->json([
-                "msg" => 'No se registro correctamente la informacion',
-                'data' =>
-                ["errorValidacion" => $validation->getMessageBag()]
-            ], response::HTTP_UNPROCESSABLE_ENTITY);
-        }
+            // Actualiza los campos necesarios de la incidencia
+            $incidence->update([
+                "code_incidence" => $incidence->code_incidence,
+                "code_sale" => $incidence->code_sale,
+                "description" => null,
+                'area' => $incidence->area,
+                'reason' => $incidence->reason,
+                'product_type' => $incidence->product_type,
+                'type_of_technique' => $incidence->type_of_technique,
+                'responsible' => $incidence->responsible,
+                'creation_date' => $incidence->creation_date,
+                'evidence' => $newEvidence,
+                'commitment_date' => $incidence->commitment_date,
+                'solution' => $incidence->solution,
+                'solution_date' => $incidence->solution_date,
+                'elaborated' => $incidence->elaborated,
+                'signature_elaborated' => $incidence->signature_elaborated,
+                'reviewed' => $incidence->reviewed,
+                'signature_reviewed' => $incidence->signature_reviewed,
+                'sale_id' => $incidence->sale_id
+            ]);
 
-        $incidence->update([
-            "code_incidence" => $incidence->code_incidence,
-            "code_sale" => $incidence->code_sale,
-            "description" => null,
-            'area' => $request->area ?? $incidence->area,
-            'reason' => $request->motivo ?? $incidence->reason,
-            'product_type' => $request->tipo_de_producto ?? $incidence->product_type,
-            'type_of_technique' => $request->tipo_de_tecnica ?? $incidence->type_of_technique,
-            'responsible' => $request->responsable ?? $incidence->responsible,
-            'creation_date' => $request->fecha_creacion ?? $incidence->creation_date,
-            'evidence' => $request->evidencia ?? $incidence->evidence,
-            'commitment_date' => $request->fecha_compromiso ?? $incidence->commitment_date,
-            'solution' => $request->solucion ?? $incidence->solution,
-            'solution_date' => $incidence->solution_date,
-            //  'user_id' => $request->id_user ?? $incidence->user_id,
-            'elaborated' => $request->elaboro ?? $incidence->elaborated,
-            'signature_elaborated' => $request->firma_elaboro ?? $incidence->signature_elaborated,
-            'reviewed' => $request->reviso ?? $incidence->reviewed,
-            'signature_reviewed' => $request->firma_reviso ?? $incidence->signature_reviewed,
-            'sale_id' => $incidence->sale_id
-        ]);
-        $incidence->save();
+            // Encuentra el producto de incidencia relacionado
+            $incidenceProduct = IncidenceProduct::where('incidence_id', $incidence->id)->first();
 
-        foreach ($request->incidence_products as $incidence_product) {
-            $incidence_product = (object)$incidence_product;
-            // Revisar si exite el atributo id en el objeto incidence_producto
-            $incidenceProduct = IncidenceProduct::where('order_purchase_product_id', $incidence_product->order_purchase_product_id)->first();
-            if (isset($incidenceProduct)) {
-                // $incidenceProduct = IncidenceProduct::find($incidence_product->incidence_product_id);
-                $incidenceProduct->quantity_selected = $incidence_product->quantity_selected ?? $incidenceProduct->quantity_selected;
-                $incidenceProduct->save();
+            if ($incidenceProduct) {
+                // Actualiza la cantidad seleccionada del producto de incidencia
+                if ($request->has('quantity_selected')) {
+                    $incidenceProduct->quantity_selected = $request->quantity_selected;
+                    $incidenceProduct->save();
+                }
             }
+
+            // Confirma la transacción
+            DB::commit();
+
+            return response()->json([
+                "msg" => 'Incidencia editada exitosamente',
+                'data' => [
+                    "incidencia" => $incidence,
+                    "incidencia_products" => $incidenceProduct
+                ]
+            ], response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            // Revierte la transacción en caso de error
+            DB::rollBack();
+            return response()->json(["msg" => "Error al actualizar la incidencia: " . $e->getMessage()], response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return response()->json([
-            "msg" => 'Incidencia editada exitosamente',
-            'data' => [
-                "incidencia" => $incidence,
-                "incidencia_products" => $incidence_product
-            ]
-        ], response::HTTP_CREATED);
     }
 }
