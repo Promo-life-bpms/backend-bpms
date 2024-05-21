@@ -172,7 +172,7 @@ class InspectionController extends Controller
             'user_signature_reviewed'=> $inspection->user_signature_reviewed,
             'quantity_revised' => $inspection->quantity_revised,
             'quantity_denied' => $inspection->quantity_denied,
-            //'sample' =>$inspection->sample,
+            'sample' =>$inspection->sample,
             'created_at' => $inspection->created_at,
         ];
 
