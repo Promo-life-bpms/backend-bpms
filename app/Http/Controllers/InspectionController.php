@@ -73,8 +73,7 @@ class InspectionController extends Controller
         }
 
         //$jsonData = $request->input('files'); // Acceder a la cadena JSON enviada en la solicitud
-        $jsonData = json_encode($request->input('files'), JSON_UNESCAPED_SLASHES);       
-
+        $jsonData = json_encode($request->input('files'));
         $dataInspection = [
             'sale_id' => $sale->id,
             'code_inspection' => "INSP-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
@@ -174,12 +173,12 @@ class InspectionController extends Controller
                 'inspections.user_signature_reviewed',
                 'inspections.quantity_revised',
                 'inspections.quantity_denied',
-                'inspections.files_ins',
+                'inspections.files',
                 "additional_sale_information.sale_id"
             )
             ->first();
 
-
+        return $pedidoIns;
         $ins = $pedidoIns->inspections()->where("code_inspection", $inspection_id)->first();
 
         $pedidoIns->features_quantity = $ins->featuresQuantity;
