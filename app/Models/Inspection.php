@@ -22,9 +22,6 @@ class Inspection extends Model
         'user_signature_reviewed',
         'quantity_revised',
         'quantity_denied',
-        'files_ins'
-
-
     ];
 
     public function productsSelected()

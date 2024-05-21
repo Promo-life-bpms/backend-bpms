@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Inspection;
+use App\Models\InspectionFiles;
 use App\Models\Sale;
 use App\Models\InspectionProduct;
 use App\Models\SaleStatusChange;
@@ -71,18 +72,6 @@ class InspectionController extends Controller
             $idInsp++;
         }
 
-        $files = $request->files;
-
-        // Array para almacenar las rutas de los archivos
-        $filePaths = [];
-
-        // Iterar sobre cada archivo y obtener su ruta
-        foreach ($files as $file) {
-            // Obtener la ruta del archivo y almacenarla
-            $filePath = $file->getPathname();
-            $filePaths[] = $filePath;
-        }
-
         $dataInspection = [
             'sale_id' => $sale->id,
             'code_inspection' => "INSP-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
@@ -96,11 +85,23 @@ class InspectionController extends Controller
             'user_signature_reviewed' => $request->user_signature_reviewed,
             'quantity_revised' => $request->quantity_revised,
             'quantity_denied' => $request->quantity_denied,
-            'files_ins' => $filePaths,
         ];
 
         try {
             $inspection = Inspection::create($dataInspection);
+            $imagenes = $request->file('files');
+            $namesImagenes = [];
+            foreach ($imagenes as $imagen) {
+                $n =  $imagen->getClientOriginalName();
+                $nombreImagen = time() . ' ' . Str::slug($n) . '.' . $imagen->getClientOriginalExtension();
+                $imagen->move(public_path('storage/images/'), $nombreImagen);
+                array_push($namesImagenes, 'storage/images/' . $nombreImagen);
+            }
+            InspectionFiles::create([
+                'files' => $namesImagenes,
+                'id_ins' => $inspection->id
+            ]);
+
             $request->features_quantity = (object) $request->features_quantity;
             $dataFeaturesQuantity = [
                 'wrong_pantone_color' =>  $request->features_quantity->wrong_pantone_color,
@@ -241,6 +242,7 @@ class InspectionController extends Controller
     {
         $validation = Validator::make($request->all(), [
             'files' => 'required',
+            'id ' => 'required',
         ]);
 
         if ($validation->fails()) {
@@ -249,6 +251,7 @@ class InspectionController extends Controller
                 "errorValidacion" => $validation->getMessageBag()
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+
         $imagenes = $request->file('files');
         $namesImagenes = [];
         foreach ($imagenes as $imagen) {
@@ -257,6 +260,12 @@ class InspectionController extends Controller
             $imagen->move(public_path('storage/public/images/'), $nombreImagen);
             array_push($namesImagenes, 'storage/images/' . $nombreImagen);
         }
+        $Inspec = DB::table('inspections')->where('id', $request->id)->first();
+        InspectionFiles::create([
+            'files' => $namesImagenes,
+            'id_ins' => $request->id
+        ]);
+
         return response()->json(['images' => $namesImagenes]);
     
     }
