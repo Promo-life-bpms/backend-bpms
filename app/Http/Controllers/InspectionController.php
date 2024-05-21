@@ -72,6 +72,9 @@ class InspectionController extends Controller
             $idInsp++;
         }
 
+        //$jsonData = $request->input('files'); // Acceder a la cadena JSON enviada en la solicitud
+        $jsonData = json_encode($request->input('files'), JSON_UNESCAPED_SLASHES);       
+
         $dataInspection = [
             'sale_id' => $sale->id,
             'code_inspection' => "INSP-" . str_pad($idInsp, 5, "0", STR_PAD_LEFT),
@@ -85,7 +88,7 @@ class InspectionController extends Controller
             'user_signature_reviewed' => $request->user_signature_reviewed,
             'quantity_revised' => $request->quantity_revised,
             'quantity_denied' => $request->quantity_denied,
-            'files' => $request->files,
+            'files' => $jsonData,
         ];
 
         try {
@@ -245,7 +248,7 @@ class InspectionController extends Controller
         foreach ($imagenes as $imagen) {
             $n =  $imagen->getClientOriginalName();
             $nombreImagen = time() . ' ' . Str::slug($n) . '.' . $imagen->getClientOriginalExtension();
-            $imagen->move(public_path('storage/public/images/'), $nombreImagen);
+            $imagen->move(public_path('storage/images/'), $nombreImagen);
             array_push($namesImagenes, 'storage/images/' . $nombreImagen);
         }
 
