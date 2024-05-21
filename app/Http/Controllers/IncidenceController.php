@@ -193,6 +193,7 @@ class IncidenceController extends Controller
 
 
         $incidencia->solution_date = $request->solution_date;
+        $incidencia->status = "Liberda";
         $incidencia->save();
         /*  foreach ($request->incidence_products as $incidence_product) {
             $incidence_product = (object)$incidence_product;
