@@ -97,11 +97,11 @@ class IncidenceController extends Controller
         if (!$sale) {
             return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
         }
-        $user = auth()->user()->name;
+        $user = auth()->user()->id;
         $user_details = UserDetails::where('id_user', $user)->first();
         $user_department = Department::where('id', $user_details->id_department)->first();
         $maxINC = Incidence::max('code_incidence');
-
+        $user_name = auth()->user()->name;
         $idinc = null;
         if (!$maxINC) {
             $idinc = 1;
@@ -123,7 +123,7 @@ class IncidenceController extends Controller
             'evidence' => $request->evidencia,
             'solution' => $request->solution ?? null,
             'solution_date' => null,
-            'elaborated' => $user, ///////meter quein elabroo
+            'elaborated' => $user_name, ///////meter quein elabroo
             'signature_elaborated' => $request->firma_elaboro,
             'reviewed' => $request->reviso ?? null,
             'signature_reviewed' => $request->firma_de_revision ?? null,
