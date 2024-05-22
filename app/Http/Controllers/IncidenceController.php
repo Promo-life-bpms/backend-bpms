@@ -97,7 +97,7 @@ class IncidenceController extends Controller
         if (!$sale) {
             return response()->json(["msg" => "No se ha encontrado el pedido"], response::HTTP_NOT_FOUND);
         }
-        $user = auth()->user()->id;
+        $user = auth()->user()->name;
         $user_details = UserDetails::where('id_user', $user)->first();
         $user_department = Department::where('id', $user_details->id_department)->first();
         $maxINC = Incidence::max('code_incidence');
