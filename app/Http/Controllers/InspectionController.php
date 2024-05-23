@@ -6,6 +6,7 @@ use App\Models\Inspection;
 use App\Models\InspectionFiles;
 use App\Models\Sale;
 use App\Models\InspectionProduct;
+use App\Models\OrderPurchaseProduct;
 use App\Models\SaleStatusChange;
 use Exception;
 use Illuminate\Http\Request;
@@ -24,7 +25,7 @@ class InspectionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, $sale_id)
+    public function store(Request $request, $sale_id, $product_id)
     {
         // Crear una inspeccion de calidad
         $validation = Validator::make($request->all(), [
@@ -49,10 +50,9 @@ class InspectionController extends Controller
             'features_quantity.product_does_not_perform_its_function' => 'required|numeric',
             'features_quantity.wrong_product_code' => 'required|numeric',
             'features_quantity.total' => 'required|numeric',
-            'products_selected' => 'required|array',
-            'products_selected.*.odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
-            'products_selected.*.code_order' => 'required|exists:order_purchases,code_order',
-            'products_selected.*.quantity_selected' => 'required',
+            'odoo_product_id' => 'required|exists:order_purchase_products,odoo_product_id',
+            'code_order' => 'required|exists:order_purchases,code_order',
+            'quantity_selected' => 'required'
         ]);
 
         if ($validation->fails()) {
@@ -111,14 +111,21 @@ class InspectionController extends Controller
             ];
 
             $inspection->featuresQuantity()->create($dataFeaturesQuantity);
-            foreach ($request->products_selected as $productSelected) {
+            $dataProductSelected = [
+                "odoo_product_id" => $request->odoo_product_id,
+                "code_order" => $request->code_order,
+                "quantity_selected" => $request->quantity_selected,
+                "id_order_purchase_products" => $product_id,
+            ];
+            $inspection->productsSelected()->create($dataProductSelected);
+            /* foreach ($request->products_selected as $productSelected) {
                 $dataProductSelected = [
                     "odoo_product_id" => $productSelected['odoo_product_id'],
                     "code_order" => $productSelected['code_order'],
                     "quantity_selected" => $productSelected['quantity_selected'],
                 ];
                 $inspection->productsSelected()->create($dataProductSelected);
-            }
+            } */
 
             //Inspección de calidad liberada
             $quantity_denied = $request->quantity_denied;
@@ -133,7 +140,6 @@ class InspectionController extends Controller
                     }
                 }
             }
-
             return response()->json([
                 "msg" => "Inspeccion Creada Correctamente",
                 'data' =>
