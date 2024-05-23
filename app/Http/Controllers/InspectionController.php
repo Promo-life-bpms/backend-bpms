@@ -192,6 +192,7 @@ class InspectionController extends Controller
             'description_product' => $productDescription,
             'id' => $inspection_products->id,
             'inspection_id' => $inspection_products->inspection_id,
+            'id_order_purchase_products' => $inspection_products->id_order_purchase_products,
             'odoo_product_id' => $inspection_products->odoo_product_id,
             'code_order' => $inspection_products->code_order,
             'quantity_selected' => $inspection_products->quantity_selected,
