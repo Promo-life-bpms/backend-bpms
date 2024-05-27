@@ -26,8 +26,8 @@ class ApiOdooController extends Controller
     public function setSale(Request $request)
     {
         try {
-            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
-                /*$validator = Validator::make($request->all(), [
+            if ($request->header('token') == true) {
+                $validator = Validator::make($request->all(), [
                     'sale' => 'bail|required|array',
                     'sale.code_sale' => 'required',
                     'sale.name_sale' => 'required',
@@ -70,14 +70,13 @@ class ApiOdooController extends Controller
                     'sale.products.*.quantity_invoiced' => 'required|numeric',
                     'sale.products.*.unit_price' => 'required|numeric',
                     'sale.products.*.subtotal' => 'required|numeric',
-                    'sale.checklist' => 'bail|required|array',
                     'sale.total' => 'required|numeric',
                     'sale.status' => 'required',
                 ]);
 
                 if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
-                }*/
+                }
                 // Obtener el pedido
                 $requestData = (object) $request->sale;
                 // Obtener datos principales
@@ -134,7 +133,7 @@ class ApiOdooController extends Controller
                         } else {
                             $sale->moreInformation()->create($dataAdditionalInfo);
                         }
-                        $conceptos = ['OC', 'Virtual', 'Logo', 'AI', 'Cotización proveedor', 'Distribución', 'Dirección de entrega', 'Contacto', 'Datos de facturación'];
+                        $conceptos = ['OC', 'Virtual', 'Logo', 'AI', 'Cotizaci贸n proveedor', 'Distribuci贸n', 'Direcci贸n de entrega', 'Contacto', 'Datos de facturaci贸n'];
                         foreach ($conceptos as $concepto) {
                             # code...
                             $check = CheckList::create([
