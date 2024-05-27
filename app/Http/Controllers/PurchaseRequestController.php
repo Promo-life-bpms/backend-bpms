@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Models\UserCenter;
 use App\Models\UserRole;
 use App\Notifications\BuyersRequestNotification;
+use App\Notifications\ConfirmedReceipt;
 use App\Notifications\CreatePurchaseRequest;
 use App\Notifications\CreateRequestNotification;
 use Carbon\Carbon;
@@ -710,7 +711,7 @@ class PurchaseRequestController extends Controller
         }
         ///////////////////////////////////
         //////////PRIMERO VERIFICAMOS QUIEN ES SU JEFE DIRECTO////////////
-        /* $department = DB::table('user_details')->where('id_user', $user->id)->first();
+        $department = DB::table('user_details')->where('id_user', $user->id)->first();
         //dd($department);
         $idDepartment = $department->id_department;
         //dd($idDepartment);
@@ -725,7 +726,7 @@ class PurchaseRequestController extends Controller
             } catch (\Exception $e) {
                 return $e;
             }
-        } */
+        }
         /*$users_to_send_mail = UserCenter::where('center_id', $center_id)->get();
 
         if (count($users_to_send_mail) != 0) {
@@ -1078,6 +1079,14 @@ class PurchaseRequestController extends Controller
             DB::table('purchase_requests')->where('id', $request->id)->update([
                 'purchase_status_id' => 3,
             ]);
+
+            $Usuario = User::where('id', $user->id)->first();
+            try {
+                $Usuario->notify(new ConfirmedReceipt($user->name, $Usuario->name, $request->id));
+                
+            } catch (\Exception $e) {
+                return $e;
+            }
 
             $metododepago = DB::table('purchase_requests')->where('id', $request->id)->select('payment_method_id')->first();
 
