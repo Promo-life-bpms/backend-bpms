@@ -2,5 +2,5 @@
 # ¡Buen día, {{ $receptor}}!
 
 {{ $emisor }} ha creado una nueva solicitud de gasto. 
-El No. de la solicitud es "GOT-{{$idPurchase}}"
+El No. de la solicitud es "GTO-{{$idPurchase}}"
 @endcomponent

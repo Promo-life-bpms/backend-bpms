@@ -473,13 +473,29 @@ class SaleController extends Controller
             }
             ////////////////////////////////////////COMFIRMACION DE LAS RUTAS/////////////////////////////////////
             $ConfirmationOrder = [];
+            //dd($idOrdenes);
             foreach ($idOrdenes as $code_order => $idOrden) {
                 $ConfirmationRoute = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
+                //dd($ConfirmationRoute);
                 foreach ($ConfirmationRoute as $Confirma) {
+                    //dd($Confirma);
                     $DatosConfirmate = DB::table('confirm_routes')->where('id_product_order', $Confirma->id)
                         ->orderBy('created_at', 'desc')
                         ->limit(1)
                         ->get();
+
+                    $Insp = DB::table('inspection_products')->where('id_order_purchase_products', $Confirma->id)->get();
+                    $inspectionsInfo = [];
+                    foreach ($Insp as $Ins) {
+                        $idInspeccion = DB::table('inspections')->where('id', $Ins->inspection_id)->first();
+                        $code = $idInspeccion->code_inspection;
+                        $inspectionsInfo[] = [
+                            'inspection_id' => $Ins->inspection_id,
+                            'created_at' => $Ins->created_at,
+                            'code_inspection' => $code,
+
+                        ];
+                    }
                     foreach ($DatosConfirmate as $confirmados) {
                         $ProductsCounts = DB::table('confirm_product_counts')->where('id_product',$Confirma->id)->exists();
                         $HistoryProductsCounts = 0;
@@ -493,6 +509,7 @@ class SaleController extends Controller
                                 'id_product' => $Confirma->id,
                                 'description' => $Confirma->description,
                                 'Products_Counts_History' => $HistoryProductsCounts,
+                                'Inspections' => $inspectionsInfo
                             ];
                             $ConfirmationOrder[] = $info;
                         }

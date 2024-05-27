@@ -14,6 +14,7 @@ class Inspection extends Model
         "code_inspection",
         'user_created_id',
         'date_inspection',
+        'files',
         'type_product',
         'observations',
         'user_created',
@@ -22,9 +23,7 @@ class Inspection extends Model
         'user_signature_reviewed',
         'quantity_revised',
         'quantity_denied',
-        'files_ins'
-
-
+        'sample',
     ];
 
     public function productsSelected()

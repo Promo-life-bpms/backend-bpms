@@ -19,6 +19,7 @@ class CreateInspectionsTable extends Migration
             $table->foreignId('sale_id')->constrained();
             $table->foreignId('user_created_id')->references('id')->on('users');
             $table->dateTime('date_inspection');
+            $table->text('files')->nullable();
             $table->string('type_product');
             $table->text('observations');
             $table->string('user_created');
@@ -27,7 +28,7 @@ class CreateInspectionsTable extends Migration
             $table->text('user_signature_reviewed');
             $table->integer('quantity_revised');
             $table->integer('quantity_denied');
-            $table->text('files_ins');
+            $table->integer('sample');
             $table->timestamps();
         });
     }
