@@ -1081,8 +1081,10 @@ class PurchaseRequestController extends Controller
             ]);
 
             $Usuario = User::where('id', $user->id)->first();
+            $id = $purchase_request->user_id;
+            $username = DB::table('users')->where('id', $id)->value('name');
             try {
-                $Usuario->notify(new ConfirmedReceipt($user->name, $Usuario->name, $request->id));
+                $Usuario->notify(new ConfirmedReceipt($user->name, $username, $request->id));
                 
             } catch (\Exception $e) {
                 return $e;
