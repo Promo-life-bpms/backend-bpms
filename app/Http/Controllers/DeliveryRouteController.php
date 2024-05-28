@@ -274,10 +274,7 @@ class DeliveryRouteController extends Controller
                             }
                         }
                     }
-
-
                 } else if ($pm_visible_zero_or_one) {
-                    return 'Aqui entro pm';
                     foreach ($status_deliverys as $status_delivery) {
                         if ($status_delivery->status == 'Almacen PL') {
                             if ($pm_visible_one) {
@@ -387,7 +384,6 @@ class DeliveryRouteController extends Controller
                         }
                     }
                 }
-
             }
         }
         return response()->json([
