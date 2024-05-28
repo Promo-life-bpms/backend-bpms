@@ -190,14 +190,15 @@ class InspectionController extends Controller
 
         $inspection_products = DB::table('inspection_products')->where('inspection_id', $inspection->id)->first();
         $orden= DB::table('order_purchases')->where('code_order', $inspection_products->code_order)->first();
-        $productDescription = DB::table('order_purchase_products')->where('order_purchase_id', $orden->id)->value('description');
+        $productDescription = DB::table('order_purchase_products')->where('order_purchase_id', $orden->id)->first();
     
         $inspection_product = [
-            'description_product' => $productDescription,
             'id' => $inspection_products->id,
             'inspection_id' => $inspection_products->inspection_id,
             'id_order_purchase_products' => $inspection_products->id_order_purchase_products,
             'odoo_product_id' => $inspection_products->odoo_product_id,
+            'description_product' => $productDescription->description,
+            'total' => $productDescription->quantity,
             'code_order' => $inspection_products->code_order,
             'quantity_selected' => $inspection_products->quantity_selected,
             'created_at' => $inspection_products->created_at,
