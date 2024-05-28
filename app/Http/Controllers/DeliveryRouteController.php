@@ -136,23 +136,25 @@ class DeliveryRouteController extends Controller
                 $visible = 2; //El visible 2 es que no tiene ningun dato
             }
             //$visible = ($color == 2) ? 1 : 0;
-            /*    $rutas = DeliveryRoute::where('product_id', $deliveryRouteData['product_id'])->where()->get(); */
-
-            $ruta = DeliveryRoute::create([
-                'code_sale' => $sale->code_sale,
-                'code_order' => $order->code_order,
-                'product_id' => $deliveryRouteData['product_id'],
-                'type' => $deliveryRouteData['type'],
-                'type_of_destiny' => $deliveryRouteData['type_of_destiny'],
-                'date_of_delivery' => $deliveryRouteData['date_of_delivery'],
-                'status_delivery' => $deliveryRouteData['status_delivery'],
-                'shipping_type' => $deliveryRouteData['shipping_type'],
-                'color' => $color,
-                'visible' => $visible
-            ]);
-            $routes[] = $ruta;
+            $ruta_ant = DeliveryRoute::where('product_id', $deliveryRouteData['product_id'])->where('type_of_destiny', $deliveryRouteData['type_of_destiny'])->first();
+            if (!$ruta_ant) {
+                $ruta = DeliveryRoute::create([
+                    'code_sale' => $sale->code_sale,
+                    'code_order' => $order->code_order,
+                    'product_id' => $deliveryRouteData['product_id'],
+                    'type' => $deliveryRouteData['type'],
+                    'type_of_destiny' => $deliveryRouteData['type_of_destiny'],
+                    'date_of_delivery' => $deliveryRouteData['date_of_delivery'],
+                    'status_delivery' => $deliveryRouteData['status_delivery'],
+                    'shipping_type' => $deliveryRouteData['shipping_type'],
+                    'color' => $color,
+                    'visible' => $visible
+                ]);
+                $routes[] = $ruta;
+            } else {
+                return response()->json(['ya existe una ruta para ese destino']);
+            }
         }
-
         $existingStatuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $deliveryRouteData['product_id'])
             ->where('code_order', $order->code_order)
             ->get();
@@ -198,42 +200,149 @@ class DeliveryRouteController extends Controller
                     $status_deliverys[] = $statuses_Delivery;
                 }
             }
-        } else {
-            // Si existen registros, actualizarlos
-            foreach ($routes as $ruta) {
-                // Busca el estado correspondiente al tipo_de_destino de la ruta actual
-                $status = collect($statuses)->firstWhere('status', $ruta['type_of_destiny']);
+        }
+        $pl_visible_two = false;
+        $maquila_visible_two = false;
+        $pm_visible_two = false;
 
-                if ($status) {
-                    // Busca si ya existe un registro para este estado y orden
-                    $existingStatus = StatusDeliveryRouteChange::where('order_purchase_product_id', $ruta['product_id'])
-                        ->where('code_order', $ruta['code_order'])
-                        ->where('status', $status['status'])
-                        ->first();
+        $maquila_visible_zero_or_one = false;
+        $pm_visible_zero_or_one = false;
+        $cliente_visible_zero_or_one = false;
 
-                    if ($existingStatus) {
-                        // Actualiza el registro existente con la nueva visibilidad
-                        $existingStatus->update([
-                            'visible' => $ruta['visible'],
-                        ]);
+        $maquila_visible_one = false;
+        $pm_visible_one = false;
+        $cliente_visible_one = false;
+
+        foreach ($status_deliverys as $status_delivery) {
+            if ($status_delivery->status == 'Almacen PL' && $status_delivery->visible === 2) {
+                $pl_visible_two = true;
+            }
+            if ($status_delivery->status == 'Maquila' && $status_delivery->visible === 2) {
+                $maquila_visible_two = true;
+            }
+            if ($status_delivery->status == 'Almacen PM' && $status_delivery->visible === 2) {
+                $pm_visible_two = true;
+            }
+
+            if ($status_delivery->status == 'Maquila') {
+                if ($status_delivery->visible == 0 || $status_delivery->visible == 1) {
+                    $maquila_visible_zero_or_one = true;
+                    if ($status_delivery->visible == 1) {
+                        $maquila_visible_one = true;
                     }
-
+                }
+            } else if ($status_delivery->status == 'Almacen PM') {
+                if ($status_delivery->visible == 0 || $status_delivery->visible == 1) {
+                    $pm_visible_zero_or_one = true;
+                    if ($status_delivery->visible == 1) {
+                        $pm_visible_one = true;
+                    }
+                }
+            } else if ($status_delivery->status == 'Cliente') {
+                if ($status_delivery->visible == 0 || $status_delivery->visible == 1) {
+                    $cliente_visible_zero_or_one = true;
+                    if ($status_delivery->visible == 1) {
+                        $cliente_visible_one = true;
+                    }
+                }
+            }
+            // Luego recorremos y aplicamos el cambio necesario si se cumple la condición
+            if ($pl_visible_two) {
+                if ($maquila_visible_zero_or_one) {
+                    foreach ($status_deliverys as $status_delivery) {
+                        if ($status_delivery->status == 'Almacen PL') {
+                            if ($maquila_visible_one) {
+                                $status_delivery->visible = 1;
+                            } else {
+                                $status_delivery->visible = 0;
+                            }
+                            $status_delivery->save();
+                        }
+                    }
+                } else if ($pm_visible_zero_or_one) {
+                    foreach ($status_deliverys as $status_delivery) {
+                        if ($status_delivery->status == 'Almacen PL') {
+                            if ($pm_visible_one) {
+                                $status_delivery->visible = 1;
+                            } else {
+                                $status_delivery->visible = 0;
+                            }
+                            $status_delivery->save();
+                        }
+                        if ($status_delivery->status == 'Maquila') {
+                            if ($pm_visible_one) {
+                                $status_delivery->visible = 1;
+                            } else {
+                                $status_delivery->visible = 0;
+                            }
+                            $status_delivery->save();
+                        }
+                    }
+                } else if ($cliente_visible_zero_or_one) {
+                    foreach ($status_deliverys as $status_delivery) {
+                        if ($status_delivery->status == 'Almacen PL') {
+                            if ($cliente_visible_one) {
+                                $status_delivery->visible = 1;
+                            } else {
+                                $status_delivery->visible = 0;
+                            }
+                            $status_delivery->save();
+                        }
+                        if ($status_delivery->status == 'Maquila') {
+                            if ($cliente_visible_one) {
+                                $status_delivery->visible = 1;
+                            } else {
+                                $status_delivery->visible = 0;
+                            }
+                            $status_delivery->save();
+                        }
+                        if ($status_delivery->status == 'Almacen PM') {
+                            if ($cliente_visible_one) {
+                                $status_delivery->visible = 1;
+                            } else {
+                                $status_delivery->visible = 0;
+                            }
+                            $status_delivery->save();
+                        }
+                    }
+                } else if ($maquila_visible_two) {
+                    if ($pm_visible_zero_or_one) {
+                        foreach ($status_deliverys as $status_delivery) {
+                            if ($status_delivery->status == 'Maquila') {
+                                if ($pm_visible_one) {
+                                    $status_delivery->visible = 1;
+                                } else {
+                                    $status_delivery->visible = 0;
+                                }
+                                $status_delivery->save();
+                            }
+                        }
+                    }
+                } else if ($pm_visible_two) {
+                    if ($cliente_visible_zero_or_one) {
+                        foreach ($status_deliverys as $status_delivery) {
+                            if ($status_delivery->status == 'Almacen PM') {
+                                if ($cliente_visible_one) {
+                                    $status_delivery->visible = 1;
+                                } else {
+                                    $status_delivery->visible = 0;
+                                }
+                                $status_delivery->save();
+                            }
+                        }
+                    }
                 }
             }
         }
-
-        $existingStatuses = StatusDeliveryRouteChange::where('order_purchase_product_id', $deliveryRouteData['product_id'])
-            ->where('code_order', $order->code_order)
-            ->get();
-
         return response()->json([
             'msg' => 'Ruta Creada Existosamente',
             'data' => [
                 "ruta" => $routes,
-                "status" => $existingStatuses
+                "status" => $status_deliverys
             ]
         ], Response::HTTP_CREATED);
     }
+
     public function updateInfoChofer(Request $request, $ruta, $pedido)
     {
         $validation = Validator::make($request->all(), [
