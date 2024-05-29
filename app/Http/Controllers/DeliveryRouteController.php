@@ -259,6 +259,21 @@ class DeliveryRouteController extends Controller
                             $status_delivery->save();
                         }
                     }
+
+                    if ($pm_visible_two) {
+                        if ($cliente_visible_zero_or_one) {
+                            foreach ($status_deliverys as $status_delivery) {
+                                if ($status_delivery->status == 'Almacen PM') {
+                                    if ($cliente_visible_one) {
+                                        $status_delivery->visible = 1;
+                                    } else {
+                                        $status_delivery->visible = 0;
+                                    }
+                                    $status_delivery->save();
+                                }
+                            }
+                        }
+                    }
                 } else if ($pm_visible_zero_or_one) {
                     foreach ($status_deliverys as $status_delivery) {
                         if ($status_delivery->status == 'Almacen PL') {
@@ -332,6 +347,43 @@ class DeliveryRouteController extends Controller
                         }
                     }
                 }
+            } else {
+                if ($maquila_visible_two){
+                    if ($pm_visible_zero_or_one) {
+                        foreach ($status_deliverys as $status_delivery) {
+                            if ($status_delivery->status == 'Maquila') {
+                                if ($pm_visible_one) {
+                                    $status_delivery->visible = 1;
+                                } else {
+                                    $status_delivery->visible = 0;
+                                }
+                                $status_delivery->save();
+                            }
+                        }
+                    }
+                    else if ($pm_visible_two) {
+                        if ($cliente_visible_zero_or_one) {
+                            foreach ($status_deliverys as $status_delivery) {
+                                if ($status_delivery->status == 'Maquila') {
+                                    if ($cliente_visible_one) {
+                                        $status_delivery->visible = 1;
+                                    } else {
+                                        $status_delivery->visible = 0;
+                                    }
+                                    $status_delivery->save();
+                                }
+                                if ($status_delivery->status == 'Almacen PM') {
+                                    if ($cliente_visible_one) {
+                                        $status_delivery->visible = 1;
+                                    } else {
+                                        $status_delivery->visible = 0;
+                                    }
+                                    $status_delivery->save();
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
         return response()->json([
@@ -343,70 +395,7 @@ class DeliveryRouteController extends Controller
         ], Response::HTTP_CREATED);
     }
 
-    public function updateInfoChofer(Request $request, $ruta, $pedido)
-    {
-        $validation = Validator::make($request->all(), [
-            'type_of_product' => 'required|in:Limpio,Maquilado',
-            'type_of_chofer' => 'required',
-            'user_chofer_id' => 'required_if:type_of_chofer,==,Interno',
-            'parcel' => 'required_if:type_of_chofer,==,Externo'
-        ]);
-        if ($validation->fails()) {
-            return response()->json(
-                [
-                    'msg' => "Error al validar informacion de la ruta de entrega",
-                    'data' => ['errorValidacion' => $validation->getMessageBag()]
-                ],
-                response::HTTP_UNPROCESSABLE_ENTITY
-            ); // 422
-        }
-        $isAuthToUpdate =  auth()->user()->hasRole([
-            'logistica-y-mesa-de-control',
-            'administrator',
-            'jefe-de-logistica',
-            'gerente-de-operaciones',
-            'almacen'
-        ]);
 
-        if (!$isAuthToUpdate) {
-            return response()->json(
-                ['msg' => "No tienes autorizacion para modificar los choferes",]
-            );
-        }
-        $rutaDB = DeliveryRoute::where('code_route', $ruta)->first();
-        // Chequeaos si encontró o no la ruta
-        if (!$rutaDB) {
-            // Se devuelve un array errors con los errores detectados y código 404
-            return response()->json(['msg'  => 'No se encuentra esa ruta de entrega.'], response::HTTP_NOT_FOUND); //404
-        }
-        $pedidosRuta = $rutaDB->codeOrderDeliveryRoute()->where('code_sale', $pedido)->get();
-        if ($pedidosRuta->count() <= 0) {
-            return response()->json(['msg'  => 'No se encuentra ese pedido en la ruta.'], response::HTTP_NOT_FOUND); //404
-        }
-        foreach ($pedidosRuta as $codeOrder) {
-            $codeOrder = (object)$codeOrder;
-
-            $dataSale = [
-                'user_chofer_id' => $request->user_chofer_id,
-                'type_of_product' => $request->type_of_product,
-                'type_of_chofer' => $request->type_of_chofer,
-                'num_guide' => $request->num_guide,
-                'observations' => $request->observations,
-                'parcel_name' => $request->parcel
-
-            ];
-
-            $codeOrder->save($dataSale);
-        }
-        return response()->json(['msg'  => 'Actualizacion completa.'], response::HTTP_ACCEPTED);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\DeliveryRoute  $deliveryRoute
-     * @return \Illuminate\Http\Response
-     */
     public function excelCompras($ruta)
     {
 
@@ -469,15 +458,10 @@ class DeliveryRouteController extends Controller
         return response()->json(['msg' => 'Detalle de ruta de entrega',  'data' => ['ruta' => $ruta]], response::HTTP_OK);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\DeliveryRoute  $deliveryRoute
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(DeliveryRoute $deliveryRoute)
+
+    public function updateRuta(Request $request, $product_id, $sale)
     {
-        //
+        $ruta_ant = DeliveryRoute::where('product_id', $product_id)->where('code_sale', $sale)->where('code_order', $request->code_order)->get();
     }
     /**
      * Update the specified resource in storage.
