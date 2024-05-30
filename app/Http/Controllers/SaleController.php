@@ -493,9 +493,11 @@ class SaleController extends Controller
                             'inspection_id' => $Ins->inspection_id,
                             'created_at' => $Ins->created_at,
                             'code_inspection' => $code,
-
                         ];
                     }
+                    $Deliverys = DB::table('confirm_deliveries')->where('id_order_purchase_product', $Confirma->id)->get();
+                    
+
                     foreach ($DatosConfirmate as $confirmados) {
                         $ProductsCounts = DB::table('confirm_product_counts')->where('id_product',$Confirma->id)->exists();
                         $HistoryProductsCounts = 0;
@@ -504,18 +506,28 @@ class SaleController extends Controller
 
                         }
                         if ($confirmados) {
+                            $deliveryProducts = [];
+                            foreach($Deliverys as $Delivery){
+                                $deliveryProducts[] = [
+                                    'id_order_purchase_product' => $Delivery->id_order_purchase_product,
+                                    'delivery_type' => $Delivery->delivery_type,
+                                    'created_at' => $Delivery->created_at
+                                ];
+                            }
+                            
                             $info = [
                                 'reference' => $code_order,
                                 'id_product' => $Confirma->id,
                                 'description' => $Confirma->description,
                                 'Products_Counts_History' => $HistoryProductsCounts,
-                                'Inspections' => $inspectionsInfo
+                                'Inspections' => $inspectionsInfo,
+                                'Delivery' => $deliveryProducts
                             ];
                             $ConfirmationOrder[] = $info;
                         }
                     }
                 }
-            }            
+            } 
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
