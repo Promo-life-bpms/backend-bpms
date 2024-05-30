@@ -64,12 +64,11 @@
             <br>
             <div style="text-align: justify;">
                 {{ $emisor }} ha confirmado la entrega de efectivo de la solicitud "GTO-{{$idPurchase}}".
-                Apartir de ahora puedes pasar con el personal de Caja chica para la entrega de dinero. 
+                Podrás pasar a recoger el dinero dentro de 45 minutos, con el personal de Caja chica. 
             </div>
             <br>
             <div style="text-align: justify;">
                 Recuerda que una vez hayas recibido el dinero, deberás confirmar su recepción en el sistema. 
-                De lo contrario, ya no se te volverá a entregar efectivo hasta que hablemos con tu jefe directo.
             </div>
         </div>
         <div class="bpms-legend">
