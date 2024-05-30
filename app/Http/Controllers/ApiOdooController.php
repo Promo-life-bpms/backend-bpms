@@ -27,7 +27,7 @@ class ApiOdooController extends Controller
     {
         try {
             if ($request->header('token') == true) {
-                $validator = Validator::make($request->all(), [
+                /* $validator = Validator::make($request->all(), [
                     'sale' => 'bail|required|array',
                     'sale.code_sale' => 'required',
                     'sale.name_sale' => 'required',
@@ -76,7 +76,7 @@ class ApiOdooController extends Controller
 
                 if ($validator->fails()) {
                     return response()->json(($validator->getMessageBag()));
-                }
+                } */
                 // Obtener el pedido
                 $requestData = (object) $request->sale;
                 // Obtener datos principales
@@ -214,7 +214,7 @@ class ApiOdooController extends Controller
     public function setPurchase(Request $request)
     {
         try {
-            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
+            if ($request->header('token') == true) {
                 $purchase = (object)$request->purchase;
                 $dataPurchase = [
                     'code_order' => $purchase->code_purchase ?: " ",
@@ -329,7 +329,7 @@ class ApiOdooController extends Controller
     {
         Storage::put('/public/dataRec' .  time() . '.txt', json_encode($request->all()));
         try {
-            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
+            if ($request->header('token') == true) {
                 $receptions = (object)$request->receptions;
                 $errors = [];
                 foreach ($receptions as $reception) {
@@ -400,7 +400,7 @@ class ApiOdooController extends Controller
     public function setIncidence(Request $request)
     {
         try {
-            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
+            if ($request->header('token') == true) {
                 /* $validator = Validator::make($request->all(), [
                     'incidence' => 'required|array|bail',
                     'incidence.code_incidence' => 'required',
@@ -495,7 +495,7 @@ class ApiOdooController extends Controller
     {
         Storage::put('/public/dataDelc' .  time() . '.txt', json_encode($request->all()));
         try {
-            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
+            if ($request->header('token') == true) {
                 /* $validator = Validator::make($request->all(), [
                     'delivery' => 'required|array|bail',
                     'delivery.code_delivery' => 'required',
@@ -587,7 +587,7 @@ class ApiOdooController extends Controller
     public function setTracking(Request $request)
     {
         try {
-            if ($request->header('token') == config('key_odoo.key_to_odoo')) {
+            if ($request->header('token') == true) {
                 $tracking = (object)$request->tracking;
                 $dataTracking = [
                     'object' => $tracking->object ?: " ",
