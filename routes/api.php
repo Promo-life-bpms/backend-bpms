@@ -151,7 +151,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('rutas-de-entrega/show/{id}', [DeliveryRouteController::class, 'show']);
 
     // Actualizar la ruta de entrega
-    Route::put('rutas-de-entrega/{ruta}/update', [DeliveryRouteController::class, 'update']);
+    Route::post('ruta-de-entrega/{prouduct_id}', [DeliveryRouteController::class, 'updateRuta']);
+    // Route::put('rutas-de-entrega/{ruta}/updateStatus', [DeliveryRouteController::class, 'updateStatus']);
     Route::put('rutas-de-entrega/{ruta}/updateStatus', [DeliveryRouteController::class, 'updateStatus']);
     Route::patch('rutas-de-entrega/{ruta}/pedido/{pedido}', [DeliveryRouteController::class, 'updateInfoChofer']);
     // Eliminar ruta de entrega
@@ -182,7 +183,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('confirmation/order/products', [OrderConfirmationController::class, 'ConfirmOrderProducts']);
 
 
-    Route::post('status/two/{pedido}',[StatusOrdersController::class, 'StatusTwo']);
+    Route::post('status/two/{pedido}', [StatusOrdersController::class, 'StatusTwo']);
     /////////////////CONFIRMAR ORDENES DE PRODUCTOS///////////////
     Route::post('confirmation/route/product', [ConfirmRouteController::class, 'ConfirmationRoute']);
     Route::get('history/confirmation/route/product/{idProductOrder}', [ConfirmRouteController::class, 'index']);
@@ -306,7 +307,6 @@ Route::group(['middleware' => 'auth'], function () {
 
     ///////////////////APIS PARA MANAGERS//////////////////////////////
     Route::get('managers/department', [ManagerHasDepartmentController::class, 'ViewManager']);
-    Route::post('create/manager/department',[ManagerHasDepartmentController::class,'CrearManager']);
-    Route::post('delete/manager/department',[ManagerHasDepartmentController::class,'DeleteManager']);
-
+    Route::post('create/manager/department', [ManagerHasDepartmentController::class, 'CrearManager']);
+    Route::post('delete/manager/department', [ManagerHasDepartmentController::class, 'DeleteManager']);
 });
