@@ -139,6 +139,8 @@ class ApiOdooController extends Controller
                             $check = CheckList::create([
                                 "code_sale" => $sale->code_sale,
                                 "description" => $concepto,
+                                "quote" => 'Creado',
+                                "distribution" => 'Creado',
                                 "status_checklist" => 'Creado',
                             ]);
                             $check->save();
