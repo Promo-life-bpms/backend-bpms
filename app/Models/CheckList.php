@@ -11,6 +11,8 @@ class CheckList extends Model
     protected $fillable = [
         'code_sale',
         'description',
+        'distribution',
+        'quote',
         'status_checklist',
     ];
 }
