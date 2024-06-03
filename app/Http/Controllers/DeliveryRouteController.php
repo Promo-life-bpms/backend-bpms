@@ -313,15 +313,32 @@ class DeliveryRouteController extends Controller
                         $visible = 2; // El visible 2 es que no tiene ningun dato
                     }
                 }
-                // Actualizar la ruta de entrega si coincide el 'type_of_destiny'
-                DB::table('delivery_routes')->where('type_of_destiny', $rutaRequest['type_of_destiny'])->update([
-                    'type' => $rutaRequest['type'] ?? $ruta->type,
-                    'date_of_delivery' => $rutaRequest['date_of_delivery'] ?? $ruta->date_of_delivery,
-                    'status_delivery' => $rutaRequest['status_delivery'] ?? $ruta->status_delivery,
-                    'shipping_type' => $rutaRequest['shipping_type'] ?? $ruta->shipping_type,
-                    'color' => $color,
-                    'visible' =>  $visible
-                ]);
+
+                $ruta_ant = DeliveryRoute::where('product_id', $product_id)->where('type_of_destiny', $rutaRequest['type_of_destiny'])->first();
+                $newrut = DeliveryRoute::where('product_id', $product_id)->first();
+                if ($ruta_ant) {
+                    DB::table('delivery_routes')->where('type_of_destiny', $rutaRequest['type_of_destiny'])->update([
+                        'type' => $rutaRequest['type'] ?? $ruta_ant->type,
+                        'date_of_delivery' => $rutaRequest['date_of_delivery'] ?? $ruta_ant->date_of_delivery,
+                        'status_delivery' => $rutaRequest['status_delivery'] ?? $ruta_ant->status_delivery,
+                        'shipping_type' => $rutaRequest['shipping_type'] ?? $ruta_ant->shipping_type,
+                        'color' => $color,
+                        'visible' =>  $visible
+                    ]);
+                } else {
+                    DeliveryRoute::create([
+                        'code_sale' => $newrut->code_sale,
+                        'code_order' => $newrut->code_order,
+                        'product_id' => $product_id,
+                        'type' => $rutaRequest['type'] ?? $newrut->type,
+                        'type_of_destiny' => $rutaRequest['type_of_destiny'],
+                        'date_of_delivery' => $rutaRequest['date_of_delivery'] ?? $newrut->date_of_delivery,
+                        'status_delivery' => $rutaRequest['status_delivery'] ?? $newrut->status_delivery,
+                        'shipping_type' => $rutaRequest['shipping_type'] ?? $newrut->shipping_type,
+                        'color' => $color,
+                        'visible' =>  $visible
+                    ]);
+                }
             }
 
             $rutas_update = DeliveryRoute::where('product_id', $order->order_purchase_id)->get();
