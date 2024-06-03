@@ -201,190 +201,7 @@ class DeliveryRouteController extends Controller
                 }
             }
         }
-        $pl_visible_two = false;
-        $maquila_visible_two = false;
-        $pm_visible_two = false;
 
-        $maquila_visible_zero_or_one = false;
-        $pm_visible_zero_or_one = false;
-        $cliente_visible_zero_or_one = false;
-
-        $maquila_visible_one = false;
-        $pm_visible_one = false;
-        $cliente_visible_one = false;
-
-        foreach ($status_deliverys as $status_delivery) {
-            if ($status_delivery->status == 'Almacen PL' && $status_delivery->visible === 2) {
-                $pl_visible_two = true;
-            }
-            if ($status_delivery->status == 'Maquila' && $status_delivery->visible === 2) {
-                $maquila_visible_two = true;
-            }
-            if ($status_delivery->status == 'Almacen PM' && $status_delivery->visible === 2) {
-                $pm_visible_two = true;
-            }
-
-            if ($status_delivery->status == 'Maquila') {
-                if ($status_delivery->visible == 0 || $status_delivery->visible == 1) {
-                    $maquila_visible_zero_or_one = true;
-                    if ($status_delivery->visible == 1) {
-                        $maquila_visible_one = true;
-                    }
-                }
-            } else if ($status_delivery->status == 'Almacen PM') {
-                if ($status_delivery->visible == 0 || $status_delivery->visible == 1) {
-                    $pm_visible_zero_or_one = true;
-                    if ($status_delivery->visible == 1) {
-                        $pm_visible_one = true;
-                    }
-                }
-            } else if ($status_delivery->status == 'Cliente') {
-                if ($status_delivery->visible == 0 || $status_delivery->visible == 1) {
-                    $cliente_visible_zero_or_one = true;
-                    if ($status_delivery->visible == 1) {
-                        $cliente_visible_one = true;
-                    }
-                }
-            }
-            // Luego recorremos y aplicamos el cambio necesario si se cumple la condición
-            if ($pl_visible_two) {
-                if ($maquila_visible_zero_or_one) {
-                    foreach ($status_deliverys as $status_delivery) {
-                        if ($status_delivery->status == 'Almacen PL') {
-                            if ($maquila_visible_one) {
-                                $status_delivery->visible = 1;
-                            } else {
-                                $status_delivery->visible = 0;
-                            }
-                            $status_delivery->save();
-                        }
-                    }
-
-                    if ($pm_visible_two) {
-                        if ($cliente_visible_zero_or_one) {
-                            foreach ($status_deliverys as $status_delivery) {
-                                if ($status_delivery->status == 'Almacen PM') {
-                                    if ($cliente_visible_one) {
-                                        $status_delivery->visible = 1;
-                                    } else {
-                                        $status_delivery->visible = 0;
-                                    }
-                                    $status_delivery->save();
-                                }
-                            }
-                        }
-                    }
-                } else if ($pm_visible_zero_or_one) {
-                    foreach ($status_deliverys as $status_delivery) {
-                        if ($status_delivery->status == 'Almacen PL') {
-                            if ($pm_visible_one) {
-                                $status_delivery->visible = 1;
-                            } else {
-                                $status_delivery->visible = 0;
-                            }
-                            $status_delivery->save();
-                        }
-                        if ($status_delivery->status == 'Maquila') {
-                            if ($pm_visible_one) {
-                                $status_delivery->visible = 1;
-                            } else {
-                                $status_delivery->visible = 0;
-                            }
-                            $status_delivery->save();
-                        }
-                    }
-                } else if ($cliente_visible_zero_or_one) {
-                    foreach ($status_deliverys as $status_delivery) {
-                        if ($status_delivery->status == 'Almacen PL') {
-                            if ($cliente_visible_one) {
-                                $status_delivery->visible = 1;
-                            } else {
-                                $status_delivery->visible = 0;
-                            }
-                            $status_delivery->save();
-                        }
-                        if ($status_delivery->status == 'Maquila') {
-                            if ($cliente_visible_one) {
-                                $status_delivery->visible = 1;
-                            } else {
-                                $status_delivery->visible = 0;
-                            }
-                            $status_delivery->save();
-                        }
-                        if ($status_delivery->status == 'Almacen PM') {
-                            if ($cliente_visible_one) {
-                                $status_delivery->visible = 1;
-                            } else {
-                                $status_delivery->visible = 0;
-                            }
-                            $status_delivery->save();
-                        }
-                    }
-                } else if ($maquila_visible_two) {
-                    if ($pm_visible_zero_or_one) {
-                        foreach ($status_deliverys as $status_delivery) {
-                            if ($status_delivery->status == 'Maquila') {
-                                if ($pm_visible_one) {
-                                    $status_delivery->visible = 1;
-                                } else {
-                                    $status_delivery->visible = 0;
-                                }
-                                $status_delivery->save();
-                            }
-                        }
-                    }
-                } else if ($pm_visible_two) {
-                    if ($cliente_visible_zero_or_one) {
-                        foreach ($status_deliverys as $status_delivery) {
-                            if ($status_delivery->status == 'Almacen PM') {
-                                if ($cliente_visible_one) {
-                                    $status_delivery->visible = 1;
-                                } else {
-                                    $status_delivery->visible = 0;
-                                }
-                                $status_delivery->save();
-                            }
-                        }
-                    }
-                }
-            } else {
-                if ($maquila_visible_two) {
-                    if ($pm_visible_zero_or_one) {
-                        foreach ($status_deliverys as $status_delivery) {
-                            if ($status_delivery->status == 'Maquila') {
-                                if ($pm_visible_one) {
-                                    $status_delivery->visible = 1;
-                                } else {
-                                    $status_delivery->visible = 0;
-                                }
-                                $status_delivery->save();
-                            }
-                        }
-                    } else if ($pm_visible_two) {
-                        if ($cliente_visible_zero_or_one) {
-                            foreach ($status_deliverys as $status_delivery) {
-                                if ($status_delivery->status == 'Maquila') {
-                                    if ($cliente_visible_one) {
-                                        $status_delivery->visible = 1;
-                                    } else {
-                                        $status_delivery->visible = 0;
-                                    }
-                                    $status_delivery->save();
-                                }
-                                if ($status_delivery->status == 'Almacen PM') {
-                                    if ($cliente_visible_one) {
-                                        $status_delivery->visible = 1;
-                                    } else {
-                                        $status_delivery->visible = 0;
-                                    }
-                                    $status_delivery->save();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
         return response()->json([
             'msg' => 'Ruta Creada Existosamente',
             'data' => [
@@ -550,7 +367,6 @@ class DeliveryRouteController extends Controller
                         }
                     }
                 } else if ($status_delivery->status == 'Almacen PM') {
-                    return 1;
                     if ($status_delivery->visible == 0 || $status_delivery->visible == 1) {
                         $pm_visible_zero_or_one = true;
                         if ($status_delivery->visible == 1) {
@@ -709,8 +525,7 @@ class DeliveryRouteController extends Controller
         }
         $statuschange = StatusDeliveryRouteChange::all()->where('order_purchase_product_id', $product_id);
         // Obtener y devolver las rutas actualizadas
-        $delivery_update = DeliveryRoute::whereIn('type_of_destiny', array_column($request->all(), 'type_of_destiny'))->get();
-
+        $delivery_update = DeliveryRoute::where('product_id', $order->order_purchase_id)->get();
         return response()->json(['ruta actualizada' => $delivery_update, 'status_Actuales' => $statuschange]);
     }
     /**
