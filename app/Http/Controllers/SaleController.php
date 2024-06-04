@@ -254,7 +254,7 @@ class SaleController extends Controller
                 'code_sale' => $sale->code_sale,
                 'commercial_email' => $sale->commercial_email,
                 'commercial_name' => $sale->commercial_name,
-                'Company' => $Company->company,
+                'Company' => $Company->company ?? 'No hay info',
                 'commercial_odoo_id' => $sale->commercial_odoo_id,
                 'incidence' => $sale->incidence,
                 'name_sale' => $sale->name_sale,
@@ -369,17 +369,24 @@ class SaleController extends Controller
             ////////MÁS INFORMACIÓN//////////////////////////
             $idSale = $sale->id;
             $Information = DB::table('additional_sale_information')->where('sale_id', $idSale)->first();
-            $MoreInformation = [
-                'id'  => $Information->id,
-                'sale_id' => $idSale,
-                'client_contact' => $Information->client_contact ?? 'Aún no hay un contacto del cliente',
-                'client_name'  => $Information->client_name ?? 'Aún no hay un nombre del cliente.',
-                'commitment_date'  => $Information->commitment_date ?? 'Aún no hay información.',
-                'effective_date'  => $Information->effective_date ?? 'Aún no hay información.',
-                'planned_date'  => $Information->planned_date ?? 'Aún no hay una fecha de entrega.',
-                'created_at'  => $Information->created_at,
-                'updated_at'  => $Information->updated_at
-            ];
+            if(!$Information){
+                $MoreInformation = [
+                    'message' => 'aun no hay información'
+                ];
+
+            }else{
+                $MoreInformation = [
+                    'id'  => $Information->id,
+                    'sale_id' => $idSale,
+                    'client_contact' => $Information->client_contact ?? 'Aún no hay un contacto del cliente',
+                    'client_name'  => $Information->client_name ?? 'Aún no hay un nombre del cliente.',
+                    'commitment_date'  => $Information->commitment_date ?? 'Aún no hay información.',
+                    'effective_date'  => $Information->effective_date ?? 'Aún no hay información.',
+                    'planned_date'  => $Information->planned_date ?? 'Aún no hay una fecha de entrega.',
+                    'created_at'  => $Information->created_at,
+                    'updated_at'  => $Information->updated_at
+                ];
+            }
             //////////////////Last status///////////////////////
             $LastStatus = DB::table('sale_status_changes')->where('sale_id', $idSale)->orderBy('created_at', 'desc')->first();
             $idstatus = $LastStatus->status_id;
@@ -457,7 +464,10 @@ class SaleController extends Controller
                     $statusOrders = 0;
                 }
                 $statusOrders = 0;
-            } elseif ($OrdersFinales == $ConfirmationOrders) {
+            } elseif($OrdersFinales == 0 && $ConfirmationOrders == 0){
+                $statusOrders = 'Aún no hay ordenes de productos.';
+            }
+            elseif ($OrdersFinales == $ConfirmationOrders) {
                 if ($registros) {
                     $status = $registros->status;
                     $idSaleStatusChange = $registros->id;
