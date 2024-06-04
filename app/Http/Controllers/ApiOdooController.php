@@ -133,7 +133,7 @@ class ApiOdooController extends Controller
                         } else {
                             $sale->moreInformation()->create($dataAdditionalInfo);
                         }
-                        $conceptos = ['OC', 'Virtual', 'Logo', 'AI', 'Cotizaci贸n proveedor', 'Distribuci贸n', 'Direcci贸n de entrega', 'Contacto', 'Datos de facturaci贸n'];
+                        $conceptos = ['OC', 'Virtual', 'Logo', 'AI', 'Cotizaci贸n proveedor', 'Distribuci贸n', 'Direcci贸n de entrega', 'Contacto', 'Datos de facturaci贸n', 'Distribucion', 'Cotizacion'];
                         foreach ($conceptos as $concepto) {
                             # code...
                             $check = CheckList::create([
