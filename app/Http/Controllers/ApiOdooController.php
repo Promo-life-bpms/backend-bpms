@@ -127,6 +127,7 @@ class ApiOdooController extends Controller
                 try {
                     $sale = Sale::where("code_sale", $requestData->code_sale)->first();
                     if ($sale) {
+
                         $sale->update($dataSale);
                         if ($sale->moreInformation) {
                             $sale->moreInformation()->update($dataAdditionalInfo);
@@ -141,6 +142,7 @@ class ApiOdooController extends Controller
                                 "description" => $concepto,
                                 "status_checklist" => 'Creado',
                             ]);
+
                             $check->save();
                         }
                     } else {
