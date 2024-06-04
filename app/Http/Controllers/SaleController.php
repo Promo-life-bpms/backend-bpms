@@ -411,6 +411,7 @@ class SaleController extends Controller
                     'odoo_product_id' => $saleProduct->odoo_product_id,
                     'description' => $saleProduct->description,
                     'product' => $saleProduct->product,
+                    'logo' => $saleProduct->logo ?? 'No hay logo',
                     'quantity_ordered' => $saleProduct->quantity_ordered,
                     'quantity_delivered' => $saleProduct->quantity_delivered,
                     'quantity_invoiced' => $saleProduct->quantity_invoiced,
