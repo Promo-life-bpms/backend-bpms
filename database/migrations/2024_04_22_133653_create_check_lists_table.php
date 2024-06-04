@@ -18,8 +18,6 @@ class CreateCheckListsTable extends Migration
             $table->text('code_sale');
             $table->text('description')->nullable();
             $table->text('status_checklist')->nullable();
-            $table->text('quote')->nullable();
-            $table->text('distribution')->nullable();
             $table->timestamps();
         });
     }
