@@ -147,7 +147,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('rutas-de-entrega/{id}', [DeliveryRouteController::class, 'store']);
     //ver una ruta de entrega
     Route::get('rutas-de-entrega/show/{id}', [DeliveryRouteController::class, 'show']);
-
     // Actualizar la ruta de entrega
     Route::post('ruta-de-entrega/{prouduct_id}', [DeliveryRouteController::class, 'updateRuta']);
     // Route::put('rutas-de-entrega/{ruta}/updateStatus', [DeliveryRouteController::class, 'updateStatus']);
@@ -157,7 +156,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::delete('rutas-de-entrega/{deliveryRoute}', [DeliveryRouteController::class, 'destroy']);
     //Eliminar un pedido de una ruta
     Route::get('rutas-de-entrega/{ruta}/excel', [DeliveryRouteController::class, 'excelCompras']);
-
+    //Rutas de Compras Completas
+    Route::get('rutas-de-entrega/Compras-Completa', [DeliveryRouteController::class, 'DeliveryRoutePurchaseCompletas']);
+    //Rutas de Compras Pendientes
+    Route::get('rutas-de-entrega/Compras-Pendientes', [DeliveryRouteController::class, 'DeliveryRoutePurchasePendientes']);
     // Crear una remision
     Route::post('rutas-de-entrega/{ruta}/remision', [DeliveryRouteController::class, 'setRemisiones']);
     // Ver remision
