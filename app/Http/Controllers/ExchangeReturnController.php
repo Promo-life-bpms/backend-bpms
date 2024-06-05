@@ -18,25 +18,48 @@ class ExchangeReturnController extends Controller
             'description' => 'required',
             'purchase_id' => 'required'
         ]);
+        $statusConfirmado = DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->where('status','Confirmado')->exists();
+        $ThereIsAlreadyAReturn = DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->exists();
 
-        $path = '';
-        if ($request->hasFile('file_exchange_returns')) {
-            $filenameWithExt = $request->file('file_exchange_returns')->getClientOriginalName();
-            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-            $extension = $request->file('file_exchange_returns')->clientExtension();
-            $fileNameToStore = time(). $filename . '.' . $extension;
-            $path= $request->file('file_exchange_returns')->move('storage/smallbox/files/', $fileNameToStore);
+        if(!$ThereIsAlreadyAReturn){
+            $path = '';
+            if ($request->hasFile('file_exchange_returns')) {
+                $filenameWithExt = $request->file('file_exchange_returns')->getClientOriginalName();
+                $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+                $extension = $request->file('file_exchange_returns')->clientExtension();
+                $fileNameToStore = time(). $filename . '.' . $extension;
+                $path= $request->file('file_exchange_returns')->move('storage/smallbox/files/', $fileNameToStore);
+            }
+            
+            ExchangeReturn::create([
+                'total_return' => $request->total_return,
+                'description' => $request->description,
+                'purchase_id' => $request->purchase_id,
+                'file_exchange_returns' => $path,
+                'return_user_id' => $user->id,
+            ]);
+            return response()->json(['message' => 'Has iniciado el proceso para devolver el excedente de efectivo de tu solicitud.'], 200);
+        }elseif($statusConfirmado){
+            return response()->json(['message' => 'Ya se ha confirmado tu devolución de efectivo. Ya no puedes comenzar de nuevo el flujo; acércate con el departamento de Tecnología e Innovación.'], 409);
         }
+        else{
+            $path = '';
+            if ($request->hasFile('file_exchange_returns')) {
+                $filenameWithExt = $request->file('file_exchange_returns')->getClientOriginalName();
+                $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+                $extension = $request->file('file_exchange_returns')->clientExtension();
+                $fileNameToStore = time(). $filename . '.' . $extension;
+                $path= $request->file('file_exchange_returns')->move('storage/smallbox/files/', $fileNameToStore);
+            }
 
-        ExchangeReturn::create([
-            'total_return' => $request->total_return,
-            'description' => $request->description,
-            'purchase_id' => $request->purchase_id,
-            'file_exchange_returns' => $path,
-            'return_user_id' => $user->id,
-        ]);
-
-        return response()->json(['message' => 'Comenzaste el proceso de regresar el sobrante'], 200);
+            DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->where('status','Sin confirmar')->update([
+                'total_return' => $request->total_return,
+                'description' => $request->description,
+                'file_exchange_returns' => $path,
+                'return_user_id' => $user->id,
+            ]);
+            return response()->json(['message' => 'Has iniciado el proceso para devolver el excedente de efectivo de tu solicitud; sin embargo, este proceso ya estaba en curso. Se eliminará el registro anterior.'], 200);           
+        }
     }
 
     public function ConfirmationReturnMoney(Request $request)
@@ -53,8 +76,7 @@ class ExchangeReturnController extends Controller
             'status' => 'Confirmado',
             'confirmation_datetime' => $hora,
             'confirmation_user_id' => $user->id,
-        ]);
-
-        return response()->json(['message' => 'Se confirmo el regreso del dinero'], 200);
+        ]);        
+        return response()->json(['message' => 'Se confirmó el regreso del excedente de efectivo de tu solicitud.'], 200);
     }
 }
