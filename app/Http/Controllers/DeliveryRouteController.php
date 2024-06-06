@@ -473,12 +473,15 @@ class DeliveryRouteController extends Controller
         if ($date) {
             // Assuming you have a column like 'delivery_date' in 'delivery_routes' table
             $query->whereDate('delivery_routes.date_of_delivery', '=', $date);
-        } else if ($type) {
-            $query->whereDate('delivery_routes.type', '=', $type);
-        } else if ($status) {
-            $query->whereDate('delivery_routes.status_delivery', '=', $type);
-        } else if ($destiny) {
-            $query->whereDate('delivery_routes.type_of_destiny', '=', $type);
+        }
+        if ($type) {
+            $query->where('delivery_routes.type', $type);
+        }
+        if ($status) {
+            $query->where('delivery_routes.status_delivery', '=', $status);
+        }
+        if ($destiny) {
+            $query->where('delivery_routes.type_of_destiny', '=', $destiny);
         }
 
         $rutasRPCom = $query->get();
@@ -488,6 +491,9 @@ class DeliveryRouteController extends Controller
     public function DeliveryRoutePurchasePendientes(Request $request)
     {
         $date = $request->input('date');
+        $type = $request->input('type');
+        $status = $request->input('status_delivery');
+        $destiny = $request->input('destiny');
         $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
             ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
             ->whereIn('status_delivery', ['Pendiente', 'Reprogramado'])
@@ -496,8 +502,81 @@ class DeliveryRouteController extends Controller
             // Assuming you have a column like 'delivery_date' in 'delivery_routes' table
             $query->whereDate('delivery_routes.date_of_delivery', '=', $date);
         }
+        if ($type) {
+            $query->where('delivery_routes.type', $type);
+        }
+        if ($status) {
+            $query->where('delivery_routes.status_delivery', '=', $status);
+        }
+        if ($destiny) {
+            $query->where('delivery_routes.type_of_destiny', '=', $destiny);
+        }
         $rutasRPPen = $query->get();
         return response()->json(['Rutas_Pendientes' => $rutasRPPen]);
+    }
+    public function updateDeliveryPurchasePendientes(Request $request)
+    {
+
+        $querys = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
+            ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
+            ->whereIn('status_delivery', ['Pendiente', 'Reprogramado'])
+            ->select('delivery_routes.*', 'order_purchase_products.description')->get();
+        foreach ($request->all() as $rutaPenRequest) {
+            foreach ($querys as $query) {
+                $type = $rutaPenRequest['type'] ?? $query->type ?? null;
+                $status_delivery = $rutaPenRequest['status_delivery'] ?? $query->status_delivery ?? null;
+                // $product_id = $rutaPenRequest['product_id'] ?? $query->product_id ?? null;
+                if ($type && $status_delivery) {
+                    if ($type == "Parcial" && in_array($status_delivery, ["Completo", "Reprogramado", "Pendiente"])) {
+                        $color = 1;
+                    } elseif ($type == "Total" && in_array($status_delivery, ["Pendiente", "Reprogramado"])) {
+                        $color = 1;
+                    } elseif ($type == "Total" && $status_delivery == "Completo") {
+                        $color = 2;
+                    } else {
+                        $color = 0; // Valor predeterminado si no se cumple ninguna condición
+                    }
+                } else {
+                    $color = 0; // Valor predeterminado si no se cumple ninguna condición
+                }
+
+                if ($color == 2) {
+                    $visible = 1; // El visible 1 es de que ya esta completo y total
+                } elseif ($color == 1) {
+                    $visible = 0; // El visible 0 es de que status sea diferente a completo y a total puede ser que sea parcial y que sea reprogramado o pendiente
+                } else {
+                    $visible = 2; // El visible 2 es que no tiene ningun dato
+                }
+            }
+            $rutaPen = DeliveryRoute::where('product_id', $rutaPenRequest['product_id'])->where('type_of_destiny', $rutaPenRequest['type_of_destiny'])->first();
+            return $rutaPen;
+            if ($rutaPen) {
+                $rutaPendiente = DB::table('delivery_routes')->Where('product_id', $rutaPenRequest['product_id'])
+                    ->where('type_of_destiny', $rutaPenRequest['type_of_destiny'])->update([
+                        'type' => $rutaRequest['type'] ?? $rutaPen->type,
+                        'date_of_delivery' => $rutaRequest['date_of_delivery'] ?? $rutaPen->date_of_delivery,
+                        'status_delivery' => $rutaRequest['status_delivery'] ?? $rutaPen->status_delivery,
+                        'shipping_type' => $rutaRequest['shipping_type'] ?? $rutaPen->shipping_type,
+                        'color' => $color,
+                        'visible' =>  $visible
+                    ]);
+            } else {
+                'no existe';
+            }
+            return $rutaPendiente;
+            $rutas_updatePed = DeliveryRoute::where('product_id', $rutaPenRequest['product_id'])->get();
+            $statuschanges = StatusDeliveryRouteChange::all()->where('order_purchase_product_id', $rutaPenRequest['product_id']);
+            foreach ($statuschanges as $status_change) {
+
+                foreach ($rutas_updatePed as $ruta_updatePed) {
+                    if ($status_change->status == $ruta_updatePed->type_of_destiny) {
+                        $status_change->status = $ruta_updatePed->type_of_destiny;
+                        $status_change->visible = $ruta_updatePed->visible;
+                        $status_change->save();
+                    }
+                }
+            }
+        }
     }
     public function updateStatus(Request $request,  $id)
     {
