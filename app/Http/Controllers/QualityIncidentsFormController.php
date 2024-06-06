@@ -190,7 +190,6 @@ class QualityIncidentsFormController extends Controller
 
         }
         
-        
         $ThirdInfoform = DB::table('incident_closure_forms')->where('id_solution_incident', $SecondInfo->id)->first();
         if($ThirdInfoform !== null){
             $thirdinfo =[
