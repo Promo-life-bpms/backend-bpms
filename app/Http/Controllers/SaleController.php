@@ -345,9 +345,6 @@ class SaleController extends Controller
                             'status_product' => collect()
                         ];
 
-                        // Agregar los datos de sale_status_changes al nuevo array
-
-
                         // Agregar los datos de StatusDeliveryRouteChange al nuevo array
                         foreach ($statusesDelivery as $statusDelivery) {
                             $product['status_product']->push([
@@ -356,13 +353,83 @@ class SaleController extends Controller
                                 'code_order' => $ordenCompra->code_order,
                                 'status' => $statusDelivery->status,
                                 'visible' => $statusDelivery->visible,
-
-                                // Agregar más campos si es necesario
                             ]);
                         }
 
                         // Agregar el producto al arreglo de productos
                         $products[] = $product;
+                    }
+                }
+            }
+            ////////////////////////////////////////COMFIRMACION DE LAS RUTAS/////////////////////////////////////
+            $ConfirmationOrder = [];
+            //dd($idOrdenes);
+            foreach ($idOrdenes as $code_order => $idOrden) {
+                $ConfirmationRoute = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
+                //dd($ConfirmationRoute);
+                foreach ($ConfirmationRoute as $Confirma) {
+                    //dd($Confirma);
+                    $DatosConfirmate = DB::table('confirm_routes')->where('id_product_order', $Confirma->id)
+                        ->orderBy('created_at', 'desc')
+                        ->limit(1)
+                        ->get();
+
+                    $Insp = DB::table('inspection_products')->where('id_order_purchase_products', $Confirma->id)->get();
+                    $inspectionsInfo = [];
+                    foreach ($Insp as $Ins) {
+                        $idInspeccion = DB::table('inspections')->where('id', $Ins->inspection_id)->first();
+                        $code = $idInspeccion->code_inspection;
+                        $inspectionsInfo[] = [
+                            'inspection_id' => $Ins->inspection_id,
+                            'created_at' => $Ins->created_at,
+                            'code_inspection' => $code,
+                        ];
+                    }
+                    $Deliverys = DB::table('confirm_deliveries')->where('id_order_purchase_product', $Confirma->id)->get();
+                    
+
+                    foreach ($DatosConfirmate as $confirmados) {
+                        $ProductsCounts = DB::table('confirm_product_counts')->where('id_product',$Confirma->id)->exists();
+                        $HistoryProductsCounts = 0;
+                        if($ProductsCounts){
+                            $HistoryProductsCounts = 1;
+
+                        }
+                        if ($confirmados) {
+                            $deliveryProducts = [];
+                            foreach($Deliverys as $Delivery){
+                                $deliveryProducts[] = [
+                                    'id_order_purchase_product' => $Delivery->id_order_purchase_product,
+                                    'delivery_type' => $Delivery->delivery_type,
+                                    'created_at' => $Delivery->created_at
+                                ];
+                            }
+                            
+                            $info = [
+                                'reference' => $code_order,
+                                'id_product' => $Confirma->id,
+                                'description' => $Confirma->description,
+                                'Products_Counts_History' => $HistoryProductsCounts,
+                                'Inspections' => $inspectionsInfo,
+                                'Delivery' => $deliveryProducts
+                            ];
+                            $ConfirmationOrder[] = $info;
+                        }
+                    }
+                }
+            } 
+
+            /////////////////////////MANDA LA INFORMACION EN EL ARREGLO DE PRODUCTS////////////
+            foreach ($products as &$product) {
+                foreach ($ConfirmationOrder as $confirmation) {
+                    if ($product['id'] === $confirmation['id_product']) {
+                        $product['ConfirmationOrder'] = [
+                            'reference' => $confirmation['reference'],
+                            'description' => $confirmation['description'],
+                            'Products_Counts_History' => $confirmation['Products_Counts_History'],
+                            'Inspections' => $confirmation['Inspections'],
+                            'Delivery' => $confirmation['Delivery']
+                        ];
                     }
                 }
             }
@@ -482,63 +549,7 @@ class SaleController extends Controller
                     $statusOrders = 1;
                 }
             }
-            ////////////////////////////////////////COMFIRMACION DE LAS RUTAS/////////////////////////////////////
-            $ConfirmationOrder = [];
-            //dd($idOrdenes);
-            foreach ($idOrdenes as $code_order => $idOrden) {
-                $ConfirmationRoute = DB::table('order_purchase_products')->where('order_purchase_id', $idOrden)->get();
-                //dd($ConfirmationRoute);
-                foreach ($ConfirmationRoute as $Confirma) {
-                    //dd($Confirma);
-                    $DatosConfirmate = DB::table('confirm_routes')->where('id_product_order', $Confirma->id)
-                        ->orderBy('created_at', 'desc')
-                        ->limit(1)
-                        ->get();
 
-                    $Insp = DB::table('inspection_products')->where('id_order_purchase_products', $Confirma->id)->get();
-                    $inspectionsInfo = [];
-                    foreach ($Insp as $Ins) {
-                        $idInspeccion = DB::table('inspections')->where('id', $Ins->inspection_id)->first();
-                        $code = $idInspeccion->code_inspection;
-                        $inspectionsInfo[] = [
-                            'inspection_id' => $Ins->inspection_id,
-                            'created_at' => $Ins->created_at,
-                            'code_inspection' => $code,
-                        ];
-                    }
-                    $Deliverys = DB::table('confirm_deliveries')->where('id_order_purchase_product', $Confirma->id)->get();
-                    
-
-                    foreach ($DatosConfirmate as $confirmados) {
-                        $ProductsCounts = DB::table('confirm_product_counts')->where('id_product',$Confirma->id)->exists();
-                        $HistoryProductsCounts = 0;
-                        if($ProductsCounts){
-                            $HistoryProductsCounts = 1;
-
-                        }
-                        if ($confirmados) {
-                            $deliveryProducts = [];
-                            foreach($Deliverys as $Delivery){
-                                $deliveryProducts[] = [
-                                    'id_order_purchase_product' => $Delivery->id_order_purchase_product,
-                                    'delivery_type' => $Delivery->delivery_type,
-                                    'created_at' => $Delivery->created_at
-                                ];
-                            }
-                            
-                            $info = [
-                                'reference' => $code_order,
-                                'id_product' => $Confirma->id,
-                                'description' => $Confirma->description,
-                                'Products_Counts_History' => $HistoryProductsCounts,
-                                'Inspections' => $inspectionsInfo,
-                                'Delivery' => $deliveryProducts
-                            ];
-                            $ConfirmationOrder[] = $info;
-                        }
-                    }
-                }
-            } 
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
