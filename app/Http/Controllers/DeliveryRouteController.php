@@ -462,7 +462,9 @@ class DeliveryRouteController extends Controller
     public function DeliveryRoutePurchaseCompletas(Request $request)
     {
         $date = $request->input('date');
-
+        $type = $request->input('type');
+        $status = $request->input('status_delivery');
+        $destiny = $request->input('destiny');
         $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', '=', 'delivery_routes.product_id')
             ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
             ->where('status_delivery', 'Completo')
@@ -471,6 +473,12 @@ class DeliveryRouteController extends Controller
         if ($date) {
             // Assuming you have a column like 'delivery_date' in 'delivery_routes' table
             $query->whereDate('delivery_routes.date_of_delivery', '=', $date);
+        } else if ($type) {
+            $query->whereDate('delivery_routes.type', '=', $type);
+        } else if ($status) {
+            $query->whereDate('delivery_routes.status_delivery', '=', $type);
+        } else if ($destiny) {
+            $query->whereDate('delivery_routes.type_of_destiny', '=', $type);
         }
 
         $rutasRPCom = $query->get();
