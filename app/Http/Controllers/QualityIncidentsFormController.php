@@ -135,46 +135,81 @@ class QualityIncidentsFormController extends Controller
     public function IncidentForm($idform)
     {
         $info = DB::table('quality_incidents_forms')->where('id', $idform)->first();
-        //dd($info);
+        if($info){
+            $id_s_p = $info->id_sale_product;
+            $DescriptionProductSale = DB::table('sales_products')->where('id', $id_s_p)->value('description');
+            $id_o_p = $info->id_order_products;
+            $DescriptionOrderProducts = DB::table('order_purchase_products')->where('id', $id_o_p)->value('description');
+            $informacion = [
+                'id_first_part' => $info->id,
+                'code_sale' => $info->code_sale,
+                'incidence_folio' => $info->incidence_folio,
+                'days_in_warehouse' => $info->days_in_warehouse,
+                'id_sale_product' => $id_s_p,
+                'description_sale_product' => $DescriptionProductSale,
+                'sale_product_quantity' => $info->sale_product_quantity,
+                'logo' => $info->logo,
+                'id_order_products' => $info->id_order_products,
+                'description_order_products' =>$DescriptionOrderProducts,
+                'order_product_quantity' => $info->order_product_quantity,
+                'correct_parts' => $info->correct_parts,
+                'defective_parts' => $info->defective_parts,
+                'defect_percentage' => $info->defect_percentage,
+                'responsible' => $info->responsible,
+                'general_cause' => $info->general_cause,
+                'return_description' => $info->return_description,
+            ];
+        }else{
+            $informacion = [
+                'message' => 'Aún no se crea esta incidencia.'
+            ];
+        }
 
+        $SecondInfo = DB::table('solution_of_the_incident_forms')->where('id_quality_incidents', $info->id)->first();
+        if($SecondInfo){
+            $SecondInc = [
+                'id' => $SecondInfo->id,
+                'proposed_solution' => $SecondInfo->proposed_solution,
+                'monitoring_manager' => $SecondInfo->monitoring_manager,
+                'replacement_out_of_time' => $SecondInfo->replacement_out_of_time,
+                'incident_delivery_date' => $SecondInfo->incident_delivery_date,
+                'days_of_incident_processing' => $SecondInfo->days_of_incident_processing,
+                'odc_mat_clean' => $SecondInfo->odc_mat_clean,
+                'cu_prod_clean' => $SecondInfo->cu_prod_clean,
+                'final_cost_of_clean_material' => $SecondInfo->final_cost_of_clean_material,
+                'odc_impression' => $SecondInfo->odc_impression,
+                'printing_cost_per_piece' => $SecondInfo->printing_cost_per_piece,
+                'cu_prod_impression' => $SecondInfo->cu_prod_impression,
+                'total_cost' => $SecondInfo->total_cost,
+                'id_quality_incidents' => $SecondInfo->id_quality_incidents
+            ];
+        }else{
+            $SecondInc = [
+                'message' => 'Aún no se crea la segunda parte de la incidencia.',
+            ];
 
-        $informacion = [
-            'code_sale' => $info->code_sale,
-            'incidence_folio' => $info->incidence_folio,
-            'days_in_warehouse' => $info->days_in_warehouse,
-            'id_sale_product' => $info->id_sale_product,
-            'sale_product_quantity' => $info->sale_product_quantity,
-            'logo' => $info->logo,
-            'id_order_products' => $info->id_order_products,
-            'order_product_quantity' => $info->order_product_quantity,
-            'correct_parts' => $info->correct_parts,
-            'defective_parts' => $info->defective_parts,
-            'defect_percentage' => $info->defect_percentage,
-            'responsible' => $info->responsible,
-            'general_cause' => $info->general_cause,
-            'return_description' => $info->return_description,
-        ];
+        }
+        
+        $ThirdInfoform = DB::table('incident_closure_forms')->where('id_solution_incident', $SecondInfo->id)->first();
+        if($ThirdInfoform !== null){
+            $thirdinfo =[
+                'id' => $ThirdInfoform->id,
+                'status' => $ThirdInfoform->status,
+                'application' => $ThirdInfoform->application,
+                'note_of_application' => $ThirdInfoform->note_of_application,
+                'responsible_for_final_monitoring' => $ThirdInfoform->responsible_for_final_monitoring,
+                'final_status' => $ThirdInfoform->final_status,
+                'final_closing_date' => $ThirdInfoform->final_closing_date,
+                'credit_note' => $ThirdInfoform->credit_note,
+                'days_of_incident_process' => $ThirdInfoform->days_of_incident_process,
+                'id_solution_incident' => $ThirdInfoform->id_solution_incident,
+            ];
 
-        dd($informacion);
-
-        /* $formIncidencia = [
-            'proposed_solution' => $info->proposed_solution,
-            'monitoring_manager' => $info->monitoring_manager,
-            'replacement_out_of_time' => $info->replacement_out_of_time,
-            'incident_delivery_date' => $info->incident_delivery_date,
-            'days_of_incident_processing' => $info->days_of_incident_processing,
-            'odc_mat_clean' => $info->odc_mat_clean,
-            'cu_prod_clean' => $info->cu_prod_clean,
-            'final_cost_of_clean_material' => $info->final_cost_of_clean_material,
-            'odc_impression' => $info->odc_impression,
-            'printing_cost_per_piece' => $info->printing_cost_per_piece,
-            'cu_prod_impression' => $info->cu_prod_impression,
-            'total_cost' => $info->total_cost,
-            'id_quality_incidents' => $info->id_quality_incidents
-        ]; */
-
-        //dd($formIncidencia);
+        }else{
+            $thirdinfo =[
+                'message' => 'Aún no se crea la tercera parte de la incidencia.',
+            ];
+        }
+        return response()->json(['first_part' => $informacion, 'second_part' => $SecondInc, 'third_part' =>$thirdinfo]);
     }
-
-
 }

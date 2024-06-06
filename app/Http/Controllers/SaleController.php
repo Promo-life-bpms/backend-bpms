@@ -385,8 +385,7 @@ class SaleController extends Controller
                         ];
                     }
                     $Deliverys = DB::table('confirm_deliveries')->where('id_order_purchase_product', $Confirma->id)->get();
-                    
-
+    
                     foreach ($DatosConfirmate as $confirmados) {
                         $ProductsCounts = DB::table('confirm_product_counts')->where('id_product',$Confirma->id)->exists();
                         $HistoryProductsCounts = 0;
