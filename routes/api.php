@@ -29,6 +29,7 @@ use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
 use App\Http\Controllers\Pruebas;
 use App\Http\Controllers\PurchaseRequestController;
+use App\Http\Controllers\QualityIncidentsFormController;
 use App\Http\Controllers\SmallBoxUserController;
 use App\Http\Controllers\SpentController;
 use App\Http\Controllers\StatusOrdersController;
@@ -195,6 +196,12 @@ Route::group(['middleware' => 'auth'], function () {
     ////////////////CONFIRMAR LA ENTREGA DEL PRODUCTO//////////
     Route::post('confirm/product/delivery', [ConfirmDeliveryController::class, 'ConfirmDelivery']);
     Route::get('history/confirm/product/delivery/{idProduct}',[ConfirmDeliveryController::class, 'HistoryConfirmDelivery']);
+
+    ///////////////////////////FORMULARIO PARA CREAR UNA INCIDENCIA///////////
+    Route::post('first/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class,'FirstPartOfTheIncidentForm']);
+    Route::post('second/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'SecondPartOfTheIncidentForm']);
+    Route::post('third/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'ThirdPartOfTheIncidentForm']);
+    Route::get('incident/form/{idform}', [QualityIncidentsFormController::class, 'IncidentForm']);
 
     //CAJA CHICA
 
