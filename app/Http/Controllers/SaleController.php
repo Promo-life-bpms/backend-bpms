@@ -25,10 +25,7 @@ class SaleController extends Controller
      */
     public function index(Request $request)
     {
-        // Vista de tabla de Pedidos
-        // crear una var que se llame per_page = 10
-        // Vista de tabla de Pedidos
-        // crear una var que se llame per_page = 10
+
         $per_page = 15;
         if ($request->per_page) {
             //Asignarle el valor al var per_page
@@ -38,15 +35,17 @@ class SaleController extends Controller
         // Filtros de buscador
 
         $idPedidos = $request->idPedidos ?? ""; // Sale.code_sale
-        /*  $fechaCreacion = $request->fechaCreacion ?? ""; // Pendiente
-         $horariodeentrega = $request->horariodeentrega ?? ""; // Pendiente
+        $fechaCreacion = $request->fechaCreacion ?? ""; // Pendiente
+        /*    $horariodeentrega = $request->horariodeentrega ?? ""; // Pendiente
         $empresa = $request->empresa ?? null; // AdditionalSaleInformation.warehouse_company
         $cliente = $request->cliente ?? null; // additional_sale_information.client_name
         $comercial = $request->comercial ?? ""; // Sale.commercial_name
         $total = $request->total ?? null; // sale.total */
 
 
-        $sales = Sale::where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")->paginate($per_page);
+        $sales = Sale::where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
+            ->where("sales.created_at", "LIKE", "%" . $fechaCreacion . "%")
+            ->paginate($per_page);
         return response()->json([
             'msg' => 'Lista de los pedidos', 'data' => ["sales" => $sales]
             // 'ordenes' => $ordenes
@@ -436,12 +435,11 @@ class SaleController extends Controller
             ////////MÁS INFORMACIÓN//////////////////////////
             $idSale = $sale->id;
             $Information = DB::table('additional_sale_information')->where('sale_id', $idSale)->first();
-            if(!$Information){
+            if (!$Information) {
                 $MoreInformation = [
                     'message' => 'aun no hay información'
                 ];
-
-            }else{
+            } else {
                 $MoreInformation = [
                     'id'  => $Information->id,
                     'sale_id' => $idSale,
@@ -532,10 +530,9 @@ class SaleController extends Controller
                     $statusOrders = 0;
                 }
                 $statusOrders = 0;
-            } elseif($OrdersFinales == 0 && $ConfirmationOrders == 0){
+            } elseif ($OrdersFinales == 0 && $ConfirmationOrders == 0) {
                 $statusOrders = 'Aún no hay ordenes de productos.';
-            }
-            elseif ($OrdersFinales == $ConfirmationOrders) {
+            } elseif ($OrdersFinales == $ConfirmationOrders) {
                 if ($registros) {
                     $status = $registros->status;
                     $idSaleStatusChange = $registros->id;
@@ -549,7 +546,7 @@ class SaleController extends Controller
                     $statusOrders = 1;
                 }
             }
-
+          
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
