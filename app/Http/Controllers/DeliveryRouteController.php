@@ -96,14 +96,14 @@ class DeliveryRouteController extends Controller
         if (count($errores) > 0) {
             return response()->json($errores, 400);
         }
-        $sale = Sale::where('code_sale', $sale)->first();
+        //$sale = Sale::where('code_sale', $sale)->first();
         $routes = [];
         $productIdsWithStates = [];
         $color = null;
 
         foreach ($request['delivery_route'] as $deliveryRouteData) {
-            $order = OrderPurchase::where('code_order', $deliveryRouteData['code_order'])->where('code_sale', $sale->code_sale)->first();
 
+            $order = OrderPurchase::where('code_order', $deliveryRouteData['code_order'])->where('code_sale', $sale)->first();
             if (!$order) {
                 return response()->json(
                     [
@@ -139,7 +139,7 @@ class DeliveryRouteController extends Controller
             $ruta_ant = DeliveryRoute::where('product_id', $deliveryRouteData['product_id'])->where('type_of_destiny', $deliveryRouteData['type_of_destiny'])->first();
             if (!$ruta_ant) {
                 $ruta = DeliveryRoute::create([
-                    'code_sale' => $sale->code_sale,
+                    'code_sale' => $sale,
                     'code_order' => $order->code_order,
                     'product_id' => $deliveryRouteData['product_id'],
                     'type' => $deliveryRouteData['type'],
@@ -316,8 +316,10 @@ class DeliveryRouteController extends Controller
 
                 $ruta_ant = DeliveryRoute::where('product_id', $product_id)->where('type_of_destiny', $rutaRequest['type_of_destiny'])->first();
                 $newrut = DeliveryRoute::where('product_id', $product_id)->first();
+
+                # code...
                 if ($ruta_ant) {
-                    DB::table('delivery_routes')->where('type_of_destiny', $rutaRequest['type_of_destiny'])->update([
+                    DB::table('delivery_routes')->where('type_of_destiny', $rutaRequest['type_of_destiny'])->where('product_id', $product_id)->update([
                         'type' => $rutaRequest['type'] ?? $ruta_ant->type,
                         'date_of_delivery' => $rutaRequest['date_of_delivery'] ?? $ruta_ant->date_of_delivery,
                         'status_delivery' => $rutaRequest['status_delivery'] ?? $ruta_ant->status_delivery,
@@ -340,7 +342,6 @@ class DeliveryRouteController extends Controller
                     ]);
                 }
             }
-
             $rutas_update = DeliveryRoute::where('product_id', $order->order_purchase_id)->get();
             $statuschanges = StatusDeliveryRouteChange::all()->where('order_purchase_product_id', $product_id);
             foreach ($statuschanges as $status_change) {
