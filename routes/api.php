@@ -162,6 +162,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('rutas-de-entrega/Compras-Completa', [DeliveryRouteController::class, 'DeliveryRoutePurchaseCompletas']);
     //Rutas de Compras Pendientes
     Route::get('rutas-de-entrega/Compras-Pendientes', [DeliveryRouteController::class, 'DeliveryRoutePurchasePendientes']);
+    //Editar Rutas de Compras Pendientes
+    Route::post('rutas-de-entrega/Editar/Compras-Pendientes', [DeliveryRouteController::class, 'updateDeliveryPurchasePendientes']);
     // Crear una remision
     Route::post('rutas-de-entrega/{ruta}/remision', [DeliveryRouteController::class, 'setRemisiones']);
     // Ver remision
@@ -196,7 +198,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     ////////////////CONFIRMAR LA ENTREGA DEL PRODUCTO//////////
     Route::post('confirm/product/delivery', [ConfirmDeliveryController::class, 'ConfirmDelivery']);
-    Route::get('history/confirm/product/delivery/{idProduct}',[ConfirmDeliveryController::class, 'HistoryConfirmDelivery']);
+    Route::get('history/confirm/product/delivery/{idProduct}', [ConfirmDeliveryController::class, 'HistoryConfirmDelivery']);
 
     //CAJA CHICA
 

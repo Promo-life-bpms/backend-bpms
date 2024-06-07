@@ -517,15 +517,18 @@ class DeliveryRouteController extends Controller
     public function updateDeliveryPurchasePendientes(Request $request)
     {
 
-        $querys = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
+        /*  $querys = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
             ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
             ->whereIn('status_delivery', ['Pendiente', 'Reprogramado'])
-            ->select('delivery_routes.*', 'order_purchase_products.description')->get();
+            ->select('delivery_routes.*', 'order_purchase_products.description')->get(); */
+
         foreach ($request->all() as $rutaPenRequest) {
-            foreach ($querys as $query) {
-                $type = $rutaPenRequest['type'] ?? $query->type ?? null;
-                $status_delivery = $rutaPenRequest['status_delivery'] ?? $query->status_delivery ?? null;
+            $rutasPurPed = DeliveryRoute::where('id', $rutaPenRequest['id'])->get();
+            foreach ($rutasPurPed as $rutaPurPed) {
+                $type = $rutaPenRequest['type'] ?? $rutaPurPed->type ?? null;
+                $status_delivery = $rutaPenRequest['status_delivery'] ?? $rutaPurPed->status_delivery ?? null;
                 // $product_id = $rutaPenRequest['product_id'] ?? $query->product_id ?? null;
+
                 if ($type && $status_delivery) {
                     if ($type == "Parcial" && in_array($status_delivery, ["Completo", "Reprogramado", "Pendiente"])) {
                         $color = 1;
@@ -548,23 +551,23 @@ class DeliveryRouteController extends Controller
                     $visible = 2; // El visible 2 es que no tiene ningun dato
                 }
             }
-            $rutaPen = DeliveryRoute::where('product_id', $rutaPenRequest['product_id'])->where('type_of_destiny', $rutaPenRequest['type_of_destiny'])->first();
-            return $rutaPen;
+            $rutaPen = DeliveryRoute::where('id', $rutaPenRequest['id'])->first();
+
             if ($rutaPen) {
-                $rutaPendiente = DB::table('delivery_routes')->Where('product_id', $rutaPenRequest['product_id'])
+                DB::table('delivery_routes')->Where('product_id', $rutaPenRequest['product_id'])
                     ->where('type_of_destiny', $rutaPenRequest['type_of_destiny'])->update([
-                        'type' => $rutaRequest['type'] ?? $rutaPen->type,
-                        'date_of_delivery' => $rutaRequest['date_of_delivery'] ?? $rutaPen->date_of_delivery,
-                        'status_delivery' => $rutaRequest['status_delivery'] ?? $rutaPen->status_delivery,
-                        'shipping_type' => $rutaRequest['shipping_type'] ?? $rutaPen->shipping_type,
+                        'type' => $rutaPenRequest['type'] ?? $rutaPen->type,
+                        'date_of_delivery' => $rutaPenRequest['date_of_delivery'] ?? $rutaPen->date_of_delivery,
+                        'status_delivery' => $rutaPenRequest['status_delivery'] ?? $rutaPen->status_delivery,
+                        'shipping_type' => $rutaPenRequest['shipping_type'] ?? $rutaPen->shipping_type,
                         'color' => $color,
                         'visible' =>  $visible
                     ]);
             } else {
                 'no existe';
             }
-            return $rutaPendiente;
-            $rutas_updatePed = DeliveryRoute::where('product_id', $rutaPenRequest['product_id'])->get();
+
+            $rutas_updatePed = DeliveryRoute::where('id', $rutaPenRequest['id'])->get();
             $statuschanges = StatusDeliveryRouteChange::all()->where('order_purchase_product_id', $rutaPenRequest['product_id']);
             foreach ($statuschanges as $status_change) {
 
