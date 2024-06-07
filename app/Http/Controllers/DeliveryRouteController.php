@@ -461,15 +461,17 @@ class DeliveryRouteController extends Controller
      */
     public function DeliveryRoutePurchaseCompletas(Request $request)
     {
+
+        $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', '=', 'delivery_routes.product_id')
+            ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
+            ->where('status_delivery', 'Completo')
+            ->where('type', 'Total')
+            ->select('delivery_routes.*', 'order_purchase_products.description');
+
         $date = $request->input('date');
         $type = $request->input('type');
         $status = $request->input('status_delivery');
         $destiny = $request->input('destiny');
-        $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', '=', 'delivery_routes.product_id')
-            ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
-            ->where('status_delivery', 'Completo')->where('type', 'Total')
-            ->select('delivery_routes.*', 'order_purchase_products.description');
-
         if ($date) {
             // Assuming you have a column like 'delivery_date' in 'delivery_routes' table
             $query->whereDate('delivery_routes.date_of_delivery', '=', $date);
@@ -490,14 +492,33 @@ class DeliveryRouteController extends Controller
     }
     public function DeliveryRoutePurchasePendientes(Request $request)
     {
+
+        $querys = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
+            ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
+            /*   ->where('status_delivery', 'Pendiente') */
+            //->whereIn('delivery_routes.type', ['Total', 'Parcial'])
+            ->select('delivery_routes.*', 'order_purchase_products.description')->get();
+        foreach ($querys as $query) {
+
+            if ($query->type == 'Parcial' /* && $query->status_delivery == ['Completo', 'Reprogramado', 'Pendiente'] */) {
+                $nuevaruta = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
+                    ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
+                    ->whereIn('status_delivery', ['Pendiente', 'Reprogramado', 'Completo'])
+                    ->where('type', 'Parcial')
+                    ->select('delivery_routes.*', 'order_purchase_products.description')->get();
+            } else {
+                $nuevaruta = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
+                    ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
+                    ->whereIn('status_delivery', ['Pendiente', 'Reprogramado'])
+                    ->where('type', 'Total')
+                    ->select('delivery_routes.*', 'order_purchase_products.description')->get();
+            }
+        }
+
         $date = $request->input('date');
         $type = $request->input('type');
         $status = $request->input('status_delivery');
         $destiny = $request->input('destiny');
-        $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
-            ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
-            ->whereIn('status_delivery', ['Pendiente', 'Reprogramado'])
-            ->select('delivery_routes.*', 'order_purchase_products.description');
         if ($date) {
             // Assuming you have a column like 'delivery_date' in 'delivery_routes' table
             $query->whereDate('delivery_routes.date_of_delivery', '=', $date);
@@ -511,8 +532,8 @@ class DeliveryRouteController extends Controller
         if ($destiny) {
             $query->where('delivery_routes.type_of_destiny', '=', $destiny);
         }
-        $rutasRPPen = $query->get();
-        return response()->json(['Rutas_Pendientes' => $rutasRPPen]);
+        /*    $rutasRPPen = $query->get(); */
+        return response()->json(['Rutas_Pendientes' => $nuevaruta]);
     }
     public function updateDeliveryPurchasePendientes(Request $request)
     {
