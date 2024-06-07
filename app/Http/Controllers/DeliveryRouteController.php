@@ -467,7 +467,7 @@ class DeliveryRouteController extends Controller
         $destiny = $request->input('destiny');
         $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', '=', 'delivery_routes.product_id')
             ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
-            ->where('status_delivery', 'Completo')
+            ->where('status_delivery', 'Completo')->where('type', 'Total')
             ->select('delivery_routes.*', 'order_purchase_products.description');
 
         if ($date) {
@@ -563,10 +563,7 @@ class DeliveryRouteController extends Controller
                         'color' => $color,
                         'visible' =>  $visible
                     ]);
-            } else {
-                'no existe';
             }
-
             $rutas_updatePed = DeliveryRoute::where('id', $rutaPenRequest['id'])->get();
             $statuschanges = StatusDeliveryRouteChange::all()->where('order_purchase_product_id', $rutaPenRequest['product_id']);
             foreach ($statuschanges as $status_change) {

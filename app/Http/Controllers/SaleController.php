@@ -155,11 +155,11 @@ class SaleController extends Controller
                 }
             }
         }
-
+*/
         return response()->json([
             'msg' => 'Lista de pedidos', 'data' => ["sales" => $sales]
             // 'ordenes' => $ordenes
-        ], response::HTTP_OK); //200 */
+        ], response::HTTP_OK); //200
     }
 
     /**
