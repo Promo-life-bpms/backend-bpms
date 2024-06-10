@@ -135,7 +135,9 @@ class QualityIncidentsFormController extends Controller
     public function IncidentForm($idform)
     {
         $info = DB::table('quality_incidents_forms')->where('id', $idform)->first();
-        if($info){
+        if($info == null){
+            $informacion = ['Aún no se crea esta incidencia.'];
+        }else{
             $id_s_p = $info->id_sale_product;
             $DescriptionProductSale = DB::table('sales_products')->where('id', $id_s_p)->value('description');
             $id_o_p = $info->id_order_products;
@@ -159,56 +161,54 @@ class QualityIncidentsFormController extends Controller
                 'general_cause' => $info->general_cause,
                 'return_description' => $info->return_description,
             ];
-        }else{
-            $informacion = [
-                'message' => 'Aún no se crea esta incidencia.'
-            ];
         }
 
-        $SecondInfo = DB::table('solution_of_the_incident_forms')->where('id_quality_incidents', $info->id)->first();
-        if($SecondInfo){
-            $SecondInc = [
-                'id' => $SecondInfo->id,
-                'proposed_solution' => $SecondInfo->proposed_solution,
-                'monitoring_manager' => $SecondInfo->monitoring_manager,
-                'replacement_out_of_time' => $SecondInfo->replacement_out_of_time,
-                'incident_delivery_date' => $SecondInfo->incident_delivery_date,
-                'days_of_incident_processing' => $SecondInfo->days_of_incident_processing,
-                'odc_mat_clean' => $SecondInfo->odc_mat_clean,
-                'cu_prod_clean' => $SecondInfo->cu_prod_clean,
-                'final_cost_of_clean_material' => $SecondInfo->final_cost_of_clean_material,
-                'odc_impression' => $SecondInfo->odc_impression,
-                'printing_cost_per_piece' => $SecondInfo->printing_cost_per_piece,
-                'cu_prod_impression' => $SecondInfo->cu_prod_impression,
-                'total_cost' => $SecondInfo->total_cost,
-                'id_quality_incidents' => $SecondInfo->id_quality_incidents
-            ];
-        }else{
-            $SecondInc = [
-                'message' => 'Aún no se crea la segunda parte de la incidencia.',
-            ];
+        if ($info !== null) {
+            $id = $info->id;
+            $SecondInfo = DB::table('solution_of_the_incident_forms')->where('id_quality_incidents', $id)->first();
+            //dd($SecondInfo);
+            if($SecondInfo){
+                $SecondInc = [
+                    'id' => $SecondInfo->id,
+                    'proposed_solution' => $SecondInfo->proposed_solution,
+                    'monitoring_manager' => $SecondInfo->monitoring_manager,
+                    'replacement_out_of_time' => $SecondInfo->replacement_out_of_time,
+                    'incident_delivery_date' => $SecondInfo->incident_delivery_date,
+                    'days_of_incident_processing' => $SecondInfo->days_of_incident_processing,
+                    'odc_mat_clean' => $SecondInfo->odc_mat_clean,
+                    'cu_prod_clean' => $SecondInfo->cu_prod_clean,
+                    'final_cost_of_clean_material' => $SecondInfo->final_cost_of_clean_material,
+                    'odc_impression' => $SecondInfo->odc_impression,
+                    'printing_cost_per_piece' => $SecondInfo->printing_cost_per_piece,
+                    'cu_prod_impression' => $SecondInfo->cu_prod_impression,
+                    'total_cost' => $SecondInfo->total_cost,
+                    'id_quality_incidents' => $SecondInfo->id_quality_incidents
+                ];
 
-        }
-        
-        $ThirdInfoform = DB::table('incident_closure_forms')->where('id_solution_incident', $SecondInfo->id)->first();
-        if($ThirdInfoform !== null){
-            $thirdinfo =[
-                'id' => $ThirdInfoform->id,
-                'status' => $ThirdInfoform->status,
-                'application' => $ThirdInfoform->application,
-                'note_of_application' => $ThirdInfoform->note_of_application,
-                'responsible_for_final_monitoring' => $ThirdInfoform->responsible_for_final_monitoring,
-                'final_status' => $ThirdInfoform->final_status,
-                'final_closing_date' => $ThirdInfoform->final_closing_date,
-                'credit_note' => $ThirdInfoform->credit_note,
-                'days_of_incident_process' => $ThirdInfoform->days_of_incident_process,
-                'id_solution_incident' => $ThirdInfoform->id_solution_incident,
-            ];
-
-        }else{
-            $thirdinfo =[
-                'message' => 'Aún no se crea la tercera parte de la incidencia.',
-            ];
+                $Second = DB::table('incident_closure_forms')->where('id_solution_incident', $SecondInfo->id)->first();
+                if($Second !== null){
+                    $thirdinfo =[
+                        'id' => $Second->id,
+                        'status' => $Second->status,
+                        'application' => $Second->application,
+                        'note_of_application' => $Second->note_of_application,
+                        'responsible_for_final_monitoring' => $Second->responsible_for_final_monitoring,
+                        'final_status' => $Second->final_status,
+                        'final_closing_date' => $Second->final_closing_date,
+                        'credit_note' => $Second->credit_note,
+                        'days_of_incident_process' => $Second->days_of_incident_process,
+                        'id_solution_incident' => $Second->id_solution_incident,
+                    ];
+                }else{
+                    $thirdinfo =['Aún no se crea la tercera parte de la incidencia.'];
+                }
+            }else{
+                $SecondInc = ['Aún no se crea la segunda parte de la incidencia.'];
+                $thirdinfo =['Aún no se crea la tercera parte de la incidencia.'];
+            }   
+        } else {
+            $SecondInc = ['Aún no se crea la segunda parte de la incidencia.'];
+            $thirdinfo =['Aún no se crea la tercera parte de la incidencia.'];
         }
         return response()->json(['first_part' => $informacion, 'second_part' => $SecondInc, 'third_part' =>$thirdinfo]);
     }
