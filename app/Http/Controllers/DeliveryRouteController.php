@@ -368,7 +368,7 @@ class DeliveryRouteController extends Controller
                 'type' => $rutaupdate->type,
                 'date_of_delivery' => $rutaupdate->date_of_delivery,
                 'status_delivery' => $rutaupdate->status_delivery,
-                'shipping_type' => $rutaupdate->type,
+                'shipping_type' => $rutaupdate->shipping_type,
                 'color' => $rutaupdate->color,
                 'visible' => $rutaupdate->visible,
             ]);
@@ -626,7 +626,7 @@ class DeliveryRouteController extends Controller
                     'type' => $rutaupdate->type,
                     'date_of_delivery' => $rutaupdate->date_of_delivery,
                     'status_delivery' => $rutaupdate->status_delivery,
-                    'shipping_type' => $rutaupdate->type,
+                    'shipping_type' => $rutaupdate->shipping_type,
                     'color' => $rutaupdate->color,
                     'visible' => $rutaupdate->visible,
                 ]);
