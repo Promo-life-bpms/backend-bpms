@@ -264,7 +264,7 @@ class DeliveryRouteController extends Controller
 
         // Corresponde con la ruta  rutas-de-entrega
         // Buscamos un study por el ID.
-        $ruta = DeliveryRoute::where('product_id', $product_id)->orderBy('created_at', 'desc')->get();
+        $ruta = HistoryDeliveryRoute::where('product_id', $product_id)->orderBy('created_at', 'desc')->get();
         // Chequeaos si encontró o no la ruta
         if (!$ruta) {
             // Se devuelve un array errors con los errores detectados y código 404
