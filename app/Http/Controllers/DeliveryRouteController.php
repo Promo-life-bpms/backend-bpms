@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CodeOrderDeliveryRoute;
 use App\Models\DeliveryRoute;
+use App\Models\HistoryDeliveryRoute;
 use App\Models\OrderPurchase;
 use App\Models\Remission;
 use App\Models\Role;
@@ -358,6 +359,20 @@ class DeliveryRouteController extends Controller
         $statuschange = StatusDeliveryRouteChange::all()->where('order_purchase_product_id', $product_id);
         // Obtener y devolver las rutas actualizadas
         $delivery_update = DeliveryRoute::where('product_id', $order->order_purchase_id)->get();
+        foreach ($delivery_update as $rutaupdate) {
+            HistoryDeliveryRoute::create([
+                'code_sale' => $rutaupdate->code_sale,
+                'code_order' => $rutaupdate->code_order,
+                'product_id' => $rutaupdate->product_id,
+                'type_of_destiny' => $rutaupdate->type_of_destiny,
+                'type' => $rutaupdate->type,
+                'date_of_delivery' => $rutaupdate->date_of_delivery,
+                'status_delivery' => $rutaupdate->status_delivery,
+                'shipping_type' => $rutaupdate->type,
+                'color' => $rutaupdate->color,
+                'visible' => $rutaupdate->visible,
+            ]);
+        }
         return response()->json(['ruta actualizada' => $delivery_update, 'status_Actuales' => $statuschange]);
     }
     /**
@@ -492,33 +507,38 @@ class DeliveryRouteController extends Controller
     }
     public function DeliveryRoutePurchasePendientes(Request $request)
     {
-
-        $querys = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
-            ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
-            /*   ->where('status_delivery', 'Pendiente') */
-            //->whereIn('delivery_routes.type', ['Total', 'Parcial'])
-            ->select('delivery_routes.*', 'order_purchase_products.description')->get();
-        foreach ($querys as $query) {
-
-            if ($query->type == 'Parcial' /* && $query->status_delivery == ['Completo', 'Reprogramado', 'Pendiente'] */) {
-                $nuevaruta = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
-                    ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
-                    ->whereIn('status_delivery', ['Pendiente', 'Reprogramado', 'Completo'])
-                    ->where('type', 'Parcial')
-                    ->select('delivery_routes.*', 'order_purchase_products.description')->get();
-            } else {
-                $nuevaruta = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
-                    ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
-                    ->whereIn('status_delivery', ['Pendiente', 'Reprogramado'])
-                    ->where('type', 'Total')
-                    ->select('delivery_routes.*', 'order_purchase_products.description')->get();
-            }
-        }
-
         $date = $request->input('date');
         $type = $request->input('type');
         $status = $request->input('status_delivery');
         $destiny = $request->input('destiny');
+        $querys = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
+            ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
+            /*   ->where('status_delivery', 'Pendiente') */
+            //->whereIn('delivery_routes.type', ['Total', 'Parcial'])
+
+            ->select('delivery_routes.*', 'order_purchase_products.description')->get();
+        $nuevaRuta = collect(); // Usamos una colección de Laravel para manejar mejor los datos
+
+        foreach ($querys as $query) {
+            $type = $query->type;
+            $statusDelivery = ['Pendiente', 'Reprogramado'];
+
+            if ($type == 'Parcial') {
+                $statusDelivery[] = 'Completo';
+            }
+
+            $results = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
+                ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
+                ->whereIn('status_delivery', $statusDelivery)
+                ->where('type', $type)
+                ->select('delivery_routes.*', 'order_purchase_products.description')
+                ->get();
+
+            $nuevaRuta = $nuevaRuta->merge($results);
+        }
+
+        $nuevaRuta = $nuevaRuta->unique(); // Elimina duplicados a nivel de colección
+
         if ($date) {
             // Assuming you have a column like 'delivery_date' in 'delivery_routes' table
             $query->whereDate('delivery_routes.date_of_delivery', '=', $date);
@@ -533,7 +553,7 @@ class DeliveryRouteController extends Controller
             $query->where('delivery_routes.type_of_destiny', '=', $destiny);
         }
         /*    $rutasRPPen = $query->get(); */
-        return response()->json(['Rutas_Pendientes' => $nuevaruta]);
+        return response()->json(['Rutas_Pendientes' => $nuevaRuta]);
     }
     public function updateDeliveryPurchasePendientes(Request $request)
     {
@@ -596,6 +616,20 @@ class DeliveryRouteController extends Controller
                         $status_change->save();
                     }
                 }
+            }
+            foreach ($rutas_updatePed as $rutaupdate) {
+                HistoryDeliveryRoute::create([
+                    'code_sale' => $rutaupdate->code_sale,
+                    'code_order' => $rutaupdate->code_order,
+                    'product_id' => $rutaupdate->product_id,
+                    'type_of_destiny' => $rutaupdate->type_of_destiny,
+                    'type' => $rutaupdate->type,
+                    'date_of_delivery' => $rutaupdate->date_of_delivery,
+                    'status_delivery' => $rutaupdate->status_delivery,
+                    'shipping_type' => $rutaupdate->type,
+                    'color' => $rutaupdate->color,
+                    'visible' => $rutaupdate->visible,
+                ]);
             }
         }
     }
