@@ -492,14 +492,13 @@ class PurchaseRequestController extends Controller
 
         $user = Auth::user();
         $department_id_solicitud = DB::table('purchase_requests')->where('id', $request->id)->value('department_id');
-
+        //dd($department_id_solicitud);
         // Obtener el id del usuario manager del departamento asociado con la solicitud
-        $manager_id = DB::table('manager_has_departments')
-            ->where('id_department', $department_id_solicitud)
-            ->value('id_user');
+        $manager_ids = DB::table('manager_has_departments')->where('id_department', $department_id_solicitud)->pluck('id_user');
+        
 
         ///Si el usuario logueado es manager aprueba///
-        if ($user->id == $manager_id) {
+        if ($manager_ids->contains($user->id)) {
             $purchase_request = PurchaseRequest::where('id', $request->id)->get()->last();
             DB::table('purchase_requests')->where('id', $request->id)->update([
                 'approved_status' => 'en aprobación por administrador',
