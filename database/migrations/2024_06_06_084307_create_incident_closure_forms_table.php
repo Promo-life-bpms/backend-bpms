@@ -15,15 +15,15 @@ class CreateIncidentClosureFormsTable extends Migration
     {
         Schema::create('incident_closure_forms', function (Blueprint $table) {
             $table->id();
-            $table->string('status');
-            $table->string('application');
-            $table->string('note_of_application');
-            $table->string('responsible_for_final_monitoring');
-            $table->string('final_status');
-            $table->dateTime('final_closing_date');
-            $table->string('credit_note');
-            $table->integer('days_of_incident_process');
-            $table->unsignedBigInteger('id_solution_incident');
+            $table->string('status')->nullable();
+            $table->string('application')->nullable();
+            $table->string('note_of_application')->nullable();
+            $table->string('responsible_for_final_monitoring')->nullable();
+            $table->string('final_status')->nullable();
+            $table->dateTime('final_closing_date')->nullable();
+            $table->string('credit_note')->nullable();
+            $table->integer('days_of_incident_process')->nullable();
+            $table->unsignedBigInteger('id_solution_incident')->nullable();
             $table->foreign('id_solution_incident')->references('id')->on('solution_of_the_incident_forms')->onDelete('cascade');
             $table->timestamps();
         });

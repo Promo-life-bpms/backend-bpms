@@ -206,6 +206,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('second/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'SecondPartOfTheIncidentForm']);
     Route::post('third/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'ThirdPartOfTheIncidentForm']);
     Route::get('incident/form/{idform}', [QualityIncidentsFormController::class, 'IncidentForm']);
+    Route::post('edit/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'UpdateFormInc']);
 
     //CAJA CHICA
 
