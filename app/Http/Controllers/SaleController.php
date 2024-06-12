@@ -291,7 +291,7 @@ class SaleController extends Controller
                 }
                   
                 $idsProducts = [];
-                if ($estado_confirmacion === 'Confirmado') {
+                if ($estado_confirmacion === 'Parcial') {
                     foreach ($registros as $registro) {
                         $idsProducts[] = $registro->id_order_products;
                     }
