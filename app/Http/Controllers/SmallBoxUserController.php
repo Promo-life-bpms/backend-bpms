@@ -96,6 +96,10 @@ class SmallBoxUserController extends Controller
                 ]);
             }
 
+            if($data == null){
+                return response()->json(['message' => 'No has creado solicitudes de gasto.'], 409);
+            }
+
             return array(
                 'spents' => $data, 
             );
@@ -441,6 +445,10 @@ class SmallBoxUserController extends Controller
                     'created_at' => $spent->created_at->format('d-m-Y'),
                     'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
                 ]);
+            }
+
+            if($data == null){
+                return response()->json(['message' => 'No tienes solicitudes de gasto.'], 409);
             }
 
             return array(

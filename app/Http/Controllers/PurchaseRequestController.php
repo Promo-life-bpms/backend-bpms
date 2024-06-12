@@ -546,6 +546,13 @@ class PurchaseRequestController extends Controller
             ], 400);
         }
 
+        $rol = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
+        if($rol != 1){
+            return response()->json([
+                'message' => 'No tienes el permiso para visualizar las solicitudes.'
+            ], 404);
+        }
+
         $data = [];
         $spents = PurchaseRequest::where('approved_status', '<>', 'cancelada')->get();
 
@@ -624,6 +631,12 @@ class PurchaseRequestController extends Controller
                 'creation_date' => $spent->creation_date ? Carbon::parse($spent->creation_date)->format('d-m-Y') : "Aún no se ha asignado una fecha de creación.",
                 'department_name' => $department_name,
             ]);
+        }
+
+        if($data == null)
+        {
+            return response()->json(['No se han creado solicitudes']);
+
         }
 
         return array(
