@@ -352,11 +352,11 @@ class SmallBoxUserController extends Controller
         }
 
         $data = [
-            'companies' => $companies_data,
-            'centers' => $centers_data,
-            'spents' => $spents_data,
-            'payments' => $payments_data, 
-            'roles' => $roles_data,
+            'companies' => $companies->isEmpty() ? ['message' => 'No hay compañias disponibles.'] : $companies_data,
+            'centers' => $centers->isEmpty() ? ['message' => 'No hay centros de gastos disponibles.'] : $centers_data,
+            'spents' => $spents->isEmpty() ? ['message' => 'No hay tipos de gastos disponibles.'] : $spents_data,
+            'payments' => $payments->isEmpty() ? ['message' => 'No hay métodos de pagos disponibles.'] : $payments_data,
+            'roles' => $roles->isEmpty() ? ['message' => 'No hay roles disponibles.'] : $roles_data,
         ];
         
         return $data;

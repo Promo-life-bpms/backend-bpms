@@ -289,6 +289,14 @@ class SaleController extends Controller
                         $estado_confirmacion = 'Parcial';
                     }
                 }
+                  
+                $idsProducts = [];
+                if ($estado_confirmacion === 'Confirmado') {
+                    foreach ($registros as $registro) {
+                        $idsProducts[] = $registro->id_order_products;
+                    }
+                }
+
                 $Orden = [
                     'id' => $orden->id,
                     'code_order' => $orden->code_order,
@@ -300,6 +308,7 @@ class SaleController extends Controller
                     'status_bpm' => $orden->status_bpm,
                     'supplier_representative' => $orden->supplier_representative,
                     'Confirmation' => $estado_confirmacion,
+                    'idProductsOrders' => $idsProducts,
                     'last_confirmation_created_at' => $ultima_creacion, // Aquí agregamos la última fecha de creación
                     'created_at' => $orden->created_at,
                     'updated_at' => $orden->updated_at,
