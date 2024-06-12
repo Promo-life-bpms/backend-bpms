@@ -146,6 +146,12 @@ class PurchaseRequestController extends Controller
         } else {
             $spents = PurchaseRequest::whereIn('department_id', $department_ids)->orWhere('user_id', $user->id)->get();
         }
+
+        /////VERIFICAMOS SI EL USUARIO LOGUEADO TIENE SOLICITUDES/////////
+        if ($spents->isEmpty()) {
+            return response()->json(['message' => 'No hay solicitudes disponibles'], 404);
+        }
+
         $data = [];
 
         foreach ($spents as $spent) {
@@ -647,6 +653,12 @@ class PurchaseRequestController extends Controller
             'eventuales.*.company' => 'required'
         ]);
 
+        $total = $request->total;
+
+        if($total < 1){
+            return response()->json(['message' => 'El importe debe ser mayor a $0'], 405);
+        }
+
         $spent = Spent::where('id', $request->spent_id)->get()->last();
         if ($spent == null) {
             $center_id = 1;
@@ -726,24 +738,8 @@ class PurchaseRequestController extends Controller
                 return $e;
             }
         }
-        /*$users_to_send_mail = UserCenter::where('center_id', $center_id)->get();
-
-        if (count($users_to_send_mail) != 0) {
-            $spent = Spent::where('id', $request->spent_id)->get()->first();
-
-            foreach ($users_to_send_mail as $user_mail) {
-                $user = User::where('id', $user_mail->user_id)->get()->last();
-
-                try {
-                    Notification::route('mail', $user->email)
-                        ->notify(new CreateRequestNotification($spent->concept, $spent->center->name, $request->total));
-                } catch (\Exception $e) {
-                    return $e;
-                }
-            }
-        }*/
-
-        return response()->json(['message' => "Registro guardado satisfactoriamente"], 200);
+        
+        return response()->json(['message' => "Creación de solicitud exitosa."], 200);
     }
 
     public function editdate(Request $request)
