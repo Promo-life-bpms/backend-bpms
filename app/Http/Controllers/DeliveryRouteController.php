@@ -343,12 +343,12 @@ class DeliveryRouteController extends Controller
                         'code_order' => $ruta_ant->code_order,
                         'product_id' => $ruta_ant->product_id,
                         'type_of_destiny' => $ruta_ant->type_of_destiny,
-                        'type' => $ruta_ant->type,
-                        'date_of_delivery' => $ruta_ant->date_of_delivery,
-                        'status_delivery' => $ruta_ant->status_delivery,
-                        'shipping_type' => $ruta_ant->shipping_type,
-                        'color' => $ruta_ant->color,
-                        'visible' => $ruta_ant->visible,
+                        'type' => $rutaRequest['type'] ?? $ruta_ant->type,
+                        'date_of_delivery' => $rutaRequest['date_of_delivery'] ?? $ruta_ant->date_of_delivery,
+                        'status_delivery' => $rutaRequest['status_delivery'] ?? $ruta_ant->status_delivery,
+                        'shipping_type' => $rutaRequest['shipping_type'] ?? $ruta_ant->shipping_type,
+                        'color' => $color,
+                        'visible' => $visible,
                     ]);
                 } else {
                     DeliveryRoute::create([
@@ -391,7 +391,7 @@ class DeliveryRouteController extends Controller
             }
         }
         $statuschange = StatusDeliveryRouteChange::all()->where('order_purchase_product_id', $product_id);
-        // Obtener y devolver las rutas actualizadas
+
         $delivery_update = DeliveryRoute::where('product_id', $order->order_purchase_id)->get();
 
         return response()->json(['ruta actualizada' => $delivery_update, 'status_Actuales' => $statuschange]);
@@ -524,40 +524,40 @@ class DeliveryRouteController extends Controller
         $rutasRPCom = $query->get();
         return response()->json(['Rutas_Completas' => $rutasRPCom]);
     }
-   public function DeliveryRoutePurchasePendientes(Request $request)
-{
-    $date = $request->input('date');
-    $type = $request->input('type');
-    $status = $request->input('status_delivery');
-    $destiny = $request->input('destiny');
-    $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
-        ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
-        ->select('delivery_routes.*', 'order_purchase_products.description');
-    // Filtrar por tipo y estado según la lógica proporcionada
-    $query->where(function ($query) {
-        $query->where('delivery_routes.type', 'Total')
-              ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado'])
-            ->orWhere(function ($query) {
-                $query->where('delivery_routes.type', 'Parcial')
-                      ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado', 'Completo']);
-            });
-    });
-    // Aplicar filtros adicionales si se proporcionan
-    if ($date) {
-        $query->whereDate('delivery_routes.date_of_delivery', '=', $date);
+    public function DeliveryRoutePurchasePendientes(Request $request)
+    {
+        $date = $request->input('date');
+        $type = $request->input('type');
+        $status = $request->input('status_delivery');
+        $destiny = $request->input('destiny');
+        $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
+            ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
+            ->select('delivery_routes.*', 'order_purchase_products.description');
+        // Filtrar por tipo y estado según la lógica proporcionada
+        $query->where(function ($query) {
+            $query->where('delivery_routes.type', 'Total')
+                ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado'])
+                ->orWhere(function ($query) {
+                    $query->where('delivery_routes.type', 'Parcial')
+                        ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado', 'Completo']);
+                });
+        });
+        // Aplicar filtros adicionales si se proporcionan
+        if ($date) {
+            $query->whereDate('delivery_routes.date_of_delivery', '=', $date);
+        }
+        if ($type) {
+            $query->where('delivery_routes.type', $type);
+        }
+        if ($status) {
+            $query->where('delivery_routes.status_delivery', '=', $status);
+        }
+        if ($destiny) {
+            $query->where('delivery_routes.type_of_destiny', '=', $destiny);
+        }
+        $rutasRPPen = $query->get();
+        return response()->json(['Rutas_Pendientes' => $rutasRPPen]);
     }
-    if ($type) {
-        $query->where('delivery_routes.type', $type);
-    }
-    if ($status) {
-        $query->where('delivery_routes.status_delivery', '=', $status);
-    }
-    if ($destiny) {
-        $query->where('delivery_routes.type_of_destiny', '=', $destiny);
-    }
-    $rutasRPPen = $query->get();
-    return response()->json(['Rutas_Pendientes' => $rutasRPPen]);
-}
 
     public function updateDeliveryPurchasePendientes(Request $request)
     {
