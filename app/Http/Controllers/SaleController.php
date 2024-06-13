@@ -512,18 +512,16 @@ class SaleController extends Controller
             }
             ///////////////STATUS 2////////////
             //  return $orders;
-             $orderConfirmado = [];
-             $orderPendient= [];
-             foreach($orders as $orderconf){
-                 if($orderconf['Confirmation'] == 'Confirmado'){
-                 $orderConfirmado[] = $orderconf['Confirmation'] = 'Confirmado';
+            $orderConfirmado = [];
+            $orderPendient = [];
+            foreach ($orders as $orderconf) {
+                if ($orderconf['Confirmation'] == 'Confirmado') {
+                    $orderConfirmado[] = $orderconf['Confirmation'] = 'Confirmado';
+                } else if ($orderconf['Confirmation'] == 'Parcial') {
 
-                 } else if ($orderconf['Confirmation'] == 'Parcial'){
-
-                 $orderPendient[] = $orderconf['Confirmation'] = 'Parcial';
-           }
-
-             }
+                    $orderPendient[] = $orderconf['Confirmation'] = 'Parcial';
+                }
+            }
 
             $orders_confirmations = DB::table('order_confirmations')->where('code_sale', $sale_id)->get();
             if (empty($orders_confirmations)) {
@@ -559,17 +557,20 @@ class SaleController extends Controller
                 ]);
             }
             $status_order = SaleStatusChange::where('sale_id', $idSale)->where('status_id', 15)->first();
+            $status_sale = DB::table('statuses')->where('id', $status_order->status_id)->first();
             if ($status_order) {
                 // $orderConfirmado
                 // $orderPendient
-                if (count($orderConfirmado) ===  0  && count($orderPendient) === 0 ) {
-                     DB::table('sale_status_changes')->where('status_id', 15)->update([
+                if (count($orderConfirmado) ===  0  && count($orderPendient) === 0) {
+                    DB::table('sale_status_changes')->where('status_id', 15)->update([
                         'sale_id' => $idSale,
                         'status_id' => 15,
                         'status' => 0,
-                        'visible' => 2
+                        'visible' => 2,
+                        'status_name' => $status_sale->status,
+                        'slug' => $status_sale->slug
                     ]);
-                }else if (count($orderConfirmado) < count($ordenes) && count($orderConfirmado) != 0 ) {
+                } else if (count($orderConfirmado) < count($ordenes) && count($orderConfirmado) != 0) {
                     //return [count($orderConfirmado) , count($ordenes) ];
                     DB::table('sale_status_changes')->where('status_id', 15)->update([
                         'sale_id' => $idSale,
@@ -577,23 +578,24 @@ class SaleController extends Controller
                         'status' => 0,
                         'visible' => 0
                     ]);
-                } else if(count($orderPendient) < count($ordenes) && count($orderPendient) != 0){
+                } else if (count($orderPendient) < count($ordenes) && count($orderPendient) != 0) {
                     DB::table('sale_status_changes')->where('status_id', 15)->update([
                         'sale_id' => $idSale,
                         'status_id' => 15,
                         'status' => 0,
                         'visible' => 0
                     ]);
-               } else {
+                } else {
 
                     DB::table('sale_status_changes')->where('status_id', 15)->update([
                         'sale_id' => $idSale,
                         'status_id' => 15,
                         'status' => 0,
-                        'visible' => 1
+                        'visible' => 1,
+                        'status_name' => $status_sale->status,
+                        'slug' => $status_sale->slug
                     ]);
                 }
-
             } else {
 
                 SaleStatusChange::create([
@@ -602,7 +604,6 @@ class SaleController extends Controller
                     'status' => 0,
                     'visible' => 2
                 ]);
-
             }
 
             $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();

@@ -19,6 +19,8 @@ class CreateSaleStatusChangesTable extends Migration
             $table->foreignId("status_id")->constrained();
             $table->integer('status');
             $table->integer('visible')->nullable();
+            $table->string('status_name')->nullable();
+            $table->string('slug')->nullable();
             $table->timestamps();
         });
     }
