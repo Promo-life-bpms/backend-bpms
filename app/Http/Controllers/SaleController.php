@@ -263,7 +263,7 @@ class SaleController extends Controller
             ];
             /////ORDENES////////////////
             $ordenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
-               $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%')->orWhere('code_order', 'like', 'OT%')->orWhere('code_order', 'like', 'OC%');
+                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%')->orWhere('code_order', 'like', 'OT%')->orWhere('code_order', 'like', 'OC%');
             })->get();
             $orders = [];
             foreach ($ordenes as $orden) {
@@ -396,15 +396,14 @@ class SaleController extends Controller
                     $Deliverys = DB::table('confirm_deliveries')->where('id_order_purchase_product', $Confirma->id)->get();
 
                     foreach ($DatosConfirmate as $confirmados) {
-                        $ProductsCounts = DB::table('confirm_product_counts')->where('id_product',$Confirma->id)->exists();
+                        $ProductsCounts = DB::table('confirm_product_counts')->where('id_product', $Confirma->id)->exists();
                         $HistoryProductsCounts = 0;
-                        if($ProductsCounts){
+                        if ($ProductsCounts) {
                             $HistoryProductsCounts = 1;
-
                         }
                         if ($confirmados) {
                             $deliveryProducts = [];
-                            foreach($Deliverys as $Delivery){
+                            foreach ($Deliverys as $Delivery) {
                                 $deliveryProducts[] = [
                                     'id_order_purchase_product' => $Delivery->id_order_purchase_product,
                                     'delivery_type' => $Delivery->delivery_type,
@@ -511,7 +510,113 @@ class SaleController extends Controller
                     'id_order_products' => $item->id_order_products
                 ];
             }
-           /*  ///////////////STATUS 2////////////
+            ///////////////STATUS 2////////////
+            $orders_confirmations = DB::table('order_confirmations')->where('code_sale', $sale_id)->get();
+            if (empty($orders_confirmations)) {
+                return response()->json(['no hay ordenes confirmadas']);
+            }
+            $NumOrders = [];
+            foreach ($ordenes as $Order) {
+                //return $ordenes;
+                $idOrder = $Order->id;
+                $productos_totales = DB::table('order_purchase_products')->where('order_purchase_id', $idOrder)->count();
+                $NumOrders[] = $productos_totales;
+            }
+
+            $newOrderCom = [];
+            $newOrderPen = [];
+            foreach ($orders_confirmations as $order_confirmation) {
+
+                if ($order_confirmation->description == 'COMPLETADO') {
+                    $newOrderCom[] = $orders_confirmations->where('description', 'COMPLETADO')->count();
+                } else if ($order_confirmation->description == 'PARCIAL') {
+                    $newOrderPen[] = $orders_confirmations->where('description', 'PARCIAL')->count();
+                }
+            }
+            $orderconfirmationCom = array_sum($newOrderCom);
+            $orderconfirmationPen = array_sum($newOrderPen);
+            $orders_products = array_sum($NumOrders);
+            if ($orders_products == 0) {
+                DB::table('sale_status_changes')->where('status_id', 15)->update([
+                    'sale_id' => $idSale,
+                    'status_id' => 15,
+                    'status' => 0,
+                    'visible' => 2
+                ]);
+            }
+            $status_order = SaleStatusChange::where('sale_id', $idSale)->where('status_id', 15)->first();
+            if (empty($status_order)) {
+                SaleStatusChange::create([
+                    'sale_id' => $idSale,
+                    'status_id' => 15,
+                    'status' => 0,
+                    'visible' => 2
+                ]);
+                if ($orderconfirmationCom != $orders_products) {
+                    DB::table('sale_status_changes')->where('status_id', 15)->update([
+                        'sale_id' => $idSale,
+                        'status_id' => 15,
+                        'status' => 0,
+                        'visible' => 0
+                    ]);
+                } elseif ($orderconfirmationCom == $orders_products) {
+                    DB::table('sale_status_changes')->where('status_id', 15)->update([
+                        'sale_id' => $idSale,
+                        'status_id' => 15,
+                        'status' => 0,
+                        'visible' => 1
+                    ]);
+                }
+            } else {
+                'no hay ordenes';
+            }
+
+            $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
+
+            /*
+           $orders_confirmations = DB::table('order_confirmations')->where('code_sale', $sale_id)->get();
+            $NumOrders = [];
+            foreach ($ordenes as $Order) {
+                $idOrder = $Order->id;
+                $productos_totales = DB::table('order_purchase_products')->where('order_purchase_id', $idOrder)->count();
+                $NumOrders[] = $productos_totales;
+            }
+
+            $newOrderCom = [];
+            $newOrderPen = [];
+            foreach ($orders_confirmations as $order_confirmation) {
+
+                if ($order_confirmation->description == 'COMPLETADO') {
+                    $newOrderCom[] = $orders_confirmations->where('description', 'COMPLETADO')->count();
+                } else if ($order_confirmation->description == 'PARCIAL') {
+                    $newOrderPen[] = $orders_confirmations->where('description', 'PARCIAL')->count();
+                }
+            }
+            $orderconfirmationCom = array_sum($newOrderCom);
+            $orderconfirmationPen = array_sum($newOrderPen);
+            $orders_products = array_sum($NumOrders);
+            $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
+            foreach ($statusOrders as $status_order) {
+                if ($status_order->status_id != 15 && $status_order->status_id == 2) {
+                    if ($orderconfirmationCom != $orders_products) {
+                        SaleStatusChange::create([
+                            'sale_id' => $idSale,
+                            'status_id' => 15,
+                            'status' => 0,
+                            'visible' => 0
+                        ]);
+                    } elseif ($orderconfirmationCom == $orders_products) {
+                        DB::table('sale_status_changes')->where('status_id', 15)->update([
+                            'sale_id' => $idSale,
+                            'status_id' => 15,
+                            'status' => 0,
+                            'visible' => 1
+                        ]);
+                    }
+                }
+            }
+            $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
+
             $NumOrders = [];
             foreach ($ordenes as $Order) {
                 $idOrder = $Order->id;
@@ -554,13 +659,13 @@ class SaleController extends Controller
                     $statusOrders = 1;
                 }
 
-            } */
-          
+            }
 
+ */
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
-                'status' => $combinedResults, /* 'status_two' => $statusOrders ,*/ 'HistoryConfirmationOrder' => $ConfirmationOrder,
+                'status' => $combinedResults, 'status_sale' => $statusOrders, 'HistoryConfirmationOrder' => $ConfirmationOrder,
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);
