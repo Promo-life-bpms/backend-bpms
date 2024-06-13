@@ -13,7 +13,9 @@ class SaleStatusChange extends Model
         "sale_id",
         "status_id",
         "status",
-        "visible"
+        "visible",
+        "status_name",
+        "slug"
     ];
 
     public function pedido()
