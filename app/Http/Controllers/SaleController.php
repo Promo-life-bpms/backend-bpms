@@ -511,7 +511,7 @@ class SaleController extends Controller
                     'id_order_products' => $item->id_order_products
                 ];
             }
-            ///////////////STATUS 2////////////
+           /*  ///////////////STATUS 2////////////
             $NumOrders = [];
             foreach ($ordenes as $Order) {
                 $idOrder = $Order->id;
@@ -553,12 +553,14 @@ class SaleController extends Controller
                 } elseif ($status == 1) {
                     $statusOrders = 1;
                 }
-            }
+
+            } */
+          
 
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
-                'status' => $combinedResults, 'status_two' => $statusOrders, 'HistoryConfirmationOrder' => $ConfirmationOrder,
+                'status' => $combinedResults, /* 'status_two' => $statusOrders ,*/ 'HistoryConfirmationOrder' => $ConfirmationOrder,
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);
