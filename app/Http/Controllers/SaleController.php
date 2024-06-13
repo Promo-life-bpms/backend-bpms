@@ -511,6 +511,20 @@ class SaleController extends Controller
                 ];
             }
             ///////////////STATUS 2////////////
+            //  return $orders;
+             $orderConfirmado = [];
+             $orderPendient= [];
+             foreach($orders as $orderconf){
+                 if($orderconf['Confirmation'] == 'Confirmado'){
+                 $orderConfirmado[] = $orderconf['Confirmation'] = 'Confirmado';
+
+                 } else if ($orderconf['Confirmation'] == 'Parcial'){
+
+                 $orderPendient[] = $orderconf['Confirmation'] = 'Parcial';
+           }
+
+             }
+
             $orders_confirmations = DB::table('order_confirmations')->where('code_sale', $sale_id)->get();
             if (empty($orders_confirmations)) {
                 return response()->json(['no hay ordenes confirmadas']);
@@ -545,21 +559,33 @@ class SaleController extends Controller
                 ]);
             }
             $status_order = SaleStatusChange::where('sale_id', $idSale)->where('status_id', 15)->first();
-            if (empty($status_order)) {
-                SaleStatusChange::create([
-                    'sale_id' => $idSale,
-                    'status_id' => 15,
-                    'status' => 0,
-                    'visible' => 2
-                ]);
-                if ($orderconfirmationCom != $orders_products) {
+            if ($status_order) {
+                // $orderConfirmado
+                // $orderPendient
+                if (count($orderConfirmado) ===  0  && count($orderPendient) === 0 ) {
+                     DB::table('sale_status_changes')->where('status_id', 15)->update([
+                        'sale_id' => $idSale,
+                        'status_id' => 15,
+                        'status' => 0,
+                        'visible' => 2
+                    ]);
+                }else if (count($orderConfirmado) < count($ordenes) && count($orderConfirmado) != 0 ) {
+                    //return [count($orderConfirmado) , count($ordenes) ];
                     DB::table('sale_status_changes')->where('status_id', 15)->update([
                         'sale_id' => $idSale,
                         'status_id' => 15,
                         'status' => 0,
                         'visible' => 0
                     ]);
-                } elseif ($orderconfirmationCom == $orders_products) {
+                } else if(count($orderPendient) < count($ordenes) && count($orderPendient) != 0){
+                    DB::table('sale_status_changes')->where('status_id', 15)->update([
+                        'sale_id' => $idSale,
+                        'status_id' => 15,
+                        'status' => 0,
+                        'visible' => 0
+                    ]);
+               } else {
+
                     DB::table('sale_status_changes')->where('status_id', 15)->update([
                         'sale_id' => $idSale,
                         'status_id' => 15,
@@ -567,54 +593,21 @@ class SaleController extends Controller
                         'visible' => 1
                     ]);
                 }
+
             } else {
-                'no hay ordenes';
+
+                SaleStatusChange::create([
+                    'sale_id' => $idSale,
+                    'status_id' => 15,
+                    'status' => 0,
+                    'visible' => 2
+                ]);
+
             }
 
             $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
 
             /*
-           $orders_confirmations = DB::table('order_confirmations')->where('code_sale', $sale_id)->get();
-            $NumOrders = [];
-            foreach ($ordenes as $Order) {
-                $idOrder = $Order->id;
-                $productos_totales = DB::table('order_purchase_products')->where('order_purchase_id', $idOrder)->count();
-                $NumOrders[] = $productos_totales;
-            }
-
-            $newOrderCom = [];
-            $newOrderPen = [];
-            foreach ($orders_confirmations as $order_confirmation) {
-
-                if ($order_confirmation->description == 'COMPLETADO') {
-                    $newOrderCom[] = $orders_confirmations->where('description', 'COMPLETADO')->count();
-                } else if ($order_confirmation->description == 'PARCIAL') {
-                    $newOrderPen[] = $orders_confirmations->where('description', 'PARCIAL')->count();
-                }
-            }
-            $orderconfirmationCom = array_sum($newOrderCom);
-            $orderconfirmationPen = array_sum($newOrderPen);
-            $orders_products = array_sum($NumOrders);
-            $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
-            foreach ($statusOrders as $status_order) {
-                if ($status_order->status_id != 15 && $status_order->status_id == 2) {
-                    if ($orderconfirmationCom != $orders_products) {
-                        SaleStatusChange::create([
-                            'sale_id' => $idSale,
-                            'status_id' => 15,
-                            'status' => 0,
-                            'visible' => 0
-                        ]);
-                    } elseif ($orderconfirmationCom == $orders_products) {
-                        DB::table('sale_status_changes')->where('status_id', 15)->update([
-                            'sale_id' => $idSale,
-                            'status_id' => 15,
-                            'status' => 0,
-                            'visible' => 1
-                        ]);
-                    }
-                }
-            }
             $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
 
             $NumOrders = [];
