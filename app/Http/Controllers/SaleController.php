@@ -263,7 +263,7 @@ class SaleController extends Controller
             ];
             /////ORDENES////////////////
             $ordenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
-                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
+               $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%')->orWhere('code_order', 'like', 'OT%')->orWhere('code_order', 'like', 'OC%');
             })->get();
             $orders = [];
             foreach ($ordenes as $orden) {
@@ -289,7 +289,7 @@ class SaleController extends Controller
                         $estado_confirmacion = 'Parcial';
                     }
                 }
-                  
+
                 $idsProducts = [];
                 if ($estado_confirmacion === 'Parcial') {
                     foreach ($registros as $registro) {
@@ -317,7 +317,7 @@ class SaleController extends Controller
             }
             /////////////PRODUCTOS/////////////////
             $idOrdenes = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
-                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%');
+                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OT-%')->orWhere('code_order', 'like', 'OT%')->orWhere('code_order', 'like', 'OC%');
             })->pluck('id', 'code_order');
             $products = [];
             ////VERIFICAMOS QUE LOS PRODUCTOS ESTEN COMPLETADOS/////////////
@@ -394,7 +394,7 @@ class SaleController extends Controller
                         ];
                     }
                     $Deliverys = DB::table('confirm_deliveries')->where('id_order_purchase_product', $Confirma->id)->get();
-    
+
                     foreach ($DatosConfirmate as $confirmados) {
                         $ProductsCounts = DB::table('confirm_product_counts')->where('id_product',$Confirma->id)->exists();
                         $HistoryProductsCounts = 0;
@@ -411,7 +411,7 @@ class SaleController extends Controller
                                     'created_at' => $Delivery->created_at
                                 ];
                             }
-                            
+
                             $info = [
                                 'reference' => $code_order,
                                 'id_product' => $Confirma->id,
@@ -424,7 +424,7 @@ class SaleController extends Controller
                         }
                     }
                 }
-            } 
+            }
 
             /////////////////////////MANDA LA INFORMACION EN EL ARREGLO DE PRODUCTS////////////
             foreach ($products as &$product) {
@@ -553,8 +553,10 @@ class SaleController extends Controller
                 } elseif ($status == 1) {
                     $statusOrders = 1;
                 }
+
             } */
           
+
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,

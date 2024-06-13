@@ -188,7 +188,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('confirmation/order/products', [OrderConfirmationController::class, 'ConfirmOrderProducts']);
 
 
-    Route::post('status/two/{pedido}', [StatusOrdersController::class, 'StatusTwo']);
+    //Route::post('status/two/{pedido}', [StatusOrdersController::class, 'StatusTwo']);
     /////////////////CONFIRMAR ORDENES DE PRODUCTOS///////////////
     Route::post('confirmation/route/product', [ConfirmRouteController::class, 'ConfirmationRoute']);
     Route::get('history/confirmation/route/product/{idProductOrder}', [ConfirmRouteController::class, 'index']);
