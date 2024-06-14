@@ -96,7 +96,8 @@ class Sale extends Model
 
     public function lastStatus()
     {
-        return $this->hasOne(SaleStatusChange::class)->latestOfMany();
+        return $this->hasMany(SaleStatusChange::class);
+       // return $this->hasOne(SaleStatusChange::class)->latestOfMany();
     }
 
     public function binnacles()
@@ -110,3 +111,4 @@ class Sale extends Model
         return $this->hasMany(Remission::class, 'code_sale', 'code_sale');
     }
 }
+

@@ -44,6 +44,7 @@ class SaleController extends Controller
 
 
         $sales = Sale::where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
+            ->with('lastStatus')
             ->where("sales.created_at", "LIKE", "%" . $fechaCreacion . "%")
             ->paginate($per_page);
         return response()->json([
@@ -461,13 +462,17 @@ class SaleController extends Controller
             }
             //////////////////Last status///////////////////////
             $LastStatus = DB::table('sale_status_changes')->where('sale_id', $idSale)->orderBy('created_at', 'desc')->first();
-            $idstatus = $LastStatus->status_id;
-            $NombreStatus = DB::table('statuses')->where('id', $idstatus)->first();
-            $lastStatus = [
-                "created_at" => $LastStatus->created_at,
-                "slug" => $NombreStatus->slug,
-                "last_status" => $NombreStatus->status,
-            ];
+            if ($LastStatus) {
+                $idstatus = $LastStatus->status_id;
+                $NombreStatus = DB::table('statuses')->where('id', $idstatus)->first();
+                $lastStatus = [
+                    "created_at" => $LastStatus->created_at,
+                    "slug" => $NombreStatus->slug,
+                    "last_status" => $NombreStatus->status,
+                ];
+            } else {
+                $LastStatus = 0;
+            }
             ///////////INCIDENCIAS///////////////
             $incidences = DB::table('incidences')->where('code_sale', $sale_id)->get();
             /////INSPECTIONS////////////////////////
@@ -557,7 +562,8 @@ class SaleController extends Controller
                 ]);
             }
             $status_order = SaleStatusChange::where('sale_id', $idSale)->where('status_id', 15)->first();
-            $status_sale = DB::table('statuses')->where('id', $status_order->status_id)->first();
+            $status_order_ped = SaleStatusChange::where('sale_id', $idSale)->first();
+            $status_sales = DB::table('statuses')->where('id', 15)->first();
             if ($status_order) {
                 // $orderConfirmado
                 // $orderPendient
@@ -567,8 +573,6 @@ class SaleController extends Controller
                         'status_id' => 15,
                         'status' => 0,
                         'visible' => 2,
-                        'status_name' => $status_sale->status,
-                        'slug' => $status_sale->slug
                     ]);
                 } else if (count($orderConfirmado) < count($ordenes) && count($orderConfirmado) != 0) {
                     //return [count($orderConfirmado) , count($ordenes) ];
@@ -592,8 +596,8 @@ class SaleController extends Controller
                         'status_id' => 15,
                         'status' => 0,
                         'visible' => 1,
-                        'status_name' => $status_sale->status,
-                        'slug' => $status_sale->slug
+                        'status_name' => $status_sales->status,
+                        'slug' => $status_sales->slug
                     ]);
                 }
             } else {
@@ -602,7 +606,9 @@ class SaleController extends Controller
                     'sale_id' => $idSale,
                     'status_id' => 15,
                     'status' => 0,
-                    'visible' => 2
+                    'visible' => 2,
+                    'status_name' => $status_sales->status,
+                    'slug' => $status_sales->slug
                 ]);
             }
 
