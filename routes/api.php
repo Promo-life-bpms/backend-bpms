@@ -27,6 +27,7 @@ use App\Http\Controllers\ManagerHasDepartmentController;
 use App\Http\Controllers\OrderConfirmationController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
+use App\Http\Controllers\OrdersGroup as ControllersOrdersGroup;
 use App\Http\Controllers\Pruebas;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\QualityIncidentsFormController;
@@ -40,6 +41,7 @@ use App\Models\EstimationSmallBox;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserDetailsController;
 use App\Models\CheckList;
+use App\Models\OrdersGroup;
 use App\Notifications\Acces;
 use App\Models\User;
 
@@ -110,7 +112,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     // Detalle de  OC, OT
     Route::get('pedidos/{pedido}/orders/{order}', [OrderPurchaseController::class, 'show']);
-
+    Route::get('pedidos-orders-groups', [ControllersOrdersGroup::class, 'create']);
     // Recepciones de Inventario
     Route::post('reception/{code_order}', [ReceptionController::class, 'saveReception']);
 
