@@ -19,11 +19,9 @@ class OrdersGroup extends Controller
         foreach ($data as $index => $order) {
             $validator = Validator::make($order, [
                 'code_order_oc' => 'required',
-                'code_order_ot' => 'required|array',
                 'code_sale' => 'required',
                 'description' => 'required',
                 'product_id_oc' => 'required',
-                'product_id_ot' => 'required|array',
             ]);
 
             if ($validator->fails()) {
