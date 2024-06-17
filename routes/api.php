@@ -113,6 +113,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Detalle de  OC, OT
     Route::get('pedidos/{pedido}/orders/{order}', [OrderPurchaseController::class, 'show']);
     Route::post('pedidos-orders-groups', [ControllersOrdersGroup::class, 'create']);
+    Route::post('pedidos-orders-groups/update/{sale}', [ControllersOrdersGroup::class, 'update']);
     // Recepciones de Inventario
     Route::post('reception/{code_order}', [ReceptionController::class, 'saveReception']);
 

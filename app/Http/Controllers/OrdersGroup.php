@@ -92,7 +92,32 @@ class OrdersGroup extends Controller
         }
         return response()->json(['ordenes' => $order_group]);
     } */
-    public function update()
+    public function update(Request $request, $sale)
     {
+        $neworders = [];
+
+        foreach ($request->ordenes as $order) {
+            $orderGroup = ModelsOrdersGroup::where('code_sale', $sale)
+                ->where('code_order_oc', $order['code_order_oc'])
+                ->first();
+
+            if ($orderGroup) {
+                $new_order = DB::table('orders_groups')->where('code_sale', $sale)
+                    ->where('code_order_oc', $order['code_order_oc'])
+                    ->update([
+                        'code_order_oc' => $order['code_order_oc'] ?? $orderGroup->code_order_oc,
+                        'code_order_ot' => implode(',', $order['code_order_ot']) ?? $orderGroup->code_order_ot,
+                        'code_sale' => $order['code_sale'] ?? $orderGroup->code_sale,
+                        'description' => $order['description'] ?? $orderGroup->description,
+                        'product_id_oc' => $order['product_id_oc'] ?? $orderGroup->product_id_oc,
+                        'product_id_ot' => implode(',', $order['product_id_ot']) ?? $orderGroup->product_id_ot,
+                        'planned_date' => $order['planned_date'] ?? $orderGroup->planned_date
+                    ]);
+
+                $neworders[] = $new_order;
+            }
+        }
+
+        return response()->json(['ordenes' => $neworders]);
     }
 }
