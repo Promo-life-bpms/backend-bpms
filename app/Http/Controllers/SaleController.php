@@ -473,6 +473,8 @@ class SaleController extends Controller
             } else {
                 $LastStatus = 0;
             }
+            /////////////ORDENES_AGRUPADAS////////////////
+            $orders_groups = DB::table('orders_groups')->where('code_sale', $sale_id)->get();
             ///////////INCIDENCIAS///////////////
             $incidences = DB::table('incidences')->where('code_sale', $sale_id)->get();
             /////INSPECTIONS////////////////////////
@@ -665,7 +667,7 @@ class SaleController extends Controller
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
-                'status' => $combinedResults, 'status_sale' => $statusOrders, 'HistoryConfirmationOrder' => $ConfirmationOrder,
+                'status' => $combinedResults, 'status_sale' => $statusOrders, 'HistoryConfirmationOrder' => $ConfirmationOrder, 'orders_groups' => $orders_groups
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);
