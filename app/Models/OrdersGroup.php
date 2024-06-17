@@ -13,10 +13,12 @@ class OrdersGroup extends Model
         'code_order_ot',
         'code_sale',
         'description',
-        'product_id',
+        'product_id_oc',
+        'product_id_ot',
         'planned_date'
     ];
     protected $casts = [
         'code_order_ot' => 'array',
+        'product_id_ot' => 'array',
     ];
 }
