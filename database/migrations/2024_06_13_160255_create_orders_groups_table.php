@@ -19,7 +19,8 @@ class CreateOrdersGroupsTable extends Migration
             $table->json('code_order_ot');
             $table->string('code_sale');
             $table->string('description');
-            $table->integer('product_id');
+            $table->integer('product_id_oc');
+            $table->json('product_id_ot');
             $table->date('planned_date');
             $table->timestamps();
         });
