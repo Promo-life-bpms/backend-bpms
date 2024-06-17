@@ -106,11 +106,11 @@ class OrdersGroup extends Controller
                     ->where('code_order_oc', $order['code_order_oc'])
                     ->update([
                         'code_order_oc' => $order['code_order_oc'] ?? $orderGroup->code_order_oc,
-                        'code_order_ot' => implode(',', $order['code_order_ot']) ?? $orderGroup->code_order_ot,
+                        'code_order_ot' => $order['code_order_ot'] ?? $orderGroup->code_order_ot,
                         'code_sale' => $order['code_sale'] ?? $orderGroup->code_sale,
                         'description' => $order['description'] ?? $orderGroup->description,
                         'product_id_oc' => $order['product_id_oc'] ?? $orderGroup->product_id_oc,
-                        'product_id_ot' => implode(',', $order['product_id_ot']) ?? $orderGroup->product_id_ot,
+                        'product_id_ot' => $order['product_id_ot'] ?? $orderGroup->product_id_ot,
                         'planned_date' => $order['planned_date'] ?? $orderGroup->planned_date
                     ]);
 
@@ -124,11 +124,11 @@ class OrdersGroup extends Controller
                     if ($order_confirmation) {
                         $order_group = ModelsOrdersGroup::create([
                             'code_order_oc' => $order['code_order_oc'],
-                            'code_order_ot' => json_encode($order['code_order_ot']), // Convertimos array a JSON
+                            'code_order_ot' => $order['code_order_ot'], // Convertimos array a JSON
                             'code_sale' => $order['code_sale'],
                             'description' => $order['description'],
                             'product_id_oc' => $order['product_id_oc'],
-                            'product_id_ot' => json_encode($order['product_id_ot']), // Convertimos array a JSON
+                            'product_id_ot' => $order['product_id_ot'], // Convertimos array a JSON
                             'planned_date' => $order['planned_date']
                         ]);
                         $neworders[] = $order_group;
@@ -139,6 +139,6 @@ class OrdersGroup extends Controller
             }
         }
 
-        return response()->json(['ordenes' => $neworders]);
+        return response()->json(['ordenes_creadas' => $neworders,  'ordenes_Actualizadas' => $newordersupdate]);
     }
 }
