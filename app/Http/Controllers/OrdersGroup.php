@@ -94,8 +94,8 @@ class OrdersGroup extends Controller
     } */
     public function update(Request $request, $sale)
     {
+        $newordersupdate = [];
         $neworders = [];
-
         foreach ($request->ordenes as $order) {
             $orderGroup = ModelsOrdersGroup::where('code_sale', $sale)
                 ->where('code_order_oc', $order['code_order_oc'])
@@ -114,7 +114,28 @@ class OrdersGroup extends Controller
                         'planned_date' => $order['planned_date'] ?? $orderGroup->planned_date
                     ]);
 
-                $neworders[] = $new_order;
+                $newordersupdate[] = $new_order;
+            } else {
+                $order_confirmations = DB::table('order_confirmations')
+                    ->where('code_sale', $sale)
+                    ->get();
+
+                foreach ($order_confirmations as $order_confirmation) {
+                    if ($order_confirmation) {
+                        $order_group = ModelsOrdersGroup::create([
+                            'code_order_oc' => $order['code_order_oc'],
+                            'code_order_ot' => json_encode($order['code_order_ot']), // Convertimos array a JSON
+                            'code_sale' => $order['code_sale'],
+                            'description' => $order['description'],
+                            'product_id_oc' => $order['product_id_oc'],
+                            'product_id_ot' => json_encode($order['product_id_ot']), // Convertimos array a JSON
+                            'planned_date' => $order['planned_date']
+                        ]);
+                        $neworders[] = $order_group;
+                    } else {
+                        return response()->json(['no se ha confirmado la orden']);
+                    }
+                }
             }
         }
 
