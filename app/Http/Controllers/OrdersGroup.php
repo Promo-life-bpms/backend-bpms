@@ -39,11 +39,11 @@ class OrdersGroup extends Controller
             if ($order_confirmation || $order_product) {
                 $order_group = ModelsOrdersGroup::create([
                     'code_order_oc' => $order['code_order_oc'],
-                    'code_order_ot' => json_encode($order['code_order_ot']), // Convertimos array a JSON
+                    'code_order_ot' => $order['code_order_ot'], // Convertimos array a JSON
                     'code_sale' => $order['code_sale'],
                     'description' => $order['description'],
                     'product_id_oc' => $order['product_id_oc'],
-                    'product_id_ot' => json_encode($order['product_id_ot']), // Convertimos array a JSON
+                    'product_id_ot' => $order['product_id_ot'], // Convertimos array a JSON
                     'planned_date' => $order['planned_date']
                 ]);
                 $ordesrsGroup[] = $order_group;
