@@ -475,6 +475,34 @@ class SaleController extends Controller
             }
             /////////////ORDENES_AGRUPADAS////////////////
             $orders_groups = DB::table('orders_groups')->where('code_sale', $sale_id)->get();
+            $new_orders = [];
+            foreach ($orders_groups as $group) {
+                $statusesDelivery = StatusDeliveryRouteChange::where('order_purchase_product_id', $group->product_id_oc)->get();
+                $group_new = [
+                    'code_order_oc' => $group->code_order_oc,
+                    'code_order_ot' => $group->code_order_ot,
+                    'code_sale' => $group->code_sale,
+                    'description' => $group->description,
+                    'product_id_oc' => $group->product_id_oc,
+                    'product_id_ot' => $group->product_id_ot,
+                    'planned_date' => $group->planned_date,
+                    'status_orders' => collect()
+                ];
+                foreach ($statusesDelivery as $statusDelivery) {
+                    $group_new['status_orders']->push([
+                        'id' => $statusDelivery->id,
+                        'order_purchase_product_id' => $group->product_id_oc,
+                        'code_order' => $group->code_order_oc,
+                        'status' => $statusDelivery->status,
+                        'visible' => $statusDelivery->visible,
+                    ]);
+                }
+            }
+            // Agregar el producto al arreglo de productos
+            $new_orders[] = $group_new;
+
+
+
             ///////////INCIDENCIAS///////////////
             $incidences = DB::table('incidences')->where('code_sale', $sale_id)->get();
             /////INSPECTIONS////////////////////////
@@ -667,7 +695,7 @@ class SaleController extends Controller
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
-                'status' => $combinedResults, 'status_sale' => $statusOrders, 'HistoryConfirmationOrder' => $ConfirmationOrder, 'orders_groups' => $orders_groups
+                'status' => $combinedResults, 'status_sale' => $statusOrders, 'HistoryConfirmationOrder' => $ConfirmationOrder, 'orders_groups' => $new_orders
             ], 200);
         } else {
             return response()->json(['message' => 'No existe este pedido', 'status' => 404], 404);
