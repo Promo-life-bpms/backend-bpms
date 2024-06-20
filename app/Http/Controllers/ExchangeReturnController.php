@@ -14,14 +14,23 @@ class ExchangeReturnController extends Controller
         $user = auth()->user();
 
         $this->validate($request,[
-            'total_return' => 'required',
-            'description' => 'required',
             'purchase_id' => 'required'
         ]);
+
         $statusConfirmado = DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->where('status','Confirmado')->exists();
         $ThereIsAlreadyAReturn = DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->exists();
 
         if(!$ThereIsAlreadyAReturn){
+            if($request->description == null){
+                return response()->json(['message' => 'Debes ingresar una descripción'], 400);
+            }
+            if($request->file_exchange_returns == null){
+                return response()->json(['message' => 'No has seleccionado un archivo para el comprobante de devolución'], 400);
+            }
+            if($request->total_return < 1){
+                return response()->json(['message' => 'No puedes ingresar un monto igual a $0 o menor'], 400);
+            }
+
             $path = '';
             if ($request->hasFile('file_exchange_returns')) {
                 $filenameWithExt = $request->file('file_exchange_returns')->getClientOriginalName();
@@ -43,6 +52,15 @@ class ExchangeReturnController extends Controller
             return response()->json(['message' => 'Ya se ha confirmado tu devolución de efectivo. Ya no puedes comenzar de nuevo el flujo; acércate con el departamento de Tecnología e Innovación.'], 409);
         }
         else{
+            if($request->description == null){
+                return response()->json(['message' => 'Debes ingresar una descripción'], 400);
+            }
+            if($request->file_exchange_returns == null){
+                return response()->json(['message' => 'No has seleccionado un archivo para el comprobante de devolución'], 400);
+            }
+            if($request->total_return < 1){
+                return response()->json(['message' => 'No puedes ingresar un monto igual a $0 o menor'], 400);
+            }
             $path = '';
             if ($request->hasFile('file_exchange_returns')) {
                 $filenameWithExt = $request->file('file_exchange_returns')->getClientOriginalName();

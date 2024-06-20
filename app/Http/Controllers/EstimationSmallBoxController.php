@@ -124,7 +124,6 @@ class EstimationSmallBoxController extends Controller
     {
         $MonthlyExpense = [];
         $history = DB::table('money_spent')->select('id_user', 'id_pursache_request', 'created_at')->get();
-    
         foreach ($history as $datos) {
             $userInfo = DB::table('users')->where('id', $datos->id_user)->select('name')->first();
             if ($userInfo) {
@@ -135,7 +134,7 @@ class EstimationSmallBoxController extends Controller
                         'user_name' => $userInfo->name,
                         'created_at' => date('d-m-Y', strtotime($datos->created_at)),
                         'total' => $purchaseRequest->total,
-                        
+                        'id_purchase' => $purchaseRequest->id
                     ];
                     if ($purchaseRequest->creation_date != null) {
                         $expense['creation_date'] = date('d-m-Y', strtotime($purchaseRequest->creation_date));
