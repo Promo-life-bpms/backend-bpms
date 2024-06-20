@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DeliveryRoute;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
 use App\Models\Sale;
@@ -49,116 +50,6 @@ class SaleController extends Controller
             ->paginate($per_page);
         return response()->json([
             'msg' => 'Lista de los pedidos', 'data' => ["sales" => $sales]
-            // 'ordenes' => $ordenes
-        ], response::HTTP_OK); //200
-        /*    $sales = null;
-        $isSeller =  auth()->user()->whatRoles()->whereIn('name', ['ventas', 'gerente', 'asistente_de_gerente'])->first();
-        $isMaquilador = auth()->user()->whatRoles()->whereIn('name', ['maquilador'])->first();
-        DB::statement("SET SQL_MODE=''");
-        if ($request->ordenes_proximas) {
-            $sales =  Sale::with('moreInformation', 'lastStatus', "detailsOrders")->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
-                ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')
-                ->when($isSeller !== null, function ($query) {
-                    $user =  auth()->user();
-                    // $query->where('additional_sale_information.company', $user->company);
-                    $query->where('sales.commercial_email', $user->email);
-                })->when($isMaquilador !== null, function ($query) {
-                    $user =  auth()->user();
-                    $query->where('order_purchases.tagger_user_id', $user->id);
-                })->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
-                ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
-                ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
-                ->when($empresa !== null, function ($query) use ($empresa) {
-                    $query->where("additional_sale_information.warehouse_company", "LIKE", "%" . $empresa . "%");
-                })->when($cliente !== null, function ($query) use ($cliente) {
-                    $query->where("additional_sale_information.client_name", "LIKE", "%" . $cliente . "%");
-                })->where("sales.commercial_name", "LIKE", "%" . $comercial . "%")
-                ->when($total !== null, function ($query) use ($total) {
-                    $query->where("sales.total", "LIKE", "%" . $total . "%");
-                })->groupBy('sales.id')->orderby('order_purchases.planned_date', 'ASC')->select(
-                    'sales.*',
-                    "additional_sale_information.client_name as client_name",
-                    "additional_sale_information.company as company"
-                )->paginate($per_page);
-        } else {
-
-            $sales = Sale::with('lastStatus', "detailsOrders", "moreInformation")->join('additional_sale_information', 'additional_sale_information.sale_id', 'sales.id')
-                ->join('order_purchases', 'order_purchases.code_sale', '=', 'sales.code_sale')->when($isSeller !== null, function ($query) {
-                    $user =  auth()->user();
-                    // $query->where('additional_sale_information.company', $user->company);
-                    $query->where('sales.commercial_email', $user->email);
-                })->when($isMaquilador !== null, function ($query) {
-                    $user =  auth()->user();
-                    $query->where('order_purchases.tagger_user_id', $user->id);
-                })->where("sales.code_sale", "LIKE", "%" . $idPedidos . "%")
-
-                ->where("additional_sale_information.creation_date", "LIKE", "%" . $fechaCreacion . "%")
-                ->where("additional_sale_information.planned_date", "LIKE", "%" . $horariodeentrega . "%")
-                ->when($empresa !== null, function ($query) use ($empresa) {
-                    $query->where("additional_sale_information.warehouse_company", "LIKE", "%" . $empresa . "%");
-                })->when($cliente !== null, function ($query) use ($cliente) {
-                    $query->where("additional_sale_information.client_name", "LIKE", "%" . $cliente . "%");
-                })
-                ->where("sales.commercial_name", "LIKE", "%" . $comercial . "%")->when($total !== null, function ($query) use ($total) {
-                    $query->where("sales.total", "LIKE", "%" . $total . "%");
-                })->groupBy('sales.id')->select(
-                    'sales.*',
-                    "additional_sale_information.client_name as client_name",
-                    "additional_sale_information.company as company"
-                )->paginate($per_page);
-        }
-
-        // TODO: Pedido 153 muestra mal el status
-        foreach ($sales as $sale) {
-            if ($sale->lastStatus !== null) {
-                $sale->lastStatus->slug = $sale->lastStatus->status->slug;
-                $sale->lastStatus->last_status = $sale->lastStatus->status->status;
-                //unset($sale->lastStatus->status);
-                // unset($sale->lastStatus->id);
-                unset($sale->lastStatus->sale_id);
-                unset($sale->lastStatus->status_id);
-                unset($sale->lastStatus->updated_at);
-            }
-            $detailsOrdersReindex = $sale->detailsOrders->toArray();
-            foreach ($detailsOrdersReindex as $key => $detailOrder) {
-                // Revisar si se encuentra la  palabra OT en el codigo de la orden
-                if (strpos($detailOrder['code_order'], 'MUE') !== false) {
-                    unset($detailsOrdersReindex[$key]);
-                }
-                if (strpos($detailOrder['code_order'], 'LOG') !== false) {
-                    unset($detailsOrdersReindex[$key]);
-                }
-            }
-            unset($sale->detailsOrders);
-            $sale->details_orders = array_values($detailsOrdersReindex);
-        }
-
-        if ($isMaquilador) {
-            // mostrar la cantidad recibida de cada producto en las recepciones del maquilador
-            // Array para el quantityTagger
-            // $quantityTaggerArray = [];
-            foreach ($sales as $sale) {
-                foreach ($sale->detailsOrders as $detailOrder) {
-                    foreach ($detailOrder->products as $product) {
-                        $quantityTagger = $product
-                            ->join("reception_products", "order_purchase_products.odoo_product_id", "reception_products.odoo_product_id")
-                            ->join("receptions", "reception_products.reception_id", "receptions.id")->where("receptions.maquilador", 1)
-                            ->where("order_purchase_products.odoo_product_id", $product->odoo_product_id)
-                            ->where("order_purchase_products.order_purchase_id", $detailOrder->id)
-                            ->where("receptions.code_order", $detailOrder->code_order)
-                            ->sum(
-                                "reception_products.done"
-                            );
-                        // array_push($quantityTaggerArray, [$product,$quantityTagger, $product->odoo_product_id, $detailOrder->id]);
-                        $product->quantity_delivered = $quantityTagger;
-                        $quantityTagger = 0;
-                    }
-                }
-            }
-        }
-*/
-        return response()->json([
-            'msg' => 'Lista de pedidos', 'data' => ["sales" => $sales]
             // 'ordenes' => $ordenes
         ], response::HTTP_OK); //200
     }
@@ -478,6 +369,13 @@ class SaleController extends Controller
             $new_orders = [];
             foreach ($orders_groups as $group) {
                 $statusesDelivery = StatusDeliveryRouteChange::where('order_purchase_product_id', $group->product_id_oc)->get();
+                $ConfirmProductsCounts = DB::table('confirm_routes')->where("id_product_order", $group->product_id_oc)->exists();
+                $statusproduct_id_oc = '';
+                if (!$ConfirmProductsCounts) {
+                    $statusproduct_id_oc = 0;
+                } else {
+                    $statusproduct_id_oc = 1;
+                }
                 $group_new = [
                     'code_order_oc' => $group->code_order_oc,
                     'code_order_ot' => $group->code_order_ot,
@@ -486,6 +384,7 @@ class SaleController extends Controller
                     'product_id_oc' => $group->product_id_oc,
                     'product_id_ot' => $group->product_id_ot,
                     'planned_date' => $group->planned_date,
+                    'reception_oc' => $statusproduct_id_oc,
                     'status_orders' => collect()
                 ];
                 foreach ($statusesDelivery as $statusDelivery) {
@@ -497,9 +396,11 @@ class SaleController extends Controller
                         'visible' => $statusDelivery->visible,
                     ]);
                 }
+                $new_orders[] = $group_new;
             }
+
             // Agregar el producto al arreglo de productos
-            $new_orders[] = $group_new;
+
 
 
 
@@ -641,8 +542,105 @@ class SaleController extends Controller
                     'slug' => $status_sales->slug
                 ]);
             }
-
             $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
+
+            ///////////////////////////// STATUS 3//////////////////////////////////////////////77
+            $ordenes_pedidos = DB::table('order_purchases')->where('code_sale', $sale_id)->where(function ($query) {
+                $query->where('code_order', 'like', 'OC-%')->orWhere('code_order', 'like', 'OC%');
+            })->get();
+            $new_orders3 = [];
+            $total_productos = [];
+            foreach ($ordenes_pedidos as $orden_pedido) {
+                $ordenes_productos = DB::table('order_purchase_products')->where('order_purchase_id', $orden_pedido->id)->get();
+                $new_orders3[] = $ordenes_productos;
+            }
+            foreach ($new_orders3 as $orden_productos) {
+                foreach ($orden_productos as $producto) {
+                    $total_productos[] = $producto->order_purchase_id;
+                }
+            }
+            $total_product_orders = count($total_productos);
+            $delivery_routes_new = DeliveryRoute::where('code_sale', $sale_id)->get();
+            $rutasCom = [];
+            $rutasPen = [];
+
+            foreach ($delivery_routes_new as $delivery_route_new) {
+                $status_route = StatusDeliveryRouteChange::where('status', $delivery_route_new->type_of_destiny)->first();
+                if (empty($status_route)) {
+                } else {
+                    if ($status_route->status == 'Almacen PL' && $status_route->visible == 1) {
+                        $rutasCom[] =  $status_route;
+                    } else if ($status_route->status == 'Almacen PL' && $status_route->visible == 0) {
+                        $rutasPen[] = $status_route;
+                    }
+                }
+            }
+
+
+
+            $rutas_totales = count($rutasCom);
+
+            $rutas_pendientes = count($rutasPen);
+            $status_order_new = SaleStatusChange::where('sale_id', $idSale)->where('status_id', 16)->first();
+            $status_sales = DB::table('statuses')->where('id', 16)->first();
+            $status_routes = StatusDeliveryRouteChange::all();
+            //return $status_order_new;
+            if (empty($status_order_new)) {
+                if ($rutas_totales == $total_product_orders) {
+
+                    SaleStatusChange::create([
+                        'sale_id' => $idSale,
+                        'status_id' => 16,
+                        'status' => 0,
+                        'visible' => 1,
+                        'status_name' => $status_sales->status,
+                        'slug' => $status_sales->slug
+                    ]);
+                } else if ($rutas_pendientes > 0 || $rutas_totales < $total_product_orders) {
+                    SaleStatusChange::create([
+                        'sale_id' => $idSale,
+                        'status_id' => 16,
+                        'status' => 0,
+                        'visible' => 0,
+                        'status_name' => $status_sales->status,
+                        'slug' => $status_sales->slug
+                    ]);
+                } else if (empty($rutas_totales)) {
+                    SaleStatusChange::create([
+                        'sale_id' => $idSale,
+                        'status_id' => 16,
+                        'status' => 0,
+                        'visible' => 2,
+                        'status_name' => $status_sales->status,
+                        'slug' => $status_sales->slug
+                    ]);
+                }
+            } else {
+                if ($rutas_totales == $total_product_orders) {
+                    DB::table('sale_status_changes')->where('status_id', 16)->update([
+                        'sale_id' => $idSale,
+                        'status_id' => 16,
+                        'status' => 0,
+                        'visible' => 1
+                    ]);
+                } else if ($rutas_pendientes > 0 || $rutas_totales < $total_product_orders && $rutas_totales > 0) {
+                    DB::table('sale_status_changes')->where('status_id', 16)->update([
+                        'sale_id' => $idSale,
+                        'status_id' => 16,
+                        'status' => 0,
+                        'visible' => 0
+                    ]);
+                } else if (empty($rutas_totales)) {
+                    DB::table('sale_status_changes')->where('status_id', 16)->update([
+                        'sale_id' => $idSale,
+                        'status_id' => 16,
+                        'status' => 0,
+                        'visible' => 2
+                    ]);
+                }
+            }
+            $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
+            //return $ordens_products;
 
             /*
             $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
