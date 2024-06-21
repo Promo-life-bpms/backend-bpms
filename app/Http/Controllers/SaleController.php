@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CheckList;
 use App\Models\DeliveryRoute;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
@@ -466,6 +467,19 @@ class SaleController extends Controller
             }
             ///////////////STATUS 2////////////
             //  return $orders;
+            /////////////check list/////////
+            $conceptos = ['OC', 'Virtual', 'Logo', 'AI', 'Cotización proveedor', 'Distribución', 'Dirección de entrega', 'Contacto', 'Datos de facturación'];
+            $ultimosChecklistsDes = CheckList::where('code_sale', $sale->code_sale)
+                ->whereIn('description', $conceptos)
+                // ->whereIn('status_checklist', ['Listo', 'No aplica'])
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->unique('description');
+
+            $ultimosChecklists = $ultimosChecklistsDes->whereIn('status_checklist', ['Listo', 'No aplica']);
+            // return $ultimosChecklists;
+            $historys_actuales = count($ultimosChecklists);
+            // return $historys_actuales;
             $orderConfirmado = [];
             $orderPendient = [];
             foreach ($orders as $orderconf) {
@@ -516,7 +530,8 @@ class SaleController extends Controller
             if ($status_order) {
                 // $orderConfirmado
                 // $orderPendient
-                if (count($orderConfirmado) ===  0  && count($orderPendient) === 0) {
+                if (count($orderConfirmado) ===  0  && count($orderPendient) === 0 && $historys_actuales === 0) {
+                    //return 1;
                     DB::table('sale_status_changes')->where('status_id', 15)->update([
                         'sale_id' => $idSale,
                         'status_id' => 15,
@@ -524,6 +539,7 @@ class SaleController extends Controller
                         'visible' => 2,
                     ]);
                 } else if (count($orderConfirmado) < count($ordenes) && count($orderConfirmado) != 0) {
+                    //return 2;
                     //return [count($orderConfirmado) , count($ordenes) ];
                     DB::table('sale_status_changes')->where('status_id', 15)->update([
                         'sale_id' => $idSale,
@@ -532,6 +548,17 @@ class SaleController extends Controller
                         'visible' => 0
                     ]);
                 } else if (count($orderPendient) < count($ordenes) && count($orderPendient) != 0) {
+                    //return 3;
+                    DB::table('sale_status_changes')->where('status_id', 15)->update([
+                        'sale_id' => $idSale,
+                        'status_id' => 15,
+                        'status' => 0,
+                        'visible' => 0
+                    ]);
+
+
+                } else if ($historys_actuales < 9 && $historys_actuales != 0 ){
+                    //return 4;
                     DB::table('sale_status_changes')->where('status_id', 15)->update([
                         'sale_id' => $idSale,
                         'status_id' => 15,
@@ -539,6 +566,7 @@ class SaleController extends Controller
                         'visible' => 0
                     ]);
                 } else {
+                    //return 12;
 
                     DB::table('sale_status_changes')->where('status_id', 15)->update([
                         'sale_id' => $idSale,
