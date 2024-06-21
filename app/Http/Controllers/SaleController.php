@@ -376,6 +376,22 @@ class SaleController extends Controller
                 } else {
                     $statusproduct_id_oc = 1;
                 }
+                $ProductsCounts = DB::table('confirm_product_counts')->where('id_product', $group->product_id_oc)->exists();
+                $HistoryProductsCounts = 0;
+                if ($ProductsCounts) {
+                    $HistoryProductsCounts = 1;
+                }
+                $Insp = DB::table('inspection_products')->where('id_order_purchase_products', $group->product_id_oc)->get();
+                $inspectionsInfo = [];
+                foreach ($Insp as $Ins) {
+                    $idInspeccion = DB::table('inspections')->where('id', $Ins->inspection_id)->first();
+                    $code = $idInspeccion->code_inspection;
+                    $inspectionsInfo[] = [
+                        'inspection_id' => $Ins->inspection_id,
+                        'created_at' => $Ins->created_at,
+                        'code_inspection' => $code,
+                    ];
+                }
                 $group_new = [
                     'code_order_oc' => $group->code_order_oc,
                     'code_order_ot' => $group->code_order_ot,
@@ -385,6 +401,8 @@ class SaleController extends Controller
                     'product_id_ot' => $group->product_id_ot,
                     'planned_date' => $group->planned_date,
                     'reception_oc' => $statusproduct_id_oc,
+                    'Products_Counts_History' => $HistoryProductsCounts,
+                    'Inspection' => $inspectionsInfo,
                     'status_orders' => collect()
                 ];
                 foreach ($statusesDelivery as $statusDelivery) {
