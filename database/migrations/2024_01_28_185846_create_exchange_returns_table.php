@@ -16,6 +16,7 @@ class CreateExchangeReturnsTable extends Migration
         Schema::create('exchange_returns', function (Blueprint $table) {
             $table->id();
             $table->decimal('total_return', 16,2);
+            $table->decimal('previous_total', 16,2);
             $table->string('status')->default('Sin confirmar');
             $table->dateTime('confirmation_datetime')->nullable();
             $table->integer('confirmation_user_id')->nullable();

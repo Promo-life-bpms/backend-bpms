@@ -37,12 +37,13 @@ class EstimationSmallBoxController extends Controller
         }
 
 
-        ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
+        /* ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
         $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])->where(function($query){
             $query->where(function($subquery){
                 $subquery->where('status', '=', 'Confirmado');
             });
-        })->sum('total_return');
+        })->sum('total_return'); */
+        //dd($devolutionmoney);
         
         ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
         //gastosmentuales == monthlyexpenses
@@ -60,6 +61,7 @@ class EstimationSmallBoxController extends Controller
             });
         })->sum('total');
 
+        //dd($MonthlyExpenses);
         ///presupuestodisponible == AvailableBudget                                        
         $AvailableBudget =number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '' );
 
@@ -72,14 +74,14 @@ class EstimationSmallBoxController extends Controller
         }
 
         ///REGRESAR  AL PRESUPUESTO EL DINERO///
-        if($devolutionmoney){
+        /* if($devolutionmoney){
             $AvailableBudget +=$devolutionmoney;
         }
 
         ///RESTARLE EL DINERO A LO EGRESADO///                                                
         if($devolutionmoney){
             $MonthlyExpenses -= $devolutionmoney;
-        }
+        } */
 
         if($AvailableBudget == 0){
             return response()->json(['AvailableBudget' => 'No tienes presupuesto disponible', 'Information' => $Information, 'MonthlyExpenses' => $MonthlyExpenses], 200);
@@ -124,7 +126,6 @@ class EstimationSmallBoxController extends Controller
     {
         $MonthlyExpense = [];
         $history = DB::table('money_spent')->select('id_user', 'id_pursache_request', 'created_at')->get();
-    
         foreach ($history as $datos) {
             $userInfo = DB::table('users')->where('id', $datos->id_user)->select('name')->first();
             if ($userInfo) {
@@ -135,7 +136,7 @@ class EstimationSmallBoxController extends Controller
                         'user_name' => $userInfo->name,
                         'created_at' => date('d-m-Y', strtotime($datos->created_at)),
                         'total' => $purchaseRequest->total,
-                        
+                        'id_purchase' => $purchaseRequest->id
                     ];
                     if ($purchaseRequest->creation_date != null) {
                         $expense['creation_date'] = date('d-m-Y', strtotime($purchaseRequest->creation_date));
@@ -232,8 +233,9 @@ class EstimationSmallBoxController extends Controller
                 $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'rechazada')->where('payment_method_id', '=', 1);
             });
         })->sum('total');
+        //dd($MonthlyExpenses);
         
-        $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])->where(function($query){
+        /* $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at',[$primerDiaDelMes,$ultimoDiaDelMes])->where(function($query){
             $query->where(function($subquery){
                 $subquery->where('status', '=', 'Confirmado');
             });
@@ -242,7 +244,7 @@ class EstimationSmallBoxController extends Controller
         ///RESTARLE EL DINERO A LO EGRESADO///                                                
         if($devolutionmoney){
             $MonthlyExpenses -= $devolutionmoney;
-        }
+        } */
         ///////////////////////////////////////////////////////////////////
         $path = '';
         if ($request->hasFile('file')) {

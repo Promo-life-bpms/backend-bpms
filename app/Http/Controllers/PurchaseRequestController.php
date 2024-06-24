@@ -759,9 +759,12 @@ class PurchaseRequestController extends Controller
     {
         $this->validate($request, [
             'id' => 'required',
-            'creation_date' => 'required',
         ]);
 
+        if($request->creation_date == null){
+            return response()->json(['message' => 'Selecciona una fecha'], 400);
+        }
+        
         $date = Carbon::parse($request->creation_date)->format('Y-m-d');
 
         DB::table('purchase_requests')->where('id', $request->id)->update(['creation_date' => $date]);
@@ -777,11 +780,9 @@ class PurchaseRequestController extends Controller
             'total_update' => 'required'
         ]);
 
-        $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
-        $rolcajachi = DB::table('roles')->where('id', 14)->value('id');
-        $roladquicision = DB::table('roles')->where('id', 15)->value('id');
-
-        if ($rolcajachica == $rolcajachi || $rolcajachica == $roladquicision) {
+        $rolesUsuario = DB::table('role_user')->where('user_id', $user->id)->pluck('role_id')->toArray();
+        $rolesPermitidos = [14, 15];
+        if (!empty(array_intersect($rolesUsuario, $rolesPermitidos))) {
             $method = DB::table('purchase_requests')->where('id', $request->id_purchase)->select('payment_method_id')->first();
 
             if ($method->payment_method_id == 1) {
@@ -799,11 +800,11 @@ class PurchaseRequestController extends Controller
                 }
 
                 ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
-                $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+                /* $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
                     $query->where(function ($subquery) {
                         $subquery->where('status', '=', 'Confirmado');
                     });
-                })->sum('total_return');
+                })->sum('total_return'); */
 
                 ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
                 //gastosmentuales == monthlyexpenses
@@ -820,6 +821,7 @@ class PurchaseRequestController extends Controller
                         $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'rechazada')->where('payment_method_id', '=', 1);
                     });
                 })->sum('total');
+                //dd($MonthlyExpenses);
 
                 $AvailableBudget = number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '');
 
@@ -831,13 +833,13 @@ class PurchaseRequestController extends Controller
                 }
 
                 ///REGRESAR  AL PRESUPUESTO EL DINERO///
-                if ($devolutionmoney) {
+                /* if ($devolutionmoney) {
                     $AvailableBudget += $devolutionmoney;
                 }
                 ///RESTARLE EL DINERO A LO EGRESADO///                                                
                 if ($devolutionmoney) {
                     $MonthlyExpenses -= $devolutionmoney;
-                }
+                } */
                 //dd($AvailableBudget);
 
                 $purchase = DB::table('purchase_requests')->where('id', $request->id_purchase)->first();
@@ -850,6 +852,10 @@ class PurchaseRequestController extends Controller
                     if ($difference > $AvailableBudget) {
                         return response()->json(['message' => 'No tienes fondos suficientes'], 400);
                     } else {
+                        if($request->total_update < 1){
+                            return response()->json(['message' => 'No puedes ingresar un monto igual a $0']);
+                        }
+
                         DB::table('purchase_requests')->where('id', $request->id_purchase)->update([
                             'total' => $request->total_update
                         ]);
@@ -1460,11 +1466,12 @@ class PurchaseRequestController extends Controller
             'payment_method_id' => 'required',
         ]);
 
-        $rolcajachica = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
-        $rolcajachi = DB::table('roles')->where('id', 14)->value('id');
-        $roladquicision = DB::table('roles')->where('id', 15)->value('id');
+        ////14 ES ROL DE CAJA CHICA
+        ////15 ES ROL DE ADQUISISION
 
-        if ($rolcajachica == $rolcajachi || $rolcajachica == $roladquicision) {
+        $rolesUsuario = DB::table('role_user')->where('user_id', $user->id)->pluck('role_id')->toArray();
+        $rolesPermitidos = [14, 15];
+        if (!empty(array_intersect($rolesUsuario, $rolesPermitidos))) {
             ///VERIFICAMOS SI EL METODO DE PAGO QUE SE USUARA ES EFECTIVO///
             if ($request->payment_method_id == 1) {
                 $pago = DB::table('purchase_requests')->where('id', $request->id)->select('total')->first();
@@ -1483,11 +1490,11 @@ class PurchaseRequestController extends Controller
                 ///gastosmentuales == monthlyexpenses///
 
                 ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
-                $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+                /* $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
                     $query->where(function ($subquery) {
                         $subquery->where('status', '=', 'Confirmado');
                     });
-                })->sum('total_return');
+                })->sum('total_return'); */
                 $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
                     $query->where(function ($subquery) {
                         $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
@@ -1513,14 +1520,14 @@ class PurchaseRequestController extends Controller
                 }
 
                 ///REGRESAR  AL PRESUPUESTO EL DINERO///
-                if ($devolutionmoney) {
+                /* if ($devolutionmoney) {
                     $AvailableBudget += $devolutionmoney;
                 }
                 ///RESTARLE EL DINERO A LO EGRESADO///                                                
                 if ($devolutionmoney) {
                     $MonthlyExpenses -= $devolutionmoney;
-                }
-                //dd($AvailableBudget);
+                } */
+                //dd($MonthlyExpenses);
 
                 if ($pago) {
                     if ($total > $AvailableBudget) {
@@ -1534,9 +1541,7 @@ class PurchaseRequestController extends Controller
                     return response()->json(['message' => '¡No se encontró el pago correspondiente!'], 400);
                 }
             } else {
-                DB::table('purchase_requests')->where('id', $request->id)->update([
-                    'payment_method_id' => $request->payment_method_id,
-                ]);
+                return response()->json(['message' => 'Selecciona un método de pago válido'], 400);
             }
             return response()->json(['message' => "Método de pago actualizado correctamente"], 200);
         } else {
@@ -1568,11 +1573,11 @@ class PurchaseRequestController extends Controller
         }
 
         ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
-        $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+        /* $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
             $query->where(function ($subquery) {
                 $subquery->where('status', '=', 'Confirmado');
             });
-        })->sum('total_return');
+        })->sum('total_return'); */
 
         ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
         //gastosmentuales == monthlyexpenses
@@ -1600,16 +1605,16 @@ class PurchaseRequestController extends Controller
         }
 
         ///REGRESAR  AL PRESUPUESTO EL DINERO///
-        if ($devolutionmoney) {
+        /* if ($devolutionmoney) {
             $AvailableBudget += $devolutionmoney;
         }
         ///RESTARLE EL DINERO A LO EGRESADO///                                                
         if ($devolutionmoney) {
             $MonthlyExpenses -= $devolutionmoney;
-        }
+        } */
 
         ///////////////////////////////////////////////////////FIN DE LA VERIFICACION DEL PRESUPUESTO/////////////////////
-        //dd($AvailableBudget);
+        //dd($MonthlyExpenses);
         $purchase_id = $request->purchase_id;
         $id_eventuales = $request->id_eventual; // Ahora id_eventual es un array
 
@@ -1686,11 +1691,11 @@ class PurchaseRequestController extends Controller
         }
 
         ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
-        $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+        /* $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
             $query->where(function ($subquery) {
                 $subquery->where('status', '=', 'Confirmado');
             });
-        })->sum('total_return');
+        })->sum('total_return'); */
 
         ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
         //gastosmentuales == monthlyexpenses
@@ -1718,16 +1723,16 @@ class PurchaseRequestController extends Controller
         }
 
         ///REGRESAR  AL PRESUPUESTO EL DINERO///
-        if ($devolutionmoney) {
+        /* if ($devolutionmoney) {
             $AvailableBudget += $devolutionmoney;
         }
         ///RESTARLE EL DINERO A LO EGRESADO///                                                
         if ($devolutionmoney) {
             $MonthlyExpenses -= $devolutionmoney;
-        }
+        } */
 
         ///////////////////////////////////////////////////////FIN DE LA VERIFICACION DEL PRESUPUESTO/////////////////////
-        //dd($AvailableBudget);
+        //dd($MonthlyExpenses);
         $eventuales = $request->eventuales;
         $total_pay = 0;
 
@@ -1758,9 +1763,11 @@ class PurchaseRequestController extends Controller
             } else {
                 $request->validate([
                     'description' => 'required',
-                    'file' => 'required',
                 ]);
 
+                if($request->file == null){
+                    return response()->json(['message' => 'No has cargado un comprobante'], 400);
+                }
                 ////GUARDAMOS EL EVENTUAL////
                 $eventual = Eventuales::create($eventualesData);
 
@@ -1792,8 +1799,11 @@ class PurchaseRequestController extends Controller
             }else {
                 $request->validate([
                     'description' => 'required',
-                    'file' => 'required',
                 ]);
+
+                if($request->file == null){
+                    return response()->json(['message' => 'No has cargado un comprobante'], 400);
+                }
             
                 ////GUARDAMOS EL EVENTUAL////
                 $eventual = Eventuales::create($eventualesData);

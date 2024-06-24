@@ -14,14 +14,25 @@ class ExchangeReturnController extends Controller
         $user = auth()->user();
 
         $this->validate($request,[
-            'total_return' => 'required',
-            'description' => 'required',
             'purchase_id' => 'required'
         ]);
+
         $statusConfirmado = DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->where('status','Confirmado')->exists();
         $ThereIsAlreadyAReturn = DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->exists();
 
+        $previous_total = DB::table('purchase_requests')->where('id', $request->purchase_id)->value('total');
+
         if(!$ThereIsAlreadyAReturn){
+            if($request->description == null){
+                return response()->json(['message' => 'Debes ingresar una descripción'], 400);
+            }
+            if($request->file_exchange_returns == null){
+                return response()->json(['message' => 'No has seleccionado un archivo para el comprobante de devolución'], 400);
+            }
+            if($request->total_return < 1){
+                return response()->json(['message' => 'No puedes ingresar un monto igual a $0 o menor'], 400);
+            }
+
             $path = '';
             if ($request->hasFile('file_exchange_returns')) {
                 $filenameWithExt = $request->file('file_exchange_returns')->getClientOriginalName();
@@ -33,6 +44,7 @@ class ExchangeReturnController extends Controller
             
             ExchangeReturn::create([
                 'total_return' => $request->total_return,
+                'previous_total' => $previous_total,
                 'description' => $request->description,
                 'purchase_id' => $request->purchase_id,
                 'file_exchange_returns' => $path,
@@ -43,6 +55,15 @@ class ExchangeReturnController extends Controller
             return response()->json(['message' => 'Ya se ha confirmado tu devolución de efectivo. Ya no puedes comenzar de nuevo el flujo; acércate con el departamento de Tecnología e Innovación.'], 409);
         }
         else{
+            if($request->description == null){
+                return response()->json(['message' => 'Debes ingresar una descripción'], 400);
+            }
+            if($request->file_exchange_returns == null){
+                return response()->json(['message' => 'No has seleccionado un archivo para el comprobante de devolución'], 400);
+            }
+            if($request->total_return < 1){
+                return response()->json(['message' => 'No puedes ingresar un monto igual a $0 o menor'], 400);
+            }
             $path = '';
             if ($request->hasFile('file_exchange_returns')) {
                 $filenameWithExt = $request->file('file_exchange_returns')->getClientOriginalName();
@@ -54,6 +75,7 @@ class ExchangeReturnController extends Controller
 
             DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->where('status','Sin confirmar')->update([
                 'total_return' => $request->total_return,
+                'previous_total' => $previous_total,
                 'description' => $request->description,
                 'file_exchange_returns' => $path,
                 'return_user_id' => $user->id,
@@ -76,7 +98,15 @@ class ExchangeReturnController extends Controller
             'status' => 'Confirmado',
             'confirmation_datetime' => $hora,
             'confirmation_user_id' => $user->id,
-        ]);        
+        ]);
+
+        $money = DB::table('exchange_returns')->where('purchase_id', $request->purchase_id)->first();
+        //$moneytotal = $money->previous_total;
+        $moneytotal = $money->previous_total - $money->total_return;
+        DB::table('purchase_requests')->where('id', $request->purchase_id)->update([
+            'total' => $moneytotal,
+        ]);
+
         return response()->json(['message' => 'Se confirmó el regreso del excedente de efectivo de tu solicitud.'], 200);
     }
 }
