@@ -325,7 +325,7 @@ class SmallBoxUserController extends Controller
         }
 
         /////ESTOS SON LOS SPENTS QUE TODOS PUEDEN VER 115, 26, 10////
-        $rol = DB::table('role_user')->where('user_id', $user->id)->pluck('role_id')->toArray();
+        /* $rol = DB::table('role_user')->where('user_id', $user->id)->pluck('role_id')->toArray();
         $selectedIds = [];
         foreach ($rol as $role_id) {
             //////ADMINISTRADOR
@@ -368,20 +368,15 @@ class SmallBoxUserController extends Controller
 
             }
 
-            /* $departments = DB::table('manager_has_departments')->where('id_user', $user->id)->pluck('id_department')->toArray();
+            $departments = DB::table('manager_has_departments')->where('id_user', $user->id)->pluck('id_department')->toArray();
             $selectedIds = [];
             foreach ($departments as $department) {
                 
-            } */
+            }
         }
+        $spents = DB::table('spents')->whereIn('id', $selectedIds)->get(); */
 
-        
-
-
-
-        $spents = DB::table('spents')->whereIn('id', $selectedIds)->get();
-
-        /* foreach($spents as $spent){
+        foreach($spents as $spent){
             array_push($spents_data, (object)[
                 'id' => $spent->id,
                 'concept' => $spent->concept,
@@ -391,7 +386,7 @@ class SmallBoxUserController extends Controller
                 'spent_product_type' =>  $spent->product_type,
                 'status' => $spent->status,
             ]);
-        } */
+        }
 
         foreach($centers as $center){
             array_push($centers_data, (object)[
@@ -417,7 +412,7 @@ class SmallBoxUserController extends Controller
         $data = [
             'companies' => $companies->isEmpty() ? ['message' => 'No hay compañias disponibles.'] : $companies_data,
             'centers' => $centers->isEmpty() ? ['message' => 'No hay centros de gastos disponibles.'] : $centers_data,
-            'spents' => $spents->isEmpty() ? ['message' => 'No hay tipos de gastos disponibles.'] : $spents,
+            'spents' => $spents->isEmpty() ? ['message' => 'No hay tipos de gastos disponibles.'] : $spents_data,
             'payments' => $payments->isEmpty() ? ['message' => 'No hay métodos de pagos disponibles.'] : $payments_data,
             'roles' => $roles->isEmpty() ? ['message' => 'No hay roles disponibles.'] : $roles_data,
         ];

@@ -800,11 +800,11 @@ class PurchaseRequestController extends Controller
                 }
 
                 ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
-                $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+                /* $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
                     $query->where(function ($subquery) {
                         $subquery->where('status', '=', 'Confirmado');
                     });
-                })->sum('total_return');
+                })->sum('total_return'); */
 
                 ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
                 //gastosmentuales == monthlyexpenses
@@ -821,6 +821,7 @@ class PurchaseRequestController extends Controller
                         $subquery->where('purchase_status_id', '=', 5)->where('type_status', '=', 'rechazada')->where('payment_method_id', '=', 1);
                     });
                 })->sum('total');
+                //dd($MonthlyExpenses);
 
                 $AvailableBudget = number_format($MonthlyBudget - $MonthlyExpenses, 2, '.', '');
 
@@ -832,13 +833,13 @@ class PurchaseRequestController extends Controller
                 }
 
                 ///REGRESAR  AL PRESUPUESTO EL DINERO///
-                if ($devolutionmoney) {
+                /* if ($devolutionmoney) {
                     $AvailableBudget += $devolutionmoney;
                 }
                 ///RESTARLE EL DINERO A LO EGRESADO///                                                
                 if ($devolutionmoney) {
                     $MonthlyExpenses -= $devolutionmoney;
-                }
+                } */
                 //dd($AvailableBudget);
 
                 $purchase = DB::table('purchase_requests')->where('id', $request->id_purchase)->first();
@@ -1489,11 +1490,11 @@ class PurchaseRequestController extends Controller
                 ///gastosmentuales == monthlyexpenses///
 
                 ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
-                $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+                /* $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
                     $query->where(function ($subquery) {
                         $subquery->where('status', '=', 'Confirmado');
                     });
-                })->sum('total_return');
+                })->sum('total_return'); */
                 $MonthlyExpenses = DB::table('purchase_requests')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
                     $query->where(function ($subquery) {
                         $subquery->where('purchase_status_id', '=', 4)->where('type_status', '=', 'normal')->where('payment_method_id', '=', 1);
@@ -1519,14 +1520,14 @@ class PurchaseRequestController extends Controller
                 }
 
                 ///REGRESAR  AL PRESUPUESTO EL DINERO///
-                if ($devolutionmoney) {
+                /* if ($devolutionmoney) {
                     $AvailableBudget += $devolutionmoney;
                 }
                 ///RESTARLE EL DINERO A LO EGRESADO///                                                
                 if ($devolutionmoney) {
                     $MonthlyExpenses -= $devolutionmoney;
-                }
-                //dd($AvailableBudget);
+                } */
+                //dd($MonthlyExpenses);
 
                 if ($pago) {
                     if ($total > $AvailableBudget) {
@@ -1572,11 +1573,11 @@ class PurchaseRequestController extends Controller
         }
 
         ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
-        $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+        /* $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
             $query->where(function ($subquery) {
                 $subquery->where('status', '=', 'Confirmado');
             });
-        })->sum('total_return');
+        })->sum('total_return'); */
 
         ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
         //gastosmentuales == monthlyexpenses
@@ -1604,16 +1605,16 @@ class PurchaseRequestController extends Controller
         }
 
         ///REGRESAR  AL PRESUPUESTO EL DINERO///
-        if ($devolutionmoney) {
+        /* if ($devolutionmoney) {
             $AvailableBudget += $devolutionmoney;
         }
         ///RESTARLE EL DINERO A LO EGRESADO///                                                
         if ($devolutionmoney) {
             $MonthlyExpenses -= $devolutionmoney;
-        }
+        } */
 
         ///////////////////////////////////////////////////////FIN DE LA VERIFICACION DEL PRESUPUESTO/////////////////////
-        //dd($AvailableBudget);
+        //dd($MonthlyExpenses);
         $purchase_id = $request->purchase_id;
         $id_eventuales = $request->id_eventual; // Ahora id_eventual es un array
 
@@ -1690,11 +1691,11 @@ class PurchaseRequestController extends Controller
         }
 
         ///OBTENEMOS UN VALOR PARA REGRESAR EL DINERO SI SOBRA/// 
-        $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
+        /* $devolutionmoney = DB::table('exchange_returns')->whereBetween('created_at', [$primerDiaDelMes, $ultimoDiaDelMes])->where(function ($query) {
             $query->where(function ($subquery) {
                 $subquery->where('status', '=', 'Confirmado');
             });
-        })->sum('total_return');
+        })->sum('total_return'); */
 
         ///CONDICIONES PARA PODER SUMAR EL CAMPO "total"///
         //gastosmentuales == monthlyexpenses
@@ -1722,16 +1723,16 @@ class PurchaseRequestController extends Controller
         }
 
         ///REGRESAR  AL PRESUPUESTO EL DINERO///
-        if ($devolutionmoney) {
+        /* if ($devolutionmoney) {
             $AvailableBudget += $devolutionmoney;
         }
         ///RESTARLE EL DINERO A LO EGRESADO///                                                
         if ($devolutionmoney) {
             $MonthlyExpenses -= $devolutionmoney;
-        }
+        } */
 
         ///////////////////////////////////////////////////////FIN DE LA VERIFICACION DEL PRESUPUESTO/////////////////////
-        //dd($AvailableBudget);
+        //dd($MonthlyExpenses);
         $eventuales = $request->eventuales;
         $total_pay = 0;
 
