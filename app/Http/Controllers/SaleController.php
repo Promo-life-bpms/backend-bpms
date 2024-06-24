@@ -6,6 +6,7 @@ use App\Models\CheckList;
 use App\Models\DeliveryRoute;
 use App\Models\Incidence;
 use App\Models\OrderPurchase;
+use App\Models\OrdersGroup;
 use App\Models\Sale;
 use App\Models\SaleStatusChange;
 use App\Models\StatusDeliveryRouteChange;
@@ -555,9 +556,7 @@ class SaleController extends Controller
                         'status' => 0,
                         'visible' => 0
                     ]);
-
-
-                } else if ($historys_actuales < 9 && $historys_actuales != 0 ){
+                } else if ($historys_actuales < 9 && $historys_actuales != 0) {
                     //return 4;
                     DB::table('sale_status_changes')->where('status_id', 15)->update([
                         'sale_id' => $idSale,
@@ -606,136 +605,157 @@ class SaleController extends Controller
                 }
             }
             $total_product_orders = count($total_productos);
-            $delivery_routes_new = DeliveryRoute::where('code_sale', $sale_id)->get();
+            $status_order_new = SaleStatusChange::where('sale_id', $idSale)->where('status_id', 16)->first();
+            $status_sales = DB::table('statuses')->where('id', 16)->first();
+            /////////////////////agregar estado 3 o amarillo ////////////////
+            $rutas_status3 = DeliveryRoute::where('code_sale', $sale_id)->where('type_of_destiny', 'Almacen PL')->get();
+            $orders3vis2 = [];
+            $orders3vis1 = [];
+            $orders3vis3 = [];
+            $count_rutas_status3 = count($rutas_status3);
             $rutasCom = [];
-            $rutasPen = [];
+            foreach ($rutas_status3 as $ruta_status3) {
 
-            foreach ($delivery_routes_new as $delivery_route_new) {
-                $status_route = StatusDeliveryRouteChange::where('status', $delivery_route_new->type_of_destiny)->first();
-                if (empty($status_route)) {
+                if ($ruta_status3->visible == 2) {
+                    $orders3vis2[] = $ruta_status3->visible;
+                } elseif ($ruta_status3->visible == 1) {
+                    $orders3vis1[] = $ruta_status3->visible;
+                } elseif ($ruta_status3->visible == 0) {
+                    $orders3vis3[] = $ruta_status3->visible;
+                }
+            }
+
+
+            $ordervisible2num3 = count($orders3vis2);
+            $ordervisible1num3 = count($orders3vis1);
+            $ordervisible0num3 = count($orders3vis3);
+            $suma1 = $ordervisible2num3 + $ordervisible1num3;
+            if (empty($status_order_new)) {
+                if ($suma1 == $total_product_orders && $ordervisible1num3 !== $total_product_orders && $ordervisible0num3 !== $total_product_orders && $ordervisible2num3 !== $total_product_orders) {
+                    if ($suma1 == $total_product_orders) {
+                        SaleStatusChange::create([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 3,
+                            'status_name' => $status_sales->status,
+                            'slug' => $status_sales->slug
+                        ]);
+                    } else if ($ordervisible1num3 == $total_product_orders) {
+                        SaleStatusChange::create([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 1,
+                            'status_name' => $status_sales->status,
+                            'slug' => $status_sales->slug
+                        ]);
+                    } else if ($ordervisible0num3 > 0 || $ordervisible1num3 > 0 && $ordervisible0num3 > 0 || $ordervisible1num3 > 0 && $ordervisible1num3 < $total_product_orders) {
+                        SaleStatusChange::create([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 0,
+                            'status_name' => $status_sales->status,
+                            'slug' => $status_sales->slug
+                        ]);
+                    } else if (empty($rutas_totales)) {
+                        SaleStatusChange::create([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 2,
+                            'status_name' => $status_sales->status,
+                            'slug' => $status_sales->slug
+                        ]);
+                    }
                 } else {
-                    if ($status_route->status == 'Almacen PL' && $status_route->visible == 1) {
-                        $rutasCom[] =  $status_route;
-                    } else if ($status_route->status == 'Almacen PL' && $status_route->visible == 0) {
-                        $rutasPen[] = $status_route;
+                    if ($ordervisible1num3 == $total_product_orders) {
+                        SaleStatusChange::create([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 1,
+                            'status_name' => $status_sales->status,
+                            'slug' => $status_sales->slug
+                        ]);
+                    } else if ($ordervisible0num3 > 0 || $ordervisible1num3 > 0 && $ordervisible0num3 > 0 || $ordervisible1num3 > 0 && $ordervisible1num3 < $total_product_orders) {
+                        SaleStatusChange::create([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 0,
+                            'status_name' => $status_sales->status,
+                            'slug' => $status_sales->slug
+                        ]);
+                    } else if (empty($rutas_totales)) {
+                        SaleStatusChange::create([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 2,
+                            'status_name' => $status_sales->status,
+                            'slug' => $status_sales->slug
+                        ]);
+                    }
+                }
+            } else {
+                if ($count_rutas_status3 == $total_product_orders) {
+                    if ($suma1 == $total_product_orders && $ordervisible1num3 !== $total_product_orders && $ordervisible0num3 !== $total_product_orders && $ordervisible2num3 !== $total_product_orders) {
+                        DB::table('sale_status_changes')->where('status_id', 16)->update([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 3
+                        ]);
+                    } else if ($ordervisible1num3 == $total_product_orders) {
+                        DB::table('sale_status_changes')->where('status_id', 16)->update([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 1
+                        ]);
+                    } else if ($ordervisible0num3 > 0 || $ordervisible1num3 > 0 && $ordervisible0num3 > 0 || $ordervisible1num3 > 0 && $ordervisible1num3 < $total_product_orders) {
+                        DB::table('sale_status_changes')->where('status_id', 16)->update([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 0
+                        ]);
+                    } else if (empty($rutas_totales)) {
+                        DB::table('sale_status_changes')->where('status_id', 16)->update([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 2
+                        ]);
+                    }
+                } else {
+                    if ($ordervisible1num3 == $total_product_orders) {
+                        DB::table('sale_status_changes')->where('status_id', 16)->update([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 1
+                        ]);
+                    } else if ($ordervisible0num3 > 0 || $ordervisible1num3 > 0 && $ordervisible0num3 > 0 || $ordervisible1num3 > 0 && $ordervisible1num3 < $total_product_orders) {
+                        DB::table('sale_status_changes')->where('status_id', 16)->update([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 0
+                        ]);
+                    } else if (empty($rutas_totales)) {
+                        DB::table('sale_status_changes')->where('status_id', 16)->update([
+                            'sale_id' => $idSale,
+                            'status_id' => 16,
+                            'status' => 0,
+                            'visible' => 2
+                        ]);
                     }
                 }
             }
-
-
-
-            $rutas_totales = count($rutasCom);
-
-            $rutas_pendientes = count($rutasPen);
-            $status_order_new = SaleStatusChange::where('sale_id', $idSale)->where('status_id', 16)->first();
-            $status_sales = DB::table('statuses')->where('id', 16)->first();
-            $status_routes = StatusDeliveryRouteChange::all();
-            //return $status_order_new;
-            if (empty($status_order_new)) {
-                if ($rutas_totales == $total_product_orders) {
-
-                    SaleStatusChange::create([
-                        'sale_id' => $idSale,
-                        'status_id' => 16,
-                        'status' => 0,
-                        'visible' => 1,
-                        'status_name' => $status_sales->status,
-                        'slug' => $status_sales->slug
-                    ]);
-                } else if ($rutas_pendientes > 0 || $rutas_totales < $total_product_orders) {
-                    SaleStatusChange::create([
-                        'sale_id' => $idSale,
-                        'status_id' => 16,
-                        'status' => 0,
-                        'visible' => 0,
-                        'status_name' => $status_sales->status,
-                        'slug' => $status_sales->slug
-                    ]);
-                } else if (empty($rutas_totales)) {
-                    SaleStatusChange::create([
-                        'sale_id' => $idSale,
-                        'status_id' => 16,
-                        'status' => 0,
-                        'visible' => 2,
-                        'status_name' => $status_sales->status,
-                        'slug' => $status_sales->slug
-                    ]);
-                }
-            } else {
-                if ($rutas_totales == $total_product_orders) {
-                    DB::table('sale_status_changes')->where('status_id', 16)->update([
-                        'sale_id' => $idSale,
-                        'status_id' => 16,
-                        'status' => 0,
-                        'visible' => 1
-                    ]);
-                } else if ($rutas_pendientes > 0 || $rutas_totales < $total_product_orders && $rutas_totales > 0) {
-                    DB::table('sale_status_changes')->where('status_id', 16)->update([
-                        'sale_id' => $idSale,
-                        'status_id' => 16,
-                        'status' => 0,
-                        'visible' => 0
-                    ]);
-                } else if (empty($rutas_totales)) {
-                    DB::table('sale_status_changes')->where('status_id', 16)->update([
-                        'sale_id' => $idSale,
-                        'status_id' => 16,
-                        'status' => 0,
-                        'visible' => 2
-                    ]);
-                }
-            }
             $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
-            //return $ordens_products;
-
-            /*
-            $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
-
-            $NumOrders = [];
-            foreach ($ordenes as $Order) {
-                $idOrder = $Order->id;
-                $productos_totales = DB::table('order_purchase_products')->where('order_purchase_id', $idOrder)->count();
-                $NumOrders[] = $productos_totales;
-            }
-            $OrdersFinales = array_sum($NumOrders);
-            $registros = [];
-            foreach ($ordenes as $order) {
-                $idPurchase = $order->id;
-                $ya = DB::table('order_confirmations')->where('order_purchase_id', $idPurchase)->count();
-                $registros[] = $ya;
-            }
-            $ConfirmationOrders = array_sum($registros);
-            $statusOrders = '';
-            $registros = DB::table('sale_status_changes')->where('sale_id', $idSale)->where('status_id', 15)->first();
-            if ($OrdersFinales != $ConfirmationOrders) {
-                if (!$registros) {
-                    SaleStatusChange::create([
-                        'sale_id' => $idSale,
-                        'status_id' => 15,
-                        'status' => 0,
-                    ]);
-                    $statusOrders = 0;
-                }
-                $statusOrders = 0;
-            } elseif ($OrdersFinales == 0 && $ConfirmationOrders == 0) {
-                $statusOrders = 'Aún no hay ordenes de productos.';
-            } elseif ($OrdersFinales == $ConfirmationOrders) {
-                if ($registros) {
-                    $status = $registros->status;
-                    $idSaleStatusChange = $registros->id;
-                    DB::table('sale_status_changes')->where('id', $idSaleStatusChange)->update([
-                        'sale_id' => $idSale,
-                        'status_id' => 15,
-                        'status' => 1,
-                    ]);
-                    $statusOrders = 1;
-                } elseif ($status == 1) {
-                    $statusOrders = 1;
-                }
-
-            }
-
- */
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
                 'last_status' => $lastStatus, 'incidences' => $incidences, 'inspections'  => $inspections, 'sales_products' => $Sale, 'check_list' => $check_list,
