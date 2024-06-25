@@ -394,6 +394,23 @@ class SaleController extends Controller
                         'code_inspection' => $code,
                     ];
                 }
+                /////////////////////////////////////
+                $devs = DB::table('delivery_routes')->where('code_sale', $sale_id)->get();
+                $devInfo = [];
+                foreach ($devs as $dev) {
+                    $devInfo[] = [
+                        'code_sale' => $dev->code_sale,
+                        'code_order' => $dev->code_order,
+                        'product_id' => $dev->product_id,
+                        'type' => $dev->type,
+                        'type_of_destiny' => $dev->type_of_destiny,
+                        'date_of_delivery' => $dev->date_of_delivery,
+                        'status_delivery' => $dev->status_delivery,
+                        'shipping_type' => $dev->shipping_type,
+                        'color' => $dev->color,
+                        'visible' => $dev->visible,
+                    ];
+                }
                 $group_new = [
                     'code_order_oc' => $group->code_order_oc,
                     'code_order_ot' => $group->code_order_ot,
@@ -405,6 +422,7 @@ class SaleController extends Controller
                     'reception_oc' => $statusproduct_id_oc,
                     'Products_Counts_History' => $HistoryProductsCounts,
                     'Inspection' => $inspectionsInfo,
+                    'deliverys_route' => $devInfo,
                     'status_orders' => collect()
                 ];
                 foreach ($statusesDelivery as $statusDelivery) {
@@ -418,12 +436,6 @@ class SaleController extends Controller
                 }
                 $new_orders[] = $group_new;
             }
-
-            // Agregar el producto al arreglo de productos
-
-
-
-
             ///////////INCIDENCIAS///////////////
             $incidences = DB::table('incidences')->where('code_sale', $sale_id)->get();
             /////INSPECTIONS////////////////////////
@@ -608,7 +620,21 @@ class SaleController extends Controller
             $status_order_new = SaleStatusChange::where('sale_id', $idSale)->where('status_id', 16)->first();
             $status_sales = DB::table('statuses')->where('id', 16)->first();
             /////////////////////agregar estado 3 o amarillo ////////////////
-            $rutas_status3 = DeliveryRoute::where('code_sale', $sale_id)->where('type_of_destiny', 'Almacen PL')->get();
+            $subQuery = DB::table('status_delivery_route_changes')
+                ->select('status_delivery_route_changes.id')
+                ->distinct()
+                ->join('delivery_routes', 'delivery_routes.product_id', '=', 'status_delivery_route_changes.order_purchase_product_id')
+                ->where('status_delivery_route_changes.status', '=', 'Almacen PL')
+                ->where('delivery_routes.code_sale', $sale_id);
+
+            // Consulta principal utilizando la subconsulta
+            $rutas_status3 = DB::table('status_delivery_route_changes')
+                ->joinSub($subQuery, 'unique_changes', function ($join) {
+                    $join->on('status_delivery_route_changes.id', '=', 'unique_changes.id');
+                })
+                ->get();
+            // return $rutas_status3;
+            // $rutas_status3 = DeliveryRoute::where('code_sale', $sale_id)->where('type_of_destiny', 'Almacen PL')->get();
             $orders3vis2 = [];
             $orders3vis1 = [];
             $orders3vis3 = [];
@@ -755,6 +781,99 @@ class SaleController extends Controller
                     }
                 }
             }
+            //////////////////////////// Stauts 4//////////////////////////////////////////
+
+            $status_order4 = SaleStatusChange::where('sale_id', $idSale)
+                ->where('status_id', 17)
+                ->first();
+
+            $status_sales4 = DB::table('statuses')->where('id', 17)->first();
+
+            $subQuery = DB::table('status_delivery_route_changes')
+                ->select('status_delivery_route_changes.id')
+                ->distinct()
+                ->join('delivery_routes', 'delivery_routes.product_id', '=', 'status_delivery_route_changes.order_purchase_product_id')
+                ->where('status_delivery_route_changes.status', '=', 'Maquila')
+                ->where('delivery_routes.code_sale', $sale_id);
+
+            $rutas_status4 = DB::table('status_delivery_route_changes')
+                ->joinSub($subQuery, 'unique_changes', function ($join) {
+                    $join->on('status_delivery_route_changes.id', '=', 'unique_changes.id');
+                })->get();
+            //return $rutas_status4;
+            $count_rutas_status4 = count($rutas_status4);
+
+            $orders4vis = [
+                2 => 0,
+                1 => 0,
+                0 => 0
+            ];
+
+            foreach ($rutas_status4 as $ruta_status4) {
+                if (isset($orders4vis[$ruta_status4->visible])) {
+                    $orders4vis[$ruta_status4->visible]++;
+                }
+            }
+
+            $ordervisible2num4 = $orders4vis[2];
+            $ordervisible1num4 = $orders4vis[1];
+            $ordervisible0num4 = $orders4vis[0];
+            $suma2 = $ordervisible2num4 + $ordervisible1num4;
+
+            $dataToUpdate = [
+                'sale_id' => $idSale,
+                'status_id' => 17,
+                'status' => 0,
+                'status_name' => $status_sales4->status,
+                'slug' => $status_sales4->slug
+            ];
+
+            if (empty($status_order4)) {
+                if ($suma2 == $total_product_orders && $ordervisible1num4 != $total_product_orders && $ordervisible0num4 != $total_product_orders && $ordervisible2num4 != $total_product_orders) {
+                    return 12;
+                    $dataToUpdate['visible'] = 3;
+                } else if ($ordervisible1num4 == $total_product_orders) {
+                    $dataToUpdate['visible'] = 1;
+                } else if ($ordervisible0num4 > 0 || ($ordervisible1num4 > 0 && $ordervisible1num4 < $total_product_orders)) {
+                    $dataToUpdate['visible'] = 0;
+                } else if (empty($rutas_totales)) {
+                    $dataToUpdate['visible'] = 2;
+                }
+
+                SaleStatusChange::create($dataToUpdate);
+            } else {
+                if ($count_rutas_status4 == $total_product_orders) {
+
+                    if ($suma2 == $total_product_orders && $ordervisible1num4 != $total_product_orders && $ordervisible0num4 != $total_product_orders && $ordervisible2num4 != $total_product_orders) {
+                        $dataToUpdate['visible'] = 3;
+                    } else if ($ordervisible1num4 == $total_product_orders) {
+                        $dataToUpdate['visible'] = 1;
+                    } else if ($ordervisible0num4 > 0 || ($ordervisible1num4 > 0 && $ordervisible1num4 < $total_product_orders)) {
+                        $dataToUpdate['visible'] = 0;
+                    } else if (empty($rutas_totales)) {
+                        $dataToUpdate['visible'] = 2;
+                    }
+
+                    DB::table('sale_status_changes')
+                        ->where('status_id', 17)
+                        ->update($dataToUpdate);
+                } else {
+                    if ($suma2 == $total_product_orders && $ordervisible1num4 != $total_product_orders && $ordervisible0num4 != $total_product_orders && $ordervisible2num4 != $total_product_orders) {
+                        $dataToUpdate['visible'] = 3;
+                    } else if ($ordervisible1num4 == $total_product_orders) {
+                        $dataToUpdate['visible'] = 1;
+                    } else if ($ordervisible0num4 > 0 || ($ordervisible1num4 > 0 && $ordervisible1num4 < $total_product_orders)) {
+                        $dataToUpdate['visible'] = 0;
+                    } else if (empty($rutas_totales)) {
+                        $dataToUpdate['visible'] = 2;
+                    }
+
+                    DB::table('sale_status_changes')
+                        ->where('status_id', 17)
+                        ->update($dataToUpdate);
+                }
+            }
+            ////////////////////////////////////////////////////////////////
             $statusOrders = SaleStatusChange::where('sale_id', $idSale)->get();
             return response()->json([
                 'additional_information' => $InfoAditional, 'orders'  => $orders, 'products_orders' => $products, 'more_information' => $MoreInformation,
