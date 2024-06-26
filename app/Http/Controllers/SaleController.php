@@ -394,8 +394,10 @@ class SaleController extends Controller
                         'code_inspection' => $code,
                     ];
                 }
-                /////////////////////////////////////
-                $devs = DB::table('delivery_routes')->where('code_sale', $sale_id)->get();
+                ///////////////////////////////////// rutas
+                // $devs = DB::table('delivery_routes')->where('code_sale', $sale_id)->where('product_id', $group->product_id_oc)->whereIn('type_of_destiny', ['Almacen PL','Almacen PM'])->where('status_delivery', ['Completo'])->get();
+                 $devs = DB::table('delivery_routes')->where('code_sale', $sale_id)->where('product_id', $group->product_id_oc)->where('status_delivery', ['Completo'])->get();
+
                 $devInfo = [];
                 foreach ($devs as $dev) {
                     $devInfo[] = [
@@ -411,6 +413,17 @@ class SaleController extends Controller
                         'visible' => $dev->visible,
                     ];
                 }
+                //////////////////////////////7
+                $confirms = DB::table('confirm_routes')->where('id_product_order', $group->product_id_oc)->get();
+                $confirmsInfo = [];
+                foreach ($confirms as $confirm) {
+                    $confirmsInfo[] = [
+                        'id_product_order' => $confirm->id_product_order,
+                        'id_delivery_routes' => $confirm->id_delivery_routes,
+                        'reception_type' => $confirm->reception_type,
+                        'destination' => $confirm->destination,
+                    ];
+                }
                 $group_new = [
                     'code_order_oc' => $group->code_order_oc,
                     'code_order_ot' => $group->code_order_ot,
@@ -423,6 +436,7 @@ class SaleController extends Controller
                     'Products_Counts_History' => $HistoryProductsCounts,
                     'Inspection' => $inspectionsInfo,
                     'deliverys_route' => $devInfo,
+                    'confirm_routes' => $confirmsInfo,
                     'status_orders' => collect()
                 ];
                 foreach ($statusesDelivery as $statusDelivery) {
@@ -781,7 +795,7 @@ class SaleController extends Controller
                     }
                 }
             }
-            //////////////////////////// Stauts 4//////////////////////////////////////////
+            //////////////////////////// STATUS 4//////////////////////////////////////////
 
             $status_order4 = SaleStatusChange::where('sale_id', $idSale)
                 ->where('status_id', 17)
@@ -870,6 +884,96 @@ class SaleController extends Controller
 
                     DB::table('sale_status_changes')
                         ->where('status_id', 17)
+                        ->update($dataToUpdate);
+                }
+            }
+            ///////////////////////////// STATUS 5 ////////////////////////////7
+            $status_order5 = SaleStatusChange::where('sale_id', $idSale)
+                ->where('status_id', 18)
+                ->first();
+
+            $status_sales5 = DB::table('statuses')->where('id', 18)->first();
+
+            $subQuery = DB::table('status_delivery_route_changes')
+                ->select('status_delivery_route_changes.id')
+                ->distinct()
+                ->join('delivery_routes', 'delivery_routes.product_id', '=', 'status_delivery_route_changes.order_purchase_product_id')
+                ->where('status_delivery_route_changes.status', '=', 'Almacen PM')
+                ->where('delivery_routes.code_sale', $sale_id);
+
+            $rutas_status5 = DB::table('status_delivery_route_changes')
+                ->joinSub($subQuery, 'unique_changes', function ($join) {
+                    $join->on('status_delivery_route_changes.id', '=', 'unique_changes.id');
+                })->get();
+            //return $rutas_status4;
+            $count_rutas_status5 = count($rutas_status5);
+
+            $orders5vis = [
+                2 => 0,
+                1 => 0,
+                0 => 0
+            ];
+
+            foreach ($rutas_status5 as $ruta_status5) {
+                if (isset($orders5vis[$ruta_status5->visible])) {
+                    $orders5vis[$ruta_status5->visible]++;
+                }
+            }
+
+            $ordervisible2num5 = $orders5vis[2];
+            $ordervisible1num5 = $orders5vis[1];
+            $ordervisible0num5 = $orders5vis[0];
+            $suma5 = $ordervisible2num5 + $ordervisible1num5;
+
+            $dataToUpdate = [
+                'sale_id' => $idSale,
+                'status_id' => 18,
+                'status' => 0,
+                'status_name' => $status_sales5->status,
+                'slug' => $status_sales5->slug
+            ];
+
+            if (empty($status_order5)) {
+                if ($suma5 == $total_product_orders && $ordervisible1num5 != $total_product_orders && $ordervisible0num5 != $total_product_orders && $ordervisible2num5 != $total_product_orders) {
+                    $dataToUpdate['visible'] = 3;
+                } else if ($ordervisible1num5 == $total_product_orders) {
+                    $dataToUpdate['visible'] = 1;
+                } else if ($ordervisible0num5 > 0 || ($ordervisible1num5 > 0 && $ordervisible1num5 < $total_product_orders)) {
+                    $dataToUpdate['visible'] = 0;
+                } else if (empty($rutas_totales)) {
+                    $dataToUpdate['visible'] = 2;
+                }
+
+                SaleStatusChange::create($dataToUpdate);
+            } else {
+                if ($count_rutas_status5 == $total_product_orders) {
+
+                    if ($suma5 == $total_product_orders && $ordervisible1num5 != $total_product_orders && $ordervisible0num5 != $total_product_orders && $ordervisible2num5 != $total_product_orders) {
+                        $dataToUpdate['visible'] = 3;
+                    } else if ($ordervisible1num5 == $total_product_orders) {
+                        $dataToUpdate['visible'] = 1;
+                    } else if ($ordervisible0num5 > 0 || ($ordervisible1num5 > 0 && $ordervisible1num5 < $total_product_orders)) {
+                        $dataToUpdate['visible'] = 0;
+                    } else if (empty($rutas_totales)) {
+                        $dataToUpdate['visible'] = 2;
+                    }
+
+                    DB::table('sale_status_changes')
+                        ->where('status_id', 18)
+                        ->update($dataToUpdate);
+                } else {
+                    if ($suma5 == $total_product_orders && $ordervisible1num5 != $total_product_orders && $ordervisible0num5 != $total_product_orders && $ordervisible2num5 != $total_product_orders) {
+                        $dataToUpdate['visible'] = 3;
+                    } else if ($ordervisible1num5 == $total_product_orders) {
+                        $dataToUpdate['visible'] = 1;
+                    } else if ($ordervisible0num5 > 0 || ($ordervisible1num5 > 0 && $ordervisible1num5 < $total_product_orders)) {
+                        $dataToUpdate['visible'] = 0;
+                    } else if (empty($rutas_totales)) {
+                        $dataToUpdate['visible'] = 2;
+                    }
+
+                    DB::table('sale_status_changes')
+                        ->where('status_id', 18)
                         ->update($dataToUpdate);
                 }
             }
