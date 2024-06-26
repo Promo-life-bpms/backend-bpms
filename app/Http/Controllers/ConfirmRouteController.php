@@ -2,63 +2,77 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ConfirmProductCount;
+use App\Models\ConfirmRoute;
+use App\Models\DeliveryRoute;
+use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class ConfirmProductCountController extends Controller
+class ConfirmRouteController extends Controller
 {
-    public function ProductCount(Request $request)
+    public function ConfirmationRoute(Request $request)
     {
         $this->validate($request, [
-            'id_product' => 'required',
-            'confirmation_type' => 'required',
-            'type' => 'required'
+            'id_product_order' => 'required',
+            'destiny' => 'required',
+
         ]);
 
-        if ($request->type == 'Maquila') {
-            ConfirmProductCount::create([
-                'id_product' => $request->id_product,
-                'type' => $request->type,
-                'confirmation_type' => $request->confirmation_type,
-                'id_confirm_routes' => null,
-                'observation' => $request->observation
-            ]);
-        } elseif ($request->type == 'Cliente') {
-            ConfirmProductCount::create([
-                'id_product' => $request->id_product,
-                'type' => $request->type,
-                'confirmation_type' => $request->confirmation_type,
-                'id_confirm_routes' => null,
-                'observation' => $request->observation
-            ]);
+        $inforDelivery = DB::table('delivery_routes')->where('product_id', $request->id_product_order)
+            ->where('status_delivery', 'Completo')
+            ->where('type_of_destiny', $request->destiny)
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (!$inforDelivery) {
+            return response()->json(['message' => 'Aún no se actualiza la ruta.'], 409);
         } else {
-            $infoConfirmRoute = DB::table('confirm_routes')->where('id_product_order', $request->id_product)->where('reception_type', $request->confirmation_type)
-                ->where('destination', $request->type)->orderBy('created_at', 'desc')
-                ->first();
-            $type = $infoConfirmRoute->destination;
-            $confirmation_type = $infoConfirmRoute->reception_type;
-            $id_confirm_routes = $infoConfirmRoute->id;
-
-            if (!$infoConfirmRoute) {
-                return response()->json(['message' => 'Es posible que a迆n no se confirme la recepci車n del producto.'], 409);
-            } else {
-                ConfirmProductCount::create([
-                    'id_product' => $request->id_product,
-                    'type' => $type,
-                    'confirmation_type' => $confirmation_type,
-                    'id_confirm_routes' => $id_confirm_routes,
-                    'observation' => $request->observation
-                ]);
-            }
+            $type = $inforDelivery->type;
+            $idDelivery =  $inforDelivery->id;
+            ConfirmRoute::create([
+                'id_product_order' => $request->id_product_order,
+                'id_delivery_routes' => $idDelivery,
+                'reception_type' => $type,
+                'destination' => $request->destiny,
+            ]);
         }
-        return response()->json(['message' => 'Se confirm車 el conteo de los productos'], 200);
+
+        return response()->json(['message' => 'Se confirmo la ruta del producto'], 200);
     }
-    public function ProductCountHistory($idProductOrder)
+
+    public function index($idProductOrder)
+
     {
-        $ProductCountHistory = DB::table('confirm_product_counts')->where('id_product', $idProductOrder)->get();
+        $History = DB::table('confirm_routes')->where('id_product_order', $idProductOrder)->get();
 
+        $Historial = [];
+        foreach ($History as $history) {
+            $OrderConfirmatio = [
+                'id'  => $history->id,
+                'reception_type' => $history->reception_type,
+                'destination'  => $history->destination,
+                'created_at'  => $history->created_at,
 
-        return response()->json(['Product_count_history' => $ProductCountHistory], 200);
+            ];
+            $Historial[] = $OrderConfirmatio;
+        }
+        return response()->json(['HistoryConfirmationRoutes' => $Historial], 200);
+    }
+    public function StatusRecepcion($sale_id)
+    {
+        $rutas = DeliveryRoute::where('code_sale', $sale_id)->where('type_of_destiny', 'Almacen PM')->get();
+        $rutasConteo = [];
+        $recepConteo =[];
+        foreach ($rutas as $ruta) {
+
+            $rutasConteo[] = $ruta->product_id;
+            $recepConteo[] = ConfirmRoute::where('id_product_order', $ruta->product_id)->where('destination', 'Almacen PM')->get();
+        }
+        $conteoRut =  count($rutasConteo);
+        $conteoRec = count($recepConteo);
+        if($conteoRec >= 1){
+
+        }
+        return $conteoRec;
     }
 }
