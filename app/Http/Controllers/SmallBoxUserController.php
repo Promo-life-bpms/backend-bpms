@@ -323,59 +323,7 @@ class SmallBoxUserController extends Controller
                 'name' => $company->name,
             ]);
         }
-
-        /////ESTOS SON LOS SPENTS QUE TODOS PUEDEN VER 115, 26, 10////
-        /* $rol = DB::table('role_user')->where('user_id', $user->id)->pluck('role_id')->toArray();
-        $selectedIds = [];
-        foreach ($rol as $role_id) {
-            //////ADMINISTRADOR
-            if ($role_id == 1) {
-                $selectedIds = [68, 115, 26, 10]; 
-            }
-            ///////EQUIPO DE DIRECCION PL///////
-            elseif($role_id == 20){
-                $selectedIds = [68, 93, 61, 52, 124, 8, 115, 26, 10];
-            }
-            ///////AQUI DEBO COLOCAR A GERENCIA ADMINISTRACIÓN == caja chica/////
-            elseif($role_id == 14 || $user->id == 57){
-                $selectedIds = [134, 42, 106, 41, 40, 43, 109, 45, 135, 44, 
-                                102, 118, 24, 31, 53, 50, 129, 131, 132, 17, 
-                                47, 48, 49, 52, 124, 13, 28, 115, 26, 10];
-            }
-            
-            /////AQUI ESTOY AGREGANDO LOS SPENTS QUE CREO SON DE ALMACEN O OPERACIONES O LOGISTICA
-            elseif($role_id == 22 || $role_id == 23){
-                $selectedIds = [18, 27, 74, 16, 99, 97, 96, 6, 71, 54, 
-                                75, 73, 72, 115, 26, 10];
-            }
-           
-            ///////EQUIPO IMPORTACIONES///
-            elseif($role_id == 21){
-                $selectedIds = [39, 55, 115, 26, 10];
-            }
-            ////ALEJANDRO VALENCIA///////
-            elseif($user->id == 95 || $user->id == 268){
-                $selectedIds = [2, 101, 56, 54, 115, 26, 10];
-            }
-            /////////SISTEMAS (SR PEDRO)////////////
-            elseif(($role_id == 25) && ($user->id == 118)){
-                $selectedIds = [65, 86, 51, 81, 80, 82, 83, 79, 78, 115, 26, 10];
-
-            }
-            //////////EQUIPO DE VENTAS////////////
-            elseif($role_id == 26 || $role_id == 27){
-                $selectedIds = [115, 26, 10];
-
-            }
-
-            $departments = DB::table('manager_has_departments')->where('id_user', $user->id)->pluck('id_department')->toArray();
-            $selectedIds = [];
-            foreach ($departments as $department) {
-                
-            }
-        }
-        $spents = DB::table('spents')->whereIn('id', $selectedIds)->get(); */
-
+        
         foreach($spents as $spent){
             array_push($spents_data, (object)[
                 'id' => $spent->id,

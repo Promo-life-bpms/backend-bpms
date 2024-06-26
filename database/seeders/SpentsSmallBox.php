@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Role;
 use App\Models\Spent;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -395,7 +396,7 @@ class SpentsSmallBox extends Seeder
         }
         //////////////AQUI DEBO ACTUALIZAR//////////////////
         $Newspents = array(
-            /* (object)[
+            ( object)[
                 'concept' => "BOTELLAS DE AGUA",
                 'center_id' => 21,
                 'outgo_type' => "VARIABLE",
@@ -474,16 +475,32 @@ class SpentsSmallBox extends Seeder
                 'expense_type' => "GASTO",
                 'product_type' => "SERVICIO",
                 'status' => 1
-            ], */
+            ],
             (object)[
-                'concept' => "ESTUDIO PRECIOS DE TRANSFERENCIA ",
+                'concept' => "ESTUDIO PRECIOS DE TRANSFERENCIA",
                 'center_id' => 2,
                 'outgo_type' => "FIJO",
                 'expense_type' => "GASTO",
                 'product_type' => "SERVICIO",
                 'status' => 1
             ],
-
+            (object)[
+                'concept' => "COMIDA CON PROVEEDORES",
+                'center_id' => 13,
+                'outgo_type' => "VARIABLE",
+                'expense_type' => "GASTO",
+                'product_type' => "SERVICIO",
+                'status' => 1
+            ],
+            //////SE LE AGREGA A RH///////
+            (object)[
+                'concept' => "COMIDA CON JEFES DE ÁREA",
+                'center_id' => 13,
+                'outgo_type' => "VARIABLE",
+                'expense_type' => "INVERSIÓN",
+                'product_type' => "PRODUCTO",
+                'status' => 1
+            ],
         );
 
         foreach ($Newspents as $newspent) {
@@ -496,5 +513,11 @@ class SpentsSmallBox extends Seeder
                 'status' => $newspent->status
             ]);  
         }
+
+        Role::create([
+            'name' => 'equipo_sistemas',
+            'display_name' => 'Equipo Sistemas', // optional
+            'description' => 'Equipo Sistemas', // optional
+        ]);
     }
 }

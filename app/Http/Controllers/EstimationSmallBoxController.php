@@ -84,7 +84,7 @@ class EstimationSmallBoxController extends Controller
         } */
 
         if($AvailableBudget == 0){
-            return response()->json(['AvailableBudget' => 'No tienes presupuesto disponible', 'Information' => $Information, 'MonthlyExpenses' => $MonthlyExpenses], 200);
+            return response()->json(['AvailableBudget' => 0.00, 'Information' => $Information, 'MonthlyExpenses' => $MonthlyExpenses], 200);
         }
 
         return response()->json(['Information' => $Information, 'MonthlyExpenses' => $MonthlyExpenses, 'AvailableBudget' => $AvailableBudget],200);   
@@ -178,10 +178,10 @@ class EstimationSmallBoxController extends Controller
         ]);
 
         if($presupuesto){
-            return response()->json(['message' => 'Se agregó con éxito el presupuesto', 'status' => 200], 200);
+            return response()->json(['message' => 'Presupuesto ingresado correctamente', 'status' => 200], 200);
+        }else{
+            return response()->json(['message' => 'No se pudo ingresar el monto', 'status' => 400], 400);
         }
-        else
-        return response()->json(['message' => 'Error. No se agregó el presupuesto', 'status' => 400], 400);
     }
 
     ///REGRESAR EL PRESUPUESTO//////
