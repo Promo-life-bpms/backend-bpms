@@ -195,7 +195,7 @@ Route::group(['middleware' => 'auth'], function () {
     /////////////////CONFIRMAR ORDENES DE PRODUCTOS///////////////
     Route::post('confirmation/route/product', [ConfirmRouteController::class, 'ConfirmationRoute']);
     Route::get('history/confirmation/route/product/{idProductOrder}', [ConfirmRouteController::class, 'index']);
-
+    Route::get('status/route-confirmation/{sale_id}', [ConfirmRouteController::class, 'StatusRecepcion']);
     //////////////////CONTEO DEL PRODUCTO///////////////////////
     Route::post('product/count/confirmation', [ConfirmProductCountController::class, 'ProductCount']);
     Route::get('product/count/confirmation/history/{idProductOrder}', [ConfirmProductCountController::class, 'ProductCountHistory']);
@@ -205,7 +205,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('history/confirm/product/delivery/{idProduct}', [ConfirmDeliveryController::class, 'HistoryConfirmDelivery']);
 
     ///////////////////////////FORMULARIO PARA CREAR UNA INCIDENCIA///////////
-    Route::post('first/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class,'FirstPartOfTheIncidentForm']);
+    Route::post('first/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'FirstPartOfTheIncidentForm']);
     Route::post('second/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'SecondPartOfTheIncidentForm']);
     Route::post('third/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'ThirdPartOfTheIncidentForm']);
     Route::get('incident/form/{idform}', [QualityIncidentsFormController::class, 'IncidentForm']);
