@@ -23,16 +23,16 @@ class ExchangeReturnController extends Controller
         $previous_total = DB::table('purchase_requests')->where('id', $request->purchase_id)->value('total');
 
         if(!$ThereIsAlreadyAReturn){
+            if($request->total_return < 1){
+                return response()->json(['message' => 'No puedes ingresar un monto igual a $0 o menor'], 400);
+            }
             if($request->description == null){
                 return response()->json(['message' => 'Debes ingresar una descripción'], 400);
             }
             if($request->file_exchange_returns == null){
                 return response()->json(['message' => 'No has seleccionado un archivo para el comprobante de devolución'], 400);
             }
-            if($request->total_return < 1){
-                return response()->json(['message' => 'No puedes ingresar un monto igual a $0 o menor'], 400);
-            }
-
+            
             $path = '';
             if ($request->hasFile('file_exchange_returns')) {
                 $filenameWithExt = $request->file('file_exchange_returns')->getClientOriginalName();

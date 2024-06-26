@@ -324,16 +324,138 @@ class SmallBoxUserController extends Controller
             ]);
         }
         
-        foreach($spents as $spent){
-            array_push($spents_data, (object)[
-                'id' => $spent->id,
-                'concept' => $spent->concept,
-                'center' => $spent->center->name,
-                'outgo_type' => $spent->outgo_type,
-                'expense_type' => $spent->expense_type,
-                'spent_product_type' =>  $spent->product_type,
-                'status' => $spent->status,
-            ]);
+        /////ESTOS SON LOS SPENTS QUE TODOS PUEDEN VER 115, 26, 10////
+        $rol = DB::table('role_user')->where('user_id', $user->id)->pluck('role_id')->toArray();
+        $selectedIds = [];
+        foreach ($rol as $role_id) {
+            switch ($role_id) {
+                case 1: // Administrador
+                    $selectedIds = [];
+                    break;
+                
+                case 24: // Recursos Humanos
+                    $selectedIds = [112, 21, 22, 123, 14, 29, 127, 92, 88, 89, 15, 91, 19, 20, 76, 9, 
+                                111, 87, 11, 122, 136, 8, 137, 115, 26, 10];
+                    break;
+                case 26:
+                    $selectedIds = [12, 30, 58, 64, 110, 137, 115, 26, 10];
+                    break;
+                case 27: // Equipo de Ventas
+                    $selectedIds = [12, 30, 58, 64, 110, 137, 115, 26, 10];
+                    break;
+                    
+                case 14: // Caja Chica,
+                    $selectedIds = [134, 42, 106, 41, 40, 43, 109, 45, 135, 44, 102, 118, 24, 31, 53, 50, 129, 131, 132, 17, 47, 48, 49, 52, 124, 13, 28, 115, 26, 10];
+                    break;
+                case 15: //Adquisiciones 
+                    $selectedIds = [134, 42, 106, 41, 40, 43, 109, 45, 135, 44, 102, 118, 24, 31, 53, 50, 129, 131, 132, 17, 47, 48, 49, 52, 124, 13, 28, 115, 26, 10];
+                    break;
+                case 16: //Equipo Administración
+                    $selectedIds = [134, 42, 106, 41, 40, 43, 109, 45, 135, 44, 102, 118, 24, 31, 53, 50, 129, 131, 132, 17, 47, 48, 49, 52, 124, 13, 28, 115, 26, 10];
+                    break;
+                case 25: // Equipo de TI
+                    $selectedIds = [115, 26, 10];
+                    break;
+                case 28: // Equipo de Sistemas
+                    $selectedIds = [65, 86, 51, 81, 80, 82, 83, 79, 78, 115, 26, 10];
+                    break;
+                case 21: // Equipo de Importaciones
+                    $selectedIds = [39, 55, 115, 26, 10];
+                    break;
+
+                /* ///////EQUIPO DE DIRECCION PL///////
+                ///PENDIENTE
+                elseif($role_id == 20){
+                    $selectedIds = [68, 93, 61, 52, 124, 8, 115, 26, 10];
+                }
+            
+                /////AQUI ESTOY AGREGANDO LOS SPENTS QUE CREO SON DE ALMACEN O OPERACIONES O LOGISTICA
+                ///PENDIENTE////////
+                elseif($role_id == 22 || $role_id == 23){
+                    $selectedIds = [18, 27, 74, 16, 99, 97, 96, 6, 71, 54, 
+                            75, 73, 72, 115, 26, 10];
+                }
+                ////ALEJANDRO VALENCIA///////
+                ////COMPRAS PENDIENTE
+                elseif($user->id == 95 || $user->id == 268){
+                    $selectedIds = [2, 101, 56, 54, 115, 26, 10];
+                } */
+                
+                default:
+                    $selectedIds = [115, 26, 10];
+                    // Manejo para roles no especificados
+                    break;
+            }
+        }
+
+        if (!empty($selectedIds)) {
+            $spents = DB::table('spents')->whereIn('id', $selectedIds)->get();
+        } else {
+            //SI EL ARREGLO ESTA VACIO TRAE TODO;
+            $spents = DB::table('spents')->get();
+        }
+
+        //////ESTO ES SOLO PARA MANAGERS///////
+        $managers = DB::table('manager_has_departments')->where('id_user', $user->id)->pluck('id_department')->toArray();
+        $managersids = [];
+        ///ESTOS SON BASICOS PARA LOS MANAGERS 59, 133, 137, 58
+        foreach ($managers as $manager) {
+            switch ($manager) {
+                case 1:
+                    //return 1;
+                    $managersids=[59, 133, 137, 58, 134, 42, 106, 41, 40, 43, 109, 45, 135, 44, 102, 118, 24, 31, 53, 50, 129, 131, 132, 17, 47, 48, 49, 52, 124, 13, 28, 115, 26, 10];
+                    break;
+                case 2:
+                    //return 2;
+                    $managersids=[115, 26, 10];
+                    break;
+                case 3:
+                    //return 3;
+                    $managersids=[115, 26, 10 ];
+                    break;
+                case 4:
+                    //return 4;
+                    $managersids=[59, 133, 137, 58, 115, 26, 10];
+                    break;
+                case 5:
+                    //return 5;
+                    $managersids=[115, 26, 10];
+                    break;
+                case 6:
+                    ////IMPORTACIONES////
+                    //return 6;
+                    $managersids=[59, 133, 137, 58, 39, 55, 115, 26, 10];
+                    break;
+                case 7:
+                    ///RECURSOS HUMANOS///
+                    //return 7;
+                    $managersids=[59, 133, 137, 58, 112, 21, 22, 123, 14, 29, 127, 92, 88, 89, 15, 91, 19, 20, 76, 9, 
+                    111, 87, 11, 122, 136, 8, 115, 26, 10 ];
+                    break;
+                case 8:
+                    /////TI
+                    //return 8;
+                    $managersids=[69, 59, 133, 137, 70, 58, 115, 26, 10];
+                    break;
+                case 9:
+                    ///VENTAS BH
+                    //return 9;
+                    $managersids=[59, 133, 12, 30, 58, 64, 110, 137, 115, 26, 10];
+                    break;
+                case 10:
+                    ////VENTAS PL
+                    //return 10;
+                    $managersids=[59, 133, 12, 30, 58, 64, 110, 137, 115, 26, 10 ];
+                    break;
+                case 11:
+                    //return 11;
+                    $managersids=[115, 26, 10];
+                    break;
+            }
+        }
+    
+        if (!empty($managersids)) {
+            $spents = DB::table('spents')->whereIn('id', $managersids)->get();
         }
 
         foreach($centers as $center){
@@ -360,7 +482,7 @@ class SmallBoxUserController extends Controller
         $data = [
             'companies' => $companies->isEmpty() ? ['message' => 'No hay compañias disponibles.'] : $companies_data,
             'centers' => $centers->isEmpty() ? ['message' => 'No hay centros de gastos disponibles.'] : $centers_data,
-            'spents' => $spents->isEmpty() ? ['message' => 'No hay tipos de gastos disponibles.'] : $spents_data,
+            'spents' => $spents->isEmpty() ? ['message' => 'No hay tipos de gastos disponibles.'] : $spents,
             'payments' => $payments->isEmpty() ? ['message' => 'No hay métodos de pagos disponibles.'] : $payments_data,
             'roles' => $roles->isEmpty() ? ['message' => 'No hay roles disponibles.'] : $roles_data,
         ];

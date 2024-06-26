@@ -19,7 +19,7 @@ class CreateConfirmProductCountsTable extends Migration
             $table->string('type');
             $table->string('confirmation_type');
             $table->text('observation')->nullable();
-            $table->foreignId('id_confirm_routes')->references('id')->on('confirm_routes')->onDelete('cascade');
+            $table->foreignId('id_confirm_routes')->references('id')->on('confirm_routes')->onDelete('cascade')->nullable();
             $table->timestamps();
         });
     }
