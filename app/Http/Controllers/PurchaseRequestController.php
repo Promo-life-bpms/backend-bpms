@@ -378,6 +378,7 @@ class PurchaseRequestController extends Controller
             $returnmoneyexcess = DB::table('exchange_returns')->where('purchase_id', $page)->select(
                 'id',
                 'total_return',
+                'previous_total',
                 'status',
                 'confirmation_datetime',
                 'confirmation_user_id',
@@ -544,13 +545,6 @@ class PurchaseRequestController extends Controller
             return response()->json([
                 'message' => "Sesión de usuario expirada"
             ], 400);
-        }
-
-        $rol = DB::table('role_user')->where('user_id', $user->id)->value('role_id');
-        if($rol != 1){
-            return response()->json([
-                'message' => 'No tienes el permiso para visualizar las solicitudes.'
-            ], 404);
         }
 
         $data = [];
@@ -1395,6 +1389,7 @@ class PurchaseRequestController extends Controller
             $returnmoneyexcess = DB::table('exchange_returns')->where('purchase_id', $page)->select(
                 'id',
                 'total_return',
+                'previous_total',
                 'status',
                 'confirmation_datetime',
                 'confirmation_user_id',
