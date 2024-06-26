@@ -749,7 +749,8 @@ class PurchaseRequestController extends Controller
         return response()->json(['message' => "Creación de solicitud exitosa."], 200);
     }
 
-    public function editdate(Request $request)
+    /////ESTA API SE VA ELIMINAR////
+    /* public function editdate(Request $request)
     {
         $this->validate($request, [
             'id' => 'required',
@@ -763,7 +764,7 @@ class PurchaseRequestController extends Controller
 
         DB::table('purchase_requests')->where('id', $request->id)->update(['creation_date' => $date]);
         return response(['message' => '¡LISTO!'], 200);
-    }
+    } */
 
     public function updatemoney(Request $request)
     {
