@@ -197,22 +197,38 @@ class DeliveryRouteController extends Controller
                 }
             }
 
-            // Crear registros para los estados que no están presentes en las rutas
-            foreach ($statuses as $status) {
-                // Verifica si el tipo de destino del estado está presente en las rutas
-                $ruta_presente = collect($routes)->contains('type_of_destiny', $status['status']);
+            $status_order = [
+                'Almacen PL',
+                'Maquila',
+                'Almacen PM',
+                'Cliente'
+            ];
 
-                // Si el tipo de destino no está presente en las rutas, crea un registro de estado para él
-                if (!$ruta_presente) {
-                    // Crea el registro de estado con visibilidad 2
-                    $statuses_Delivery = StatusDeliveryRouteChange::create([
-                        'order_purchase_product_id' => $routes[0]['product_id'], // Usa el primer producto_id de las rutas, asumiendo que es el mismo
-                        'code_order' => $routes[0]['code_order'], // Usa el primer code_order de las rutas, asumiendo que es el mismo
-                        'status' => $status['status'],
-                        'visible' => 2, // Asigna visibilidad 2
-                    ]);
+            $current_statuses = collect($status_deliverys)->pluck('status')->toArray();
 
-                    $status_deliverys[] = $statuses_Delivery;
+            // return $current_statuses;
+
+            foreach ($status_deliverys as $status) {
+                // Determinar el índice del estado actual en el orden
+                $status_index = array_search($status['status'], $status_order);
+                if ($status_index !== false) {
+                    // Crear todos los estados anteriores al actual si no están presentes en $current_statuses
+                    for ($i = 0; $i < $status_index; $i++) {
+                        $previous_status = $status_order[$i];
+
+                        if (!in_array($previous_status, $current_statuses)) {
+                            // Crear el registro de estado con visibilidad 2
+                            $statuses_Delivery = StatusDeliveryRouteChange::create([
+                                'order_purchase_product_id' => $status_deliverys[0]['order_purchase_product_id'], // Usa el primer product_id de $status_deliverys, asumiendo que es el mismo
+                                'code_order' => $status_deliverys[0]['code_order'], // Usa el primer code_order de $status_deliverys, asumiendo que es el mismo
+                                'status' => $previous_status,
+                                'visible' => 2, // Asigna visibilidad 2
+                            ]);
+
+                            // Agregar el nuevo estado a $current_statuses para que no se duplique
+                            $current_statuses[] = $previous_status;
+                        }
+                    }
                 }
             }
         }
@@ -291,13 +307,12 @@ class DeliveryRouteController extends Controller
     public function updateRuta(Request $request, $product_id)
     {
         $orders_products = OrdersGroup::where('product_id_oc', $product_id)->get();
-        // Iterar sobre cada producto de la orden de compra
+        $statuses_Delivery = StatusDeliveryRoute::all()->sortBy('id');  // Ordenar por 'id'
+
         foreach ($orders_products as $order) {
-            // Obtener todas las rutas de entrega asociadas al producto de la orden de compra
             $rutas = DeliveryRoute::where('product_id', $order->product_id_oc)->get();
-            // Iterar sobre cada ruta en el cuerpo de la solicitud
+
             foreach ($request->all() as $rutaRequest) {
-                // Iterar sobre las rutas de entrega para actualizar cada una
                 foreach ($rutas as $ruta) {
                     $type = $rutaRequest['type'] ?? $ruta->type ?? null;
                     $status_delivery = $rutaRequest['status_delivery'] ?? $ruta->status_delivery ?? null;
@@ -310,25 +325,24 @@ class DeliveryRouteController extends Controller
                         } elseif ($type == "Total" && $status_delivery == "Completo") {
                             $color = 2;
                         } else {
-                            $color = 0; // Valor predeterminado si no se cumple ninguna condición
+                            $color = 0;
                         }
                     } else {
-                        $color = 0; // Valor predeterminado si no se cumple ninguna condición
+                        $color = 0;
                     }
 
                     if ($color == 2) {
-                        $visible = 1; // El visible 1 es de que ya esta completo y total
+                        $visible = 1;
                     } elseif ($color == 1) {
-                        $visible = 0; // El visible 0 es de que status sea diferente a completo y a total puede ser que sea parcial y que sea reprogramado o pendiente
+                        $visible = 0;
                     } else {
-                        $visible = 2; // El visible 2 es que no tiene ningun dato
+                        $visible = 2;
                     }
                 }
 
                 $ruta_ant = DeliveryRoute::where('product_id', $product_id)->where('type_of_destiny', $rutaRequest['type_of_destiny'])->first();
                 $newrut = DeliveryRoute::where('product_id', $product_id)->first();
 
-                # code...
                 if ($ruta_ant) {
                     DB::table('delivery_routes')->where('type_of_destiny', $rutaRequest['type_of_destiny'])->where('product_id', $product_id)->update([
                         'type' => $rutaRequest['type'] ?? $ruta_ant->type,
@@ -376,11 +390,48 @@ class DeliveryRouteController extends Controller
                         'visible' => $visible,
                     ]);
                 }
-            }
-            $rutas_update = DeliveryRoute::where('product_id', $order->product_id_oc)->get();
-            $statuschanges = StatusDeliveryRouteChange::all()->where('order_purchase_product_id', $product_id);
-            foreach ($statuschanges as $status_change) {
 
+                // Verificar y crear el registro en StatusDeliveryRouteChange si no existe
+                $existingStatusChange = StatusDeliveryRouteChange::where('order_purchase_product_id', $product_id)
+                    ->where('status', $rutaRequest['type_of_destiny'])
+                    ->first();
+
+                if (!$existingStatusChange) {
+                    StatusDeliveryRouteChange::create([
+                        'order_purchase_product_id' => $product_id,
+                        'status' => $rutaRequest['type_of_destiny'],
+                        'code_order' => $rutaRequest['code_order'],
+                        'visible' => $visible
+                    ]);
+                }
+
+                // Obtener el status_id del type_of_destiny actual
+                $current_status_id = $statuses_Delivery->where('status', $rutaRequest['type_of_destiny'])->first()->id;
+
+                // Crear registros para todos los status_id anteriores si el status_id es mayor que 1
+                if ($current_status_id > 1) {
+                    $previous_statuses = $statuses_Delivery->where('id', '<', $current_status_id);
+                    foreach ($previous_statuses as $previous_status) {
+                        $existingStatusChange = StatusDeliveryRouteChange::where('order_purchase_product_id', $product_id)
+                            ->where('status', $previous_status->status)
+                            ->first();
+
+                        if (!$existingStatusChange) {
+                            StatusDeliveryRouteChange::create([
+                                'order_purchase_product_id' => $product_id,
+                                'status' => $previous_status->status,
+                                'code_order' => $rutaRequest['code_order'],
+                                'visible' => 2  // Asignar un valor por defecto o según la lógica necesaria
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            $rutas_update = DeliveryRoute::where('product_id', $order->product_id_oc)->get();
+            $statuschanges = StatusDeliveryRouteChange::where('order_purchase_product_id', $product_id)->get();
+
+            foreach ($statuschanges as $status_change) {
                 foreach ($rutas_update as $ruta_update) {
                     if ($status_change->status == $ruta_update->type_of_destiny) {
                         $status_change->status = $ruta_update->type_of_destiny;
@@ -390,12 +441,13 @@ class DeliveryRouteController extends Controller
                 }
             }
         }
-        $statuschange = StatusDeliveryRouteChange::all()->where('order_purchase_product_id', $product_id);
 
+        $statuschange = StatusDeliveryRouteChange::where('order_purchase_product_id', $product_id)->get();
         $delivery_update = DeliveryRoute::where('product_id', $order->product_id_oc)->get();
 
         return response()->json(['ruta actualizada' => $delivery_update, 'status_Actuales' => $statuschange]);
     }
+
     /**
      * Update the specified resource in storage.
      *
