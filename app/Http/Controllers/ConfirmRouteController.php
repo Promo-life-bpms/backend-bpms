@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class ConfirmRouteController extends Controller
 {
-    public function ConfirmationRoute(Request $request)
+    public function ConfirmationRoute(Request $request, $sale_id)
     {
         $this->validate($request, [
             'id_product_order' => 'required',
@@ -38,7 +38,75 @@ class ConfirmRouteController extends Controller
                 'destination' => $request->destiny,
             ]);
         }
+        /////////////////sattus recepcion
+        $sale = Sale::where('code_sale', $sale_id)->first();
+        $rutas = DeliveryRoute::where('code_sale', $sale_id)->where('type_of_destiny', 'Almacen PM')->get();
+        $rutasConteo = [];
+        $recepConteo = [];
+        foreach ($rutas as $ruta) {
 
+            $rutasConteo[] = $ruta->product_id;
+            $recepsConteo[] = ConfirmRoute::where('id_product_order', $ruta->product_id)
+                ->where('destination', 'Almacen PM')
+                ->latest()
+                ->first();
+        }
+        // return $recepsConteo;
+        $conteoP = [];
+        $conteoC = [];
+        foreach ($recepsConteo as $recepConteo) {
+            //return $recepConteo;
+            if ($recepConteo->reception_type == 'Parcial') {
+                $conteoP[] = $recepConteo->reception_type;
+            } else if ($recepConteo->reception_type == 'Total') {
+                $conteoC[] = $recepConteo->reception_type;
+            }
+        }
+
+        $conteoRut =  count($rutasConteo);
+        $conteoRecPar = count($conteoP);
+        $conteoRecCom = count($conteoC);
+        //$conteoRec = count($recepsConteo);
+        $sale_status = SaleStatusChange::where('status_id', 34)->where('sale_id', $sale->id)->first();
+        $status_sales = DB::table('statuses')->where('id', 34)->first();
+        //return $conteoRecPar;
+        if (empty($sale_status)) {
+            if ($conteoRecPar >= 1  && $conteoRecPar <= $conteoRut) {
+                SaleStatusChange::create([
+                    'sale_id' => $sale->id,
+                    'status_id' => 34,
+                    'status' => 0,
+                    'visible' => 0,
+                    'status_name' => $status_sales->status,
+                    'slug' => $status_sales->slug
+                ]);
+            } else if ($conteoRecCom == $conteoRut) {
+                SaleStatusChange::create([
+                    'sale_id' => $sale->id,
+                    'status_id' => 34,
+                    'status' => 0,
+                    'visible' => 1,
+                    'status_name' => $status_sales->status,
+                    'slug' => $status_sales->slug
+                ]);
+            }
+        } else {
+            if ($conteoRecPar >= 1  && $conteoRecPar <= $conteoRut) {
+                DB::table('sale_status_changes')->where('status_id', 34)->update([
+                    'sale_id' => $sale->id,
+                    'status_id' => 34,
+                    'status' => 0,
+                    'visible' => 0
+                ]);
+            } else if ($conteoRecCom == $conteoRut) {
+                DB::table('sale_status_changes')->where('status_id', 34)->update([
+                    'sale_id' => $sale->id,
+                    'status_id' => 34,
+                    'status' => 0,
+                    'visible' => 1
+                ]);
+            }
+        }
         return response()->json(['message' => 'Se confirmo la ruta del producto'], 200);
     }
 
