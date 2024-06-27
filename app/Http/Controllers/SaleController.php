@@ -967,7 +967,7 @@ class SaleController extends Controller
                     } else if ($ordervisible1num5 == $total_product_orders) {
                         $dataToUpdate['visible'] = 1;
                     } else if ($ordervisible0num5 > 0 || ($ordervisible1num5 > 0 && $ordervisible1num5 < $total_product_orders)) {
-                        $dataToUpdate['visible'] = 0; 
+                        $dataToUpdate['visible'] = 0;
                     } else if (empty($rutas_totales)) {
                         $dataToUpdate['visible'] = 2;
                     }
@@ -1004,8 +1004,8 @@ class SaleController extends Controller
                         'status_id' => 18,
                         'status' => 0,
                         'visible' => 0,
-                        'status_name' => $status_sales->status,
-                        'slug' => $status_sales->slug
+                        'status_name' => $statuses_recep->status,
+                        'slug' => $statuses_recep->slug
                     ]);
                 } else if ($sale_recepcions->visible == 1 && $sale_rutas->visible == 3) {
                     SaleStatusChange::create([
@@ -1013,8 +1013,8 @@ class SaleController extends Controller
                         'status_id' => 18,
                         'status' => 0,
                         'visible' => 3,
-                        'status_name' => $status_sales->status,
-                        'slug' => $status_sales->slug
+                        'status_name' => $statuses_recep->status,
+                        'slug' => $statuses_recep->slug
                     ]);
                 } else {
                     SaleStatusChange::create([
@@ -1022,8 +1022,8 @@ class SaleController extends Controller
                         'status_id' => 18,
                         'status' => 0,
                         'visible' => 0,
-                        'status_name' => $status_sales->status,
-                        'slug' => $status_sales->slug
+                        'status_name' => $statuses_recep->status,
+                        'slug' => $statuses_recep->slug
                     ]);
                 }
             } else {
@@ -1035,7 +1035,6 @@ class SaleController extends Controller
                         'visible' => 1
                     ]);
                 } elseif ($sale_recepcions->visible == 1 && $sale_rutas->visible == 0 || $sale_recepcions->visible == 0 && $sale_rutas->visible == 3 || $sale_recepcions->visible == 0 && $sale_rutas->visible == 0) {
-
                     DB::table('sale_status_changes')->where('status_id', 18)->update([
                         'sale_id' => $idSale,
                         'status_id' => 18,
