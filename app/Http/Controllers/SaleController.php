@@ -899,12 +899,14 @@ class SaleController extends Controller
                 ->distinct()
                 ->join('delivery_routes', 'delivery_routes.product_id', '=', 'status_delivery_route_changes.order_purchase_product_id')
                 ->where('status_delivery_route_changes.status', '=', 'Almacen PM')
+                ->whereIn('status_delivery_route_changes.visible', [1, 0])
                 ->where('delivery_routes.code_sale', $sale_id);
 
             $rutas_status5 = DB::table('status_delivery_route_changes')
                 ->joinSub($subQuery, 'unique_changes', function ($join) {
                     $join->on('status_delivery_route_changes.id', '=', 'unique_changes.id');
                 })->get();
+      
             $count_rutas_status5 = count($rutas_status5);
 
             $orders5vis = [
@@ -947,9 +949,8 @@ class SaleController extends Controller
 
                 SaleStatusChange::create($dataToUpdate);
             } else {
-
+                return $count_rutas_status5;
                 if ($count_rutas_status5 == $total_product_orders) {
-
                     if ($suma5 == $total_product_orders && $ordervisible1num5 != $total_product_orders && $ordervisible0num5 != $total_product_orders && $ordervisible2num5 != $total_product_orders && $sale_recepcion->visible == 1) {
                         $dataToUpdate['visible'] = 3;
                     } else if ($ordervisible1num5 == $total_product_orders && $sale_recepcion->visible == 1) {
