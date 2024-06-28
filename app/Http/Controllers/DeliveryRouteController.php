@@ -587,11 +587,6 @@ class DeliveryRouteController extends Controller
                     break;
             }
         }
-        $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', '=', 'delivery_routes.product_id')
-            ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
-            ->where('status_delivery', 'Completo')
-            ->where('type', 'Total')
-            ->select('delivery_routes.*', 'order_purchase_products.description');
         if ($date) {
             // Assuming you have a column like 'delivery_date' in 'delivery_routes' table
             $query->whereDate('delivery_routes.date_of_delivery', '=', $date);
