@@ -553,7 +553,40 @@ class DeliveryRouteController extends Controller
         $type = $request->input('type');
         $status = $request->input('status_delivery');
         $destiny = $request->input('destiny');
+        $user =  auth()->user();
+        foreach ($user->whatRoles as $rol) {
+            switch ($rol->id) {
+                case 6: //compras
+                    $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', '=', 'delivery_routes.product_id')
+                        ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
+                        ->where('status_delivery', 'Completo')
+                        ->where('type', 'Total')
+                        ->select('delivery_routes.*', 'order_purchase_products.description');
+                    break;
+                case 18: //mesa_de_control
 
+                    $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', '=', 'delivery_routes.product_id')
+                        ->whereIn('delivery_routes.type_of_destiny', ['Cliente'])
+                        ->where('status_delivery', 'Completo')
+                        ->where('type', 'Total')
+                        ->select('delivery_routes.*', 'order_purchase_products.description');
+                    break;
+                case 17: //logistica
+                    $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', '=', 'delivery_routes.product_id')
+                        ->where('status_delivery', 'Completo')
+                        ->where('type', 'Total')
+                        ->select('delivery_routes.*', 'order_purchase_products.description');
+                    break;
+                default:
+                    return response()->json(
+                        [
+                            'msg' => "No tienes autorizacion para subir la evidencia",
+                        ],
+
+                    );
+                    break;
+            }
+        }
         $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', '=', 'delivery_routes.product_id')
             ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
             ->where('status_delivery', 'Completo')
@@ -582,18 +615,58 @@ class DeliveryRouteController extends Controller
         $type = $request->input('type');
         $status = $request->input('status_delivery');
         $destiny = $request->input('destiny');
-        $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
-            ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
-            ->select('delivery_routes.*', 'order_purchase_products.description');
-        // Filtrar por tipo y estado según la lógica proporcionada
-        $query->where(function ($query) {
-            $query->where('delivery_routes.type', 'Total')
-                ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado'])
-                ->orWhere(function ($query) {
-                    $query->where('delivery_routes.type', 'Parcial')
-                        ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado', 'Completo']);
-                });
-        });
+        $user =  auth()->user();
+        foreach ($user->whatRoles as $rol) {
+            switch ($rol->id) {
+                case 6: //compras
+                    $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
+                        ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
+                        ->select('delivery_routes.*', 'order_purchase_products.description');
+                    // Filtrar por tipo y estado según la lógica proporcionada
+                    $query->where(function ($query) {
+                        $query->where('delivery_routes.type', 'Total')
+                            ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado'])
+                            ->orWhere(function ($query) {
+                                $query->where('delivery_routes.type', 'Parcial')
+                                    ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado', 'Completo']);
+                            });
+                    });
+                    break;
+                case 18: //mesa_de_control
+                    $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
+                        ->whereIn('delivery_routes.type_of_destiny', ['Cliente'])
+                        ->select('delivery_routes.*', 'order_purchase_products.description');
+                    $query->where(function ($query) {
+                        $query->where('delivery_routes.type', 'Total')
+                            ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado'])
+                            ->orWhere(function ($query) {
+                                $query->where('delivery_routes.type', 'Parcial')
+                                    ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado', 'Completo']);
+                            });
+                    });
+                    break;
+                case 17: //logistica
+                    $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
+                        ->select('delivery_routes.*', 'order_purchase_products.description');
+                    $query->where(function ($query) {
+                        $query->where('delivery_routes.type', 'Total')
+                            ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado'])
+                            ->orWhere(function ($query) {
+                                $query->where('delivery_routes.type', 'Parcial')
+                                    ->whereIn('delivery_routes.status_delivery', ['Pendiente', 'Reprogramado', 'Completo']);
+                            });
+                    });
+                    break;
+                default:
+                    return response()->json(
+                        [
+                            'msg' => "No tienes autorizacion para subir la evidencia",
+                        ],
+
+                    );
+                    break;
+            }
+        }
         // Aplicar filtros adicionales si se proporcionan
         if ($date) {
             $query->whereDate('delivery_routes.date_of_delivery', '=', $date);
@@ -618,7 +691,6 @@ class DeliveryRouteController extends Controller
             ->whereIn('delivery_routes.type_of_destiny', ['Almacen PL', 'Maquila', 'ALmacen PM'])
             ->whereIn('status_delivery', ['Pendiente', 'Reprogramado'])
             ->select('delivery_routes.*', 'order_purchase_products.description')->get(); */
-
         foreach ($request->all() as $rutaPenRequest) {
             $rutasPurPed = DeliveryRoute::where('id', $rutaPenRequest['id'])->get();
             foreach ($rutasPurPed as $rutaPurPed) {
@@ -634,18 +706,18 @@ class DeliveryRouteController extends Controller
                     } elseif ($type == "Total" && $status_delivery == "Completo") {
                         $color = 2;
                     } else {
-                        $color = 0; // Valor predeterminado si no se cumple ninguna condición
+                        $color = 0;
                     }
                 } else {
-                    $color = 0; // Valor predeterminado si no se cumple ninguna condición
+                    $color = 0;
                 }
 
                 if ($color == 2) {
-                    $visible = 1; // El visible 1 es de que ya esta completo y total
+                    $visible = 1;
                 } elseif ($color == 1) {
-                    $visible = 0; // El visible 0 es de que status sea diferente a completo y a total puede ser que sea parcial y que sea reprogramado o pendiente
+                    $visible = 0;
                 } else {
-                    $visible = 2; // El visible 2 es que no tiene ningun dato
+                    $visible = 2;
                 }
             }
             $rutaPen = DeliveryRoute::where('id', $rutaPenRequest['id'])->first();
