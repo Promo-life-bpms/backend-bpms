@@ -41,21 +41,24 @@ class ConfirmRouteController extends Controller
         /////////////////sattus recepcion
         $sale = Sale::where('code_sale', $sale_id)->first();
         $rutas = DeliveryRoute::where('code_sale', $sale_id)->where('type_of_destiny', 'Almacen PM')->get();
+        // return $rutas;
         $rutasConteo = [];
         $recepConteo = [];
         foreach ($rutas as $ruta) {
+    $rutasConteo[] = $ruta->product_id;
 
-            $rutasConteo[] = $ruta->product_id;
-            $recepsConteo[] = ConfirmRoute::where('id_product_order', $ruta->product_id)
-                ->where('destination', 'Almacen PM')
-                ->latest()
-                ->first();
-        }
-        // return $recepsConteo;
+    $recep = ConfirmRoute::where('id_product_order', $ruta->product_id)
+        ->where('destination', 'Almacen PM')
+        ->latest()
+        ->first();
+
+    if ($recep) {
+        $recepsConteo[] = $recep;
+    }
+}
         $conteoP = [];
         $conteoC = [];
         foreach ($recepsConteo as $recepConteo) {
-            //return $recepConteo;
             if ($recepConteo->reception_type == 'Parcial') {
                 $conteoP[] = $recepConteo->reception_type;
             } else if ($recepConteo->reception_type == 'Total') {
@@ -91,7 +94,7 @@ class ConfirmRouteController extends Controller
                 ]);
             }
         } else {
-            if ($conteoRecPar >= 1  && $conteoRecPar <= $conteoRut) {
+            if ($conteoRecPar >= 1  && $conteoRecPar <= $conteoRut || $conteoRecCom >= 1 && $conteoRecCom < $conteoRut ) {
                 DB::table('sale_status_changes')->where('status_id', 34)->update([
                     'sale_id' => $sale->id,
                     'status_id' => 34,
