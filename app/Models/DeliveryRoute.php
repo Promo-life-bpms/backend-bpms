@@ -22,6 +22,7 @@ class DeliveryRoute extends Model
         'shipping_type',
         'color',
         'visible',
+        'observation'
     ];
 
     /*  public function codeOrderDeliveryRoute()
