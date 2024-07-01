@@ -13,6 +13,7 @@ class ExchangeReturn extends Model
 
     protected $fillable = ([
         'total_return',
+        'previous_total',
         'status',
         'confirmation_datetime',
         'confirmation_user_id',

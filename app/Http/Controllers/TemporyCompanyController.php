@@ -8,18 +8,22 @@ use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Reader\Xls\RC4;
 use Psr\Http\Message\ResponseInterface;
 
+use function PHPUnit\Framework\isEmpty;
+
 class TemporyCompanyController extends Controller
 {
     public function index()
     {
         $companies = DB::table('tempory_company')->get()->toArray();
-        // Recorrer cada empresa y formatear la fecha
+        
+        if(empty($companies)){
+            return response()->json(['message' => 'No hay compañias.'],409);
+        }
         foreach ($companies as $company) {
             $company->created_at = date('d-m-Y', strtotime($company->created_at));
         }
-
+        
         return response()->json(['companies' => $companies],200);
-
     }
 
     public function store(Request $request)

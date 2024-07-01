@@ -27,8 +27,10 @@ use App\Http\Controllers\ManagerHasDepartmentController;
 use App\Http\Controllers\OrderConfirmationController;
 use App\Http\Controllers\ReceptionController;
 use App\Http\Controllers\OrderPurchaseController;
+use App\Http\Controllers\OrdersGroup as ControllersOrdersGroup;
 use App\Http\Controllers\Pruebas;
 use App\Http\Controllers\PurchaseRequestController;
+use App\Http\Controllers\QualityIncidentsFormController;
 use App\Http\Controllers\SmallBoxUserController;
 use App\Http\Controllers\SpentController;
 use App\Http\Controllers\StatusOrdersController;
@@ -39,6 +41,7 @@ use App\Models\EstimationSmallBox;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserDetailsController;
 use App\Models\CheckList;
+use App\Models\OrdersGroup;
 use App\Notifications\Acces;
 use App\Models\User;
 
@@ -109,7 +112,8 @@ Route::group(['middleware' => 'auth'], function () {
 
     // Detalle de  OC, OT
     Route::get('pedidos/{pedido}/orders/{order}', [OrderPurchaseController::class, 'show']);
-
+    Route::post('pedidos-orders-groups', [ControllersOrdersGroup::class, 'create']);
+    Route::post('pedidos-orders-groups/update/{sale}', [ControllersOrdersGroup::class, 'update']);
     // Recepciones de Inventario
     Route::post('reception/{code_order}', [ReceptionController::class, 'saveReception']);
 
@@ -149,16 +153,21 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('rutas-de-entrega/{id}', [DeliveryRouteController::class, 'store']);
     //ver una ruta de entrega
     Route::get('rutas-de-entrega/show/{id}', [DeliveryRouteController::class, 'show']);
-
     // Actualizar la ruta de entrega
-    Route::put('rutas-de-entrega/{ruta}/update', [DeliveryRouteController::class, 'update']);
+    Route::post('ruta-de-entrega/{prouduct_id}', [DeliveryRouteController::class, 'updateRuta']);
+    // Route::put('rutas-de-entrega/{ruta}/updateStatus', [DeliveryRouteController::class, 'updateStatus']);
     Route::put('rutas-de-entrega/{ruta}/updateStatus', [DeliveryRouteController::class, 'updateStatus']);
     Route::patch('rutas-de-entrega/{ruta}/pedido/{pedido}', [DeliveryRouteController::class, 'updateInfoChofer']);
     // Eliminar ruta de entrega
     Route::delete('rutas-de-entrega/{deliveryRoute}', [DeliveryRouteController::class, 'destroy']);
     //Eliminar un pedido de una ruta
     Route::get('rutas-de-entrega/{ruta}/excel', [DeliveryRouteController::class, 'excelCompras']);
-
+    //Rutas de Compras Completas
+    Route::get('rutas-de-entrega/Compras-Completa', [DeliveryRouteController::class, 'DeliveryRoutePurchaseCompletas']);
+    //Rutas de Compras Pendientes
+    Route::get('rutas-de-entrega/Compras-Pendientes', [DeliveryRouteController::class, 'DeliveryRoutePurchasePendientes']);
+    //Editar Rutas de Compras Pendientes
+    Route::post('rutas-de-entrega/Editar/Compras-Pendientes', [DeliveryRouteController::class, 'updateDeliveryPurchasePendientes']);
     // Crear una remision
     Route::post('rutas-de-entrega/{ruta}/remision', [DeliveryRouteController::class, 'setRemisiones']);
     // Ver remision
@@ -182,18 +191,25 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('confirmation/order/products', [OrderConfirmationController::class, 'ConfirmOrderProducts']);
 
 
-    Route::post('status/two/{pedido}',[StatusOrdersController::class, 'StatusTwo']);
+    //Route::post('status/two/{pedido}', [StatusOrdersController::class, 'StatusTwo']);
     /////////////////CONFIRMAR ORDENES DE PRODUCTOS///////////////
-    Route::post('confirmation/route/product', [ConfirmRouteController::class, 'ConfirmationRoute']);
+    Route::post('confirmation/route/product/{sale_id}', [ConfirmRouteController::class, 'ConfirmationRoute']);
     Route::get('history/confirmation/route/product/{idProductOrder}', [ConfirmRouteController::class, 'index']);
-
+   // Route::get('status/route-confirmation/', [ConfirmRouteController::class, 'StatusRecepcion']);
     //////////////////CONTEO DEL PRODUCTO///////////////////////
     Route::post('product/count/confirmation', [ConfirmProductCountController::class, 'ProductCount']);
     Route::get('product/count/confirmation/history/{idProductOrder}', [ConfirmProductCountController::class, 'ProductCountHistory']);
 
     ////////////////CONFIRMAR LA ENTREGA DEL PRODUCTO//////////
     Route::post('confirm/product/delivery', [ConfirmDeliveryController::class, 'ConfirmDelivery']);
-    Route::get('history/confirm/product/delivery/{idProduct}',[ConfirmDeliveryController::class, 'HistoryConfirmDelivery']);
+    Route::get('history/confirm/product/delivery/{idProduct}', [ConfirmDeliveryController::class, 'HistoryConfirmDelivery']);
+
+    ///////////////////////////FORMULARIO PARA CREAR UNA INCIDENCIA///////////
+    Route::post('first/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'FirstPartOfTheIncidentForm']);
+    Route::post('second/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'SecondPartOfTheIncidentForm']);
+    Route::post('third/part/of/the/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'ThirdPartOfTheIncidentForm']);
+    Route::get('incident/form/{idform}', [QualityIncidentsFormController::class, 'IncidentForm']);
+    Route::post('edit/incident/form/{code_sale}', [QualityIncidentsFormController::class, 'UpdateFormInc']);
 
     //CAJA CHICA
 
@@ -226,7 +242,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('confirmation/returnormore/money/eventuales', [LackOfMoneyEventualsController::class, 'ConfirmationReturnMoneyEventuales']);
 
     Route::post('caja-chica/solicitudes-de-compra/crear/', [PurchaseRequestController::class, 'store']);
-    Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class, 'editdate']);
+    //Route::post('caja-chica/solicitudes-de-compra/edit/date/', [PurchaseRequestController::class, 'editdate']);
     Route::post('caja-chica/solicitudes-de-compra/editar/', [PurchaseRequestController::class, 'update']);
     Route::post('caja-chica/solicitudes-de-compra/borrar/', [PurchaseRequestController::class, 'delete']);
 
@@ -306,7 +322,6 @@ Route::group(['middleware' => 'auth'], function () {
 
     ///////////////////APIS PARA MANAGERS//////////////////////////////
     Route::get('managers/department', [ManagerHasDepartmentController::class, 'ViewManager']);
-    Route::post('create/manager/department',[ManagerHasDepartmentController::class,'CrearManager']);
-    Route::post('delete/manager/department',[ManagerHasDepartmentController::class,'DeleteManager']);
-
+    Route::post('create/manager/department', [ManagerHasDepartmentController::class, 'CrearManager']);
+    Route::post('delete/manager/department', [ManagerHasDepartmentController::class, 'DeleteManager']);
 });

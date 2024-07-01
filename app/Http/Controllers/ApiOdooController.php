@@ -127,6 +127,7 @@ class ApiOdooController extends Controller
                 try {
                     $sale = Sale::where("code_sale", $requestData->code_sale)->first();
                     if ($sale) {
+
                         $sale->update($dataSale);
                         if ($sale->moreInformation) {
                             $sale->moreInformation()->update($dataAdditionalInfo);
@@ -141,6 +142,7 @@ class ApiOdooController extends Controller
                                 "description" => $concepto,
                                 "status_checklist" => 'Creado',
                             ]);
+
                             $check->save();
                         }
                     } else {
@@ -150,6 +152,17 @@ class ApiOdooController extends Controller
                             "sale_id" => $sale->id,
                             "status_id" => 1,
                         ]);
+                        $conceptos = ['OC', 'Virtual', 'Logo', 'AI', 'Cotizaci贸n proveedor', 'Distribuci贸n', 'Direcci贸n de entrega', 'Contacto', 'Datos de facturaci贸n'];
+                        foreach ($conceptos as $concepto) {
+                            # code...
+                            $check = CheckList::create([
+                                "code_sale" => $sale->code_sale,
+                                "description" => $concepto,
+                                "status_checklist" => 'Creado',
+                            ]);
+
+                            $check->save();
+                        }
                     }
                     foreach ($dataProducts as $product) {
                         $registered = false;
