@@ -19,5 +19,6 @@ class HistoryDeliveryRoute extends Model
         'shipping_type',
         'color',
         'visible',
+        'observation'
     ];
 }

@@ -152,6 +152,7 @@ class DeliveryRouteController extends Controller
                     'shipping_type' => $deliveryRouteData['shipping_type'],
                     'color' => $color,
                     'visible' => $visible,
+                    'observation' => $deliveryRouteData['observation']
                 ]);
                 $ruta = DeliveryRoute::create([
                     'code_sale' => $sale,
@@ -365,6 +366,7 @@ class DeliveryRouteController extends Controller
                         'shipping_type' => $rutaRequest['shipping_type'] ?? $ruta_ant->shipping_type,
                         'color' => $color,
                         'visible' => $visible,
+                        'observation' => $rutaRequest['observation'] ?? $ruta_ant->observation
                     ]);
                 } else {
                     DeliveryRoute::create([
@@ -391,6 +393,7 @@ class DeliveryRouteController extends Controller
                         'shipping_type' => $rutaRequest['shipping_type'] ?? $newrut->shipping_type,
                         'color' => $color,
                         'visible' => $visible,
+                        'observation' => $rutaRequest['observation'] ?? $ruta_ant->observation
                     ]);
                 }
 
