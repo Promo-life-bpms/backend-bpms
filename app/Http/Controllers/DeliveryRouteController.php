@@ -571,7 +571,7 @@ class DeliveryRouteController extends Controller
                         ->where('type', 'Total')
                         ->select('delivery_routes.*', 'order_purchase_products.description');
                     break;
-                case 17: //logistica
+                case 17 || 1: //logistica
                     $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', '=', 'delivery_routes.product_id')
                         ->where('status_delivery', 'Completo')
                         ->where('type', 'Total')
@@ -640,7 +640,7 @@ class DeliveryRouteController extends Controller
                             });
                     });
                     break;
-                case 17: //logistica
+                case 17 || 1: //logistica
                     $query = DeliveryRoute::join('order_purchase_products', 'order_purchase_products.id', 'delivery_routes.product_id')
                         ->select('delivery_routes.*', 'order_purchase_products.description');
                     $query->where(function ($query) {
