@@ -743,7 +743,6 @@ class DeliveryRouteController extends Controller
                     if ($status_change->status == $ruta_updatePed->type_of_destiny) {
                         $status_change->status = $ruta_updatePed->type_of_destiny;
                         $status_change->visible = $ruta_updatePed->visible;
-                        $status_change->observation = $ruta_updatePed->observation;
                         $status_change->save();
                     }
                 }
