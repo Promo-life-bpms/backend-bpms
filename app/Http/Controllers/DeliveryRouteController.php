@@ -731,7 +731,8 @@ class DeliveryRouteController extends Controller
                         'status_delivery' => $rutaPenRequest['status_delivery'] ?? $rutaPen->status_delivery,
                         'shipping_type' => $rutaPenRequest['shipping_type'] ?? $rutaPen->shipping_type,
                         'color' => $color,
-                        'visible' =>  $visible
+                        'visible' =>  $visible,
+                        'observation' => $rutaPenRequest['observation'] ?? $rutaPen->observation
                     ]);
             }
             $rutas_updatePed = DeliveryRoute::where('id', $rutaPenRequest['id'])->get();
@@ -742,6 +743,7 @@ class DeliveryRouteController extends Controller
                     if ($status_change->status == $ruta_updatePed->type_of_destiny) {
                         $status_change->status = $ruta_updatePed->type_of_destiny;
                         $status_change->visible = $ruta_updatePed->visible;
+                        $status_change->observation = $ruta_updatePed->observation;
                         $status_change->save();
                     }
                 }
@@ -758,6 +760,7 @@ class DeliveryRouteController extends Controller
                     'shipping_type' => $rutaupdate->shipping_type,
                     'color' => $rutaupdate->color,
                     'visible' => $rutaupdate->visible,
+                    'observation' => $rutaupdate->observation,
                 ]);
             }
         }
