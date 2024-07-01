@@ -163,7 +163,8 @@ class DeliveryRouteController extends Controller
                     'status_delivery' => $deliveryRouteData['status_delivery'],
                     'shipping_type' => $deliveryRouteData['shipping_type'],
                     'color' => $color,
-                    'visible' => $visible
+                    'visible' => $visible,
+                    'observation' => $deliveryRouteData['observation']
                 ]);
                 $routes[] = $ruta;
             } else {
@@ -350,7 +351,8 @@ class DeliveryRouteController extends Controller
                         'status_delivery' => $rutaRequest['status_delivery'] ?? $ruta_ant->status_delivery,
                         'shipping_type' => $rutaRequest['shipping_type'] ?? $ruta_ant->shipping_type,
                         'color' => $color,
-                        'visible' =>  $visible
+                        'visible' =>  $visible,
+                        'observation' => $rutaRequest['observation'] ?? $ruta_ant->observation
                     ]);
                     HistoryDeliveryRoute::create([
                         'code_sale' => $ruta_ant->code_sale,
@@ -375,7 +377,8 @@ class DeliveryRouteController extends Controller
                         'status_delivery' => $rutaRequest['status_delivery'] ?? $newrut->status_delivery,
                         'shipping_type' => $rutaRequest['shipping_type'] ?? $newrut->shipping_type,
                         'color' => $color,
-                        'visible' =>  $visible
+                        'visible' =>  $visible,
+                        'observation' => $rutaRequest['observation'] ?? $newrut->observation
                     ]);
                     HistoryDeliveryRoute::create([
                         'code_sale' => $newrut->code_sale,

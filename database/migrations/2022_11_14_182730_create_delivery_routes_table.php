@@ -26,6 +26,7 @@ class CreateDeliveryRoutesTable extends Migration
             $table->string('shipping_type');
             $table->integer('color');
             $table->integer('visible');
+            $table->string('observation');
             $table->timestamps();
         });
     }
